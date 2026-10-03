@@ -18,6 +18,8 @@ def main():
     head = ('<!doctype html>\n<html lang="zh-CN">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n')
     pages = [("index.html", "1942-11-01")] + [(f"{d}.html", d) for d, _, _ in SNAPSHOTS]
+    if (MAPS / "data" / "snap-2026.json").exists():
+        pages.append(("2026.html", "2026"))
     for name, snap in pages:
         body = tpl.replace("__DEFAULT_SNAPSHOT__", snap)
         (MAPS / name).write_text(head + body + "\n</html>\n")

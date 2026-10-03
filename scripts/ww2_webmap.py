@@ -28,11 +28,13 @@ import shapely.ops
 from shapely.geometry import MultiPolygon, Polygon, shape
 
 import topo
-from common import RAW
+from common import RAW, WORK
+import cities
 from ww2_common import SNAPSHOTS, WW2_WORK, WW2_OUT
 from ww2_geo import polys, union
 
 OUT = WW2_OUT / "maps" / "data"
+MODERN = WORK / "modern"
 NE = RAW / "naturalearth"
 Q = 1000  # coordinate units per degree
 TOL_PROV = 0.008
@@ -363,6 +365,21 @@ def main():
     for s in SNAPSHOTS:
         for f in json.load(open(WW2_WORK / f"prov_split_{s[0]}.geojson"))["features"]:
             pgeom[f["properties"]["piece_id"]] = shape(f["geometry"])
+    # the present-day map (modern_2026.py) rides along as a seventh tab
+    snapshots = list(SNAPSHOTS)
+    modern_ug, modern_meta = {}, {}
+    if (MODERN / "prov_snapshot_2026.csv").exists():
+        snapshots.append(("2026", "2026 年：当今世界", "The world in 2026"))
+        hist = pd.concat([hist, pd.read_csv(MODERN / "prov_units_2026.csv", low_memory=False)], ignore_index=True)
+        snaps["2026"] = pd.read_csv(MODERN / "prov_snapshot_2026.csv", low_memory=False)
+        hgeom.update({f["properties"]["unit_id"]: shape(f["geometry"])
+                      for f in json.load(open(MODERN / "prov_units_2026.geojson"))["features"]})
+        pgeom.update({f["properties"]["piece_id"]: shape(f["geometry"])
+                      for f in json.load(open(MODERN / "prov_split_2026.geojson"))["features"]})
+        units26 = json.load(open(MODERN / "units_2026.geojson"))["features"]
+        modern_ug = {f["properties"]["unit_id"]: shape(f["geometry"]) for f in units26}
+        modern_zh = {f["properties"]["a3"]: f["properties"]["name_zh"] for f in units26}
+        modern_meta = json.load(open(MODERN / "meta_2026.json"))
 
     used = sorted(set().union(*[set(d.piece_id) for d in snaps.values()]))
     fidx = {p: i for i, p in enumerate(used)}
@@ -395,15 +412,17 @@ def main():
     arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
     unit_ids = sorted(set().union(*[set(d.unit_id) for d in snaps.values()]))
     ug = {g["properties"]["fid"]: topo.to_shape(arcs, g) for g in gs if g["properties"]["fid"] in unit_ids}
+    ug.update({u: g for u, g in modern_ug.items() if u in unit_ids})
     unit_ids = [u for u in unit_ids if u in ug]  # territories CShapes does not draw have no outline
     (OUT / "geo-units.bin").write_bytes(encode([ug[u] for u in unit_ids], TOL_UNIT))
     uidx = {u: i for i, u in enumerate(unit_ids)}
 
     ctrl_geoms = []
     summary = []
-    for snap, tzh, ten in SNAPSHOTS:
+    for snap, tzh, ten in snapshots:
         d = snaps[snap].drop_duplicates("piece_id").reset_index(drop=True)
-        d["country"] = [country_key(r) for r in d.to_dict("records")]
+        modern = "country_key" in d.columns
+        d["country"] = d.country_key if modern else [country_key(r) for r in d.to_dict("records")]
         luts = {}
         rows = {}
         for col in ("unit_name_zh", "unit_name_en", "unit_status", "sovereign_name_zh", "controller_name_zh",
@@ -426,7 +445,8 @@ def main():
         nat = d.groupby("unit_id", sort=False).agg(zh=("unit_name_zh", "first"), en=("unit_name_en", "first"),
                                                    status=("unit_status", "first"), sov=("sovereign_name_zh", "first"),
                                                    pop=("population_est", "sum"), km2=("area_km2", "sum"))
-        nat_color = {u: nation_of(r) for u, r in d.drop_duplicates("unit_id").set_index("unit_id", drop=False).iterrows()}
+        nat_color = {u: (r["nation_color"] if modern else nation_of(r))
+                     for u, r in d.drop_duplicates("unit_id").set_index("unit_id", drop=False).iterrows()}
         nat = nat.sort_values("pop", ascending=False)
         nidx = {u: i for i, u in enumerate(nat.index)}
         nations = [[int(u), r.zh or r.en, r.en, nat_color[u], r.status, r.sov, int(r["pop"]), round(float(r.km2))]
@@ -437,18 +457,21 @@ def main():
         cindex = {}
         for key, g in sorted(d.groupby("country"), key=lambda kv: -kv[1].population_est.sum()):
             first = g.sort_values("area_km2").iloc[-1]
-            zh, en = SPECIAL.get(key, (first.controller_name_zh or first.controller_name_en, first.controller_name_en))
+            if modern:
+                zh, en = first.country_zh, first.country_en
+            else:
+                zh, en = SPECIAL.get(key, (first.controller_name_zh or first.controller_name_en, first.controller_name_en))
             geom = dissolve([geom_of(p) for p in g.piece_id]) or polys(union([geom_of(p) for p in g.piece_id]))
             ci = len(countries)
             cindex[key] = ci
             comp = g.groupby("unit_name_zh", dropna=False).agg(pop=("population_est", "sum"),
                                                                km2=("area_km2", "sum")).sort_values("km2", ascending=False)
-            countries.append([key, zh, en, color_of(key), BLOCS.index(Counter(g.bloc).most_common(1)[0][0]),
+            countries.append([key, zh, en, first.country_color if modern else color_of(key), BLOCS.index(Counter(g.bloc).most_common(1)[0][0]),
                               int(g.population_est.sum()), round(float(g.area_km2.sum())), int(g.admin_id.nunique()),
                               len(ctrl_geoms), [[n if isinstance(n, str) else "—", int(r["pop"]), round(float(r["km2"]))]
                                                 for n, r in comp.head(12).iterrows()]])
             ctrl_geoms.append(geom)
-            if key == "-20" or geom is None:
+            if key in ("-20", "M:FRONT") or geom is None:
                 continue
             for part in getattr(geom, "geoms", [geom]):
                 km2 = part.area * (111.32 ** 2) * math.cos(math.radians(part.centroid.y))
@@ -468,6 +491,8 @@ def main():
             "units_active": sorted(set(uidx[u] for u in d.unit_id if u in uidx)),
             "admin_active": sorted(set(aidx[a] for a in d.admin_id)), "unit_labels": lab,
             "countries": countries, "country_labels": clabels,
+            "cities": cities.y2026(modern_zh) if modern else cities.ww2(snap),
+            "bloc_names": modern_meta.get("bloc_names") if modern else None,
             "bloc_pop": {b: int(d[d.bloc == b].population_est.sum()) for b in BLOCS},
             "tier_count": {str(t): int(n) for t, n in hist.set_index("unit_id").loc[sorted(set(d.admin_id))]
                            .tier.value_counts().sort_index().items()},
