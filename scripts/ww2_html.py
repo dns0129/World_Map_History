@@ -28,6 +28,8 @@ def main():
     for name in ("geo", "geo-admin", "geo-units", "geo-ctrl"):
         raw = (MAPS / "data" / f"{name}.bin").read_bytes()
         (WW2_WORK / f"{name}.b64.txt").write_text(base64.b64encode(raw).decode())
+    for pbf in sorted((MAPS / "data" / "glyphs" / "sans").glob("*.pbf")):
+        (WW2_WORK / f"glyphs-sans-{pbf.stem}.b64.txt").write_text(base64.b64encode(pbf.read_bytes()).decode())
 
 
 if __name__ == "__main__":

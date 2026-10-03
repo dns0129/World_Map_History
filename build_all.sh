@@ -25,5 +25,6 @@ printf "%s\n" 1939-09-01 1940-07-01 1941-12-07 1942-11-01 1944-06-06 1945-09-02 
 python3 ww2_provinces.py      # counties and districts dissolved into their provinces; borders still cut them
 python3 ww2_database.py
 python3 ww2_coverage.py
+python3 ww2_relief.py         # shaded relief sheets for the maps (Terrarium elevation tiles)
 python3 ww2_webmap.py
 python3 ww2_html.py

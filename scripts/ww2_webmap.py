@@ -8,8 +8,8 @@
   geo-ctrl.bin      the area each country actually controls on each date, dissolved (same encoding)
   admin.json        static attributes of the province-level units (columnar)
   snap-<date>.json  per-snapshot rows: which pieces exist, who controls them, the countries
-                    of the control view with their colours and curved label lines
-  terrain.png       land hillshade in Web Mercator (alpha = shade)
+                    of the control view with their colours and where their names sit
+  relief/           shaded relief sheets, written by ww2_relief.py
   hydro.json        rivers and lakes as they were in 1939-45 (Natural Earth 10m)
   hydro-detail.json the denser European and North American river and lake layers
 """
@@ -17,16 +17,18 @@ import colorsys
 import hashlib
 import json
 import math
+import unicodedata
 from collections import Counter, defaultdict
 
 import numpy as np
 import pandas as pd
 import shapefile
 import shapely
+import shapely.ops
 from shapely.geometry import MultiPolygon, Polygon, shape
 
 import topo
-from common import RAW, WORK, HYDE_RES
+from common import RAW
 from ww2_common import SNAPSHOTS, WW2_WORK, WW2_OUT
 from ww2_geo import polys, union
 
@@ -63,6 +65,11 @@ COLOR = {
     "339": "#94443f", "290": "#d06f8d", "800": "#5383c2", "711": "#cba57c", "712": "#80af90", "-30": "#b7d48c",
     "210": "#e38c3d", "211": "#d6bf54", "212": "#7aa3c4", "225": "#c95a5a", "205": "#71bf7c", "70": "#4fa58d",
     "700": "#9e8a6a", "790": "#b9798c", "-1": "#8eb2d1", "-10": "#8f8e7e", "-20": "#b9b6aa",
+    "305": "#c89a8e", "315": "#6fae9c", "366": "#6f9fd8", "367": "#a67fb5", "368": "#d9ad62", "395": "#94bdd3",
+    "100": "#dcbd57", "101": "#c97c5d", "130": "#7fb07a", "145": "#d9a65b", "150": "#88a7d4", "165": "#a3c4e0",
+    "40": "#d9776f", "41": "#8f7fbf", "42": "#6fb59a", "90": "#7aa86b", "91": "#b9a0d0", "92": "#5f9fd0",
+    "93": "#d8b86a", "94": "#c97f8f", "95": "#8fc49b", "450": "#c58fb0", "678": "#b9875f", "698": "#c7a7a0",
+    "850": "#d0855f", "660": "#8fb6c9", "652": "#c6b36b",
 }
 
 
@@ -79,6 +86,20 @@ def country_key(r):
     if gw == 220 and r["bloc"] == "neutral" and r["snapshot"] in ("1940-07-01", "1941-12-07", "1942-11-01"):
         return "VICHY"
     return str(gw)
+
+
+def lighten(hexcolor, t):
+    r, g, b = (int(hexcolor[i:i + 2], 16) for i in (1, 3, 5))
+    return "#%02x%02x%02x" % tuple(round(v + (255 - v) * t) for v in (r, g, b))
+
+
+def nation_of(r):
+    """Colour of the 'nation' view: each state's de jure territory in its own colour; colonies,
+    protectorates and mandates in a lighter shade of their sovereign's."""
+    gw = r["unit_gwcode"] if r["unit_gwcode"] == r["unit_gwcode"] else r["sovereign_gwcode"]
+    if r["unit_status"] in ("colony", "protectorate", "mandate"):
+        return lighten(color_of(str(int(r["sovereign_gwcode"]))), 0.42)
+    return color_of(str(int(gw))) if gw == gw else "#c9c4b8"
 
 
 def color_of(key):
@@ -178,105 +199,59 @@ def unmerc(x, y):
     return x * 360 - 180, math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * y))))
 
 
-def label_line(poly, nchar):
-    """A gently curved line through the body of one territory, for a country name written along it
-    (the way strategy-game maps letter a country across its land). Works in Web Mercator so the
-    line keeps its shape on screen. Returns [lon0, lat0, lonC, latC, lon1, lat1, size] where the
-    middle point is the control point of a quadratic curve and size is the font size in pixels
-    at zoom 0, or None."""
+def _chord(P, c, u, reach):
+    """Distances from c to the territory's edge along +u and -u."""
+    line = shapely.LineString([c - reach * u, c + reach * u])
+    part = P.intersection(line)
+    best = None
+    for seg in getattr(part, "geoms", [part]):
+        if seg.geom_type == "LineString" and seg.distance(shapely.Point(c)) < 1e-9:
+            best = seg
+    if best is None:
+        return 0.0, 0.0
+    xy = np.asarray(best.coords)
+    t = (xy - c) @ u
+    return float(t.max()), float(-t.min())
+
+
+def label_anchor(poly):
+    """Where a country's name sits on one piece of its territory: the point deepest inside the
+    main body (pole of inaccessibility), and the horizontal and vertical room the name has
+    there, in Web Mercator world units (0-1), so the page shows the name only at zooms where
+    it fits inside the land. Returns [lon, lat, width, height] or None."""
     xy = np.asarray(poly.exterior.coords)
-    mx, my = merc(xy[:, 0], xy[:, 1])
-    P = Polygon(np.column_stack([mx, my]), [np.column_stack(merc(*np.asarray(r.coords).T)) for r in poly.interiors])
+    P = Polygon(np.column_stack(merc(xy[:, 0], xy[:, 1])),
+                [np.column_stack(merc(*np.asarray(r.coords).T)) for r in poly.interiors])
     if not P.is_valid:
         P = polys(shapely.make_valid(P))
         if P is None:
             return None
         P = max(getattr(P, "geoms", [P]), key=lambda p: p.area)
-    # the main body of the territory: open it (shrink, keep the largest part, grow back) so that
-    # thin necks, peninsulas and bays do not pull the line out of the land
-    x0, y0, x1, y1 = P.bounds
-    step = max(x1 - x0, y1 - y0) / 56
-    gx, gy = np.meshgrid(np.arange(x0 + step / 2, x1, step), np.arange(y0 + step / 2, y1, step))
-    gx, gy = gx.ravel(), gy.ravel()
-    inside = shapely.contains_xy(P, gx, gy)
-    if inside.sum() < 12:
-        return None
-    r = 0.3 * float(shapely.distance(P.exterior, shapely.points(np.column_stack([gx[inside], gy[inside]]))).max())
+    # the main body: shrink, keep the largest part, grow back, so necks and peninsulas do not count
+    try:
+        c0 = shapely.ops.polylabel(P, tolerance=max(P.length, 1e-9) / 2000)
+    except Exception:
+        c0 = P.representative_point()
+    r = c0.distance(P.exterior)
     body = P
-    if r > 0:
-        er = P.buffer(-r)
-        if not er.is_empty:
-            er = max(getattr(er, "geoms", [er]), key=lambda q: q.area)
-            body = polys(er.buffer(r).intersection(P)) or P
-            body = max(getattr(body, "geoms", [body]), key=lambda q: q.area)
-    inside = shapely.contains_xy(body, gx, gy)
-    pts = np.column_stack([gx[inside], gy[inside]])
-    if len(pts) < 12:
+    er = P.buffer(-0.5 * r)
+    if not er.is_empty:
+        er = max(getattr(er, "geoms", [er]), key=lambda q: q.area)
+        body = polys(er.buffer(0.5 * r).intersection(P)) or P
+        body = max(getattr(body, "geoms", [body]), key=lambda q: q.area)
+    try:
+        c = np.asarray(shapely.ops.polylabel(body, tolerance=max(body.length, 1e-9) / 2000).coords[0])
+    except Exception:
+        c = np.asarray(body.representative_point().coords[0])
+    x0, y0, x1, y1 = body.bounds
+    reach = max(x1 - x0, y1 - y0) + 1e-6
+    f, b = _chord(P, c, np.array([1.0, 0.0]), reach)
+    up, down = _chord(P, c, np.array([0.0, 1.0]), reach)
+    length, height = 2 * min(f, b), 2 * min(up, down)
+    if length <= 0 or height <= 0:
         return None
-    d = shapely.distance(body.exterior, shapely.points(pts))
-    core = pts[d >= 0.3 * d.max()]
-    if len(core) < 8:
-        core = pts
-    c = core.mean(0)
-    w, v = np.linalg.eigh(np.cov((core - c).T))
-    u = v[:, np.argmax(w)]
-    if u[0] < 0:
-        u = -u
-    ang = math.atan2(u[1], u[0])
-    ang = max(-math.radians(55), min(math.radians(55), ang))
-    u = np.array([math.cos(ang), math.sin(ang)])
-    n = np.array([-u[1], u[0]])
-    t, s = (pts - c) @ u, (pts - c) @ n
-    t0, t1 = np.percentile(t, 4), np.percentile(t, 96)
-    span = t1 - t0
-    if span <= 0:
-        return None
-    edges = np.linspace(t0, t1, 11)
-    bt, bs, bw, th = [], [], [], []
-    for a, b in zip(edges[:-1], edges[1:]):
-        m = (t >= a) & (t <= b)
-        if m.sum() >= 2:
-            bt.append((a + b) / 2)
-            bs.append(np.median(s[m]))
-            bw.append(m.sum())
-            th.append(np.percentile(s[m], 90) - np.percentile(s[m], 10))
-    if len(bt) < 3:
-        return None
-    a2, a1, a0 = np.polyfit(bt, bs, 2, w=np.sqrt(bw))
-    half = span * 0.42
-    tm = (t0 + t1) / 2
-    sag = abs(a2) * half * half
-    if sag > 0.12 * span:
-        a2 *= 0.12 * span / sag
-    f = lambda tt: a2 * tt * tt + a1 * tt + a0
-    df = lambda tt: 2 * a2 * tt + a1
-    # keep the line on the territory's land (enclaves do not count): use the longest stretch of it
-    # that does not cross the sea or a neighbour
-    land = Polygon(P.exterior)
-    ts = np.linspace(tm - half, tm + half, 49)
-    on = shapely.contains_xy(land, *(c[:, None] + np.outer(u, ts) + np.outer(n, f(ts))))
-    if not on.all():
-        best, run = (0, 0), None
-        for i, ok in enumerate(np.r_[on, False]):
-            if ok and run is None:
-                run = i
-            elif not ok and run is not None:
-                if i - run > best[1] - best[0]:
-                    best = (run, i)
-                run = None
-        if best[1] - best[0] < 4:
-            return None
-        ta_, tb_ = ts[best[0]], ts[best[1] - 1]
-        tm, half = (ta_ + tb_) / 2, (tb_ - ta_) / 2
-    ta, tb = tm - half, tm + half
-    sc = f(ta) + df(ta) * (tm - ta)
-    thick = float(np.median(th[len(th) // 4: max(len(th) // 4 + 1, 3 * len(th) // 4)]))
-    size = min(0.62 * thick, 2 * half / (nchar * 1.05))
-    if size <= 0:
-        return None
-    to_ll = lambda tt, ss: unmerc(*(c + tt * u + ss * n))
-    (la, pa), (lc, pc), (lb, pb) = to_ll(ta, f(ta)), to_ll(tm, sc), to_ll(tb, f(tb))
-    return [round(la, 3), round(pa, 3), round(lc, 3), round(pc, 3), round(lb, 3), round(pb, 3), round(size * 512, 4)]
+    lon, lat = unmerc(*c)
+    return [round(lon, 3), round(lat, 3), round(length, 7), round(height, 7)]
 
 
 # ---------------------------------------------------------------- rivers and lakes
@@ -286,6 +261,14 @@ HISTORIC_LAKES = {"Aral Sea", "Lake Chad", "Lop Nur"}  # drawn as they were befo
 
 def rnd(gm):
     return json.loads(json.dumps(gm), parse_float=lambda s: round(float(s), 3))
+
+
+def cjk(name):
+    """A river name the map can letter along the river: Chinese characters only (the map draws
+    them itself; other scripts would need glyph files)."""
+    name = (name or "").strip()
+    ok = name and all(unicodedata.name(ch, "").startswith("CJK UNIFIED IDEOGRAPH") for ch in name)
+    return name if ok else None
 
 
 def river_features(path, tol, min_rank=0):
@@ -300,7 +283,7 @@ def river_features(path, tol, min_rank=0):
         if g.is_empty:
             continue
         out.append({"type": "Feature", "properties": {
-            "k": "r", "r": rank, "n": (p.get("name_zh") or p.get("name") or "").strip() or None,
+            "k": "r", "r": rank, "n": cjk(p.get("name_zh")),
             "c": 1 if "Lake" in (p.get("featurecla") or "") else 0}, "geometry": rnd(g.__geo_interface__)})
     return out
 
@@ -323,6 +306,30 @@ def lake_features(path, tol, historic=False):
     return out
 
 
+def name_lines(feats):
+    """Lines the river names are lettered along: Natural Earth cuts each river into many short
+    pieces, so join the pieces of each named river and smooth them (k = "n", not drawn)."""
+    by = defaultdict(list)
+    rank = {}
+    for f in feats:
+        p = f["properties"]
+        if p["k"] != "r" or not p.get("n") or p.get("c"):
+            continue
+        by[p["n"]].append(shape(f["geometry"]))
+        rank[p["n"]] = min(rank.get(p["n"], 99), p["r"])
+    out = []
+    for name, gs in by.items():
+        u = shapely.ops.unary_union(gs)
+        merged = shapely.ops.linemerge(u) if u.geom_type == "MultiLineString" else u
+        for part in getattr(merged, "geoms", [merged]):
+            if part.length < 0.6:
+                continue
+            g = part.simplify(0.04)
+            out.append({"type": "Feature", "properties": {"k": "n", "r": rank[name], "n": name},
+                        "geometry": rnd(g.__geo_interface__)})
+    return out
+
+
 def hydro():
     if not (NE / "shp" / "ne_10m_rivers_lake_centerlines.shp").exists():
         print("Natural Earth rivers not downloaded; keeping the existing hydro files")
@@ -330,38 +337,18 @@ def hydro():
     main = river_features(NE / "shp" / "ne_10m_rivers_lake_centerlines.shp", 0.006)
     main += lake_features(NE / "ne_10m_lakes.geojson", 0.006)
     main += lake_features(NE / "ne_10m_lakes_historic.geojson", 0.006, historic=True)
-    (OUT / "hydro.json").write_text(json.dumps({"type": "FeatureCollection", "features": main}, ensure_ascii=False,
-                                               separators=(",", ":")))
     detail = []
     for layer in ("ne_10m_rivers_europe", "ne_10m_rivers_north_america"):
         if (NE / "shp" / f"{layer}.shp").exists():
             detail += river_features(NE / "shp" / f"{layer}.shp", 0.008)
+    main += name_lines(main + detail)
+    (OUT / "hydro.json").write_text(json.dumps({"type": "FeatureCollection", "features": main}, ensure_ascii=False,
+                                               separators=(",", ":")))
     for layer in ("ne_10m_lakes_europe", "ne_10m_lakes_north_america"):
         if (NE / f"{layer}.geojson").exists():
             detail += lake_features(NE / f"{layer}.geojson", 0.006)
     (OUT / "hydro-detail.json").write_text(json.dumps({"type": "FeatureCollection", "features": detail},
                                                       ensure_ascii=False, separators=(",", ":")))
-
-
-def terrain():
-    src = WORK / "physical" / "hillshade_5m.png"
-    if not src.exists():
-        print("hillshade not built; keeping the existing terrain.png")
-        return
-    from PIL import Image
-    from rasterio.transform import from_origin, from_bounds
-    from rasterio.warp import reproject, Resampling
-    hs = np.asarray(Image.open(src), dtype=np.float32)
-    m = 20037508.342789244
-    n = 2048
-    dst = np.full((n, n), 255, dtype=np.float32)
-    reproject(hs, dst, src_transform=from_origin(-180, 90, HYDE_RES, HYDE_RES), src_crs="EPSG:4326",
-              dst_transform=from_bounds(-m, -m, m, m, n, n), dst_crs="EPSG:3857", resampling=Resampling.bilinear,
-              dst_nodata=255)
-    a = np.clip((255 - dst) * 1.4, 0, 255).astype(np.uint8)
-    rgba = np.zeros((n, n, 4), np.uint8)
-    rgba[..., 3] = a
-    Image.fromarray(rgba, "RGBA").save(OUT / "terrain.png", optimize=True)
 
 
 # ---------------------------------------------------------------- main
@@ -425,12 +412,25 @@ def main():
             luts[col], rows[col] = table(d[col].tolist())
         units = d.groupby("unit_id").agg(name_zh=("unit_name_zh", "first"), name_en=("unit_name_en", "first"),
                                          pop=("population_est", "sum")).reset_index()
-        lab = {}
+        lab = []
         for u in units.itertuples():
             if u.unit_id not in ug:
                 continue
-            p = ug[u.unit_id].representative_point()
-            lab[uidx[u.unit_id]] = [u.name_zh or u.name_en, round(p.x, 2), round(p.y, 2), int(u.pop), round(ug[u.unit_id].area, 2)]
+            g = ug[u.unit_id]
+            big = max(getattr(g, "geoms", [g]), key=lambda q: q.area)
+            anchor = label_anchor(big)
+            if anchor:
+                km2 = big.area * (111.32 ** 2) * math.cos(math.radians(big.centroid.y))
+                lab.append([uidx[u.unit_id], u.name_zh or u.name_en] + anchor + [round(km2)])
+        # nations: the de jure political units, coloured by state
+        nat = d.groupby("unit_id", sort=False).agg(zh=("unit_name_zh", "first"), en=("unit_name_en", "first"),
+                                                   status=("unit_status", "first"), sov=("sovereign_name_zh", "first"),
+                                                   pop=("population_est", "sum"), km2=("area_km2", "sum"))
+        nat_color = {u: nation_of(r) for u, r in d.drop_duplicates("unit_id").set_index("unit_id", drop=False).iterrows()}
+        nat = nat.sort_values("pop", ascending=False)
+        nidx = {u: i for i, u in enumerate(nat.index)}
+        nations = [[int(u), r.zh or r.en, r.en, nat_color[u], r.status, r.sov, int(r["pop"]), round(float(r.km2))]
+                   for u, r in nat.iterrows()]
 
         # countries of the control view: dissolved territory, colour, curved name lines
         countries, clabels = [], []
@@ -454,13 +454,13 @@ def main():
                 km2 = part.area * (111.32 ** 2) * math.cos(math.radians(part.centroid.y))
                 if km2 < LABEL_MIN_KM2:
                     continue
-                line = label_line(part, len(zh))
-                if line:
-                    clabels.append([ci] + line)
+                anchor = label_anchor(part)
+                if anchor:
+                    clabels.append([ci] + anchor + [round(km2)])
         doc = {
             "snapshot": snap, "title_zh": tzh, "title_en": ten,
             "feature": [fidx[p] for p in d.piece_id], "unit": [uidx.get(u, -1) for u in d.unit_id],
-            "country": [cindex[k] for k in d.country],
+            "country": [cindex[k] for k in d.country], "nation": [nidx[u] for u in d.unit_id], "nations": nations,
             "bloc": [BLOCS.index(b) for b in d.bloc], "conf": [CONF.index(c) if c in CONF else 0 for c in d.control_confidence],
             "ctrl_gw": [int(x) for x in d.controller_gwcode], "split": [int(x) for x in d.control_split],
             "area": [round(float(a), 1) for a in d.area_km2],
@@ -482,7 +482,6 @@ def main():
     (OUT / "geo-ctrl.bin").write_bytes(encode(ctrl_geoms, TOL_CTRL))
     (OUT / "index.json").write_text(json.dumps({"snapshots": summary, "blocs": BLOCS, "tiers": TIER_ZH,
                                                 "quantum": Q}, ensure_ascii=False, indent=1))
-    terrain()
     hydro()
     for p in sorted(OUT.iterdir()):
         print(p.name, f"{p.stat().st_size / 1e6:.2f} MB")
