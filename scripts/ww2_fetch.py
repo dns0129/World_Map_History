@@ -2,8 +2,7 @@
 
   raw/geoboundaries/   geoBoundaries gbOpen ADM1/ADM2/ADM3 (simplified) for every country
   raw/ww2/             US historical counties (Newberry AHCB via USAboundariesData),
-                       Konrad Lawson's East Asia 1930-1942 layers, NIKH Korea places,
-                       Chinese county names (modood/Administrative-divisions-of-China)
+                       Konrad Lawson's East Asia 1930-1942 layers, NIKH Korea places
 All hosts are GitHub (git, raw and LFS media).
 """
 import concurrent.futures as cf
@@ -21,7 +20,7 @@ WW2 = RAW / "ww2"
 LAWSON_FILES = [
     "LICENSE.md",
     "tools/cache/taiwan_1930.geojson", "tools/cache/taiwan_1930_shu.geojson",
-    "tools/cache/korea_13_provinces_fine.json", "tools/cache/adm2_PHL_1939.json",
+    "tools/cache/korea_13_provinces_fine.json", "tools/cache/republican-china-provinces-v5.geojson", "tools/cache/adm2_PHL_1939.json",
     "tools/cache/manchukuo-provinces-v2.geojson", "tools/cache/mengjiang-1940.geojson",
     "tools/cache/princely-states-india-1931-v1.2026.8.11.geojson", "tools/cache/kwantung-1935.geojson",
     "tools/cache/ccp-resistance-areas-1941-1942-p199-v2.geojson",
@@ -86,12 +85,6 @@ def main():
         for n in z.namelist():
             if n.startswith("place_modern_open."):
                 (WW2 / "lawson" / n).write_bytes(z.read(n))
-    cn = WW2 / "cn-names"
-    cn.mkdir(exist_ok=True)
-    base = "https://raw.githubusercontent.com/modood/Administrative-divisions-of-China/master/"
-    for f in ("dist/provinces.csv", "dist/cities.csv", "dist/areas.csv", "LICENSE"):
-        if not (cn / f.split("/")[-1]).exists():
-            get(base + f, cn / f.split("/")[-1])
     print("done")
 
 

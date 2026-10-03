@@ -1,10 +1,12 @@
 """Data files for the interactive 1939-1945 county maps (ww2/maps/).
 
-  geo.bin           all county pieces of the six snapshots, simplified; zigzag-varint
+  geo.bin           all pieces of the six snapshots (administrative units, cut where the
+                    controller changes), simplified; zigzag-varint
                     deltas of 1/1000 degree, per feature: parts, rings, points
   geo-units.bin     CShapes units valid on any snapshot date (same encoding)
-  counties.json     static county attributes (columnar)
-  snap-<date>.json  per-snapshot rows: which features exist and who controls them
+  geo-admin.bin     outlines of the historical administrative units (same encoding)
+  admin.json        static attributes of the administrative units (columnar)
+  snap-<date>.json  per-snapshot rows: which pieces exist and who controls them
   terrain.png       land hillshade in Web Mercator (alpha = shade)
   hydro.json        main rivers and lakes
 """
@@ -26,8 +28,7 @@ Q = 1000  # coordinate units per degree
 TOL_COUNTY = 0.008
 TOL_UNIT = 0.02
 BLOCS = ["allied", "axis", "neutral", "contested"]
-BASIS = ["historical_dated", "historical_1930", "historical_1931", "reconstructed_1914_1926", "modern_proxy",
-         "historical_unit"]
+TIER_ZH = {1: "县级", 2: "地区级", 3: "省级", 4: "大区级", 5: "整个政治单元", 6: "岛屿属地"}
 CONF = ["whole", "approximate"]
 
 
@@ -98,10 +99,10 @@ def table(values):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    counties = pd.read_csv(WW2_WORK / "counties.csv", low_memory=False)
+    hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
     snaps = {s[0]: pd.read_csv(WW2_WORK / f"snapshot_{s[0]}.csv", low_memory=False) for s in SNAPSHOTS}
-    cgeom = {f["properties"]["county_id"]: shape(f["geometry"])
-             for f in json.load(open(WW2_WORK / "counties.geojson"))["features"]}
+    hgeom = {f["properties"]["unit_id"]: shape(f["geometry"])
+             for f in json.load(open(WW2_WORK / "hist_units.geojson"))["features"]}
     pgeom = {}
     for s in SNAPSHOTS:
         for f in json.load(open(WW2_WORK / f"split_{s[0]}.geojson"))["features"]:
@@ -109,27 +110,31 @@ def main():
 
     used = sorted(set().union(*[set(d.piece_id) for d in snaps.values()]))
     fidx = {p: i for i, p in enumerate(used)}
-    cids = sorted(set(counties.county_id) & set().union(*[set(d.county_id) for d in snaps.values()]))
-    cidx = {c: i for i, c in enumerate(cids)}
-    geo = encode([pgeom.get(p) or cgeom[p] for p in used], TOL_COUNTY)
-    (OUT / "geo.bin").write_bytes(geo)
+    padmin = {}
+    for d in snaps.values():
+        padmin.update(zip(d.piece_id, d.admin_id))
+    aids = sorted(set(padmin.values()))
+    aidx = {a: i for i, a in enumerate(aids)}
+    (OUT / "geo.bin").write_bytes(encode([pgeom.get(p) or hgeom[padmin[p]] for p in used], TOL_COUNTY))
+    (OUT / "geo-admin.bin").write_bytes(encode([hgeom[a] for a in aids], TOL_COUNTY))
 
-    crow = counties.set_index("county_id").loc[cids]
+    arow = hist.set_index("unit_id").loc[aids]
     cols = {}
-    for col in ("name", "name_zh", "iso3", "county_kind", "hist_parent", "hist_parent_zh", "hist_parent_kind",
-                "hist_grandparent", "adm1_modern", "adm2_modern", "defacto_parent", "defacto_parent_zh", "gb_level", "source"):
-        lut, idx = table(crow[col].tolist())
+    for col in ("name", "name_zh", "name_en", "kind", "basis", "source", "parent", "parent_zh", "grandparent", "note",
+                "start", "end"):
+        lut, idx = table(arow[col].tolist())
         cols[col] = {"lut": lut, "idx": idx}
     static = {
-        "n": len(cids), "county_id": cids, "cols": cols,
-        "basis": [BASIS.index(b) for b in crow.basis], "basis_lut": BASIS,
-        "area": [round(float(a), 1) for a in crow.area_km2],
-        "label": [[round(float(x), 3), round(float(y), 3)] for x, y in zip(crow.label_lon, crow.label_lat)],
-        "feature_county": [cidx[p.split("@")[0]] for p in used],
+        "n": len(aids), "admin_id": aids, "cols": cols,
+        "tier": [int(t) for t in arow.tier], "tier_zh": TIER_ZH,
+        "partial": [int(bool(x)) for x in arow.partial],
+        "area": [round(float(a), 1) for a in arow.area_km2],
+        "label": [[round(float(x), 3), round(float(y), 3)] for x, y in zip(arow.label_lon, arow.label_lat)],
+        "feature_admin": [aidx[padmin[p]] for p in used],
     }
-    (OUT / "counties.json").write_text(json.dumps(static, ensure_ascii=False, separators=(",", ":")))
+    (OUT / "admin.json").write_text(json.dumps(static, ensure_ascii=False, separators=(",", ":")))
 
-    # units (CShapes) for borders and labels
+    # political units (CShapes) for borders and labels
     arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
     unit_ids = sorted(set().union(*[set(d.unit_id) for d in snaps.values()]))
     ug = {g["properties"]["fid"]: topo.to_shape(arcs, g) for g in gs if g["properties"]["fid"] in unit_ids}
@@ -160,17 +165,22 @@ def main():
             "snapshot": snap, "title_zh": tzh, "title_en": ten,
             "feature": [fidx[p] for p in d.piece_id], "unit": [uidx.get(u, -1) for u in d.unit_id],
             "bloc": [BLOCS.index(b) for b in d.bloc], "conf": [CONF.index(c) if c in CONF else 0 for c in d.control_confidence],
-            "ctrl_gw": [int(x) for x in d.controller_gwcode],
+            "ctrl_gw": [int(x) for x in d.controller_gwcode], "split": [int(x) for x in d.control_split],
+            "area": [round(float(a), 1) for a in d.area_km2],
             "pop": [int(x) for x in d.population_est], "luts": luts, "rows": rows,
-            "units_active": sorted(set(uidx[u] for u in d.unit_id if u in uidx)), "unit_labels": lab,
+            "units_active": sorted(set(uidx[u] for u in d.unit_id if u in uidx)),
+            "admin_active": sorted(set(aidx[a] for a in d.admin_id)), "unit_labels": lab,
             "controllers": [[int(r.controller_gwcode), r.controller_name_zh, r.bloc, int(r.population_est)]
                             for r in ctrl_pop.head(40).itertuples()],
             "bloc_pop": {b: int(d[d.bloc == b].population_est.sum()) for b in BLOCS},
+            "tier_count": {str(t): int(n) for t, n in hist.set_index("unit_id").loc[sorted(set(d.admin_id))]
+                           .tier.value_counts().sort_index().items()},
         }
         (OUT / f"snap-{snap}.json").write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")))
         summary.append({"snapshot": snap, "title_zh": tzh, "title_en": ten, "pieces": len(d),
-                        "population": int(d.population_est.sum()), "bloc_pop": doc["bloc_pop"]})
-    (OUT / "index.json").write_text(json.dumps({"snapshots": summary, "blocs": BLOCS, "basis": BASIS,
+                        "admin_units": int(d.admin_id.nunique()), "population": int(d.population_est.sum()),
+                        "bloc_pop": doc["bloc_pop"], "tier_count": doc["tier_count"]})
+    (OUT / "index.json").write_text(json.dumps({"snapshots": summary, "blocs": BLOCS, "tiers": TIER_ZH,
                                                 "quantum": Q}, ensure_ascii=False, indent=1))
 
     # terrain in Web Mercator (alpha from the land hillshade)
