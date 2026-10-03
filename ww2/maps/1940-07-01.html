@@ -93,6 +93,9 @@ button:focus-visible, input:focus-visible, label:focus-within { outline: 2px sol
 .bar-split span { display: block; height: 100%; }
 .toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; font-size: 13px; }
 .toggles label { display: flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 4px; }
+.city-key { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--ink-2); }
+.city-key span { display: inline-flex; align-items: center; gap: 4px; }
+.city-key img { width: 14px; height: 14px; }
 .search { position: relative; }
 .search input {
   width: 100%; box-sizing: border-box; padding: 7px 10px; border: 1px solid var(--rule); border-radius: 7px;
@@ -149,7 +152,7 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
   <header class="bar">
     <div class="brand">
       <h1>世界省级战局图 1939–1945</h1>
-      <small>只用当时的省级区划 · 六个时间断面 · 阵营、国家与实际控制区</small>
+      <small>1939–1945 六个断面与 2026 年 · 省级区划 · 阵营、国家与实际控制区 · 重要城市</small>
     </div>
     <nav class="tabs" id="tabs" role="tablist" aria-label="时间断面"></nav>
   </header>
@@ -195,7 +198,9 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
           <label><input type="checkbox" id="tHydro" checked> 河流湖泊</label>
           <label><input type="checkbox" id="tLabels" checked> 地名</label>
           <label><input type="checkbox" id="tApprox" checked> 近似斜线</label>
+          <label><input type="checkbox" id="tCities" checked> 重要城市</label>
         </div>
+        <div class="city-key" id="cityKey" aria-label="城市图例"></div>
       </div>
       <div class="stack search">
         <h3><label for="q">查找省份</label></h3>
@@ -217,13 +222,15 @@ const MODES = ["bloc", "nation", "control", "density", "tier"];
 const BLOCS = ["allied", "axis", "neutral", "contested"];
 const BLOC_ZH = { allied: "同盟国一方", axis: "轴心国一方", neutral: "中立 / 维希", contested: "前线争夺" };
 const BLOC_COLOR = { allied: "#2a78d6", axis: "#eb6834", neutral: "#b8b5a8", contested: "#1baf7a" };
-const STATUS_ZH = { independent: "独立国", colony: "殖民地", protectorate: "保护国", mandate: "委任统治地", occupied: "被占领地区", "N/A": "—" };
+const STATUS_ZH = { independent: "独立国", colony: "殖民地", protectorate: "保护国", mandate: "委任统治地", occupied: "被占领地区",
+  dependency: "属地", disputed: "地位有争议", part: "特别行政区", "N/A": "—" };
 const TYPE_ZH = {
   independent: "本国统治", colony: "殖民统治", protectorate: "保护国", mandate: "委任统治", occupied: "军事占领",
   military_occupation: "军事占领", annexation: "吞并", partition: "瓜分", client_state: "傀儡 / 附庸政权",
   collaborationist_state: "合作政权（维希）", allied_occupation: "盟军占领", front_line: "前线争夺", besieged: "被围",
   resistance_base: "抗日根据地", leased_territory: "租借地", surrendering_forces: "待受降", defense_agreement: "按防务协定驻军",
-  free_french: "自由法国", satellite_state: "卫星国", liberated: "已解放", military_intervention: "军事干预", "N/A": "—"
+  free_french: "自由法国", satellite_state: "卫星国", liberated: "已解放", military_intervention: "军事干预",
+  dependency: "属地", control: "实际控制", de_facto_state: "未获普遍承认的政权", "N/A": "—"
 };
 const TIER = { 3: ["省级", "#3f9a83"], 4: ["大区级（无省级资料）", "#a9d2bd"], 5: ["整个国家 / 殖民地（无下级资料）", "#d8cfbd"], 6: ["岛屿属地", "#e2b65b"] };
 const BASIS_ZH = {
@@ -232,7 +239,8 @@ const BASIS_ZH = {
   historical_1939: "历史界线（1939）", historical_1940: "历史界线（1940）", historical_1941: "历史界线（1941）",
   historical_1928_1945: "历史界线（1928–1945）", reconstructed_1914_1926: "据 1914–26 年地点资料重建",
   present_day_outline_same_unit: "当时的单位，轮廓取自今日数据（界线基本未变）", historical_unit: "当日的国家 / 殖民地轮廓",
-  merged_subunits: "由当时的下级区划合并而成（外界即这些区划的历史界线）"
+  merged_subunits: "由当时的下级区划合并而成（外界即这些区划的历史界线）",
+  present_day_admin1: "当今一级行政区（Natural Earth 1:1000 万，约 2020 年前后的划分）"
 };
 const DENSITY_STEPS = [5, 25, 50, 100, 250, 500];
 const DENSITY_RAMP = ["#e8f0fa", "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95"];
@@ -246,7 +254,9 @@ const BASE = {
     fill: { bloc: 0.42, nation: 0.5, control: 0.56, density: 0.62, tier: 0.5 } },
 };
 const INK = "#1b2220", INK2 = "#4f5955", HALO = "rgba(250,251,248,0.92)";
-const LABEL_PX = 12;        // country names: the small serif lettering, the same at every zoom
+const LABEL_PX = 12;
+const blocName = (sd, b) => (sd.bloc_names || BLOC_ZH)[b];
+const isModern = (sd) => sd.snapshot === "2026";        // country names: the small serif lettering, the same at every zoom
 
 const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: null, adminGeo: null, units: null, ctrl: null,
   admin: null, hydro: null, hydroDetail: null, sel: null, hover: null };
@@ -372,8 +382,10 @@ function countryLabelFeatures(sd) {
   return fc(feats);
 }
 const fitsFilter = () => { const e = ["step", ["zoom"], ["==", ["get", "v0"], 1]]; for (let z = 1; z <= 11; z++) e.push(z, ["==", ["get", "v" + z], 1]); return e; };
+// full-width ASCII forms (－ ／ ・) are drawn with their plain counterparts, which the bundled glyphs cover
+const halfwidth = (s) => s.replace(/[\uff01-\uff5e]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
 const provLabelName = (ai) => {
-  const zh = col("name_zh", ai); if (zh) return zh.split(/[（(]/)[0];
+  const zh = col("name_zh", ai); if (zh) return halfwidth(zh.split(/[（(]/)[0]);
   const ok = (s) => s && /^[\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\s.,'’\-–()/·]+$/u.test(s);
   return ok(col("name", ai)) ? col("name", ai) : ok(col("name_en", ai)) ? col("name_en", ai) : null;
 };
@@ -438,6 +450,49 @@ function setLabels() {
   for (const l of riverLabelLayers()) map.setLayoutProperty(l, "visibility", rivers);
 }
 
+// ------------------------------------------------------------------ cities
+// capitals (stars), seats of colonial or provisional governments (ringed dots), ports (anchors),
+// industrial cities (gears), other major cities (dots); drawn as small map icons
+function cityIcon(kind) {
+  const r = 2, S = 16 * r; const c = document.createElement("canvas"); c.width = c.height = S; const g = c.getContext("2d"); g.scale(r, r);
+  g.lineJoin = "round";
+  if (kind === "cap") {
+    g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? 2.9 : 7; g.lineTo(8 + d * Math.cos(a), 8.4 + d * Math.sin(a)); }
+    g.closePath(); g.fillStyle = "#b3261e"; g.strokeStyle = "#fff"; g.lineWidth = 1.4; g.stroke(); g.fill();
+  } else if (kind === "seat") {
+    g.beginPath(); g.arc(8, 8, 5, 0, 2 * Math.PI); g.fillStyle = "#fff"; g.fill(); g.strokeStyle = "#b3261e"; g.lineWidth = 1.8; g.stroke();
+    g.beginPath(); g.arc(8, 8, 2.1, 0, 2 * Math.PI); g.fillStyle = "#b3261e"; g.fill();
+  } else if (kind === "port") {
+    g.beginPath(); g.arc(8, 8, 6.8, 0, 2 * Math.PI); g.fillStyle = "#1f5f99"; g.fill(); g.strokeStyle = "#fff"; g.lineWidth = 1.1; g.stroke();
+    g.strokeStyle = "#fff"; g.lineWidth = 1.3; g.lineCap = "round"; g.beginPath(); g.moveTo(8, 5); g.lineTo(8, 12); g.moveTo(5.6, 6.6); g.lineTo(10.4, 6.6);
+    g.moveTo(4.6, 9.2); g.quadraticCurveTo(5.2, 12.2, 8, 12.2); g.quadraticCurveTo(10.8, 12.2, 11.4, 9.2); g.stroke();
+    g.beginPath(); g.arc(8, 4.1, 1.1, 0, 2 * Math.PI); g.stroke();
+  } else if (kind === "ind") {
+    g.fillStyle = "#4b4f54"; g.beginPath();
+    for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8, d = i % 2 ? 4.9 : 6.9; g.lineTo(8 + d * Math.cos(a - Math.PI / 16), 8 + d * Math.sin(a - Math.PI / 16)); g.lineTo(8 + d * Math.cos(a + Math.PI / 16), 8 + d * Math.sin(a + Math.PI / 16)); }
+    g.closePath(); g.fill(); g.strokeStyle = "#fff"; g.lineWidth = 0.9; g.stroke();
+    g.beginPath(); g.arc(8, 8, 2.1, 0, 2 * Math.PI); g.fillStyle = "#fff"; g.fill();
+  } else {
+    g.beginPath(); g.arc(8, 8, 3.2, 0, 2 * Math.PI); g.fillStyle = "#1b2220"; g.fill(); g.strokeStyle = "#fff"; g.lineWidth = 1.2; g.stroke();
+  }
+  return { data: g.getImageData(0, 0, S, S), url: c.toDataURL() };
+}
+const CITY_ICONS = { cap: "首都", seat: "首府 / 政府驻地", port: "港口", ind: "工业城市", city: "其他重要城市" };
+const cityIconOf = (f) => f & 1 ? "ic-cap" : f & 2 ? "ic-seat" : f & 8 ? "ic-port" : f & 4 ? "ic-ind" : "ic-city";
+const cityFeatures = (sd) => fc((sd.cities || []).map(([n, x, y, f, r], i) => ({ type: "Feature", id: i,
+  geometry: { type: "Point", coordinates: [x, y] }, properties: { n: halfwidth(n), f, r, i, ic: cityIconOf(f), k: r * 10 - (f & 1 ? 5 : f & 2 ? 3 : 0) } })));
+function showCityTip(e, i) {
+  const [n, , , f, , role, note, pop] = sdNow().cities[i]; const tip = $("tip"); tip.replaceChildren();
+  tip.append(el("b", null, n));
+  const kinds = [f & 4 ? "工业城市" : null, f & 8 ? "港口" : null, f & 16 && !(f & 12) ? "重要城市" : null].filter(Boolean).join(" · ");
+  if (role) tip.append(el("div", null, role));
+  if (kinds) tip.append(el("div", null, kinds));
+  if (note) tip.append(el("div", null, note));
+  if (pop) tip.append(el("span", "num", `城市人口约 ${fmt(pop)}（Natural Earth）`));
+  tip.hidden = false; const r = map.getContainer().getBoundingClientRect();
+  tip.style.left = Math.min(e.point.x + 14, r.width - 270) + "px"; tip.style.top = (e.point.y + 14) + "px";
+}
+
 // ------------------------------------------------------------------ legend
 function legend() {
   const sd = sdNow(); const Lg = $("legend"); Lg.replaceChildren(); const sp = $("split"); sp.replaceChildren(); sp.hidden = true;
@@ -448,21 +503,25 @@ function legend() {
   };
   const note = $("legendNote"); note.hidden = false;
   if (state.mode === "bloc") {
-    $("legendTitle").textContent = "实际控制阵营 · 人口";
+    $("legendTitle").textContent = isModern(sd) ? "军事同盟 · 人口" : "实际控制阵营 · 人口";
     const total = Object.values(sd.bloc_pop).reduce((a, b) => a + b, 0);
     for (const k of ["allied", "axis", "contested", "neutral"]) {
-      const p = sd.bloc_pop[k] || 0; row(BLOC_COLOR[k], BLOC_ZH[k], `${fmt(p)} · ${(100 * p / total).toFixed(1)}%`);
+      const p = sd.bloc_pop[k] || 0; row(BLOC_COLOR[k], blocName(sd, k), `${fmt(p)} · ${(100 * p / total).toFixed(1)}%`);
       const seg = el("span"); seg.style.background = BLOC_COLOR[k]; seg.style.width = (100 * p / total) + "%"; sp.append(seg);
     }
     sp.hidden = false;
-    note.textContent = "粗线为当日的国界 / 殖民地界（法理）。斜线 = 近似界定（按整区分配，或沿用临近年份的占领范围）。";
+    note.textContent = isModern(sd)
+      ? "按实际控制者所属的同盟着色：北约 32 国，集体安全条约组织 6 国（亚美尼亚 2024 年起冻结参与）。斜线 = 按整州近似的控制范围。"
+      : "粗线为当日的国界 / 殖民地界（法理）。斜线 = 近似界定（按整区分配，或沿用临近年份的占领范围）。";
   } else if (state.mode === "nation") {
     $("legendTitle").textContent = "各国的法理领土 · 人口";
     for (const [i, nt] of sd.nations.slice(0, 16).entries()) {
       const k = sd.nation.indexOf(i);
       row(nt[3], nt[1].split(/[（(]/)[0] + (nt[4] !== "independent" ? `（${STATUS_ZH[nt[4]] || nt[4]}）` : ""), fmt(nt[6]), k >= 0 ? () => selectCountry(unitKey(sd, k), true, k) : null);
     }
-    note.textContent = `每个国家按法理领土着色，不计占领；殖民地、保护国、委任统治地用宗主国颜色的浅色。共 ${sd.nations.length} 个政治单元。`;
+    note.textContent = isModern(sd)
+      ? `按国际普遍承认的领土着色：克里米亚属乌克兰，戈兰高地属叙利亚，北塞浦路斯属塞浦路斯，索马里兰属索马里；台湾、科索沃、西撒哈拉、巴勒斯坦按 Natural Earth 单列。属地用宗主国颜色的浅色。共 ${sd.nations.length} 个单元。`
+      : `每个国家按法理领土着色，不计占领；殖民地、保护国、委任统治地用宗主国颜色的浅色。共 ${sd.nations.length} 个政治单元。`;
   } else if (state.mode === "control") {
     $("legendTitle").textContent = "各国实际控制区 · 人口";
     const shown = sd.countries.map((c, ci) => ci).filter((ci) => sd.countries[ci][0] !== "-20").slice(0, 16);
@@ -470,7 +529,9 @@ function legend() {
     const ci20 = sd.countries.findIndex((c) => c[0] === "-20");
     if (ci20 >= 0) { const c = country(sd, ci20); row(c.color, c.zh, fmt(c.pop), () => selectCountry(ci20, true), true); }
     const rest = sd.countries.length - shown.length - (ci20 >= 0 ? 1 : 0);
-    note.textContent = `占领区算作占领国，傀儡政权单列。${rest > 0 ? `另有 ${rest} 个国家未列出，` : ""}点击图例或地图选中国家。`;
+    note.textContent = (isModern(sd)
+      ? "克里米亚、塞瓦斯托波尔、卢甘斯克由俄罗斯控制，顿涅茨克、扎波罗热、赫尔松为交战前线（均按整州近似）；德涅斯特河沿岸、阿布哈兹、南奥塞梯、北塞浦路斯、索马里兰为未获普遍承认的政权。一国内部的内战（苏丹、缅甸、也门等）未分区表示。"
+      : "占领区算作占领国，傀儡政权单列。") + `${rest > 0 ? `另有 ${rest} 个国家未列出，` : ""}点击图例或地图选中国家。`;
   } else if (state.mode === "tier") {
     $("legendTitle").textContent = "当日区划资料的层级 · 单位数";
     for (const t of [3, 4, 5, 6]) { const n = sd.tier_count[String(t)]; if (n) row(TIER[t][1], TIER[t][0], n.toLocaleString()); }
@@ -534,7 +595,7 @@ function showCountry(cid, kAny) {
   const [dl, add] = kvList();
   if (state.mode === "control") {
     const c = country(sd, cid); sw.style.background = c.color; head.append(sw, el("h2", null, c.zh));
-    D.append(crumbs, head, chips([[BLOC_ZH[BLOCS[c.bloc]]], [c.en]]));
+    D.append(crumbs, head, chips([[blocName(sd, BLOCS[c.bloc])], [c.en]]));
     add("人口（估计）", fmt(pop)); add("面积", km2(area)); add("省级单位", `${nprov} 个（含被边界切开的部分）`);
     D.append(dl);
     const comp = el("div", "stack"); comp.append(el("h3", null, "控制的地区（按法理归属）")); const ul = el("ul", "list");
@@ -565,7 +626,7 @@ function showProvince(k) {
   const head = el("div", "title"); head.append(el("h2", null, name));
   // every piece of this province on this date: a border or front line may run through it
   const parts = []; for (let j = 0; j < sd.feature.length; j++) if (state.admin.feature_admin[sd.feature[j]] === ai) parts.push(j);
-  const cl = [[TIER[tier][0].replace(/（.*）/, ""), "hist"], [BLOC_ZH[BLOCS[sd.bloc[k]]]]];
+  const cl = [[TIER[tier][0].replace(/（.*）/, ""), "hist"], [blocName(sd, BLOCS[sd.bloc[k]])]];
   if (sd.conf[k] === 1) cl.push(["控制范围为近似", "approx"]);
   if (parts.length > 1) cl.push([`边界穿过此省 · 分为 ${parts.length} 块`, "approx"]);
   D.append(crumbs, head, chips(cl));
@@ -645,10 +706,12 @@ async function loadSnap(snap) {
     b.setAttribute("aria-selected", String(b.dataset.snap === snap));
     if (b.dataset.snap === snap) b.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
-  $("snapTitle").textContent = `${snap.replace(/-/g, ".")}　${sd.title_zh}`;
+  $("snapTitle").textContent = isModern(sd) ? sd.title_zh : `${snap.replace(/-/g, ".")}　${sd.title_zh}`;
   const n = sd.admin_active.length; const split = new Set(sd.feature.filter((f, k) => sd.split[k]).map((f) => state.admin.feature_admin[f])).size;
   const top = sd.countries.filter((c) => c[0] !== "-20").slice(0, 3).map((c) => `${c[1]} ${fmt(c[5])}`).join("、");
-  $("snapLede").textContent = `当日施行的省级区划 ${n.toLocaleString()} 个，其中 ${split} 个被国界或战线切开。人口最多的实际控制者：${top}。`;
+  $("snapLede").textContent = isModern(sd)
+    ? `当今的一级行政区 ${n.toLocaleString()} 个，其中 ${split} 个被实际控制线切开。人口最多的国家：${top}。`
+    : `当日施行的省级区划 ${n.toLocaleString()} 个，其中 ${split} 个被国界或战线切开。人口最多的实际控制者：${top}。`;
   state.hover = null; state.sel = null; $("detail").hidden = true; $("tip").hidden = true;
   map.removeFeatureState({ source: "prov" });
   document.body.classList.add("busy");
@@ -656,6 +719,7 @@ async function loadSnap(snap) {
   map.getSource("admin").setData(adminFeatures(sd));
   map.getSource("units").setData(unitFeatures(sd));
   map.getSource("ctrl").setData(ctrlFeatures(sd));
+  map.getSource("cities").setData(cityFeatures(sd));
   map.once("idle", () => document.body.classList.remove("busy"));
   applyPaint(); legend(); setLabels(); setHash();
   if (prev && prev.level === "province") { const k = sd.feature.findIndex((f) => state.admin.feature_admin[f] === prev.admin); if (k >= 0) selectProvince(k, false); }
@@ -719,6 +783,11 @@ function riverLabel(id, source, minzoom, lo, hi) {
 
 async function onLoad(index) {
   addPattern();
+  const key = $("cityKey"); key.replaceChildren();
+  for (const [k, label] of Object.entries(CITY_ICONS)) {
+    const ic = cityIcon(k); map.addImage("ic-" + k, ic.data, { pixelRatio: 2 });
+    const sp = el("span"); const img = el("img"); img.src = ic.url; img.alt = ""; sp.append(img, label); key.append(sp);
+  }
   const empty = fc([]);
   map.addSource("relief", { type: "raster", tiles: ["relief://r/{z}/{x}/{y}"], tileSize: 256, minzoom: 0, maxzoom: 5 });
   map.addSource("shade", { type: "raster", tiles: ["relief://s/{z}/{x}/{y}"], tileSize: 256, minzoom: 0, maxzoom: 5 });
@@ -729,6 +798,7 @@ async function onLoad(index) {
   map.addSource("hydro", { type: "geojson", data: state.hydro });
   map.addSource("lbl-country", { type: "geojson", data: empty });
   map.addSource("lbl-prov", { type: "geojson", data: empty });
+  map.addSource("cities", { type: "geojson", data: empty });
   map.addLayer({ id: "relief", type: "raster", source: "relief", paint: { "raster-resampling": "linear", "raster-fade-duration": 0 } });
   map.addLayer({ id: "prov-fill", type: "fill", source: "prov", paint: { "fill-color": fillColor(), "fill-opacity": 0.6 } });
   map.addLayer({ id: "prov-approx", type: "fill", source: "prov", filter: ["==", ["get", "a"], 1], paint: { "fill-pattern": "hatch", "fill-opacity": 0.6 } });
@@ -752,6 +822,12 @@ async function onLoad(index) {
     filter: ["step", ["zoom"], false, 4, [">=", ["get", "a"], 30000], 5, [">=", ["get", "a"], 6000], 6, [">=", ["get", "a"], 1000], 7, true],
     layout: { "text-field": ["get", "n"], "text-font": ["sans"], "text-size": 11, "text-max-width": 8, "symbol-sort-key": ["-", 0, ["get", "a"]], "text-padding": 3 },
     paint: { "text-color": "#39423f", "text-halo-color": HALO, "text-halo-width": 1.3 } });
+  map.addLayer({ id: "city", type: "symbol", source: "cities",
+    filter: ["step", ["zoom"], ["<=", ["get", "r"], 0], 2.6, ["<=", ["get", "r"], 1], 3.8, true],
+    layout: { "icon-image": ["get", "ic"], "icon-size": ["interpolate", ["linear"], ["zoom"], 2, 0.8, 6, 1],
+      "text-field": ["get", "n"], "text-font": ["sans"], "text-size": 11.5, "text-variable-anchor": ["left", "right", "top", "bottom"],
+      "text-radial-offset": 0.8, "text-justify": "auto", "text-optional": true, "symbol-sort-key": ["get", "k"], "text-padding": 2 },
+    paint: { "text-color": INK, "text-halo-color": HALO, "text-halo-width": 1.4 } });
   map.addLayer({ id: "country-lbl", type: "symbol", source: "lbl-country", filter: fitsFilter(),
     layout: { "text-field": ["get", "n"], "text-font": ["sans Medium"], "text-size": LABEL_PX, "text-letter-spacing": 0.04,
       "text-max-width": 30, "symbol-sort-key": ["get", "s"], "text-padding": 4 },
@@ -780,8 +856,10 @@ async function loadDetailHydro() {
 }
 
 function wire(admin) {
+  map.on("mousemove", "city", (e) => { const f = e.features[0]; if (!f) return; state.cityHover = true; showCityTip(e, f.properties.i); });
+  map.on("mouseleave", "city", () => { state.cityHover = false; $("tip").hidden = true; });
   map.on("mousemove", "prov-fill", (e) => {
-    const f = e.features[0]; if (!f) return; map.getCanvas().style.cursor = "pointer";
+    const f = e.features[0]; if (!f || state.cityHover) return; map.getCanvas().style.cursor = "pointer";
     if (state.hover !== null && state.hover !== f.id) map.setFeatureState({ source: "prov", id: state.hover }, { hov: false });
     state.hover = f.id; map.setFeatureState({ source: "prov", id: f.id }, { hov: true }); showTip(e, f.id);
   });
@@ -795,7 +873,7 @@ function wire(admin) {
   for (const b of document.querySelectorAll("[data-mode]")) b.onclick = () => setMode(b.dataset.mode);
   for (const b of document.querySelectorAll("[data-base]")) b.onclick = () => { state.base = b.dataset.base; store.set("ww2-base", state.base); applyBase(); };
   const vis = (id, layers) => $(id).onchange = () => layers.forEach((l) => map.getLayer(l) && map.setLayoutProperty(l, "visibility", $(id).checked ? "visible" : "none"));
-  vis("tProv", ["prov-line"]); vis("tTerrain", ["shade"]);
+  vis("tProv", ["prov-line"]); vis("tTerrain", ["shade"]); vis("tCities", ["city"]);
   $("tHydro").onchange = () => { for (const l of ["hydro-fill", "hydro-line", "hydro2-fill", "hydro2-line"]) if (map.getLayer(l)) map.setLayoutProperty(l, "visibility", $("tHydro").checked ? "visible" : "none"); setLabels(); };
   $("tBorders").onchange = applyPaint; $("tApprox").onchange = applyPaint; $("tLabels").onchange = setLabels;
   if (window.innerWidth <= 760) { $("controls").classList.add("collapsed"); $("toggleSheet").textContent = "展开"; $("toggleSheet").setAttribute("aria-expanded", "false"); }

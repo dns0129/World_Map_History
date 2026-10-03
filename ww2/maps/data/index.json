@@ -125,6 +125,24 @@
     "5": 117,
     "6": 11
    }
+  },
+  {
+   "snapshot": "2026",
+   "title_zh": "2026 年：当今世界",
+   "title_en": "The world in 2026",
+   "pieces": 3523,
+   "admin_units": 3515,
+   "countries": 208,
+   "population": 8300000014,
+   "bloc_pop": {
+    "allied": 997975634,
+    "axis": 201022577,
+    "neutral": 7094918358,
+    "contested": 6083445
+   },
+   "tier_count": {
+    "3": 3515
+   }
   }
  ],
  "blocs": [

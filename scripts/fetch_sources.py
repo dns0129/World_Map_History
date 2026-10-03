@@ -34,6 +34,8 @@ NE_LAYERS = [
     "ne_10m_lakes_europe",
     "ne_10m_lakes_north_america",
     "ne_10m_lakes_historic",
+    "ne_10m_populated_places",
+    "ne_10m_admin_0_disputed_areas",
     "ne_10m_land",
     "ne_10m_coastline",
     "ne_10m_minor_islands",
@@ -48,7 +50,7 @@ NE_LAYERS = [
 ]
 
 # JRC GHS-POP R2023A (1975-2030 in 5-year epochs), 30 arc-second WGS84 COGs.
-GHS_URL = ("https://jrc-ghsl.s3.amazonaws.com/ghs-pop/r2023a/4326/30ss/{y}/"
+GHS_URL = ("https://jrc-ghsl.s3.amazonaws.com/ghs-pop/r2023a/4326/30asec/{y}/"
            "GHS_POP_E{y}_GLOBE_R2023A_4326_30ss_V1_0.tif")
 GHS_EPOCHS = [1975, 1980, 1985, 1990, 1995, 2000]
 

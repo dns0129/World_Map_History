@@ -26,5 +26,6 @@ python3 ww2_provinces.py      # counties and districts dissolved into their prov
 python3 ww2_database.py
 python3 ww2_coverage.py
 python3 ww2_relief.py         # shaded relief sheets for the maps (Terrarium elevation tiles)
+python3 modern_2026.py        # the 2026 tab: present-day provinces, control and population
 python3 ww2_webmap.py
 python3 ww2_html.py
