@@ -38,6 +38,7 @@ from collections import Counter, defaultdict
 import numpy as np
 import pandas as pd
 import shapely
+import shapely.ops
 from shapely import STRtree
 from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 
