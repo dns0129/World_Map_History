@@ -1,0 +1,6 @@
+# Downloads and intermediate products; rebuilt by scripts/ (see README)
+raw/
+work/
+__pycache__/
+*.pyc
+*.sqlite-journal
