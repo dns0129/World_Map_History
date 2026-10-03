@@ -25,7 +25,7 @@ def main():
     # the artifact host supplies the document skeleton itself and serves only text and media types,
     # so the binary geometry goes along base64-encoded
     (WW2_WORK / "artifact_index.html").write_text(tpl.replace("__DEFAULT_SNAPSHOT__", "1942-11-01"))
-    for name in ("geo", "geo-admin", "geo-units"):
+    for name in ("geo", "geo-admin", "geo-units", "geo-ctrl"):
         raw = (MAPS / "data" / f"{name}.bin").read_bytes()
         (WW2_WORK / f"{name}.b64.txt").write_text(base64.b64encode(raw).decode())
 

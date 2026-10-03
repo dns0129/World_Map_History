@@ -22,6 +22,8 @@ python3 ww2_ohm.py            # OpenHistoricalMap planet -> dated administrative
 python3 ww2_reference.py      # present-day reference names for the control rules (internal)
 python3 ww2_histunits.py      # divisions in force on each of the six dates
 printf "%s\n" 1939-09-01 1940-07-01 1941-12-07 1942-11-01 1944-06-06 1945-09-02 | xargs -P 3 -I{} python3 ww2_snapshots.py {}
+python3 ww2_provinces.py      # counties and districts dissolved into their provinces; borders still cut them
 python3 ww2_database.py
+python3 ww2_coverage.py
 python3 ww2_webmap.py
 python3 ww2_html.py

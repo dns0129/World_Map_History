@@ -28,7 +28,12 @@ NE_LAYERS = [
     "ne_10m_admin_0_countries",
     "ne_10m_admin_1_states_provinces",
     "ne_10m_rivers_lake_centerlines",
+    "ne_10m_rivers_europe",
+    "ne_10m_rivers_north_america",
     "ne_10m_lakes",
+    "ne_10m_lakes_europe",
+    "ne_10m_lakes_north_america",
+    "ne_10m_lakes_historic",
     "ne_10m_land",
     "ne_10m_coastline",
     "ne_10m_minor_islands",
@@ -50,7 +55,7 @@ GHS_EPOCHS = [1975, 1980, 1985, 1990, 1995, 2000]
 # The GeoJSON copy of the river layer lacks translated names; the shapefile
 # carries name_zh and wikidataid.
 NE_SHP = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/10m_physical/"
-NE_SHP_LAYERS = ["ne_10m_rivers_lake_centerlines"]
+NE_SHP_LAYERS = ["ne_10m_rivers_lake_centerlines", "ne_10m_rivers_europe", "ne_10m_rivers_north_america"]
 
 TERRARIUM = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
 TERRAIN_ZOOM = 5
