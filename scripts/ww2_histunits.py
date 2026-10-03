@@ -155,7 +155,7 @@ def burma():
     for k, (p, g) in enumerate(read_geojson(LAW / "burma-1931-admin-units.geojson")):
         name = p.get("name") or f"{p.get('group') or 'Burma'} (unit {k})"
         out.append(cand(f"MM1931-{k:03d}", name, 1, 3, g, "Burma 1931 census districts and states, traced by "
-                        "K. Lawson (CC0)", "historical_1931", "district / state"))
+                        "K. Lawson (CC0)", "historical_1931", "district / state", parent_hint=p.get("group") or None))
     return out
 
 
@@ -381,7 +381,7 @@ def parents(units, cands, date):
     by_tier = {t: [c for c in cands if c["tier"] == t and active(c, date)] for t in (2, 3, 4)}
     trees = {t: STRtree([c["geom"] for c in cs]) for t, cs in by_tier.items() if cs}
     for u in units:
-        u["parent"] = u["parent_zh"] = u["grandparent"] = None
+        u["parent"] = u["parent_zh"] = u["grandparent"] = u["parent_tier"] = u["grandparent_tier"] = None
         if u["tier"] >= 4:
             continue
         rp = u["geom"].representative_point()
@@ -393,9 +393,9 @@ def parents(units, cands, date):
             if hit:
                 found.append(by_tier[t][min(hit, key=lambda i: by_tier[t][i]["area"])])
         if found:
-            u["parent"], u["parent_zh"] = found[0]["name"], found[0].get("name_zh")
+            u["parent"], u["parent_zh"], u["parent_tier"] = found[0]["name"], found[0].get("name_zh"), found[0]["tier"]
             if len(found) > 1:
-                u["grandparent"] = found[1]["name"]
+                u["grandparent"], u["grandparent_tier"] = found[1]["name"], found[1]["tier"]
         elif u.get("parent_hint"):
             u["parent"] = u["parent_hint"]
 
@@ -441,8 +441,8 @@ def main(dates=DATES):
                                  area_km2=round(eq_area_km2(u["geom"]), 2), snapshots="|".join(u["dates"]),
                                  tier_zh=TIER_ZH[u["tier"]], tier_en=TIER_EN[u["tier"]]))
     cols = ["unit_id", "name", "name_zh", "name_en", "tier", "tier_zh", "tier_en", "kind", "basis", "source", "note",
-            "start", "end", "partial", "parent", "parent_zh", "grandparent", "ohm_level", "wikidata", "cshapes_fid",
-            "snapshots", "area_km2", "label_lon", "label_lat"]
+            "start", "end", "partial", "parent", "parent_zh", "grandparent", "parent_tier", "grandparent_tier", "ohm_level",
+            "wikidata", "cshapes_fid", "snapshots", "area_km2", "label_lon", "label_lat"]
     df = pd.DataFrame([{c: r.get(c) for c in cols} for r in rows])
     df.to_csv(WW2_WORK / "hist_units.csv", index=False)
     with open(WW2_WORK / "hist_units.geojson", "w") as f:
