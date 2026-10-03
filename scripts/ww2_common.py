@@ -5,7 +5,7 @@ WW2_RAW = RAW / "ww2"
 GB = RAW / "geoboundaries"
 WW2_WORK = WORK / "ww2"
 WW2_OUT = ROOT / "ww2"
-WW2_DB = DB_DIR / "ww2_counties_1939_1945.sqlite"
+WW2_DB = DB_DIR / "ww2_divisions_1939_1945.sqlite"
 WW2_WORK.mkdir(parents=True, exist_ok=True)
 WW2_OUT.mkdir(parents=True, exist_ok=True)
 

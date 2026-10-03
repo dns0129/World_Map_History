@@ -1,0 +1,104 @@
+"""Geometry helpers shared by the 1939-1945 build."""
+import json
+import re
+import unicodedata
+
+import numpy as np
+from pyproj import Transformer
+import shapely
+from shapely import make_valid
+from shapely.errors import GEOSException
+from shapely import transform as shp_transform
+from shapely.geometry import MultiPolygon, shape
+
+from ww2_common import GB
+
+EQ = Transformer.from_crs("EPSG:4326", "+proj=eqearth +datum=WGS84", always_xy=True)
+
+
+def eq_area_km2(g):
+    return shp_transform(g, lambda c: np.column_stack(EQ.transform(c[:, 0], c[:, 1]))).area / 1e6
+
+
+def polys(g):
+    """Polygonal part of a geometry as Polygon/MultiPolygon, or None."""
+    if g is None or g.is_empty:
+        return None
+    g = make_valid(g)
+    ps = [p for p in getattr(g, "geoms", [g]) if p.geom_type == "Polygon" and not p.is_empty]
+    ps += [q for p in getattr(g, "geoms", []) if p.geom_type == "MultiPolygon" for q in p.geoms]
+    if not ps:
+        return None
+    return MultiPolygon(ps) if len(ps) > 1 else ps[0]
+
+
+def _safe(op, a, b):
+    try:
+        return op(a, b)
+    except GEOSException:
+        try:
+            return op(make_valid(a).buffer(0), make_valid(b).buffer(0))
+        except GEOSException:
+            return op(a, b, grid_size=1e-6)
+
+
+def diff(a, b):
+    """a minus b, robust to the small topology errors traced layers produce."""
+    return _safe(shapely.difference, a, b)
+
+
+def inter(a, b):
+    return _safe(shapely.intersection, a, b)
+
+
+def union(gs):
+    gs = [g for g in gs if g is not None and not g.is_empty]
+    if not gs:
+        return None
+    try:
+        return shapely.union_all(gs)
+    except GEOSException:
+        return shapely.union_all([make_valid(g).buffer(0) for g in gs], grid_size=1e-6)
+
+
+def clip_to(gs, bounds, pad=0.05):
+    """Cut large geometries down to a padded bounding box before set operations."""
+    x0, y0, x1, y1 = bounds
+    out = []
+    for g in gs:
+        c = shapely.clip_by_rect(g, x0 - pad, y0 - pad, x1 + pad, y1 + pad)
+        if not c.is_empty:
+            out.append(c)
+    return out
+
+
+def opening(g, d=0.005):
+    """Drop sliver components: parts whose mean width (2*area/perimeter) is under d degrees or
+    whose area is under (2d)^2. Cheap stand-in for a morphological opening."""
+    if g is None or g.is_empty:
+        return None
+    keep = [p for p in getattr(g, "geoms", [g])
+            if p.area >= 4 * d * d and 2 * p.area / max(p.length, 1e-12) >= d]
+    if not keep:
+        return None
+    return keep[0] if len(keep) == 1 else MultiPolygon(keep)
+
+
+def read_geojson(path):
+    d = json.load(open(path))
+    return [(f["properties"], polys(shape(f["geometry"]))) for f in d["features"] if f.get("geometry")]
+
+
+def read_projected(path, epsg):
+    tr = Transformer.from_crs(f"EPSG:{epsg}", "EPSG:4326", always_xy=True)
+    return [(p, polys(shp_transform(g, lambda c: np.column_stack(tr.transform(c[:, 0], c[:, 1])))))
+            for p, g in read_geojson(path)]
+
+
+def gb_path(iso, lv):
+    return GB / f"{iso}_{lv}_geoBoundaries-{iso}-{lv}_simplified.geojson"
+
+
+def norm(s):
+    s = unicodedata.normalize("NFKD", str(s)).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z]", "", s)
