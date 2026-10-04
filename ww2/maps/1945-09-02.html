@@ -794,7 +794,7 @@ async function onLoad(index) {
   const empty = fc([]);
   map.addSource("relief", { type: "raster", tiles: ["relief://r/{z}/{x}/{y}"], tileSize: 256, minzoom: 0, maxzoom: 5 });
   map.addSource("shade", { type: "raster", tiles: ["relief://s/{z}/{x}/{y}"], tileSize: 256, minzoom: 0, maxzoom: 5 });
-  map.addSource("prov", { type: "geojson", data: empty, tolerance: 0.25 });
+  map.addSource("prov", { type: "geojson", data: empty, tolerance: 0.1 });  // 0.25 left overlap streaks on huge units at world zoom
   map.addSource("admin", { type: "geojson", data: empty, tolerance: 0.25 });
   map.addSource("units", { type: "geojson", data: empty, tolerance: 0.3 });
   map.addSource("ctrl", { type: "geojson", data: empty, tolerance: 0.3 });
