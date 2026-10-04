@@ -335,6 +335,17 @@ def control_pieces(g, refs_here, ctrl_of):
     return [(parts[0][0], major)] + [(p[0], p[1]) for p in kept]
 
 
+def blank_land(g, units, refs, rtree):
+    """The land of g (reference outlines, not the sea) that none of the CShapes units covers, when it is at
+    least SPLIT_MIN_SHARE of g; else None."""
+    land = union([refs[k]["geom"] for k in rtree.query(g, predicate="intersects")])
+    if land is None:
+        return None
+    cover = union(units)
+    rest = polys(diff(inter(g, land), cover) if cover is not None else inter(g, land))
+    return rest if rest is not None and rest.area >= SPLIT_MIN_SHARE * g.area else None
+
+
 def main(only=None):
     hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
     hgeom = {f["properties"]["unit_id"]: shape(f["geometry"])
@@ -390,6 +401,7 @@ def main(only=None):
             else:
                 cand = list(tree.query(g, predicate="intersects"))
                 shares = [(i, inter(g, ug[i]).area / max(g.area, 1e-12)) for i in cand]
+                blank = 1 - sum(s_ for _, s_ in shares)  # share on land CShapes leaves blank on this date
                 shares = [(i, s_) for i, s_ in shares if s_ >= SPLIT_MIN_SHARE]
                 fb = [i for i, u in enumerate(act) if u["country_name"] == UNCOVERED.get(snap)]
                 isl = None
@@ -400,6 +412,13 @@ def main(only=None):
                     parts = [(("island", isl), None)]
                 elif fb and sum(s_ for _, s_ in shares) < 0.5 and ug[fb[0]].distance(g) < 0.5:
                     parts = [(("cs", fb[0]), None)]  # land CShapes leaves blank on this date
+                elif fb and blank >= SPLIT_MIN_SHARE and ug[fb[0]].distance(g) < 0.5 and \
+                        (rest := blank_land(g, [ug[i] for i in cand], refs, rtree)) is not None:
+                    # partly on that blank land (Livonia and Courland of 1897 on 11 November 1918): the
+                    # blank part counts as that unit, the rest goes to the units it lies in
+                    cut = {i: polys(inter(g, ug[i])) for i, _ in shares}
+                    cut[fb[0]] = polys(union([cut.get(fb[0]), rest]))
+                    parts = [(("cs", i), p) for i, p in cut.items() if p is not None]
                 elif len(shares) <= 1 or max(s_ for _, s_ in shares) >= 1 - SPLIT_MIN_SHARE:
                     hit = [i for i in cand if ug[i].contains(pt)] or [max(shares, key=lambda t: t[1])[0]] if shares else \
                         ([i for i in cand if ug[i].contains(pt)] or cand or [tree.nearest(pt)])
