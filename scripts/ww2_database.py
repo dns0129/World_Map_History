@@ -1,8 +1,9 @@
-"""SQLite database of historical administrative divisions and de facto control, 1939-1945.
+"""SQLite database of historical province-level divisions and de facto control, for one set of
+snapshots (1939-1945, or 1900-1934 with WW2_SET=early; see ww2_common.py).
 
-Only divisions in force at the time are stored (see ww2_histunits.py). Geometry is
-GeoJSON text (EPSG:4326), simplified for size; full-detail geometry stays in work/ww2/.
-Tables are documented in ww2/README.md.
+Only divisions in force at the time are stored (see ww2_histunits.py), dissolved to the
+province level (ww2_provinces.py). Geometry is GeoJSON text (EPSG:4326), simplified for
+size; full-detail geometry stays in work/ww2/. Tables are documented in ww2/README.md.
 """
 import datetime as dt
 import json
@@ -13,7 +14,7 @@ import pandas as pd
 from shapely.geometry import mapping, shape
 
 from common import ROOT
-from ww2_common import SNAPSHOTS, WW2_DB, WW2_WORK
+from ww2_common import RULES, SET, SNAPSHOTS, WW2_DB, WW2_WORK
 
 TOL = 0.006  # degrees (~600 m) for stored geometry
 ND = 3  # decimals kept (~110 m)
@@ -49,7 +50,7 @@ SOURCES = [
     ("ghspop", "GHS-POP R2023A", "European Commission JRC (2023).", "https://human-settlement.emergency.copernicus.eu/",
      "CC BY 4.0", "Spatial pattern for population estimates (1975 grid)"),
     ("curated", "Curated control rules", "Compiled for this database from standard histories of the war "
-     "(curated/ww2_region_control.csv, curated/control_events.csv).", "curated/", "CC0",
+     f"(curated/{RULES.name}, curated/control_events.csv).", "curated/", "CC0",
      "De facto control on each snapshot date"),
 ]
 
@@ -62,7 +63,8 @@ CREATE TABLE admin_units (
   admin_key INTEGER PRIMARY KEY, admin_id TEXT UNIQUE, name TEXT, name_zh TEXT, name_en TEXT,
   tier INTEGER, tier_zh TEXT, tier_en TEXT, kind TEXT, basis TEXT, source TEXT, note TEXT,
   start_date TEXT, end_date TEXT, partial INTEGER, parent TEXT, parent_zh TEXT, grandparent TEXT,
-  ohm_level INTEGER, wikidata TEXT, snapshots TEXT, area_km2 REAL, label_lon REAL, label_lat REAL, geometry TEXT);
+  ohm_level INTEGER, wikidata TEXT, merged_units INTEGER, snapshots TEXT, area_km2 REAL, label_lon REAL,
+  label_lat REAL, geometry TEXT);
 CREATE TABLE pieces (piece_key INTEGER PRIMARY KEY, piece_id TEXT UNIQUE, admin_key INTEGER, area_km2 REAL,
   geometry TEXT);
 CREATE TABLE unit_snapshot (snapshot TEXT, unit_id INTEGER, unit_gwcode INTEGER, unit_name_en TEXT,
@@ -116,25 +118,29 @@ def main():
         WW2_DB.unlink()
     con = sqlite3.connect(WW2_DB)
     con.executescript(SCHEMA)
-    df = pd.concat([pd.read_csv(WW2_WORK / f"snapshot_{s[0]}.csv", low_memory=False) for s in SNAPSHOTS],
+    df = pd.concat([pd.read_csv(WW2_WORK / f"prov_snapshot_{s[0]}.csv", low_memory=False) for s in SNAPSHOTS],
                    ignore_index=True).drop_duplicates(["snapshot", "piece_id"])
     pgeom = {}
     for s in SNAPSHOTS:
-        for f in json.load(open(WW2_WORK / f"split_{s[0]}.geojson"))["features"]:
+        for f in json.load(open(WW2_WORK / f"prov_split_{s[0]}.geojson"))["features"]:
             pgeom[f["properties"]["piece_id"]] = shape(f["geometry"])
-    hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
+    hist = pd.read_csv(WW2_WORK / "prov_units.csv", low_memory=False)
     hgeom = {f["properties"]["unit_id"]: shape(f["geometry"])
-             for f in json.load(open(WW2_WORK / "hist_units.geojson"))["features"]}
+             for f in json.load(open(WW2_WORK / "prov_units.geojson"))["features"]}
 
     meta = {
-        "title": "Historical administrative divisions and de facto control, 1939-1945",
+        "title": "Historical province-level divisions and de facto control, "
+                 + ("1900-1934" if SET == "early" else "1939-1945"),
         "snapshots": ";".join(s[0] for s in SNAPSHOTS),
         "crs": "EPSG:4326", "geometry": f"GeoJSON text simplified at {TOL} deg, coordinates rounded to {ND} decimals",
         "main_view": "snapshot_full (one row per piece and snapshot, all attributes)",
-        "admin_units": "divisions in force on each date, finest available tier: 1 county, 2 district, 3 province, "
-                       "4 region, 5 whole country or colony (no subdivision data), 6 territory not drawn by CShapes",
-        "pieces": "an administrative unit, cut where it lies in two political units or where the controller changes",
-        "population": "estimate: GHS-POP 1975 pattern scaled to each historical unit's population for the snapshot year",
+        "admin_units": "province-level divisions in force on each date: 3 province (counties and districts of the "
+                       "time dissolved into the province above them), 4 region (no province level known), 5 whole "
+                       "country or colony (no subdivision data), 6 territory not drawn by CShapes",
+        "pieces": "a province, cut where a border runs through it: where it lies in two political units or where "
+                  "the controller changes (front lines, annexations, occupation zones)",
+        "population": "estimate: GHS-POP 1975 pattern scaled to each political unit's population for the snapshot "
+                      "year, computed on the finer historical units and summed per province piece",
         "built_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
     con.executemany("INSERT INTO meta VALUES (?,?)", meta.items())
@@ -155,9 +161,9 @@ def main():
         rows.append((akey[h.unit_id], h.unit_id, v(h.name), v(h.name_zh), v(h.name_en), int(h.tier), h.tier_zh,
                      h.tier_en, v(h.kind), h.basis, h.source, v(h.note), v(h.start), v(h.end), int(bool(h.partial)),
                      v(h.parent), v(h.parent_zh), v(h.grandparent),
-                     None if v(h.ohm_level) is None else int(h.ohm_level), v(h.wikidata), h.snapshots,
-                     h.area_km2, h.label_lon, h.label_lat, gj(hgeom[h.unit_id])))
-    con.executemany("INSERT INTO admin_units VALUES (" + ",".join("?" * 25) + ")", rows)
+                     None if v(h.ohm_level) is None else int(h.ohm_level), v(h.wikidata),
+                     int(v(h.merged_units) or 0), h.snapshots, h.area_km2, h.label_lon, h.label_lat, gj(hgeom[h.unit_id])))
+    con.executemany("INSERT INTO admin_units VALUES (" + ",".join("?" * 26) + ")", rows)
     pids = sorted(set(df.piece_id))
     pkey = {p: i + 1 for i, p in enumerate(pids)}
     parea = df.groupby("piece_id").area_km2.max().to_dict()
@@ -180,7 +186,7 @@ def main():
     df["piece_key"] = df.piece_id.map(pkey)
     df[["snapshot", "piece_key", "unit_id", "control_id", "control_split", "area_km2", "population_est",
         "pop_method_id"]].to_sql("piece_snapshot", con, if_exists="append", index=False)
-    rules = pd.read_csv(ROOT / "curated" / "ww2_region_control.csv")
+    rules = pd.read_csv(RULES)
     rules.insert(0, "row", range(2, len(rules) + 2))
     rules.to_sql("control_rules", con, if_exists="append", index=False)
     pd.read_csv(ROOT / "curated" / "control_events.csv").to_sql("control_events", con, if_exists="append", index=False)

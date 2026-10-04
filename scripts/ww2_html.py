@@ -6,7 +6,7 @@ Each per-date page opens on its own snapshot and can switch to the others.
 """
 import base64
 
-from ww2_common import SNAPSHOTS, WW2_OUT, WW2_WORK
+from ww2_common import SNAPSHOTS, SNAPSHOTS_EARLY, WW2_OUT, WW2_WORK
 
 MAPS = WW2_OUT / "maps"
 
@@ -17,7 +17,10 @@ def main():
     tpl = tpl.replace("/*__MAPLIBRE_CSS__*/", css)
     head = ('<!doctype html>\n<html lang="zh-CN">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n')
-    pages = [("index.html", "1942-11-01")] + [(f"{d}.html", d) for d, _, _ in SNAPSHOTS]
+    pages = [("index.html", "1942-11-01")] + [(f"{d}.html", d) for d, _, _ in SNAPSHOTS_EARLY + SNAPSHOTS
+                                               if (MAPS / "data" / f"snap-{d}.json").exists()]
+    if (MAPS / "data" / "snap-2026.json").exists():
+        pages.append(("2026.html", "2026"))
     for name, snap in pages:
         body = tpl.replace("__DEFAULT_SNAPSHOT__", snap)
         (MAPS / name).write_text(head + body + "\n</html>\n")
@@ -25,9 +28,11 @@ def main():
     # the artifact host supplies the document skeleton itself and serves only text and media types,
     # so the binary geometry goes along base64-encoded
     (WW2_WORK / "artifact_index.html").write_text(tpl.replace("__DEFAULT_SNAPSHOT__", "1942-11-01"))
-    for name in ("geo", "geo-admin", "geo-units"):
+    for name in ("geo", "geo-admin", "geo-units", "geo-ctrl"):
         raw = (MAPS / "data" / f"{name}.bin").read_bytes()
         (WW2_WORK / f"{name}.b64.txt").write_text(base64.b64encode(raw).decode())
+    for pbf in sorted((MAPS / "data" / "glyphs" / "sans").glob("*.pbf")):
+        (WW2_WORK / f"glyphs-sans-{pbf.stem}.b64.txt").write_text(base64.b64encode(pbf.read_bytes()).decode())
 
 
 if __name__ == "__main__":

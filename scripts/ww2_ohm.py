@@ -1,12 +1,13 @@
 """OpenHistoricalMap: download the planet file and extract dated administrative areas.
 
 Keeps every boundary=administrative relation (admin_level 3-8) whose start_date/end_date
-overlap 1939-09-01 .. 1945-09-02, assembled into (multi)polygons.
+overlap 1900-01-01 .. 1945-09-02 (the earliest to the latest snapshot), assembled into
+(multi)polygons.
 
   python3 ww2_ohm.py            download the newest planet (about 1.3 GB) and extract
   python3 ww2_ohm.py <planet>   extract from a planet file already on disk
 
-Output: raw/ohm/areas_1939_45.jsonl, one JSON object per line: id, tags, wkb (hex).
+Output: raw/ohm/areas_1900_45.jsonl, one JSON object per line: id, tags, wkb (hex).
 Needs: pip install osmium
 """
 import json
@@ -20,7 +21,7 @@ from common import RAW
 
 BUCKET = "https://s3.amazonaws.com/planet.openhistoricalmap.org"
 OUT = RAW / "ohm"
-FIRST, LAST = "1939-09-01", "1945-09-02"
+FIRST, LAST = "1900-01-01", "1945-09-02"
 
 
 def latest_planet():
@@ -68,13 +69,13 @@ class Wanted(osmium.SimpleHandler):
 def extract(planet):
     w = Wanted()
     w.apply_file(str(planet))
-    print("relations in force 1939-1945:", len(w.ids), flush=True)
+    print("relations in force 1900-1945:", len(w.ids), flush=True)
     wkb = osmium.geom.WKBFactory()
     n = bad = 0
     idx = osmium.index.create_map("sparse_file_array," + str(OUT / "nodes.idx"))
     fp = osmium.FileProcessor(str(planet)).with_locations(idx) \
         .with_areas(osmium.filter.TagFilter(("boundary", "administrative")))
-    with open(OUT / "areas_1939_45.jsonl", "w") as out:
+    with open(OUT / "areas_1900_45.jsonl", "w") as out:
         for o in fp:
             if isinstance(o, osmium.osm.Area) and not o.from_way() and o.orig_id() in w.ids:
                 try:
