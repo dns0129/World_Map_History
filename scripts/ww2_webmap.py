@@ -30,11 +30,48 @@ from shapely.geometry import MultiPolygon, Polygon, shape
 import topo
 from common import RAW, WORK
 import cities
-from ww2_common import SNAPSHOTS, WW2_WORK, WW2_OUT
+from ww2_common import SNAPSHOTS, SNAPSHOTS_EARLY, WW2_WORK, WW2_OUT
 from ww2_geo import polys, union
 
 OUT = WW2_OUT / "maps" / "data"
 MODERN = WORK / "modern"
+EARLY = WORK / "early"          # the 1900-1934 snapshots (WW2_SET=early)
+EARLY_DATES = {s[0] for s in SNAPSHOTS_EARLY}
+# Blocs and legend notes of the 1900-1934 dates (ww2_snapshots.EARLY_BLOCS says who is in which)
+EARLY_META = {
+    "1900-08-14": dict(
+        bloc_names={"allied": "八国联军各国（及其属地）", "axis": "清廷（对列强宣战）", "neutral": "东南互保各省与其他国家",
+                    "contested": "交战区"},
+        notes={"bloc_title": "庚子年的阵营 · 人口",
+               "bloc": "八国联军为英、美、法、德、意、俄、日、奥匈八国，属地随宗主国。1900 年 6 月清廷对各国宣战；两江、湖广、"
+                       "两广、闽浙、山东、四川督抚与列强约定互保，不参与战事（灰色）。天津、北京为联军占领；黑龙江为俄军入侵的"
+                       "交战区；奥兰治自由邦已被英军占领，德兰士瓦为布尔战争交战区（按整区近似，斜线）。",
+               "control": "京津地区为八国联军占领；关东州为俄国租借地；奥兰治自由邦为英军占领。"}),
+    "1914-08-04": dict(
+        bloc_names={"allied": "协约国（已参战）", "axis": "同盟国（已参战）", "neutral": "中立国 / 尚未参战", "contested": "交战区"},
+        notes={"bloc_title": "参战国 · 人口",
+               "bloc": "8 月 4 日已处于战争状态的国家：协约国为塞尔维亚、俄国、法国、比利时、英国及其自治领和殖民地；同盟国为"
+                       "奥匈帝国和德国。黑山（8 月 5 日）、日本（8 月 23 日）、奥斯曼帝国（11 月）、意大利（1915 年）此时尚未参战。",
+               "control": "德国 8 月 2 日占领卢森堡；外蒙古（博克多汗国）1911 年起自治；乌梁海 1914 年 4 月成为俄国保护地。"}),
+    "1918-11-11": dict(
+        bloc_names={"allied": "协约国及其盟国", "axis": "同盟国", "neutral": "中立国 / 退出大战", "contested": "交战区（俄国内战等）"},
+        notes={"bloc_title": "大战结束时的阵营 · 人口",
+               "bloc": "协约国及其盟国含美、日、中、暹罗、巴西等对德宣战的国家，以及捷克斯洛伐克、波兰和俄国白军；同盟国为德国、"
+                       "奥匈（已分解为奥地利、匈牙利等）、奥斯曼帝国、保加利亚，四国均已停战。苏维埃俄国 1918 年 3 月退出大战，"
+                       "计为中立。俄国内战前线与利沃夫为交战区（按整州近似，斜线）。",
+               "control": "停战当日的实际控制：德军仍占领比利时大部、卢森堡、法国阿登，以及布列斯特和约后的波罗的海、白俄罗斯和乌克兰"
+                          "（盖特曼国）；协约国占领奥斯曼的阿拉伯省份；俄国内战各方、高加索三国、斯洛文尼亚人、克罗地亚人和塞尔维亚人"
+                          "国单列。均为按整州、整区的近似。"}),
+    "1934-10-16": dict(
+        bloc_names={"allied": "国际联盟成员国", "axis": "已宣布退出国联（日、德）及满洲国", "neutral": "非国联成员",
+                    "contested": "交战区"},
+        notes={"bloc_title": "国际联盟成员 · 人口",
+               "bloc": "国际联盟成员国（1934 年 9 月苏联、阿富汗、厄瓜多尔加入），属地随宗主国。日本（1933 年 3 月）与德国（1933 年"
+                       " 10 月）已宣布退出，满洲国随日本；美国、巴西、埃及、沙特阿拉伯等不是成员。查科战争前线与阿斯图里亚斯起义为"
+                       "交战区（斜线）。",
+               "control": "东北四省为伪满洲国（按 1928–45 年省界近似）；中华苏维埃共和国的中央苏区与川陕苏区按县近似；萨尔盆地由"
+                          "国际联盟管理。"}),
+}
 NE = RAW / "naturalearth"
 Q = 1000  # coordinate units per degree
 TOL_PROV = 0.008
@@ -72,6 +109,12 @@ COLOR = {
     "40": "#d9776f", "41": "#8f7fbf", "42": "#6fb59a", "90": "#7aa86b", "91": "#b9a0d0", "92": "#5f9fd0",
     "93": "#d8b86a", "94": "#c97f8f", "95": "#8fc49b", "450": "#c58fb0", "678": "#b9875f", "698": "#c7a7a0",
     "850": "#d0855f", "660": "#8fb6c9", "652": "#c6b36b",
+    # 1900-1934
+    "300": "#e0cf8a", "341": "#8c9fc9", "730": "#9cc29a", "563": "#d9a86a", "564": "#c98f5f",
+    "-50": "#8eb2d1", "-60": "#e4dcc0", "-62": "#9fb8cf", "-63": "#c9a0a0", "-64": "#d9a86a", "-65": "#7fb3a8",
+    "-66": "#e3c95d", "-67": "#8f80b8", "-68": "#d8c65f", "-69": "#86a95b", "-70": "#9fbf6f", "-71": "#c2a36a",
+    "-72": "#5f9e8f", "-73": "#a7b884", "-74": "#b98c6f", "-75": "#c4a07f", "-80": "#c4473d", "-40": "#7fa7c9",
+    "-41": "#c8b27a",
 }
 
 
@@ -365,8 +408,24 @@ def main():
     for s in SNAPSHOTS:
         for f in json.load(open(WW2_WORK / f"prov_split_{s[0]}.geojson"))["features"]:
             pgeom[f["properties"]["piece_id"]] = shape(f["geometry"])
-    # the present-day map (modern_2026.py) rides along as a seventh tab
-    snapshots = list(SNAPSHOTS)
+    # the 1900-1934 snapshots, built the same way in work/early; their ids get a prefix
+    early = []
+    if (EARLY / "prov_units.csv").exists():
+        eh = pd.read_csv(EARLY / "prov_units.csv", low_memory=False)
+        eh["unit_id"] = "E:" + eh.unit_id
+        hist = pd.concat([eh, hist], ignore_index=True)
+        hgeom.update({"E:" + f["properties"]["unit_id"]: shape(f["geometry"])
+                      for f in json.load(open(EARLY / "prov_units.geojson"))["features"]})
+        for d, _, _ in SNAPSHOTS_EARLY:
+            df = pd.read_csv(EARLY / f"prov_snapshot_{d}.csv", low_memory=False)
+            df["piece_id"] = "E:" + df.piece_id
+            df["admin_id"] = "E:" + df.admin_id
+            snaps[d] = df
+            pgeom.update({"E:" + f["properties"]["piece_id"]: shape(f["geometry"])
+                          for f in json.load(open(EARLY / f"prov_split_{d}.geojson"))["features"]})
+        early = list(SNAPSHOTS_EARLY)
+    # the present-day map (modern_2026.py) rides along as the last tab
+    snapshots = early + list(SNAPSHOTS)
     modern_ug, modern_meta = {}, {}
     if (MODERN / "prov_snapshot_2026.csv").exists():
         snapshots.append(("2026", "2026 年：当今世界", "The world in 2026"))
@@ -459,6 +518,8 @@ def main():
             first = g.sort_values("area_km2").iloc[-1]
             if modern:
                 zh, en = first.country_zh, first.country_en
+            elif snap in EARLY_DATES and key != "MAN":  # WWII names such as "-1" Allied forces mean other things here
+                zh, en = first.controller_name_zh or first.controller_name_en, first.controller_name_en
             else:
                 zh, en = SPECIAL.get(key, (first.controller_name_zh or first.controller_name_en, first.controller_name_en))
             geom = dissolve([geom_of(p) for p in g.piece_id]) or polys(union([geom_of(p) for p in g.piece_id]))
@@ -492,7 +553,8 @@ def main():
             "admin_active": sorted(set(aidx[a] for a in d.admin_id)), "unit_labels": lab,
             "countries": countries, "country_labels": clabels,
             "cities": cities.y2026(modern_zh) if modern else cities.ww2(snap),
-            "bloc_names": modern_meta.get("bloc_names") if modern else None,
+            "bloc_names": modern_meta.get("bloc_names") if modern else EARLY_META.get(snap, {}).get("bloc_names"),
+            "notes": EARLY_META.get(snap, {}).get("notes"),
             "bloc_pop": {b: int(d[d.bloc == b].population_est.sum()) for b in BLOCS},
             "tier_count": {str(t): int(n) for t, n in hist.set_index("unit_id").loc[sorted(set(d.admin_id))]
                            .tier.value_counts().sort_index().items()},
