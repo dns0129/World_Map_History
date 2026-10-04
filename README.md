@@ -136,6 +136,8 @@ pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas p
 - 1900–2000 部分约 30 分钟；
 - 1900–1945 部分需要 OpenHistoricalMap 全球数据约 1.3 GB，构建约 2 小时。
 
+下载来源都在 GitHub 和 AWS S3 上，只有 1897 年俄国省界来自 heidata.uni-heidelberg.de；在受限网络中构建时，需要把这个域名加入允许列表。
+
 各步骤见 `build_all.sh` 中的注释。
 
 ## 来源与许可
@@ -144,6 +146,7 @@ pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas p
 - **OpenHistoricalMap、Newberry 美国县界史、Natural Earth、K. Lawson 东亚图层：** CC0 或公有领域。
 - **地形：** Mapzen / AWS Terrarium 高程瓦片（SRTM、GMTED2010、ETOPO1 等，见其说明）；地图文字字形取自 OpenMapTiles 字库的 Noto Sans（SIL OFL）。
 - **GHS-POP、geoBoundaries：** CC BY 4.0（2026 年人口用 GHS-POP 2025）。
+- **1897 年俄国省界（Sablin 等，Transcultural Empire GIS，heiDATA doi:10.11588/data/10064）：** CC BY 4.0，用于 1900–1918 年的俄国与芬兰各省。
 - **人口与 GDP 序列：** 联合国 WPP、Gapminder、Maddison Project，许可见各自来源。
 
 完整引用写在两个数据库的 `sources` 表中。本仓库的代码与 `curated/` 整理表为 CC0。

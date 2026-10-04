@@ -13,7 +13,7 @@ finer unit covers, so the result is one partition of the land per date.
                           Korean and Taiwanese provinces; Philippine provinces (1939); Japanese
                           prefectures and French departements of 1939 (present-day outlines of the
                           same units, see FRANCE_1939); OpenHistoricalMap admin_level 4; Indian
-                          princely states (1931)
+                          princely states (1931); provinces of the 1897 Russian census (up to 1918)
   tier 4  region level    OpenHistoricalMap admin_level 3
   tier 5  whole unit      where no subdivision is known: the country, colony or protectorate as
                           drawn by CShapes 2.0 on that date
@@ -38,7 +38,8 @@ import shapefile
 from pyproj import Transformer
 from shapely import STRtree, voronoi_polygons, wkb
 from shapely import transform as shp_transform
-from shapely.geometry import MultiPoint, Point, mapping, shape
+from shapely.affinity import translate
+from shapely.geometry import MultiPoint, Point, box, mapping, shape
 from shapely.ops import unary_union
 
 import topo
@@ -169,6 +170,10 @@ OHM_TIER = {"6": (1, 10), "5": (2, 10), "4": (3, 20), "3": (4, 10)}
 # draws the whole Kingdom of Hungary at level 4 above its counties (vármegye)
 OHM_SKIP = {"Magyar Királyság", "Transleithania"}
 OHM_NAME = {"达里尼 Квантунская Область": ("Kwantung Leased Territory", "关东州")}
+# Drawn at level 4 but above the provinces: the Turkestan governorate-general and the Alash autonomy (1917-20)
+# span several oblasts, which are the first-level divisions (provinces of the 1897 census where
+# OpenHistoricalMap has none)
+OHM_REGION = {"Русский Туркестан", "Алашская автономия"}
 
 
 def ohm():
@@ -186,6 +191,8 @@ def ohm():
         name = t.get("name") or t.get("name:en") or f"OHM relation {o['id']}"
         zh = t.get("name:zh") or t.get("name:zh-Hans") or t.get("name:zh-CN")
         name, zh = OHM_NAME.get(name, (name, zh))
+        if name in OHM_REGION:
+            tier = 4
         out.append(cand(f"OHM-r{o['id']}", name, tier, prio, g,
                         f"OpenHistoricalMap relation {o['id']} (CC0), planet 2026-10-03", "ohm_dated",
                         t.get("border_type") or f"admin_level {lv}", name_zh=zh, name_en=t.get("name:en"),
@@ -335,6 +342,45 @@ def east_asia():
         if p.get("name"):
             out.append(cand(f"IPS-{p['fid']}", p["name"], 3, 30, g, "Indian princely states 1931, traced by "
                             "K. Lawson", "historical_1931", "princely state"))
+    return out
+
+
+# ---------------------------------------------------------------- Russian Empire, provinces of the 1897 census
+
+RU1897 = WW2_RAW / "russia1897" / "1897RussianEmpire.shp"
+RU1897_END = "1918-12-31"  # used up to the end of 1918; the Soviet reorganisation begins after that
+RU1897_SRC = ("Provinces of the 1897 Russian census, outlines traced from A. Ilyin's school atlas of c. 1914 "
+              "(Sablin et al. 2015, Transcultural Empire GIS, heiDATA doi:10.11588/data/10064, CC BY 4.0); used up "
+              "to 1918 where OpenHistoricalMap has no province, so later boundary changes are not shown")
+
+
+def russia_1897(cshapes):
+    """Governorates and oblasts of the 1897 census, and the provinces of Finland the same GIS draws. They come
+    after OpenHistoricalMap at the province level, so they fill only the provinces it lacks. Bukhara and
+    Khiva, drawn whole, are left out: they are protectorates with CShapes units of their own."""
+    names = pd.read_csv(ROOT / "curated" / "russia_1897.csv", dtype=str).fillna("")
+    rows = defaultdict(list)
+    for r in names.itertuples():
+        rows[r.src].append(r)
+    # the atlas borders run a few kilometres off CShapes: keep each province inside the empire
+    empire = union([u["geom"] for u in cshapes if u["gwcode"] == 365 and u["start"] <= RU1897_END
+                    and u["end"] >= "1897-01-28"])
+    # the atlas draws Sakhalin without the south, Japanese from 1905; until then the 1897 unit is the whole island
+    south_sakhalin = union([u["geom"] for u in cshapes if u["country_name"] == "Southern Sakhalin Island"])
+    west, east = box(-180, -90, 180, 90), box(180, -90, 540, 90)
+    out = []
+    shp = shapefile.Reader(str(RU1897), encoding="utf-8")
+    for s, rec in zip(shp.shapes(), shp.records()):
+        if rec["NAMERUS"] not in rows:
+            continue
+        g = polys(fix_rings(shape(s.__geo_interface__)))
+        g = union([inter(g, west), translate(inter(g, east), -360)])  # Chukotka runs past 180 degrees
+        g = polys(inter(g, empire))
+        for r in rows[rec["NAMERUS"]]:
+            geom = polys(union([g, south_sakhalin])) if r.key == "sakhalin" else g
+            out.append(cand(f"RU1897-{r.key}", r.name, 3, 30, geom, RU1897_SRC, "historical_1897", r.kind,
+                            name_zh=r.zh, name_en=r.en, start=r.start or None, end=r.end or RU1897_END,
+                            note=r.note or None))
     return out
 
 
@@ -517,7 +563,10 @@ def parents(units, cands, date):
 
 
 def load_inputs():
-    cands = us_counties() + taiwan() + korea() + burma() + east_asia() + from_present_day() + ohm()
+    arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
+    cshapes = [dict(g["properties"], geom=topo.to_shape(arcs, g)) for g in gs]
+    cands = (us_counties() + taiwan() + korea() + burma() + east_asia() + from_present_day() + ohm()
+             + russia_1897(cshapes))
     for c in cands:
         if not c["geom"].is_valid:
             c["geom"] = polys(fix_rings(c["geom"]))
@@ -528,8 +577,6 @@ def load_inputs():
     rgeom = {f["properties"]["ref_id"]: shape(f["geometry"]) for f in json.load(open(REF_WORK / "ref_units.geojson"))["features"]}
     for r in refs:
         r["geom"] = rgeom[r["ref_id"]]
-    arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
-    cshapes = [dict(g["properties"], geom=topo.to_shape(arcs, g)) for g in gs]
     return cands, refs, cshapes
 
 
