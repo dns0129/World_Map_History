@@ -1,8 +1,9 @@
 """How much of the world has province-level divisions? Share of land and population by tier,
-per snapshot and per political unit. Writes ww2/coverage.csv and ww2/coverage_by_unit.csv."""
+per snapshot and per political unit. Writes ww2/coverage.csv and ww2/coverage_by_unit.csv
+(ww2/coverage_1900_1934.csv and coverage_by_unit_1900_1934.csv with WW2_SET=early)."""
 import pandas as pd
 
-from ww2_common import SNAPSHOTS, WW2_OUT, WW2_WORK
+from ww2_common import SET, SNAPSHOTS, WW2_OUT, WW2_WORK
 
 TIER_ZH = {3: "省级", 4: "大区级", 5: "整个国家/殖民地", 6: "岛屿属地"}
 
@@ -30,8 +31,9 @@ def main():
         u.insert(0, "snapshot", snap)
         by_unit.append(u.sort_values("population_est", ascending=False))
     out = pd.DataFrame(rows)
-    out.to_csv(WW2_OUT / "coverage.csv", index=False)
-    pd.concat(by_unit).to_csv(WW2_OUT / "coverage_by_unit.csv", index=False)
+    sfx = "" if SET == "ww2" else "_1900_1934"
+    out.to_csv(WW2_OUT / f"coverage{sfx}.csv", index=False)
+    pd.concat(by_unit).to_csv(WW2_OUT / f"coverage_by_unit{sfx}.csv", index=False)
     print(out.to_string(index=False))
 
 

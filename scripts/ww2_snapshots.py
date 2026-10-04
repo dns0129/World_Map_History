@@ -35,8 +35,8 @@ from shapely.ops import unary_union
 import topo
 from build_database import Namer
 from common import RAW, WORK, ROOT
-from ww2_territories import ISLAND_UNITS, island_unit
-from ww2_common import SNAPSHOTS, WW2_RAW, WW2_WORK
+from ww2_territories import ALL_ISLANDS, island_unit
+from ww2_common import REF_WORK, RULES, SET, SNAPSHOTS, UNCOVERED, WW2_RAW, WW2_WORK
 from ww2_geo import diff, eq_area_km2, inter, opening, polys, read_geojson, union
 
 LAW = WW2_RAW / "lawson"
@@ -58,7 +58,7 @@ STATE = {255: ("Germany", "德国"), 325: ("Italy", "意大利"), 740: ("Japan",
          -4: ("Free France", "自由法国")}
 
 # Alliance bloc of each controller by snapshot (simplified; neutral otherwise)
-S = [s[0] for s in SNAPSHOTS]
+S = [s[0] for s in SNAPSHOTS] if SET == "ww2" else [""] * 6
 AXIS = {255: S, 325: S[:4] + [], 740: S, 317: S[:5], -12: S[1:5], -10: S,
         310: S[2:5], 360: S[2:5], 355: S[2:5], 375: S[2:5], 800: S[3:5]}
 ALLIED = {200: S, 710: S, -2: S, -1: S, -4: S, 900: S, 20: S, 920: S, 560: S, 750: S, 290: S, 210: S, 211: S, 385: S, 212: S,
@@ -69,8 +69,69 @@ ALLIED = {200: S, 710: S, -2: S, -1: S, -4: S, 900: S, 20: S, 920: S, 560: S, 75
           670: S[5:], 660: S[5:], 652: S[5:], 663: S[5:], 712: S[5:], 360: S[5:], 355: S[5:], 310: [], 375: []}
 CONTESTED = {-20}
 
+# ---- 1900-1934 (WW2_SET=early). Controllers without a state of their own on the date:
+EARLY_STATE = {
+    -1: ("Allied forces", "协约国联军"), -20: ("Contested (fighting)", "交战区（双方争夺）"),
+    -30: ("Tuvan People's Republic", "图瓦人民共和国"), -40: ("League of Nations", "国际联盟"),
+    -41: ("Free City of Danzig", "但泽自由市"), -50: ("Eight-Nation Alliance", "八国联军"),
+    -60: ("Anti-Bolshevik (White) governments", "反布尔什维克政权（白军）"),
+    -62: ("Allied intervention forces", "协约国干涉军"), -63: ("Democratic Republic of Georgia", "格鲁吉亚民主共和国"),
+    -64: ("Republic of Armenia", "亚美尼亚共和国"), -65: ("Azerbaijan Democratic Republic", "阿塞拜疆民主共和国"),
+    -66: ("Ukrainian State (Hetmanate)", "乌克兰国（盖特曼国）"),
+    -67: ("State of Slovenes, Croats and Serbs", "斯洛文尼亚人、克罗地亚人和塞尔维亚人国"),
+    -68: ("West Ukrainian People's Republic", "西乌克兰人民共和国"),
+    -69: ("Arab Government in Damascus", "大马士革阿拉伯政府"), -70: ("Kingdom of Hejaz", "汉志王国"),
+    -71: ("Emirate of Nejd and Hasa", "内志和哈萨酋长国"), -72: ("Constitutional Protection Government (Guangzhou)",
+                                                           "护法军政府（广州）"),
+    -73: ("Outer Mongolia (Bogd Khanate)", "外蒙古（博克多汗国）"), -74: ("Emirate of Bukhara", "布哈拉酋长国"),
+    -75: ("Khanate of Khiva", "希瓦汗国"), -80: ("Chinese Soviet Republic", "中华苏维埃共和国"),
+}
+# States that CShapes does not count as independent on the date but that hold or own land in it
+EARLY_STATE_ON = {"1918-11-11": {300: ("Austria-Hungary", "奥匈帝国"), 345: ("Serbia", "塞尔维亚"),
+                                 341: ("Montenegro", "黑山")}}
+
+
+def names_on(snap):
+    """Controller names for one date: the special codes, then states named for that date only."""
+    return {**STATE, **EARLY_STATE_ON.get(snap, {})} if SET == "early" else STATE
+# Bloc of each controller on each date; colonies follow their sovereign (the controller).
+#   1900  the Eight-Nation Alliance against the Qing court; the provinces of the Southeast Mutual
+#         Protection kept out of the war (their detail names it)
+#   1914  the states at war on 4 August 1914
+#   1918  the Allied and Associated Powers and the Central Powers as they ended the war
+#   1934  members of the League of Nations; Japan and Germany had given notice of withdrawal (1933)
+EARLY_BLOCS = {
+    "1900-08-14": dict(allied={200, 2, 220, 255, 325, 365, 740, 300, -50}, axis={710}),
+    "1914-08-04": dict(allied={200, 220, 365, 345, 211, 20, 900, 920, 560}, axis={255, 300}),
+    "1918-11-11": dict(allied={200, 220, 2, 325, 740, 211, 345, 341, 360, 350, 235, 140, 710, 800, 450, 40, 95, 90, 93,
+                               91, 94, 41, 20, 900, 920, 560, 315, 290, -1, -60, -62, -67, -69, -70, -72},
+                       axis={255, 305, 310, 300, 355, 640, -66}),
+    "1934-10-16": dict(allied={700, 339, 160, 900, 305, 211, 145, 355, 20, 155, 710, 100, 40, 315, 390, 42, 130, 92,
+                               366, 530, 375, 220, 350, 90, 41, 91, 310, 630, 645, 205, 325, 367, 450, 368, 212, 70,
+                               210, 920, 93, 385, 95, 150, 135, 290, 235, 360, 365, 560, 230, 380, 225, 800, 640, 200,
+                               165, 101, 345, -40, -41},
+                       axis={740, 255}),
+}
+
+
+if SET == "early":
+    STATE = EARLY_STATE  # other states take the name the period used (build_database.Namer)
+
+
+def early_bloc(gw, snap, detail):
+    if gw in CONTESTED:
+        return "contested"
+    b = EARLY_BLOCS[snap]
+    if snap == "1900-08-14" and gw == 710 and detail and "Mutual Protection" in detail:
+        return "neutral"
+    if gw == 740 and detail and detail.startswith("Manchukuo"):
+        return "axis"
+    return "allied" if gw in b["allied"] else "axis" if gw in b["axis"] else "neutral"
+
 
 def bloc(gw, snap, detail):
+    if SET == "early":
+        return early_bloc(gw, snap, detail)
     if gw in CONTESTED:
         return "contested"
     if detail and "Vichy" in detail:
@@ -105,9 +166,32 @@ def overlays():
     return occ, meng, ccp, ceded
 
 
+# Before Manchukuo's own provinces (1934-41) are known, its territory is that of these 1928-45 provinces
+MANCHU_ROC = {"Liaoning": ("Fengtian", "奉天"), "Jilin": ("Jilin", "吉林"), "Heilongjiang": ("Heilongjiang", "黑龙江"),
+              "Jehol": ("Rehe", "热河")}
+# Political units whose CShapes status on the date misdescribes them: (date, CShapes name) ->
+# (status, sovereign gw, name en, name zh). Serbia and Montenegro had been freed by 11 November 1918.
+UNIT_FIX = {("1918-11-11", "Serbia"): ("independent", 345, "Serbia", "塞尔维亚"),
+            ("1918-11-11", "Montenegro"): ("independent", 341, "Montenegro", "黑山")}
+
+
 def control_overlay(snap, county, pt, occ, meng, ccp, ceded):
     """East Asia occupation layers; returns (gw, detail_en, detail_zh, type, source, confidence) or None."""
     year = int(snap[:4])
+    if snap < "1937-07-07":
+        if county.get("defacto_parent_kind") == "ROC Manchuria" and snap >= "1932-03-01":
+            name = county.get("defacto_parent")
+            if name == "Jehol" and snap < "1933-03-04":
+                return None
+            en, zh = MANCHU_ROC[name]
+            return (740, f"Manchukuo ({en} Province)", f"伪满洲国（{zh}省）", "client_state", "overlay:manchukuo_roc", "whole")
+        if county.get("defacto_parent_kind") != "leased territory":
+            return None
+        if snap < "1905-09-05":
+            return (365, "Kwantung Leased Territory (Russia, Port Arthur and Dalny)", "关东州（俄国租借地，旅顺、大连）",
+                    "leased_territory", "overlay:kwantung", "whole")
+        return (740, "Kwantung Leased Territory (Japan)", "关东州（日本租借地）", "leased_territory", "overlay:kwantung",
+                "whole")
     if county.get("defacto_parent_kind") == "省 (Manchukuo)" or county.get("defacto_parent_kind") == "leased territory":
         lt = county.get("defacto_parent_kind") == "leased territory"
         if snap == "1945-09-02":
@@ -145,6 +229,8 @@ def rule_match(rule, c):
         return True
     if rule["field"] == "unit":
         return any(m in (c["unit"], c["unit_cs"]) for m in rule["match"].split("|"))
+    if rule["field"] == "hist":  # the historical unit itself, or the province it belongs to
+        return bool(set(rule["match"].split("|")) & set(c.get("hist_names") or ()))
     v = c.get(rule["field"])
     if not isinstance(v, str):
         return False
@@ -192,17 +278,18 @@ def ghs_zonal(pieces):
 def control_for(c, u, uen, uzh, status, sov_gw, sov_en, sov_zh, snap, pt, whole, rules, ov_layers, state_name):
     """De facto controller of one place: CShapes owner, then whole-unit events, East Asian
     occupation layers and the curated rules (last match wins)."""
+    ST = names_on(snap)
     ctrl = dict(gw=sov_gw, en=sov_en, zh=sov_zh, detail=None, detail_zh=None, type=status, source="cshapes", conf="whole")
     e = whole.get((u["country_name"], u["gwcode"]))
     if e is not None:
         gw = int(e.controller_gwcode)
-        ctrl.update(gw=gw, en=STATE.get(gw, (e.controller_name,))[0], zh=STATE.get(gw, (None, e.controller_name_zh))[1],
+        ctrl.update(gw=gw, en=ST.get(gw, (e.controller_name,))[0], zh=ST.get(gw, (None, e.controller_name_zh))[1],
                     detail=e.controller_name, detail_zh=e.controller_name_zh, type=e.control_type,
                     source=f"event:{e.event_id}")
     ov = control_overlay(snap, c, pt, *ov_layers)
     if ov:
         gw, den, dzh, typ, src, conf = ov
-        ctrl.update(gw=gw, en=STATE.get(gw, (den,))[0], zh=STATE.get(gw, (None, dzh))[1], detail=den, detail_zh=dzh,
+        ctrl.update(gw=gw, en=ST.get(gw, (den,))[0], zh=ST.get(gw, (None, dzh))[1], detail=den, detail_zh=dzh,
                     type=typ, source=src, conf=conf)
     cu = dict(c, unit=uen, unit_cs=u["country_name"])
     for k, r in enumerate(rules):
@@ -210,8 +297,8 @@ def control_for(c, u, uen, uzh, status, sov_gw, sov_en, sov_zh, snap, pt, whole,
             continue  # whole-unit rules do not override the East Asian occupation layers
         if snap in r["snapshots"].split("|") and rule_match(r, cu):
             gw = int(r["controller_gwcode"])
-            ctrl.update(gw=gw, en=STATE.get(gw, (r["controller_name"],))[0],
-                        zh=STATE.get(gw, (None, r["controller_name_zh"]))[1], detail=r["controller_name"],
+            ctrl.update(gw=gw, en=ST.get(gw, (r["controller_name"],))[0],
+                        zh=ST.get(gw, (None, r["controller_name_zh"]))[1], detail=r["controller_name"],
                         detail_zh=r["controller_name_zh"], type=r["control_type"], source=f"rule:{k + 2}",
                         conf=r["confidence"])
     if ctrl["en"] is None:
@@ -252,17 +339,17 @@ def main(only=None):
     hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
     hgeom = {f["properties"]["unit_id"]: shape(f["geometry"])
              for f in json.load(open(WW2_WORK / "hist_units.geojson"))["features"]}
-    refs = pd.read_csv(WW2_WORK / "ref_units.csv", low_memory=False).to_dict("records")
-    rgeom = {f["properties"]["ref_id"]: shape(f["geometry"]) for f in json.load(open(WW2_WORK / "ref_units.geojson"))["features"]}
+    refs = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False).to_dict("records")
+    rgeom = {f["properties"]["ref_id"]: shape(f["geometry"]) for f in json.load(open(REF_WORK / "ref_units.geojson"))["features"]}
     for r in refs:
         r["geom"] = rgeom[r["ref_id"]]
         r["pt"] = Point(r["label_lon"], r["label_lat"])
     rtree = STRtree([r["geom"] for r in refs])
-    island_by_id = {v[0]: v for v in ISLAND_UNITS.values()}
+    island_by_id = ALL_ISLANDS
     units = load_units()
     namer = Namer()
     events = pd.read_csv(ROOT / "curated" / "control_events.csv")
-    rules = pd.read_csv(ROOT / "curated" / "ww2_region_control.csv", dtype=str).fillna("").to_dict("records")
+    rules = pd.read_csv(RULES, dtype=str).fillna("").to_dict("records")
     ov_layers = overlays()
     uy = pd.read_csv(WORK / "unit_year.csv")
     targets = pd.read_csv(WORK / "admin1_targets.csv")
@@ -296,7 +383,7 @@ def main(only=None):
             pt = g.representative_point()
             # which political unit(s) of the date the historical unit lies in
             if h["tier"] == 6:
-                iu = island_by_id[int(hid[3:])]
+                iu = island_by_id[int(hid[3:].split("#")[0])]
                 parts = [(("island", iu), None)]
             elif h["tier"] == 5 and h["cshapes_fid"] == h["cshapes_fid"] and int(h["cshapes_fid"]) in fid_index:
                 parts = [(("cs", fid_index[int(h["cshapes_fid"])]), None)]
@@ -304,14 +391,18 @@ def main(only=None):
                 cand = list(tree.query(g, predicate="intersects"))
                 shares = [(i, inter(g, ug[i]).area / max(g.area, 1e-12)) for i in cand]
                 shares = [(i, s_) for i, s_ in shares if s_ >= SPLIT_MIN_SHARE]
-                if len(shares) <= 1 or max(s_ for _, s_ in shares) >= 1 - SPLIT_MIN_SHARE:
+                fb = [i for i, u in enumerate(act) if u["country_name"] == UNCOVERED.get(snap)]
+                if fb and sum(s_ for _, s_ in shares) < 0.5 and ug[fb[0]].distance(g) < 0.5:
+                    parts = [(("cs", fb[0]), None)]  # land CShapes leaves blank on this date
+                elif len(shares) <= 1 or max(s_ for _, s_ in shares) >= 1 - SPLIT_MIN_SHARE:
                     hit = [i for i in cand if ug[i].contains(pt)] or [max(shares, key=lambda t: t[1])[0]] if shares else \
                         ([i for i in cand if ug[i].contains(pt)] or cand or [tree.nearest(pt)])
                     parts = [(("cs", hit[0]), None)]
                 else:
                     parts = [(("cs", i), polys(inter(g, ug[i]))) for i, _ in shares]
                     parts = [(k, p) for k, p in parts if p is not None]
-            kind_flag = "manchukuo" if h["kind"] == "省 (Manchukuo)" else "kwantung" if hid.startswith("KW") else ""
+            kind_flag = "manchukuo" if h["kind"] == "省 (Manchukuo)" else "kwantung" if hid.startswith("KW") else \
+                "manchu_roc" if hid.startswith("ROC-") and h["name"] in MANCHU_ROC else ""
             for (ptype, ref_u), gp in parts:
                 gpart = gp if gp is not None else g
                 if ptype == "island":
@@ -323,14 +414,19 @@ def main(only=None):
                     status = u["status"]
                     uen, uzh = namer(u["country_name"], status, year)
                     sov_gw = u["gwcode"] if status == "independent" else int(u["owner"])
-                sov_en, sov_zh = STATE.get(sov_gw) or state_name.get(str(sov_gw)) or (None, None)
+                    fix = UNIT_FIX.get((snap, u["country_name"]))
+                    if fix:
+                        status, sov_gw, uen, uzh = fix
+                sov_en, sov_zh = names_on(snap).get(sov_gw) or state_name.get(str(sov_gw)) or (None, None)
 
                 def ctrl_of(r, u=u, uen=uen, uzh=uzh, status=status, sov_gw=sov_gw, sov_en=sov_en, sov_zh=sov_zh,
                             gpart=gpart):
-                    key = (r["ref_id"], u["fid"], kind_flag and hid)
+                    key = (r["ref_id"], u["fid"], hid if SET == "early" else (kind_flag and hid))
                     if key not in cache:
-                        c = dict(r, defacto_parent_kind={"manchukuo": "省 (Manchukuo)", "kwantung": "leased territory"}
-                                 .get(kind_flag), defacto_parent=h["name"], defacto_parent_zh=h["name_zh"])
+                        c = dict(r, defacto_parent_kind={"manchukuo": "省 (Manchukuo)", "kwantung": "leased territory",
+                                                         "manchu_roc": "ROC Manchuria"}.get(kind_flag),
+                                 defacto_parent=h["name"], defacto_parent_zh=h["name_zh"],
+                                 hist_names=[h["name"], h.get("parent"), h.get("grandparent")])
                         p = r["pt"] if gpart.contains(r["pt"]) else inter(r["geom"], gpart).representative_point()
                         cache[key] = control_for(c, u, uen, uzh, status, sov_gw, sov_en, sov_zh, snap, p, whole, rules,
                                                  ov_layers, state_name)
@@ -378,7 +474,7 @@ def main(only=None):
         for r in cur:
             if r["admin_id"].startswith("AHCB-") and r["_parent"] in state_code:
                 us_state_base[r["_parent"]] += r["pop_base_1975"]
-        island_pop = {v[0]: v[5] for v in ISLAND_UNITS.values()}
+        island_pop = {v[0]: v[5] for v in ALL_ISLANDS.values()}
         for r in cur:
             stc = state_code.get(r["_parent"]) if r["admin_id"].startswith("AHCB-") else None
             if stc in st and us_state_base[r["_parent"]] > 0:

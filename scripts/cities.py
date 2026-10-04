@@ -5,6 +5,9 @@ industrial cities and ports.
              a city was the seat of which government ("*" = all six), so Paris is France's
              capital in 1939 and 1945 but not under occupation, Vichy from 1940 to 1944,
              Chongqing throughout the war.
+  1900-1934  curated/cities_1900_1934.csv, the same columns plus `dates`: the snapshots a row
+             is shown on, so a renamed city has one row per name (St Petersburg, Petrograd,
+             Leningrad).
   2026       the national capitals of Natural Earth populated places, plus
              curated/cities_2026.csv (major industrial cities and ports).
 
@@ -23,6 +26,7 @@ from ww2_geo import norm
 
 CODE = {"1939-09-01": "39", "1940-07-01": "40", "1941-12-07": "41", "1942-11-01": "42", "1944-06-06": "44",
         "1945-09-02": "45"}
+EARLY_CODE = {"1900-08-14": "00", "1914-08-04": "14", "1918-11-11": "18", "1934-10-16": "34"}
 KIND_FLAG = {"I": 4, "P": 8, "C": 16}
 NAME_FIX = {"Washington,  D.C.": "华盛顿", "Washington, D.C.": "华盛顿"}
 NOTE_2026 = {"Jerusalem": "以色列宣布的首都，其地位未获国际社会普遍承认",
@@ -63,9 +67,12 @@ def roles(s, code):
 
 
 def ww2(snap):
-    code = CODE[snap]
+    early = snap in EARLY_CODE
+    code = EARLY_CODE[snap] if early else CODE[snap]
     out = []
-    for r in csv.DictReader(open(ROOT / "curated" / "ww2_cities.csv")):
+    for r in csv.DictReader(open(ROOT / "curated" / ("cities_1900_1934.csv" if early else "ww2_cities.csv"))):
+        if early and r["dates"] != "*" and code not in r["dates"].split():
+            continue
         cap, seat = roles(r["capital"], code), roles(r["seat"], code)
         flags = sum(KIND_FLAG[k] for k in r["kinds"])
         if cap:

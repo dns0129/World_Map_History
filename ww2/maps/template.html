@@ -1,4 +1,4 @@
-<title>世界省级战局图 1939–1945</title>
+<title>世界省级战局图 1900–1945</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&display=swap">
@@ -146,8 +146,8 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 <div class="app">
   <header class="bar">
     <div class="brand">
-      <h1>世界省级战局图 1939–1945</h1>
-      <small>1939–1945 六个断面与 2026 年 · 省级区划 · 阵营、国家与实际控制区 · 重要城市</small>
+      <h1>世界省级战局图 1900–1945</h1>
+      <small>1900–1945 十个断面与 2026 年 · 省级区划 · 阵营、国家与实际控制区 · 重要城市</small>
     </div>
     <nav class="tabs" id="tabs" role="tablist" aria-label="时间断面"></nav>
   </header>
@@ -225,7 +225,8 @@ const TYPE_ZH = {
   collaborationist_state: "合作政权（维希）", allied_occupation: "盟军占领", front_line: "前线争夺", besieged: "被围",
   resistance_base: "抗日根据地", leased_territory: "租借地", surrendering_forces: "待受降", defense_agreement: "按防务协定驻军",
   free_french: "自由法国", satellite_state: "卫星国", liberated: "已解放", military_intervention: "军事干预",
-  dependency: "属地", control: "实际控制", de_facto_state: "未获普遍承认的政权", "N/A": "—"
+  dependency: "属地", control: "实际控制", de_facto_state: "自立政权 / 未获普遍承认的政权", contested: "交战区",
+  international_administration: "国际管理", "N/A": "—"
 };
 const TIER = { 3: ["省级", "#3f9a83"], 4: ["大区级（无省级资料）", "#a9d2bd"], 5: ["整个国家 / 殖民地（无下级资料）", "#d8cfbd"], 6: ["岛屿属地", "#e2b65b"] };
 const BASIS_ZH = {
@@ -235,7 +236,9 @@ const BASIS_ZH = {
   historical_1928_1945: "历史界线（1928–1945）", reconstructed_1914_1926: "据 1914–26 年地点资料重建",
   present_day_outline_same_unit: "当时的单位，轮廓取自今日数据（界线基本未变）", historical_unit: "当日的国家 / 殖民地轮廓",
   merged_subunits: "由当时的下级区划合并而成（外界即这些区划的历史界线）",
-  present_day_admin1: "当今一级行政区（Natural Earth 1:1000 万，约 2020 年前后的划分）"
+  present_day_admin1: "当今一级行政区（Natural Earth 1:1000 万，约 2020 年前后的划分）",
+  reconstructed_from_1928_outlines: "据 1928–45 年省界复原（合并或拆分为当时的省份）",
+  historical_1941_outline: "1941 年的界线，按 1930 年代的归属分组"
 };
 const DENSITY_STEPS = [5, 25, 50, 100, 250, 500];
 const DENSITY_RAMP = ["#e8f0fa", "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95"];
@@ -498,16 +501,16 @@ function legend() {
   };
   const note = $("legendNote"); note.hidden = false;
   if (state.mode === "bloc") {
-    $("legendTitle").textContent = isModern(sd) ? "军事同盟 · 人口" : "实际控制阵营 · 人口";
+    $("legendTitle").textContent = sd.notes?.bloc_title || (isModern(sd) ? "军事同盟 · 人口" : "实际控制阵营 · 人口");
     const total = Object.values(sd.bloc_pop).reduce((a, b) => a + b, 0);
     for (const k of ["allied", "axis", "contested", "neutral"]) {
       const p = sd.bloc_pop[k] || 0; row(BLOC_COLOR[k], blocName(sd, k), `${fmt(p)} · ${(100 * p / total).toFixed(1)}%`);
       const seg = el("span"); seg.style.background = BLOC_COLOR[k]; seg.style.width = (100 * p / total) + "%"; sp.append(seg);
     }
     sp.hidden = false;
-    note.textContent = isModern(sd)
+    note.textContent = sd.notes?.bloc || (isModern(sd)
       ? "按实际控制者所属的同盟着色：北约 32 国，集体安全条约组织 6 国（亚美尼亚 2024 年起冻结参与）。斜线 = 按整州近似的控制范围。"
-      : "粗线为当日的国界 / 殖民地界（法理）。斜线 = 近似界定（按整区分配，或沿用临近年份的占领范围）。";
+      : "粗线为当日的国界 / 殖民地界（法理）。斜线 = 近似界定（按整区分配，或沿用临近年份的占领范围）。");
   } else if (state.mode === "nation") {
     $("legendTitle").textContent = "各国的法理领土 · 人口";
     for (const [i, nt] of sd.nations.slice(0, 16).entries()) {
@@ -524,9 +527,9 @@ function legend() {
     const ci20 = sd.countries.findIndex((c) => c[0] === "-20");
     if (ci20 >= 0) { const c = country(sd, ci20); row(c.color, c.zh, fmt(c.pop), () => selectCountry(ci20, true), true); }
     const rest = sd.countries.length - shown.length - (ci20 >= 0 ? 1 : 0);
-    note.textContent = (isModern(sd)
+    note.textContent = (sd.notes?.control || (isModern(sd)
       ? "克里米亚、塞瓦斯托波尔、卢甘斯克由俄罗斯控制，顿涅茨克、扎波罗热、赫尔松为交战前线（均按整州近似）；德涅斯特河沿岸、阿布哈兹、南奥塞梯、北塞浦路斯、索马里兰为未获普遍承认的政权。一国内部的内战（苏丹、缅甸、也门等）未分区表示。"
-      : "占领区算作占领国，傀儡政权单列。") + `${rest > 0 ? `另有 ${rest} 个国家未列出，` : ""}点击图例或地图选中国家。`;
+      : "占领区算作占领国，傀儡政权单列。")) + `${rest > 0 ? `另有 ${rest} 个国家未列出，` : ""}点击图例或地图选中国家。`;
   } else if (state.mode === "tier") {
     $("legendTitle").textContent = "当日区划资料的层级 · 单位数";
     for (const t of [3, 4, 5, 6]) { const n = sd.tier_count[String(t)]; if (n) row(TIER[t][1], TIER[t][0], n.toLocaleString()); }

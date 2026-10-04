@@ -31,6 +31,7 @@ and prov_split_<date>.geojson (same columns as the county-level files).
 import argparse
 import hashlib
 import json
+import multiprocessing
 import re
 import sqlite3
 from collections import Counter, defaultdict
@@ -85,11 +86,13 @@ ZH = {
     "Virginia": "弗吉尼亚州", "Washington": "华盛顿州", "West Virginia": "西弗吉尼亚州", "Wisconsin": "威斯康星州",
     "Wyoming": "怀俄明州",
 }
+# Provinces known only under a later name: name -> (date of the new name, earlier name, earlier zh)
+RENAMED_BEFORE = {"Federated Shan States": ("1922-10-01", "Shan States", "掸邦（南、北掸邦）")}
 # Layers that divide their whole country into provinces: a stray OpenHistoricalMap unit with no
 # ancestor inside such a country is one of their counties, not a province of its own
 COMPLETE = {"AHCB", "KR1914", "TW1930", "MM1931"}
 KIND = {"AHCB": "state / territory", "KR1914": "道", "TW1930": "州/庁", "MM1931": "division / states",
-        "FIC": "protectorate / colony", "DEI": "gouvernement"}
+        "FIC": "protectorate / colony", "DEI": "gouvernement", "DEI26": "gouvernement"}
 
 UNIT_COLS = ["unit_id", "name", "name_zh", "name_en", "tier", "tier_zh", "tier_en", "kind", "basis", "source", "note",
              "start", "end", "partial", "parent", "parent_zh", "grandparent", "ohm_level", "wikidata", "cshapes_fid",
@@ -326,7 +329,11 @@ def groups_for(date, hist, ugeom, rows, resolve):
             groups.append(dict(anchor=kids[0][0] if only_self else None, members=[h["unit_id"] for h, _, _ in kids],
                                name=name, name_zh=ZH.get(name) or (zhs.most_common(1)[0][0] if zhs else None),
                                self=only_self, src=Counter(src_of(h["unit_id"]) for h, _, _ in kids).most_common(1)[0][0]))
-    return [g for i, g in enumerate(groups) if i not in dead]
+    out = [g for i, g in enumerate(groups) if i not in dead]
+    for g in out:
+        if g["name"] in RENAMED_BEFORE and date < RENAMED_BEFORE[g["name"]][0]:
+            g["name"], g["name_zh"] = RENAMED_BEFORE[g["name"]][1:]
+    return out
 
 
 def absorb_orphans(groups, ugeom, rows, hist_tier):
@@ -414,6 +421,58 @@ def pieces_for(g, rows, ugeom, pgeom):
 
 # ---------------------------------------------------------------- main
 
+G = {}  # inputs shared with the worker processes
+
+
+def one_date(date):
+    """Province groups of one date: [(province id, record, outline, [(piece row, piece outline)])]."""
+    hist, ugeom, snaps, pgeom, hrow = G["hist"], G["ugeom"], G["snaps"], G["pgeom"], G["hrow"]
+    rows = snaps[date]
+    groups = groups_for(date, hist, ugeom, rows, G["resolve"])
+    groups = absorb_orphans(groups, ugeom, rows, G["hist_tier"])
+    ids = Counter()
+    out = []
+    for g in sorted(groups, key=lambda g: (g["name"], ugeom[g["members"][0]].centroid.x)):
+        a = g["anchor"]
+        if a is not None:
+            pid = base_id(a["unit_id"])
+        else:
+            slug = re.sub(r"[^a-z0-9]+", "-", (g["name"] or "").lower()).strip("-") or \
+                hashlib.md5(g["name"].encode()).hexdigest()[:8]
+            pid = f"PROV-{slug}"
+        ids[pid] += 1
+        if ids[pid] > 1:
+            pid += f"-{ids[pid]}"
+        kids = [m for m in g["members"] if a is None or m != a["unit_id"]]
+        geom = merged([ugeom[m] for m in g["members"]]) if kids else ugeom[g["members"][0]]
+        if a is not None:
+            rec = {c: nn(a.get(c)) for c in UNIT_COLS if c in a}
+            if pid.startswith("PH1939"):
+                rec["name"] = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", rec["name"])
+            if kids:
+                rec.update(partial=0)
+        else:
+            first = hrow[g["members"][0]]
+            rec = dict(name=g["name"], name_zh=g["name_zh"], name_en=g["name"] if g.get("src") == "AHCB" else None,
+                       tier=3, kind=KIND.get(g.get("src")) or nn(first.get("kind")), start=None, end=None, partial=0,
+                       parent=None, parent_zh=None, grandparent=None, ohm_level=None, wikidata=None, cshapes_fid=None,
+                       note=None)
+        if kids and rec["tier"] >= 5:
+            rec.update(merged_units=len(kids))  # a whole country or territory that took in a few towns
+        elif kids:
+            srcs = Counter(hrow[m]["source"] for m in g["members"])
+            rec.update(basis="merged_subunits", merged_units=len(kids),
+                       source=f"Union of {len(kids)} subdivisions in force on the date; outlines from: "
+                              + "; ".join(s for s, _ in srcs.most_common(3)))
+        else:
+            rec.update(merged_units=0)
+        if rec["tier"] in (1, 2):
+            rec["tier"] = 3
+        out.append((pid, rec, geom, pieces_for(g, rows, ugeom, pgeom)))
+    print(date, "done", flush=True)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--county-db", help="county-level database to read when work/ww2 has no county-level files")
@@ -429,56 +488,20 @@ def main():
     hist_tier = dict(zip(hist.unit_id, hist.tier))
     resolve = Resolver(hist)
 
+    G.update(hist=hist, ugeom=ugeom, snaps=snaps, pgeom=pgeom, hrow=hrow, hist_tier=hist_tier, resolve=resolve)
+    with multiprocessing.get_context("fork").Pool(min(len(DATES), 4)) as pool:
+        results = pool.map(one_date, DATES)  # dates are independent; the workers share G by fork
     final = {}       # (prov_id, geom hash) -> unit record
     piece_rows = []  # (date, prov key, row, geom)
-    for date in DATES:
-        rows = snaps[date]
-        groups = groups_for(date, hist, ugeom, rows, resolve)
-        groups = absorb_orphans(groups, ugeom, rows, hist_tier)
-        ids = Counter()
-        for g in sorted(groups, key=lambda g: (g["name"], ugeom[g["members"][0]].centroid.x)):
-            a = g["anchor"]
-            if a is not None:
-                pid = base_id(a["unit_id"])
-            else:
-                slug = re.sub(r"[^a-z0-9]+", "-", (g["name"] or "").lower()).strip("-") or \
-                    hashlib.md5(g["name"].encode()).hexdigest()[:8]
-                pid = f"PROV-{slug}"
-            ids[pid] += 1
-            if ids[pid] > 1:
-                pid += f"-{ids[pid]}"
-            kids = [m for m in g["members"] if a is None or m != a["unit_id"]]
-            geom = merged([ugeom[m] for m in g["members"]]) if kids else ugeom[g["members"][0]]
-            if a is not None:
-                rec = {c: nn(a.get(c)) for c in UNIT_COLS if c in a}
-                if pid.startswith("PH1939"):
-                    rec["name"] = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", rec["name"])
-                if kids:
-                    rec.update(partial=0)
-            else:
-                first = hrow[g["members"][0]]
-                rec = dict(name=g["name"], name_zh=g["name_zh"], name_en=g["name"] if g.get("src") == "AHCB" else None,
-                           tier=3, kind=KIND.get(g.get("src")) or nn(first.get("kind")), start=None, end=None, partial=0,
-                           parent=None, parent_zh=None, grandparent=None, ohm_level=None, wikidata=None, cshapes_fid=None,
-                           note=None)
-            if kids and rec["tier"] >= 5:
-                rec.update(merged_units=len(kids))  # a whole country or territory that took in a few towns
-            elif kids:
-                srcs = Counter(hrow[m]["source"] for m in g["members"])
-                rec.update(basis="merged_subunits", merged_units=len(kids),
-                           source=f"Union of {len(kids)} subdivisions in force on the date; outlines from: "
-                                  + "; ".join(s for s, _ in srcs.most_common(3)))
-            else:
-                rec.update(merged_units=0)
-            if rec["tier"] in (1, 2):
-                rec["tier"] = 3
+    for date, provs in zip(DATES, results):
+        for pid, rec, geom, pcs in provs:
             h = hashlib.md5(shapely.to_wkb(geom)).hexdigest()[:8]
             k = (pid, h)
             if k in final:
                 final[k]["dates"].append(date)
             else:
                 final[k] = dict(rec, uid=pid, geom=geom, dates=[date])
-            for top, pg in pieces_for(g, rows, ugeom, pgeom):
+            for top, pg in pcs:
                 piece_rows.append((date, k, top, pg))
         n = Counter(int(final[k]["tier"]) for k in {pr[1] for pr in piece_rows if pr[0] == date})
         print(date, "provinces:", sum(n.values()), dict(sorted(n.items())), flush=True)

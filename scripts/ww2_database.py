@@ -1,4 +1,5 @@
-"""SQLite database of historical province-level divisions and de facto control, 1939-1945.
+"""SQLite database of historical province-level divisions and de facto control, for one set of
+snapshots (1939-1945, or 1900-1934 with WW2_SET=early; see ww2_common.py).
 
 Only divisions in force at the time are stored (see ww2_histunits.py), dissolved to the
 province level (ww2_provinces.py). Geometry is GeoJSON text (EPSG:4326), simplified for
@@ -13,7 +14,7 @@ import pandas as pd
 from shapely.geometry import mapping, shape
 
 from common import ROOT
-from ww2_common import SNAPSHOTS, WW2_DB, WW2_WORK
+from ww2_common import RULES, SET, SNAPSHOTS, WW2_DB, WW2_WORK
 
 TOL = 0.006  # degrees (~600 m) for stored geometry
 ND = 3  # decimals kept (~110 m)
@@ -49,7 +50,7 @@ SOURCES = [
     ("ghspop", "GHS-POP R2023A", "European Commission JRC (2023).", "https://human-settlement.emergency.copernicus.eu/",
      "CC BY 4.0", "Spatial pattern for population estimates (1975 grid)"),
     ("curated", "Curated control rules", "Compiled for this database from standard histories of the war "
-     "(curated/ww2_region_control.csv, curated/control_events.csv).", "curated/", "CC0",
+     f"(curated/{RULES.name}, curated/control_events.csv).", "curated/", "CC0",
      "De facto control on each snapshot date"),
 ]
 
@@ -128,7 +129,8 @@ def main():
              for f in json.load(open(WW2_WORK / "prov_units.geojson"))["features"]}
 
     meta = {
-        "title": "Historical province-level divisions and de facto control, 1939-1945",
+        "title": "Historical province-level divisions and de facto control, "
+                 + ("1900-1934" if SET == "early" else "1939-1945"),
         "snapshots": ";".join(s[0] for s in SNAPSHOTS),
         "crs": "EPSG:4326", "geometry": f"GeoJSON text simplified at {TOL} deg, coordinates rounded to {ND} decimals",
         "main_view": "snapshot_full (one row per piece and snapshot, all attributes)",
@@ -184,7 +186,7 @@ def main():
     df["piece_key"] = df.piece_id.map(pkey)
     df[["snapshot", "piece_key", "unit_id", "control_id", "control_split", "area_km2", "population_est",
         "pop_method_id"]].to_sql("piece_snapshot", con, if_exists="append", index=False)
-    rules = pd.read_csv(ROOT / "curated" / "ww2_region_control.csv")
+    rules = pd.read_csv(RULES)
     rules.insert(0, "row", range(2, len(rules) + 2))
     rules.to_sql("control_rules", con, if_exists="append", index=False)
     pd.read_csv(ROOT / "curated" / "control_events.csv").to_sql("control_events", con, if_exists="append", index=False)
