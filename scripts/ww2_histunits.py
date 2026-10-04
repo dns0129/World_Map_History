@@ -448,11 +448,11 @@ def share_out(g, targets, step=0.1):
     parts = defaultdict(list)
     x0, y0, x1, y1 = g.bounds
     for y in np.arange(y0, y1, step):
-        row = clip_by_rect(g, x0, y, x1, y + step)
-        if row.is_empty:
+        row = polys(fix_rings(clip_by_rect(g, x0, y, x1, y + step)))  # clipping can leave degenerate rings
+        if row is None:
             continue
         for x in np.arange(x0, x1, step):
-            cell = polys(clip_by_rect(row, x, y, x + step, y + step))
+            cell = polys(inter(row, box(x, y, x + step, y + step)))
             if cell is not None:
                 parts[int(tree.nearest(cell.representative_point()))].append(cell)
     return {k: union(v) for k, v in parts.items()}
