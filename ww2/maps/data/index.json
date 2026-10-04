@@ -1,6 +1,90 @@
 {
  "snapshots": [
   {
+   "snapshot": "1900-08-14",
+   "title_zh": "八国联军攻入北京",
+   "title_en": "The Eight-Nation Alliance enters Beijing",
+   "pieces": 1128,
+   "admin_units": 1029,
+   "countries": 53,
+   "population": 1559242551,
+   "bloc_pop": {
+    "allied": 910955345,
+    "axis": 158348279,
+    "neutral": 479327123,
+    "contested": 10611804
+   },
+   "tier_count": {
+    "3": 881,
+    "4": 23,
+    "5": 112,
+    "6": 13
+   }
+  },
+  {
+   "snapshot": "1914-08-04",
+   "title_zh": "英国对德宣战，第一次世界大战全面爆发",
+   "title_en": "Britain declares war on Germany",
+   "pieces": 1181,
+   "admin_units": 1085,
+   "countries": 56,
+   "population": 1779416056,
+   "bloc_pop": {
+    "allied": 726727145,
+    "axis": 134124322,
+    "neutral": 918564589,
+    "contested": 0
+   },
+   "tier_count": {
+    "3": 947,
+    "4": 22,
+    "5": 103,
+    "6": 13
+   }
+  },
+  {
+   "snapshot": "1918-11-11",
+   "title_zh": "贡比涅停战协定生效，第一次世界大战结束",
+   "title_en": "The Armistice of Compiègne",
+   "pieces": 1358,
+   "admin_units": 1143,
+   "countries": 74,
+   "population": 1790910179,
+   "bloc_pop": {
+    "allied": 1398352153,
+    "axis": 143699210,
+    "neutral": 240000454,
+    "contested": 8858362
+   },
+   "tier_count": {
+    "3": 999,
+    "4": 21,
+    "5": 110,
+    "6": 13
+   }
+  },
+  {
+   "snapshot": "1934-10-16",
+   "title_zh": "中央红军开始长征",
+   "title_en": "The Long March begins",
+   "pieces": 1286,
+   "admin_units": 1170,
+   "countries": 75,
+   "population": 2114562304,
+   "bloc_pop": {
+    "allied": 1683102714,
+    "axis": 216949548,
+    "neutral": 213775998,
+    "contested": 734044
+   },
+   "tier_count": {
+    "3": 1023,
+    "4": 19,
+    "5": 116,
+    "6": 12
+   }
+  },
+  {
    "snapshot": "1939-09-01",
    "title_zh": "德国入侵波兰，第二次世界大战在欧洲爆发",
    "title_en": "Germany invades Poland",
