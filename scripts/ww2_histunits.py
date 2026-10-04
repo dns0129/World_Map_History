@@ -356,8 +356,9 @@ RU1897_SRC = ("Provinces of the 1897 Russian census, outlines traced from A. Ily
 
 def russia_1897(cshapes):
     """Governorates and oblasts of the 1897 census, and the provinces of Finland the same GIS draws. They come
-    after OpenHistoricalMap at the province level, so they fill only the provinces it lacks. Bukhara and
-    Khiva, drawn whole, are left out: they are protectorates with CShapes units of their own."""
+    after OpenHistoricalMap at the province level, so they fill the provinces it lacks, and where it has the
+    province the 1897 outline only adds the land it leaves out (see carve). Bukhara and Khiva, drawn whole,
+    are left out: they are protectorates with CShapes units of their own."""
     names = pd.read_csv(ROOT / "curated" / "russia_1897.csv", dtype=str).fillna("")
     rows = defaultdict(list)
     for r in names.itertuples():
@@ -380,7 +381,7 @@ def russia_1897(cshapes):
             geom = polys(union([g, south_sakhalin])) if r.key == "sakhalin" else g
             out.append(cand(f"RU1897-{r.key}", r.name, 3, 30, geom, RU1897_SRC, "historical_1897", r.kind,
                             name_zh=r.zh, name_en=r.en, start=r.start or None, end=r.end or RU1897_END,
-                            note=r.note or None))
+                            note=r.note or None, fill_rest=True))
     return out
 
 
@@ -453,12 +454,22 @@ def carve(cands, date):
         kept = {}
         for i, c in enumerate(cs):
             g = c["geom"]
-            same = clip_to([kept[j] for j in ctree.query(g, predicate="intersects") if j in kept], g.bounds)
+            hits = [int(j) for j in ctree.query(g, predicate="intersects") if j in kept]
+            same = clip_to([kept[j] for j in hits], g.bounds)
             carved = False
             if same:
                 ov = sum(inter(g, s).area for s in same)
                 if ov > 0.5 * g.area:
-                    continue  # another version of the same unit, or an overlapping duplicate
+                    if not c.get("fill_rest"):
+                        continue  # another version of the same unit, or an overlapping duplicate
+                    # a source that only fills in (the 1897 Russian provinces): what the other outline
+                    # leaves of this province stays, under that unit's name when both draw one province
+                    # (similar areas), so that the two parts become one province
+                    dup = cs[max(hits, key=lambda j: inter(g, kept[j]).area)]
+                    if 2 / 3 <= dup["area_km2"] / c["area_km2"] <= 1.5:
+                        c = dict(c, uid=c["uid"] + "-rest", name=dup["name"], name_zh=dup.get("name_zh"),
+                                 name_en=dup.get("name_en"), note=f"land the outline of {c['name']} in the 1897 "
+                                 f"census GIS adds to {dup['name']} ({dup['source']})")
                 g = diff(g, union(same))
                 carved = True
             if ftree is not None:
