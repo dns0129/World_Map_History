@@ -508,7 +508,8 @@ def main():
                      for u, r in d.drop_duplicates("unit_id").set_index("unit_id", drop=False).iterrows()}
         nat = nat.sort_values("pop", ascending=False)
         nidx = {u: i for i, u in enumerate(nat.index)}
-        nations = [[int(u), r.zh or r.en, r.en, nat_color[u], r.status, r.sov, int(r["pop"]), round(float(r.km2))]
+        nations = [[int(u), r.zh or r.en, r.en, nat_color[u], r.status, r.sov if isinstance(r.sov, str) else None,
+                    int(r["pop"]), round(float(r.km2))]
                    for u, r in nat.iterrows()]
 
         # countries of the control view: dissolved territory, colour, curved name lines
@@ -519,7 +520,9 @@ def main():
             if modern:
                 zh, en = first.country_zh, first.country_en
             elif snap in EARLY_DATES and key != "MAN":  # WWII names such as "-1" Allied forces mean other things here
-                zh, en = first.controller_name_zh or first.controller_name_en, first.controller_name_en
+                home = g[g.unit_gwcode == g.controller_gwcode]  # a state is named after its own territory
+                nm = home.sort_values("area_km2").iloc[-1] if len(home) else first
+                zh, en = nm.controller_name_zh or nm.controller_name_en, nm.controller_name_en
             else:
                 zh, en = SPECIAL.get(key, (first.controller_name_zh or first.controller_name_en, first.controller_name_en))
             geom = dissolve([geom_of(p) for p in g.piece_id]) or polys(union([geom_of(p) for p in g.piece_id]))

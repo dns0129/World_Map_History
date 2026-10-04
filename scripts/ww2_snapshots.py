@@ -392,7 +392,13 @@ def main(only=None):
                 shares = [(i, inter(g, ug[i]).area / max(g.area, 1e-12)) for i in cand]
                 shares = [(i, s_) for i, s_ in shares if s_ >= SPLIT_MIN_SHARE]
                 fb = [i for i, u in enumerate(act) if u["country_name"] == UNCOVERED.get(snap)]
-                if fb and sum(s_ for _, s_ in shares) < 0.5 and ug[fb[0]].distance(g) < 0.5:
+                isl = None
+                if not shares and SET == "early":  # land CShapes does not draw: a known territory (Greenland)?
+                    isl = next((iu for k in rtree.query(pt) if refs[k]["geom"].contains(pt)
+                                for iu in [island_unit(refs[k], snap)] if iu), None)
+                if isl:
+                    parts = [(("island", isl), None)]
+                elif fb and sum(s_ for _, s_ in shares) < 0.5 and ug[fb[0]].distance(g) < 0.5:
                     parts = [(("cs", fb[0]), None)]  # land CShapes leaves blank on this date
                 elif len(shares) <= 1 or max(s_ for _, s_ in shares) >= 1 - SPLIT_MIN_SHARE:
                     hit = [i for i in cand if ug[i].contains(pt)] or [max(shares, key=lambda t: t[1])[0]] if shares else \
