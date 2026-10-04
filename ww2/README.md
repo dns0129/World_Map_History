@@ -319,7 +319,7 @@ SELECT snapshot, bloc, SUM(population_est) FROM snapshot_full GROUP BY snapshot,
 - OpenHistoricalMap、Newberry AHCB、K. Lawson 描绘图层：CC0；
 - 中研院台湾历史图层：CC BY-NC-SA 4.0；
 - 国史编纂委员会：KOGL；
-- ENP-China、geoBoundaries、GHS-POP：CC BY 4.0；
+- ENP-China、geoBoundaries、GHS-POP、1897 年俄国省界（Transcultural Empire GIS）：CC BY 4.0；
 - Natural Earth（河流湖泊、2026 年行政区划与城市）：公有领域；
 - Terrarium 高程瓦片（地形底图）：SRTM、GMTED2010、ETOPO1 等公开数据，见 Mapzen terrain tiles 说明；
 - Noto Sans 字形（OpenMapTiles 字库）：SIL Open Font License；
