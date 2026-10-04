@@ -508,6 +508,7 @@ def carve(cands, date):
                     for k, part in share_out(g, [accepted[k]["geom"] for k in fill]).items():
                         a = accepted[fill[k]]
                         a["geom"] = polys(union([a["geom"], part]))
+                    kept[i] = g  # still carved out of the regions laid down after it (Bukhara)
                     continue
             kept[i] = g
             accepted.append(dict(c, geom=g, partial=km2 < 0.97 * c["area_km2"]))
@@ -633,7 +634,8 @@ def write(per_date):
     for date, allu in per_date:
         for u in allu:
             h = hashlib.md5(wkb.dumps(u["geom"])).hexdigest()[:8]
-            key = (u["uid"], h)
+            # a unit whose parent changes between dates (a county of a province that ends) is a new version
+            key = (u["uid"], h, u.get("parent"), u.get("grandparent"))
             if key in final:
                 final[key]["dates"].append(date)
             else:
