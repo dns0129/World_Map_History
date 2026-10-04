@@ -36,7 +36,7 @@ import numpy as np
 import pandas as pd
 import shapefile
 from pyproj import Transformer
-from shapely import STRtree, clip_by_rect, voronoi_polygons, wkb
+from shapely import STRtree, voronoi_polygons, wkb
 from shapely import transform as shp_transform
 from shapely.affinity import translate
 from shapely.geometry import MultiPoint, Point, box, mapping, shape
@@ -448,7 +448,7 @@ def share_out(g, targets, step=0.1):
     parts = defaultdict(list)
     x0, y0, x1, y1 = g.bounds
     for y in np.arange(y0, y1, step):
-        row = polys(fix_rings(clip_by_rect(g, x0, y, x1, y + step)))  # clipping can leave degenerate rings
+        row = polys(inter(g, box(x0, y, x1, y + step)))  # robust: clip_by_rect can fail on degenerate rings
         if row is None:
             continue
         for x in np.arange(x0, x1, step):
