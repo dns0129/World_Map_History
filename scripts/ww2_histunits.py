@@ -36,7 +36,7 @@ import numpy as np
 import pandas as pd
 import shapefile
 from pyproj import Transformer
-from shapely import STRtree, voronoi_polygons, wkb
+from shapely import STRtree, clip_by_rect, voronoi_polygons, wkb
 from shapely import transform as shp_transform
 from shapely.affinity import translate
 from shapely.geometry import MultiPoint, Point, box, mapping, shape
@@ -58,6 +58,7 @@ TIER_ZH = {1: "县级", 2: "地区级", 3: "省级", 4: "大区级", 5: "整个�
 TIER_EN = {1: "county", 2: "district", 3: "province", 4: "region", 5: "whole unit", 6: "territory"}
 MIN_KEEP_KM2 = 300      # smaller remnants of a carved unit are given to their neighbours
 SNAP_KM2 = 800          # leftover land up to this size joins the adjacent historical unit
+FILL_REGION_SHARE = 0.25  # a region the fill-in provinces cover all but this share of gives them the rest
 
 
 def cand(uid, name, tier, prio, geom, source, basis, kind, name_zh=None, name_en=None, start=None, end=None, **kw):
@@ -441,6 +442,22 @@ def carve_order(c):
     return c["prio"], -(int(c["start"][:4]) if c["start"] else -9999), c["area"]
 
 
+def share_out(g, targets, step=0.1):
+    """Split g among the target outlines: each cell of a 0.1-degree grid goes to the nearest target."""
+    tree = STRtree(targets)
+    parts = defaultdict(list)
+    x0, y0, x1, y1 = g.bounds
+    for y in np.arange(y0, y1, step):
+        row = clip_by_rect(g, x0, y, x1, y + step)
+        if row.is_empty:
+            continue
+        for x in np.arange(x0, x1, step):
+            cell = polys(clip_by_rect(row, x, y, x + step, y + step))
+            if cell is not None:
+                parts[int(tree.nearest(cell.representative_point()))].append(cell)
+    return {k: union(v) for k, v in parts.items()}
+
+
 def carve(cands, date):
     """Lay the candidate units down from tier 1 to tier 4; each keeps what finer tiers left."""
     accepted = []
@@ -483,6 +500,15 @@ def carve(cands, date):
             km2 = eq_area_km2(g)
             if km2 < MIN_KEEP_KM2 and km2 < 0.5 * c["area_km2"]:
                 continue
+            if tier == 4 and ftree is not None and km2 < FILL_REGION_SHARE * c["area_km2"]:
+                # what a region keeps beside fill-in provinces (the coast and islands of Finland, which the 1897
+                # outlines draw short, the seams between the Turkestan oblasts) goes to the nearest of them
+                fill = [int(k) for k in ftree.query(g.buffer(0.05)) if accepted[int(k)].get("fill_rest")]
+                if fill:
+                    for k, part in share_out(g, [accepted[k]["geom"] for k in fill]).items():
+                        a = accepted[fill[k]]
+                        a["geom"] = polys(union([a["geom"], part]))
+                    continue
             kept[i] = g
             accepted.append(dict(c, geom=g, partial=km2 < 0.97 * c["area_km2"]))
     return accepted
