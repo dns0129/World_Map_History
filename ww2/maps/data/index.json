@@ -1,11 +1,96 @@
 {
  "snapshots": [
   {
+   "snapshot": "1900-08-14",
+   "title_zh": "八国联军攻入北京",
+   "title_en": "The Eight-Nation Alliance enters Beijing",
+   "pieces": 1128,
+   "admin_units": 1029,
+   "countries": 53,
+   "population": 1559571549,
+   "bloc_pop": {
+    "allied": 911266343,
+    "axis": 158348279,
+    "neutral": 479345123,
+    "contested": 10611804
+   },
+   "tier_count": {
+    "3": 881,
+    "4": 23,
+    "5": 112,
+    "6": 13
+   }
+  },
+  {
+   "snapshot": "1914-08-04",
+   "title_zh": "英国对德宣战，第一次世界大战全面爆发",
+   "title_en": "Britain declares war on Germany",
+   "pieces": 1181,
+   "admin_units": 1085,
+   "countries": 56,
+   "population": 1779689055,
+   "bloc_pop": {
+    "allied": 726960144,
+    "axis": 134124322,
+    "neutral": 918604589,
+    "contested": 0
+   },
+   "tier_count": {
+    "3": 947,
+    "4": 22,
+    "5": 103,
+    "6": 13
+   }
+  },
+  {
+   "snapshot": "1918-11-11",
+   "title_zh": "贡比涅停战协定生效，第一次世界大战结束",
+   "title_en": "The Armistice of Compiègne",
+   "pieces": 1358,
+   "admin_units": 1143,
+   "countries": 74,
+   "population": 1791258182,
+   "bloc_pop": {
+    "allied": 1398521160,
+    "axis": 143856661,
+    "neutral": 240021999,
+    "contested": 8858362
+   },
+   "tier_count": {
+    "3": 999,
+    "4": 21,
+    "5": 110,
+    "6": 13
+   }
+  },
+  {
+   "snapshot": "1934-10-16",
+   "title_zh": "中央红军开始长征",
+   "title_en": "The Long March begins",
+   "pieces": 1286,
+   "admin_units": 1170,
+   "countries": 75,
+   "population": 2114923300,
+   "bloc_pop": {
+    "allied": 1683428710,
+    "axis": 216949548,
+    "neutral": 213810998,
+    "contested": 734044
+   },
+   "tier_count": {
+    "3": 1023,
+    "4": 19,
+    "5": 116,
+    "6": 12
+   }
+  },
+  {
    "snapshot": "1939-09-01",
    "title_zh": "德国入侵波兰，第二次世界大战在欧洲爆发",
    "title_en": "Germany invades Poland",
-   "pieces": 5797,
-   "admin_units": 5607,
+   "pieces": 1348,
+   "admin_units": 1211,
+   "countries": 69,
    "population": 2230600902,
    "bloc_pop": {
     "allied": 1064033739,
@@ -14,11 +99,9 @@
     "contested": 0
    },
    "tier_count": {
-    "1": 4197,
-    "2": 308,
-    "3": 919,
+    "3": 1053,
     "4": 28,
-    "5": 144,
+    "5": 119,
     "6": 11
    }
   },
@@ -26,8 +109,9 @@
    "snapshot": "1940-07-01",
    "title_zh": "法国停战后，德国控制西欧",
    "title_en": "After the fall of France",
-   "pieces": 5781,
-   "admin_units": 5570,
+   "pieces": 1351,
+   "admin_units": 1199,
+   "countries": 63,
    "population": 2241742730,
    "bloc_pop": {
     "allied": 893858327,
@@ -36,11 +120,9 @@
     "contested": 0
    },
    "tier_count": {
-    "1": 4161,
-    "2": 311,
-    "3": 917,
+    "3": 1043,
     "4": 28,
-    "5": 142,
+    "5": 117,
     "6": 11
    }
   },
@@ -48,8 +130,9 @@
    "snapshot": "1941-12-07",
    "title_zh": "珍珠港事件当日，德军止步莫斯科城下",
    "title_en": "Pearl Harbor; Germans before Moscow",
-   "pieces": 5848,
-   "admin_units": 5584,
+   "pieces": 1392,
+   "admin_units": 1204,
+   "countries": 66,
    "population": 2261948414,
    "bloc_pop": {
     "allied": 1206417479,
@@ -58,11 +141,9 @@
     "contested": 12254457
    },
    "tier_count": {
-    "1": 4176,
-    "2": 310,
-    "3": 919,
+    "3": 1050,
     "4": 26,
-    "5": 142,
+    "5": 117,
     "6": 11
    }
   },
@@ -70,8 +151,9 @@
    "snapshot": "1942-11-01",
    "title_zh": "轴心国扩张的最大范围（阿拉曼、斯大林格勒之前）",
    "title_en": "Greatest Axis extent",
-   "pieces": 5854,
-   "admin_units": 5583,
+   "pieces": 1409,
+   "admin_units": 1210,
+   "countries": 67,
    "population": 2281670037,
    "bloc_pop": {
     "allied": 1214645295,
@@ -80,11 +162,9 @@
     "contested": 6697042
    },
    "tier_count": {
-    "1": 4171,
-    "2": 311,
-    "3": 922,
+    "3": 1056,
     "4": 26,
-    "5": 142,
+    "5": 117,
     "6": 11
    }
   },
@@ -92,8 +172,9 @@
    "snapshot": "1944-06-06",
    "title_zh": "诺曼底登陆日",
    "title_en": "D-Day",
-   "pieces": 5840,
-   "admin_units": 5603,
+   "pieces": 1397,
+   "admin_units": 1226,
+   "countries": 66,
    "population": 2317644980,
    "bloc_pop": {
     "allied": 1368392413,
@@ -102,11 +183,9 @@
     "contested": 7889948
    },
    "tier_count": {
-    "1": 4178,
-    "2": 308,
-    "3": 936,
+    "3": 1071,
     "4": 28,
-    "5": 142,
+    "5": 116,
     "6": 11
    }
   },
@@ -114,8 +193,9 @@
    "snapshot": "1945-09-02",
    "title_zh": "日本签署投降书，战争结束",
    "title_en": "Japan signs the surrender",
-   "pieces": 5720,
-   "admin_units": 5543,
+   "pieces": 1414,
+   "admin_units": 1271,
+   "countries": 68,
    "population": 2345147099,
    "bloc_pop": {
     "allied": 1878130234,
@@ -124,12 +204,28 @@
     "contested": 0
    },
    "tier_count": {
-    "1": 4106,
-    "2": 300,
-    "3": 954,
+    "3": 1113,
     "4": 30,
-    "5": 142,
+    "5": 117,
     "6": 11
+   }
+  },
+  {
+   "snapshot": "2026",
+   "title_zh": "2026 年：当今世界",
+   "title_en": "The world in 2026",
+   "pieces": 3523,
+   "admin_units": 3515,
+   "countries": 208,
+   "population": 8300000014,
+   "bloc_pop": {
+    "allied": 997975634,
+    "axis": 201022577,
+    "neutral": 7094918358,
+    "contested": 6083445
+   },
+   "tier_count": {
+    "3": 3515
    }
   }
  ],
@@ -140,8 +236,6 @@
   "contested"
  ],
  "tiers": {
-  "1": "县级",
-  "2": "地区级",
   "3": "省级",
   "4": "大区级",
   "5": "整个政治单元",

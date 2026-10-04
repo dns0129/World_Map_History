@@ -20,7 +20,7 @@ from shapely import STRtree
 from shapely.geometry import mapping
 from shapely.ops import unary_union
 
-from ww2_common import GB, WW2_WORK, TYPICAL_COUNTY_KM2
+from ww2_common import GB, REF_WORK as WW2_WORK, TYPICAL_COUNTY_KM2
 from ww2_geo import eq_area_km2, gb_path, polys, read_geojson
 
 

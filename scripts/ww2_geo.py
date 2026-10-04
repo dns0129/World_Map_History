@@ -9,7 +9,7 @@ import shapely
 from shapely import make_valid
 from shapely.errors import GEOSException
 from shapely import transform as shp_transform
-from shapely.geometry import MultiPolygon, shape
+from shapely.geometry import MultiPolygon, Polygon, shape
 
 from ww2_common import GB
 
@@ -61,12 +61,38 @@ def union(gs):
         return shapely.union_all([make_valid(g).buffer(0) for g in gs], grid_size=1e-6)
 
 
+def fix_rings(g):
+    """Rebuild a (multi)polygon without the degenerate rings (fewer than four points) that some
+    source outlines contain and GEOS refuses to process."""
+    if g is None or g.is_empty:
+        return g
+    out = []
+    for p in getattr(g, "geoms", [g]):
+        if p.geom_type != "Polygon" or len(set(p.exterior.coords)) < 3:
+            continue
+        holes = [r.coords for r in p.interiors if len(set(r.coords)) >= 3]
+        out.append(Polygon(p.exterior.coords, holes))
+    if not out:
+        return None
+    m = MultiPolygon(out) if len(out) > 1 else out[0]
+    return m if m.is_valid else make_valid(m).buffer(0)
+
+
 def clip_to(gs, bounds, pad=0.05):
     """Cut large geometries down to a padded bounding box before set operations."""
     x0, y0, x1, y1 = bounds
     out = []
     for g in gs:
-        c = shapely.clip_by_rect(g, x0 - pad, y0 - pad, x1 + pad, y1 + pad)
+        try:
+            c = shapely.clip_by_rect(g, x0 - pad, y0 - pad, x1 + pad, y1 + pad)
+        except GEOSException:  # a degenerate ring in the source outline
+            try:
+                g = fix_rings(g)
+                if g is None:
+                    continue
+                c = shapely.clip_by_rect(g, x0 - pad, y0 - pad, x1 + pad, y1 + pad)
+            except GEOSException:
+                continue
         if not c.is_empty:
             out.append(c)
     return out

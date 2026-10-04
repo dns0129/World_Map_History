@@ -37,5 +37,38 @@ ISLAND_UNITS.update({("GRC", n): _DOD for n in (
 ISLAND_UNITS.update({("RUS", n): _KUR for n in ("Yuzhno-Kurilsky District", "Kurilsky District", "Severo-Kurilsky District")})
 
 
-def island_unit(c):
-    return ISLAND_UNITS.get(c["iso3"]) or ISLAND_UNITS.get((c["iso3"], c.get("name")))
+# Before the Second World War some of these had other owners. Unit id of the 1939-45 record ->
+# [(first day, last day, record)]; each earlier record has an id of its own.
+EARLIER = {
+    -1001: [("1899-06-30", "1914-10-13", (-1101, "German Micronesia (Caroline, Mariana and Marshall Islands)",
+                                          "德属密克罗尼西亚（加罗林、马里亚纳、马绍尔群岛）", "colony", 255, 70000)),
+            ("1914-10-14", "1920-12-16", (-1102, "Japanese-occupied Micronesia (formerly German)",
+                                          "日军占领的密克罗尼西亚（原德属）", "occupied", 740, 50000))],
+    -1005: [("1900-03-01", "1914-08-28", (-1103, "German Samoa", "德属萨摩亚", "colony", 255, 35000)),
+            ("1914-08-29", "1920-12-16", (-1104, "Western Samoa (New Zealand occupation)", "西萨摩亚（新西兰占领）",
+                                          "occupied", 920, 38000))],
+    -1006: [("1900-04-01", "1901-06-10", (-1105, "Niue (British protectorate)", "纽埃（英国保护地）", "protectorate",
+                                          200, 4000))],
+    -1008: [("1888-10-01", "1914-11-05", (-1106, "Nauru (German)", "瑙鲁（德属）", "colony", 255, 1500)),
+            ("1914-11-06", "1920-12-16", (-1107, "Nauru (Australian occupation)", "瑙鲁（澳大利亚占领）", "occupied",
+                                          900, 1500))],
+    -1009: [("1887-10-24", "1906-10-19", (-1108, "New Hebrides (Anglo-French Joint Naval Commission)",
+                                          "新赫布里底（英法联合海军委员会）", "colony", 200, 60000))],
+    -1010: [("1899-01-23", "1914-11-02", (-1109, "Kuwait (British protection, Ottoman suzerainty)",
+                                          "科威特（英国保护，奥斯曼名义宗主）", "protectorate", 200, 35000))],
+    -1021: [("1878-07-13", "1912-05-03", (-1110, "Dodecanese (Ottoman)", "多德卡尼斯群岛（奥斯曼帝国）",
+                                          "independent", 640, 100000)),
+            ("1912-05-04", "1923-08-05", (-1111, "Dodecanese (Italian occupation)", "多德卡尼斯群岛（意大利占领）",
+                                          "occupied", 325, 100000))],
+}
+ALL_ISLANDS = {v[0]: v for v in ISLAND_UNITS.values()}
+ALL_ISLANDS.update({rec[0]: rec for vs in EARLIER.values() for _, _, rec in vs})
+
+
+def island_unit(c, date=None):
+    u = ISLAND_UNITS.get(c["iso3"]) or ISLAND_UNITS.get((c["iso3"], c.get("name")))
+    if u and date:
+        for first, last, rec in EARLIER.get(u[0], ()):
+            if first <= date <= last:
+                return rec
+    return u
