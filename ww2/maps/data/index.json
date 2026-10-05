@@ -4,20 +4,20 @@
    "snapshot": "1900-08-14",
    "title_zh": "八国联军攻入北京",
    "title_en": "The Eight-Nation Alliance enters Beijing",
-   "pieces": 1128,
-   "admin_units": 1029,
+   "pieces": 1194,
+   "admin_units": 1086,
    "countries": 53,
-   "population": 1559571549,
+   "population": 1559571545,
    "bloc_pop": {
-    "allied": 911266343,
-    "axis": 158348279,
-    "neutral": 479345123,
-    "contested": 10611804
+    "allied": 911273970,
+    "axis": 158225148,
+    "neutral": 479551569,
+    "contested": 10520858
    },
    "tier_count": {
-    "3": 881,
-    "4": 23,
-    "5": 112,
+    "3": 937,
+    "4": 25,
+    "5": 111,
     "6": 13
    }
   },
@@ -25,20 +25,20 @@
    "snapshot": "1914-08-04",
    "title_zh": "英国对德宣战，第一次世界大战全面爆发",
    "title_en": "Britain declares war on Germany",
-   "pieces": 1181,
-   "admin_units": 1085,
+   "pieces": 1247,
+   "admin_units": 1141,
    "countries": 56,
-   "population": 1779689055,
+   "population": 1779689066,
    "bloc_pop": {
-    "allied": 726960144,
-    "axis": 134124322,
-    "neutral": 918604589,
+    "allied": 726960869,
+    "axis": 134124324,
+    "neutral": 918603873,
     "contested": 0
    },
    "tier_count": {
-    "3": 947,
-    "4": 22,
-    "5": 103,
+    "3": 1002,
+    "4": 24,
+    "5": 102,
     "6": 13
    }
   },
@@ -46,20 +46,20 @@
    "snapshot": "1918-11-11",
    "title_zh": "贡比涅停战协定生效，第一次世界大战结束",
    "title_en": "The Armistice of Compiègne",
-   "pieces": 1358,
-   "admin_units": 1143,
+   "pieces": 1480,
+   "admin_units": 1202,
    "countries": 74,
-   "population": 1791258182,
+   "population": 1791137234,
    "bloc_pop": {
-    "allied": 1398521160,
-    "axis": 143856661,
-    "neutral": 240021999,
-    "contested": 8858362
+    "allied": 1398427281,
+    "axis": 144370508,
+    "neutral": 239575363,
+    "contested": 8764082
    },
    "tier_count": {
-    "3": 999,
-    "4": 21,
-    "5": 110,
+    "3": 1061,
+    "4": 22,
+    "5": 106,
     "6": 13
    }
   },
