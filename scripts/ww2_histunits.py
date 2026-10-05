@@ -350,6 +350,7 @@ def east_asia():
 
 RU1897 = WW2_RAW / "russia1897" / "1897RussianEmpire.shp"
 RU1897_END = "1918-12-31"  # used up to the end of 1918; the Soviet reorganisation begins after that
+RU1897_CENSUS = "1897-01-28"  # only units in force on the census date take an 1897 province as their parent
 RU1897_SRC = ("Provinces of the 1897 Russian census, outlines traced from A. Ilyin's school atlas of c. 1914 "
               "(Sablin et al. 2015, Transcultural Empire GIS, heiDATA doi:10.11588/data/10064, CC BY 4.0); used up "
               "to 1918 where OpenHistoricalMap has no province, so later boundary changes are not shown")
@@ -600,10 +601,11 @@ def parents(units, cands, date):
             continue
         rp = u["geom"].representative_point()
         found = []
+        late = (u.get("start") or "") > RU1897_CENSUS  # created after the census: cuts across the 1897 provinces
         for t in (2, 3, 4):
             if t <= u["tier"] or t not in trees:
                 continue
-            hit = [i for i in trees[t].query(rp, predicate="within")]
+            hit = [i for i in trees[t].query(rp, predicate="within") if not (late and by_tier[t][i].get("fill_rest"))]
             if hit:  # the unit carve() would have kept: preferred source, newest, smallest
                 found.append(by_tier[t][min(hit, key=lambda i: carve_order(by_tier[t][i]))])
         if found:
