@@ -1,4 +1,4 @@
-"""Data files for the interactive 1939-1945 province maps (ww2/maps/).
+"""Data files for the interactive province maps (ww2/maps/): 1900-1934, 1939-1945, 1946-1991 and 2026.
 
   geo.bin           all pieces of the six snapshots (provinces, cut where a border or the
                     controller runs through them), simplified; zigzag-varint deltas of
@@ -30,13 +30,15 @@ from shapely.geometry import MultiPolygon, Polygon, shape
 import topo
 from common import RAW, WORK
 import cities
-from ww2_common import SNAPSHOTS, SNAPSHOTS_EARLY, WW2_WORK, WW2_OUT
+from ww2_common import SNAPSHOTS, SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, WW2_WORK, WW2_OUT
 from ww2_geo import polys, union
 
 OUT = WW2_OUT / "maps" / "data"
 MODERN = WORK / "modern"
 EARLY = WORK / "early"          # the 1900-1934 snapshots (WW2_SET=early)
 EARLY_DATES = {s[0] for s in SNAPSHOTS_EARLY}
+POSTWAR = WORK / "postwar"      # the 1946-1991 snapshots (WW2_SET=postwar)
+POSTWAR_DATES = {s[0] for s in SNAPSHOTS_POSTWAR}
 # Blocs and legend notes of the 1900-1934 dates (ww2_snapshots.EARLY_BLOCS says who is in which)
 EARLY_META = {
     "1900-08-14": dict(
@@ -72,6 +74,58 @@ EARLY_META = {
                "control": "东北四省为伪满洲国（按 1928–45 年省界近似）；中华苏维埃共和国的中央苏区与川陕苏区按县近似；萨尔盆地由"
                           "国际联盟管理。"}),
 }
+# Blocs and legend notes of the 1946-1991 dates (ww2_snapshots.POSTWAR_BLOCS says who is in which)
+POSTWAR_META = {
+    "1946-06-26": dict(
+        bloc_names={"allied": "西方盟国（美英法等）及其属地", "axis": "苏联势力范围（含中共控制区）", "neutral": "其他国家",
+                    "contested": "交战区"},
+        notes={"bloc_title": "铁幕初落 · 人口",
+               "bloc": "按丘吉尔 1946 年 3 月“铁幕”演说划分：苏联及东欧各国、外蒙古、德奥的苏占区、朝鲜三八线以北，以及中共、"
+                       "伊朗阿塞拜疆与马哈巴德、新疆三区等苏联支持的政权为一方；美英法及其属地、比荷卢、北欧、希腊、土耳其、"
+                       "中华民国为另一方。中原突围地区为交战区。中共控制区按县近似（斜线）。",
+               "control": "德国、奥地利分为美英法苏四个占领区，柏林、维也纳四国共管；日本由美国主导的盟军占领，冲绳、奄美归美军；"
+                          "朝鲜以三八线分美苏占领区；关东州（旅大）由苏军驻守。国共双方控制区按县近似。"}),
+    "1947-08-15": dict(
+        bloc_names={"allied": "西方阵营（杜鲁门主义、马歇尔计划）", "axis": "苏联阵营（含中共控制区）", "neutral": "其他国家",
+                    "contested": "交战区"},
+        notes={"bloc_title": "冷战开始 · 人口",
+               "bloc": "1947 年 3 月杜鲁门主义援助希腊、土耳其，6 月提出马歇尔计划。印度、巴基斯坦当日独立，计入其他国家；"
+                       "海得拉巴、克什米尔、朱纳格特尚未加入印巴，卡拉特宣布独立。希腊内战山区、陕北与豫东、越南红河三角洲为交战区。",
+               "control": "印巴分治；国民政府攻占延安后中共主力转入外线，东北中共控制乡村；荷兰“警察行动”占领爪哇、苏门答腊要地；"
+                          "法越战争中越盟控制越北山区与中部。均为按整区、整县的近似。"}),
+    "1948-09-12": dict(
+        bloc_names={"allied": "西方阵营", "axis": "苏联阵营（含中共控制区）", "neutral": "其他国家（含南斯拉夫）",
+                    "contested": "交战区"},
+        notes={"bloc_title": "柏林封锁与辽沈战役前夕 · 人口",
+               "bloc": "1948 年 2 月捷克斯洛伐克政变，6 月南斯拉夫被开除出情报局（计入其他国家），苏联封锁西柏林。朝鲜半岛 8 月、"
+                       "9 月先后成立大韩民国和朝鲜民主主义人民共和国。以色列 5 月建国，第一次中东战争处于第二次停火中，内盖夫为交战区。",
+               "control": "东北除长春、沈阳、锦州走廊外均为中共控制，华北、山东、中原大部亦然（国民政府守大城市）；海得拉巴仍未加入印度"
+                          "（9 月 13 日印军进攻）；伊拉克军队据守撒马利亚北部。均为近似。"}),
+    "1949-10-01": dict(
+        bloc_names={"allied": "北约与美国的盟友", "axis": "苏联阵营（含中华人民共和国）", "neutral": "其他国家",
+                    "contested": "交战区"},
+        notes={"bloc_title": "北约成立与新中国 · 人口",
+               "bloc": "北约 1949 年 4 月成立，12 个创始国；希腊、土耳其、中华民国、韩国、菲律宾、澳新计入美国一方。中华人民共和国"
+                       "当日成立；德国西部已成立联邦德国（9 月），东部为苏占区（10 月 7 日成立民主德国）。",
+               "control": "中华人民共和国控制北方、西北、华东和长江中游；国民政府仍据两广、西南、海南、台湾和舟山。柏林分治。"
+                          "印度尼西亚为荷兰与共和国停火后的分治局面（近似）。"}),
+    "1953-07-27": dict(
+        bloc_names={"allied": "北约、澳新美与美国在亚洲的盟友", "axis": "苏联阵营、中华人民共和国、朝鲜", "neutral": "其他国家",
+                    "contested": "交战区"},
+        notes={"bloc_title": "朝鲜停战 · 人口",
+               "bloc": "北约 14 国（1952 年希腊、土耳其加入）、联邦德国、澳新美同盟，以及日本、韩国、菲律宾、台湾的中华民国为一方；"
+                       "苏联、东欧各国、民主德国、蒙古、中华人民共和国、朝鲜、越盟为另一方。越南红河三角洲边缘为交战区。",
+               "control": "朝鲜半岛以停战线分南北；越盟控制越北山区与中部，巴特寮占据老挝桑怒、丰沙里；萨尔为法国保护地，"
+                          "的里雅斯特 A 区由英美管理；冲绳、奄美仍归美国。"}),
+    "1991-12-26": dict(
+        bloc_names={"allied": "北约成员国", "axis": "独联体国家（原苏联）", "neutral": "其他国家", "contested": "交战区"},
+        notes={"bloc_title": "苏联解体 · 人口",
+               "bloc": "北约 16 国；独立国家联合体 11 国（1991 年 12 月 21 日阿拉木图宣言）。波罗的海三国 9 月独立，格鲁吉亚未加入独联体。"
+                       "克罗地亚、纳戈尔诺-卡拉巴赫、南奥塞梯与索马里为交战区（斜线）。",
+               "control": "苏联 12 月 26 日解体，各加盟共和国独立；南斯拉夫解体中，斯洛文尼亚、克罗地亚已实际独立，塞尔维亚克拉伊纳"
+                          "共和国单列；车臣、德涅斯特河沿岸、北塞浦路斯、索马里兰、伊拉克库尔德地区、厄立特里亚为实际自立的政权。"}),
+}
+META = {**EARLY_META, **POSTWAR_META}
 NE = RAW / "naturalearth"
 Q = 1000  # coordinate units per degree
 TOL_PROV = 0.008
@@ -115,11 +169,26 @@ COLOR = {
     "-66": "#e3c95d", "-67": "#8f80b8", "-68": "#d8c65f", "-69": "#86a95b", "-70": "#9fbf6f", "-71": "#c2a36a",
     "-72": "#5f9e8f", "-73": "#a7b884", "-74": "#b98c6f", "-75": "#c4a07f", "-80": "#c4473d", "-40": "#7fa7c9",
     "-41": "#c8b27a",
+    # 1946-1991
+    "PRC": "#c4473d", "713": "#d49a3c", "260": "#5d86d8", "265": "#b5584f", "731": "#a65d57", "732": "#5b8fc9",
+    "750": "#e0a24c", "770": "#5f9e6e", "771": "#79b38a", "666": "#6f8fd0", "663": "#c9a467", "816": "#c96a4f",
+    "-100": "#c98b7b", "-101": "#b4a05f", "-102": "#9d6aa8", "-104": "#c7a3d6", "-105": "#a8c48a", "-106": "#d3b47b",
+    "-107": "#b88f6a", "-110": "#7aa3c4", "-113": "#9b6f8d", "-114": "#b07d56", "-116": "#7b9e6a", "-118": "#c96c6c",
+    "-122": "#6fae9c", "-123": "#d0a65e", "-126": "#a77c5b", "-129": "#b9cf8f", "-130": "#93a8c9", "-131": "#8a5c4f",
+    "369": "#e3c95d", "370": "#9fbf6f", "705": "#69a6c9", "704": "#7fb3a8", "701": "#c2a36a", "702": "#b98c6f",
+    "703": "#c4a07f", "371": "#d9a86a", "372": "#c9a0a0", "373": "#7fb3a8", "359": "#d8c65f", "344": "#7b8fc7",
+    "349": "#8fc49b", "343": "#c58fb0",
 }
 
 
 def country_key(r):
     gw, det = int(r["controller_gwcode"]), str(r["controller_detail_en"] or "")
+    if r["snapshot"] in POSTWAR_DATES:
+        if gw == 710 and r["snapshot"] >= "1950":
+            return "PRC"
+        if gw == -2 and r["snapshot"] == "1949-10-01":
+            return "PRC"
+        return str(gw)
     if gw == 740 and det.startswith("Manchukuo"):
         return "MAN"
     if gw == 740 and det.startswith("Mengjiang"):
@@ -424,8 +493,24 @@ def main():
             pgeom.update({"E:" + f["properties"]["piece_id"]: shape(f["geometry"])
                           for f in json.load(open(EARLY / f"prov_split_{d}.geojson"))["features"]})
         early = list(SNAPSHOTS_EARLY)
+    # the 1946-1991 snapshots, built the same way in work/postwar; their ids get the prefix P:
+    postwar = []
+    if (POSTWAR / "prov_units.csv").exists():
+        ph = pd.read_csv(POSTWAR / "prov_units.csv", low_memory=False)
+        ph["unit_id"] = "P:" + ph.unit_id
+        hist = pd.concat([hist, ph], ignore_index=True)
+        hgeom.update({"P:" + f["properties"]["unit_id"]: shape(f["geometry"])
+                      for f in json.load(open(POSTWAR / "prov_units.geojson"))["features"]})
+        for d, _, _ in SNAPSHOTS_POSTWAR:
+            df = pd.read_csv(POSTWAR / f"prov_snapshot_{d}.csv", low_memory=False)
+            df["piece_id"] = "P:" + df.piece_id
+            df["admin_id"] = "P:" + df.admin_id
+            snaps[d] = df
+            pgeom.update({"P:" + f["properties"]["piece_id"]: shape(f["geometry"])
+                          for f in json.load(open(POSTWAR / f"prov_split_{d}.geojson"))["features"]})
+        postwar = list(SNAPSHOTS_POSTWAR)
     # the present-day map (modern_2026.py) rides along as the last tab
-    snapshots = early + list(SNAPSHOTS)
+    snapshots = early + list(SNAPSHOTS) + postwar
     modern_ug, modern_meta = {}, {}
     if (MODERN / "prov_snapshot_2026.csv").exists():
         snapshots.append(("2026", "2026 年：当今世界", "The world in 2026"))
@@ -519,7 +604,8 @@ def main():
             first = g.sort_values("area_km2").iloc[-1]
             if modern:
                 zh, en = first.country_zh, first.country_en
-            elif snap in EARLY_DATES and key != "MAN":  # WWII names such as "-1" Allied forces mean other things here
+            elif (snap in EARLY_DATES or snap in POSTWAR_DATES) and key != "MAN":  # WWII names such as "-1" Allied
+                # forces mean other things here
                 home = g[g.unit_gwcode == g.controller_gwcode]  # a state is named after its own territory
                 nm = home.sort_values("area_km2").iloc[-1] if len(home) else first
                 zh, en = nm.controller_name_zh or nm.controller_name_en, nm.controller_name_en
@@ -556,8 +642,8 @@ def main():
             "admin_active": sorted(set(aidx[a] for a in d.admin_id)), "unit_labels": lab,
             "countries": countries, "country_labels": clabels,
             "cities": cities.y2026(modern_zh) if modern else cities.ww2(snap),
-            "bloc_names": modern_meta.get("bloc_names") if modern else EARLY_META.get(snap, {}).get("bloc_names"),
-            "notes": EARLY_META.get(snap, {}).get("notes"),
+            "bloc_names": modern_meta.get("bloc_names") if modern else META.get(snap, {}).get("bloc_names"),
+            "notes": META.get(snap, {}).get("notes"),
             "bloc_pop": {b: int(d[d.bloc == b].population_est.sum()) for b in BLOCS},
             "tier_count": {str(t): int(n) for t, n in hist.set_index("unit_id").loc[sorted(set(d.admin_id))]
                            .tier.value_counts().sort_index().items()},
