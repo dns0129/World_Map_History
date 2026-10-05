@@ -41,6 +41,7 @@ from ww2_geo import diff, eq_area_km2, inter, opening, polys, read_geojson, unio
 
 LAW = WW2_RAW / "lawson"
 SPLIT_MIN_SHARE = 0.03
+RU1897_SPLIT_KM2 = 300  # parts of an 1897 province this large in another unit are cut off, whatever their share
 GHS = RAW / "ghs_pop" / "GHS_POP_E1975_30ss.tif"
 
 # Short WWII names for states that appear as controllers
@@ -405,7 +406,10 @@ def main(only=None):
                 cand = list(tree.query(g, predicate="intersects"))
                 shares = [(i, inter(g, ug[i]).area / max(g.area, 1e-12)) for i in cand]
                 blank = 1 - sum(s_ for _, s_ in shares)  # share on land CShapes leaves blank on this date
-                shares = [(i, s_) for i, s_ in shares if s_ >= SPLIT_MIN_SHARE]
+                min_share = SPLIT_MIN_SHARE
+                if hid.startswith("RU1897"):  # the 1897 provinces are cut at every later border (Finland in 1918)
+                    min_share = min(SPLIT_MIN_SHARE, RU1897_SPLIT_KM2 / max(eq_area_km2(g), 1.0))
+                shares = [(i, s_) for i, s_ in shares if s_ >= min_share]
                 fb = [i for i, u in enumerate(act) if u["country_name"] == UNCOVERED.get(snap)]
                 isl = None
                 if not shares and SET == "early":  # land CShapes does not draw: a known territory (Greenland)?
@@ -422,7 +426,7 @@ def main(only=None):
                     cut = {i: polys(inter(g, ug[i])) for i, _ in shares}
                     cut[fb[0]] = polys(union([cut.get(fb[0]), rest]))
                     parts = [(("cs", i), p) for i, p in cut.items() if p is not None]
-                elif len(shares) <= 1 or max(s_ for _, s_ in shares) >= 1 - SPLIT_MIN_SHARE:
+                elif len(shares) <= 1 or max(s_ for _, s_ in shares) >= 1 - min_share:
                     hit = [i for i in cand if ug[i].contains(pt)] or [max(shares, key=lambda t: t[1])[0]] if shares else \
                         ([i for i in cand if ug[i].contains(pt)] or cand or [tree.nearest(pt)])
                     parts = [(("cs", hit[0]), None)]
