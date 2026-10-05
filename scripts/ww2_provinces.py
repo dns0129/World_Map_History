@@ -32,6 +32,7 @@ import argparse
 import hashlib
 import json
 import multiprocessing
+import os
 import re
 import sqlite3
 from collections import Counter, defaultdict
@@ -494,7 +495,8 @@ def main():
     resolve = Resolver(hist)
 
     G.update(hist=hist, ugeom=ugeom, snaps=snaps, pgeom=pgeom, hrow=hrow, hist_tier=hist_tier, resolve=resolve)
-    with multiprocessing.get_context("fork").Pool(min(len(DATES), 4)) as pool:
+    workers = min(len(DATES), int(os.environ.get("WW2_POOL", 4)))  # each worker holds about 3 GB
+    with multiprocessing.get_context("fork").Pool(workers) as pool:
         results = pool.map(one_date, DATES)  # dates are independent; the workers share G by fork
     final = {}       # (prov_id, geom hash) -> unit record
     piece_rows = []  # (date, prov key, row, geom)

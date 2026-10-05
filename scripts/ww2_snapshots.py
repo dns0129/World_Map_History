@@ -134,15 +134,16 @@ POSTWAR_STATE = {
     -123: ("Kurdistan Region (Kurdistan Front)", "库尔德斯坦地区（库尔德斯坦阵线）"),
     -126: ("Liberation Tigers of Tamil Eelam", "泰米尔伊拉姆猛虎解放组织"),
     -129: ("Sikkim (protectorate)", "锡金（保护国）"),
-    816: ("Democratic Republic of Vietnam (Viet Minh)", "越南民主共和国（越盟）"),
-    812: ("Pathet Lao", "巴特寮"),
 }
+_VIET_MINH = {816: ("Democratic Republic of Vietnam (Viet Minh)", "越南民主共和国（越盟）"), 812: ("Pathet Lao", "巴特寮")}
 # States named for one date only: the People's Republic proclaimed in the CCP-held land on 1 October 1949;
 # Russia, Croatia and Slovenia at the end of 1991
 POSTWAR_STATE_ON = {
-    "1949-10-01": {-2: ("People's Republic of China", "中华人民共和国")},
+    "1946-06-26": _VIET_MINH, "1947-08-15": _VIET_MINH, "1948-09-12": _VIET_MINH,
+    "1949-10-01": {**_VIET_MINH, -2: ("People's Republic of China", "中华人民共和国")},
+    "1953-07-27": _VIET_MINH,
     "1991-12-26": {365: ("Russia", "俄罗斯"), 344: ("Croatia", "克罗地亚"), 349: ("Slovenia", "斯洛文尼亚"),
-                   345: ("Yugoslavia", "南斯拉夫")},
+                   345: ("Yugoslavia", "南斯拉夫"), 260: ("Germany", "德国")},
 }
 # Bloc of each controller on each date; colonies follow their sovereign (the controller).
 #   1946  the Western Allies and the Soviet sphere of the "iron curtain" speech (March 1946)
@@ -237,7 +238,8 @@ MANCHU_ROC = {"Liaoning": ("Fengtian", "奉天"), "Jilin": ("Jilin", "吉林"), 
 # (status, sovereign gw, name en, name zh). Serbia and Montenegro had been freed by 11 November 1918.
 UNIT_FIX = {("1918-11-11", "Serbia"): ("independent", 345, "Serbia", "塞尔维亚"),
             ("1918-11-11", "Montenegro"): ("independent", 341, "Montenegro", "黑山"),
-            ("1991-12-26", "Russia (Soviet Union)"): ("independent", 365, "Russia", "俄罗斯")}
+            ("1991-12-26", "Russia (Soviet Union)"): ("independent", 365, "Russia", "俄罗斯"),
+            ("1991-12-26", "German Federal Republic"): ("independent", 260, "Germany", "德国")}
 
 
 def control_overlay(snap, county, pt, occ, meng, ccp, ceded):
