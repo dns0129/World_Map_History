@@ -367,6 +367,13 @@ def russia_1897(cshapes):
     # the atlas borders run a few kilometres off CShapes: keep each province inside the empire
     empire = union([u["geom"] for u in cshapes if u["gwcode"] == 365 and u["start"] <= RU1897_END
                     and u["end"] >= "1897-01-28"])
+    # where a region's leftover may be handed to these provinces (see carve): the empire and its coastal waters,
+    # less the land of the other units of the empire's time, before the states that broke away from it
+    # (Khiva, Bukhara, Austria, Sweden)
+    others = [u["geom"] for u in cshapes if u["gwcode"] != 365 and u["start"] <= "1914-08-04"
+              and u["end"] >= "1897-01-28"]
+    reach = empire.simplify(0.01).buffer(0.5)
+    zone = polys(diff(reach, union([o for o in others if o.intersects(reach)])))
     # the atlas draws Sakhalin without the south, Japanese from 1905; until then the 1897 unit is the whole island
     south_sakhalin = union([u["geom"] for u in cshapes if u["country_name"] == "Southern Sakhalin Island"])
     west, east = box(-180, -90, 180, 90), box(180, -90, 540, 90)
@@ -382,7 +389,7 @@ def russia_1897(cshapes):
             geom = polys(union([g, south_sakhalin])) if r.key == "sakhalin" else g
             out.append(cand(f"RU1897-{r.key}", r.name, 3, 30, geom, RU1897_SRC, "historical_1897", r.kind,
                             name_zh=r.zh, name_en=r.en, start=r.start or None, end=r.end or RU1897_END,
-                            note=r.note or None, fill_rest=True, fill_within=empire))
+                            note=r.note or None, fill_rest=True, fill_within=zone))
     return out
 
 
@@ -503,7 +510,7 @@ def carve(cands, date):
             if tier == 4 and ftree is not None and km2 < FILL_REGION_SHARE * c["area_km2"]:
                 # what a region keeps beside fill-in provinces (the coast and islands of Finland, which the 1897
                 # outlines draw short, the seams between the Turkestan oblasts) goes to the nearest of them, as
-                # far as it lies in the land they fill (not Khiva, Bukhara or Austria)
+                # far as it lies in the empire or its waters (not Khiva, Bukhara, Austria or Sweden)
                 fill = [int(k) for k in ftree.query(g.buffer(0.05)) if accepted[int(k)].get("fill_rest")]
                 share = polys(inter(g, accepted[fill[0]]["fill_within"])) if fill else None
                 if share is not None:
