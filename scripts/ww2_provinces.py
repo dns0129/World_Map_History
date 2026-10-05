@@ -61,7 +61,10 @@ PIECE_MIN_KM2 = 5        # control pieces smaller than this inside a province jo
 TIER2_NAME = re.compile(r"^(Regierungsbezirk|Bezirk |Kreishauptmannschaft|Landeskommiss|Oberlandrat)")
 
 # Names of one province spelled differently by two sources
-ALIAS = {"Tonkin": "Protectorat du Tonkin", "Annam": "Protectorat d'Annam", "Cochinchina": "Colonie de Cochinchine"}
+ALIAS = {"Tonkin": "Protectorat du Tonkin", "Annam": "Protectorat d'Annam", "Cochinchina": "Colonie de Cochinchine",
+         # OpenHistoricalMap's Kalisz governorate ends in 1914; in 1918 its powiats of Konin and Slupca, which the
+         # 1897 outline leaves out, join the 1897 one
+         "Gubernia kaliska": "Gubernia kaliska / Калишская губерния"}
 # Chinese names of provinces that only exist here as the union of their subdivisions
 ZH = {
     "Protectorat du Tonkin": "东京（法国保护国）", "Protectorat d'Annam": "安南（法国保护国）",
