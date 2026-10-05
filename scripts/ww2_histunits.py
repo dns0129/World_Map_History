@@ -648,7 +648,8 @@ def write(per_date):
     # a unit keeps the parent of its first date; one whose parent becomes or ceases to be an 1897 Russian province
     # (the powiats of Konin and Slupca: OpenHistoricalMap's Kalisz governorate until 1914, the 1897 one in 1918)
     # is a new version, so that it joins that province
-    ru1897 = {u["name"] for _, allu in per_date for u in allu if u["uid"].startswith("RU1897")}
+    ru1897 = ({u["name"] for _, allu in per_date for u in allu if u["uid"].startswith("RU1897")}
+              - {u["name"] for _, allu in per_date for u in allu if not u["uid"].startswith("RU1897")})
     for date, allu in per_date:
         for u in allu:
             h = hashlib.md5(wkb.dumps(u["geom"])).hexdigest()[:8]
