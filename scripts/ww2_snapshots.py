@@ -29,14 +29,14 @@ import rasterio
 from rasterio.features import rasterize
 from rasterio.windows import Window
 from shapely import STRtree
-from shapely.geometry import Point, mapping, shape
+from shapely.geometry import Point, box, mapping, shape
 from shapely.ops import unary_union
 
 import topo
 from build_database import Namer
 from common import RAW, WORK, ROOT
 from ww2_territories import ALL_ISLANDS, island_unit
-from ww2_common import REF_WORK, RULES, SET, SNAPSHOTS, UNCOVERED, WW2_RAW, WW2_WORK
+from ww2_common import REF_WORK, RULES, SET, SNAPSHOTS, UNCOVERED, UNCOVERED_BOX, WW2_RAW, WW2_WORK
 from ww2_geo import diff, eq_area_km2, inter, opening, polys, read_geojson, union
 
 LAW = WW2_RAW / "lawson"
@@ -335,14 +335,17 @@ def control_pieces(g, refs_here, ctrl_of):
     return [(parts[0][0], major)] + [(p[0], p[1]) for p in kept]
 
 
-def blank_land(g, units, refs, rtree):
-    """The land of g (reference outlines, not the sea) that none of the CShapes units covers, when it is at
-    least SPLIT_MIN_SHARE of g; else None."""
+def blank_land(g, units, refs, rtree, snap):
+    """The land of g (reference outlines, not the sea) inside UNCOVERED_BOX that none of the CShapes units
+    covers, in parts too wide and large to be a seam between two outlines; None when under SPLIT_MIN_SHARE of g."""
     land = union([refs[k]["geom"] for k in rtree.query(g, predicate="intersects")])
     if land is None:
         return None
+    land = inter(land, box(*UNCOVERED_BOX[snap]))
     cover = union(units)
-    rest = polys(diff(inter(g, land), cover) if cover is not None else inter(g, land))
+    rest = opening(polys(diff(inter(g, land), cover) if cover is not None else inter(g, land)), 0.05)
+    parts = [p for p in getattr(rest, "geoms", [rest]) if rest is not None and eq_area_km2(p) >= 300]
+    rest = polys(union(parts)) if parts else None
     return rest if rest is not None and rest.area >= SPLIT_MIN_SHARE * g.area else None
 
 
@@ -413,7 +416,7 @@ def main(only=None):
                 elif fb and sum(s_ for _, s_ in shares) < 0.5 and ug[fb[0]].distance(g) < 0.5:
                     parts = [(("cs", fb[0]), None)]  # land CShapes leaves blank on this date
                 elif fb and blank >= SPLIT_MIN_SHARE and ug[fb[0]].distance(g) < 0.5 and \
-                        (rest := blank_land(g, [ug[i] for i in cand], refs, rtree)) is not None:
+                        (rest := blank_land(g, [ug[i] for i in cand], refs, rtree, snap)) is not None:
                     # partly on that blank land (Livonia and Courland of 1897 on 11 November 1918): the
                     # blank part counts as that unit, the rest goes to the units it lies in
                     cut = {i: polys(inter(g, ug[i])) for i, _ in shares}

@@ -382,7 +382,7 @@ def russia_1897(cshapes):
             geom = polys(union([g, south_sakhalin])) if r.key == "sakhalin" else g
             out.append(cand(f"RU1897-{r.key}", r.name, 3, 30, geom, RU1897_SRC, "historical_1897", r.kind,
                             name_zh=r.zh, name_en=r.en, start=r.start or None, end=r.end or RU1897_END,
-                            note=r.note or None, fill_rest=True))
+                            note=r.note or None, fill_rest=True, fill_within=empire))
     return out
 
 
@@ -502,13 +502,20 @@ def carve(cands, date):
                 continue
             if tier == 4 and ftree is not None and km2 < FILL_REGION_SHARE * c["area_km2"]:
                 # what a region keeps beside fill-in provinces (the coast and islands of Finland, which the 1897
-                # outlines draw short, the seams between the Turkestan oblasts) goes to the nearest of them
+                # outlines draw short, the seams between the Turkestan oblasts) goes to the nearest of them, as
+                # far as it lies in the land they fill (not Khiva, Bukhara or Austria)
                 fill = [int(k) for k in ftree.query(g.buffer(0.05)) if accepted[int(k)].get("fill_rest")]
-                if fill:
-                    for k, part in share_out(g, [accepted[k]["geom"] for k in fill]).items():
+                share = polys(inter(g, accepted[fill[0]]["fill_within"])) if fill else None
+                if share is not None:
+                    for k, part in share_out(share, [accepted[k]["geom"] for k in fill]).items():
                         a = accepted[fill[k]]
                         a["geom"] = polys(union([a["geom"], part]))
-                    kept[i] = g  # still carved out of the regions laid down after it (Bukhara)
+                    rest = opening(polys(diff(g, share)))
+                    if rest is None or eq_area_km2(rest) < MIN_KEEP_KM2:
+                        kept[i] = g  # still carved out of the regions laid down after it
+                        continue
+                    kept[i] = g
+                    accepted.append(dict(c, geom=rest, partial=True))
                     continue
             kept[i] = g
             accepted.append(dict(c, geom=g, partial=km2 < 0.97 * c["area_km2"]))
