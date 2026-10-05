@@ -645,11 +645,14 @@ def partition(date, cands, refs, cshapes, namer):
 
 def write(per_date):
     final = {}
+    # a unit keeps the parent of its first date; one whose parent becomes or ceases to be an 1897 Russian province
+    # (the powiats of Konin and Slupca: OpenHistoricalMap's Kalisz governorate until 1914, the 1897 one in 1918)
+    # is a new version, so that it joins that province
+    ru1897 = {u["name"] for _, allu in per_date for u in allu if u["uid"].startswith("RU1897")}
     for date, allu in per_date:
         for u in allu:
             h = hashlib.md5(wkb.dumps(u["geom"])).hexdigest()[:8]
-            # a unit whose parent changes between dates (a county of a province that ends) is a new version
-            key = (u["uid"], h, u.get("parent"), u.get("grandparent"))
+            key = (u["uid"], h, u.get("parent") if u.get("parent") in ru1897 else None)
             if key in final:
                 final[key]["dates"].append(date)
             else:
