@@ -1,5 +1,5 @@
 """SQLite database of historical province-level divisions and de facto control, for one set of
-snapshots (1939-1945, or 1900-1934 with WW2_SET=early; see ww2_common.py).
+snapshots (1939-1945, 1900-1934 with WW2_SET=early, or 1946-1991 with WW2_SET=postwar; see ww2_common.py).
 
 Only divisions in force at the time are stored (see ww2_histunits.py), dissolved to the
 province level (ww2_provinces.py). Geometry is GeoJSON text (EPSG:4326), simplified for
@@ -49,10 +49,23 @@ SOURCES = [
      "present-day region names the control rules refer to"),
     ("ghspop", "GHS-POP R2023A", "European Commission JRC (2023).", "https://human-settlement.emergency.copernicus.eu/",
      "CC BY 4.0", "Spatial pattern for population estimates (1975 grid)"),
-    ("curated", "Curated control rules", "Compiled for this database from standard histories of the war "
+    ("curated", "Curated control rules", "Compiled for this database from standard histories of the "
+     + ("period " if SET == "postwar" else "war ") +
      f"(curated/{RULES.name}, curated/control_events.csv).", "curated/", "CC0",
      "De facto control on each snapshot date"),
 ]
+
+if SET == "postwar":
+    SOURCES = SOURCES + [
+        ("cn_counties", "Chinese provinces 1946-1954", "Compiled for this database: the province each present-day county "
+         "belonged to in 1946-48 (the nine provinces of the north-east), 1949-52 and 1952-54 (curated/"
+         "china_counties_1946_1954.csv), joined to the 1928-45 provincial outlines.", "curated/", "CC0",
+         "Provinces of the Republic of China after 1945 and of the People's Republic to 1954"),
+        ("present_day_units", "Present-day outlines of the same units", "Compiled for this database: units whose present-"
+         "day outline (geoBoundaries) is the outline they had on the date, or the union of the units they later split "
+         "into (curated/present_day_units_1946_1991.csv).", "curated/", "CC0",
+         "Korea, Indonesia, Yugoslav republics, Austria, Switzerland, and most countries' first-level divisions of 1991"),
+    ]
 
 SCHEMA = """
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT);
@@ -130,7 +143,7 @@ def main():
 
     meta = {
         "title": "Historical province-level divisions and de facto control, "
-                 + ("1900-1934" if SET == "early" else "1939-1945"),
+                 + {"early": "1900-1934", "postwar": "1946-1991"}.get(SET, "1939-1945"),
         "snapshots": ";".join(s[0] for s in SNAPSHOTS),
         "crs": "EPSG:4326", "geometry": f"GeoJSON text simplified at {TOL} deg, coordinates rounded to {ND} decimals",
         "main_view": "snapshot_full (one row per piece and snapshot, all attributes)",

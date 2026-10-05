@@ -1,8 +1,9 @@
 """Shared settings for the county-level historical database.
 
-Two sets of snapshots go through the same scripts:
-  ww2    1939-1945, six dates of the Second World War (the default)
-  early  1900-1934, four dates before it
+Three sets of snapshots go through the same scripts:
+  ww2      1939-1945, six dates of the Second World War (the default)
+  early    1900-1934, four dates before it
+  postwar  1946-1991, six dates after it
 Choose with the environment variable WW2_SET, e.g. `WW2_SET=early python3 ww2_histunits.py`.
 Each set has its own work directory, control rules and database; the present-day reference
 units (ww2_reference.py) are shared.
@@ -12,7 +13,7 @@ import os
 from common import RAW, WORK, ROOT, DB_DIR
 
 SET = os.environ.get("WW2_SET", "ww2")
-assert SET in ("ww2", "early"), SET
+assert SET in ("ww2", "early", "postwar"), SET
 WW2_RAW = RAW / "ww2"
 GB = RAW / "geoboundaries"
 REF_WORK = WORK / "ww2"            # present-day reference units, shared by both sets
@@ -36,12 +37,23 @@ SNAPSHOTS_EARLY = [
     ("1918-11-11", "贡比涅停战协定生效，第一次世界大战结束", "The Armistice of Compiègne"),
     ("1934-10-16", "中央红军开始长征", "The Long March begins"),
 ]
-SNAPSHOTS = SNAPSHOTS_EARLY if SET == "early" else SNAPSHOTS_WW2
+SNAPSHOTS_POSTWAR = [
+    ("1946-06-26", "国共内战全面爆发（中原突围）", "Full-scale Chinese Civil War begins"),
+    ("1947-08-15", "印度、巴基斯坦分治独立", "Partition and independence of India and Pakistan"),
+    ("1948-09-12", "辽沈战役开始；朝鲜半岛南北分立", "Liaoshen campaign begins; two Korean states"),
+    ("1949-10-01", "中华人民共和国成立", "Founding of the People's Republic of China"),
+    ("1953-07-27", "朝鲜停战协定签署", "Korean Armistice Agreement"),
+    ("1991-12-26", "苏联解体", "Dissolution of the Soviet Union"),
+]
+SNAPSHOTS = {"early": SNAPSHOTS_EARLY, "postwar": SNAPSHOTS_POSTWAR}.get(SET, SNAPSHOTS_WW2)
 SNAP_DATES = [s[0] for s in SNAPSHOTS]
 
 if SET == "early":
     WW2_DB = DB_DIR / "divisions_1900_1934.sqlite"
     RULES = ROOT / "curated" / "region_control_1900_1934.csv"
+elif SET == "postwar":
+    WW2_DB = DB_DIR / "divisions_1946_1991.sqlite"
+    RULES = ROOT / "curated" / "region_control_1946_1991.csv"
 else:
     WW2_DB = DB_DIR / "ww2_divisions_1939_1945.sqlite"
     RULES = ROOT / "curated" / "ww2_region_control.csv"

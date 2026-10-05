@@ -38,20 +38,20 @@ import shapefile
 from pyproj import Transformer
 from shapely import STRtree, voronoi_polygons, wkb
 from shapely import transform as shp_transform
-from shapely.geometry import MultiPoint, Point, mapping, shape
+from shapely.geometry import MultiPoint, Point, Polygon, mapping, shape
 from shapely.ops import unary_union
 
 import topo
 from build_database import Namer
 from common import RAW, ROOT
-from ww2_common import REF_WORK, SNAPSHOTS, UNCOVERED, WW2_RAW, WW2_WORK
+from ww2_common import REF_WORK, SET, SNAPSHOTS, UNCOVERED, WW2_RAW, WW2_WORK
 from ww2_geo import (clip_to, diff, eq_area_km2, fix_rings, gb_path, inter, norm, opening, polys, read_geojson,
                      read_projected, union)
 from ww2_territories import island_unit
 
 LAW = WW2_RAW / "lawson"
 EA = ROOT / "curated" / "east_asia"
-OHM = RAW / "ohm" / "areas_1900_45.jsonl"
+OHM = RAW / "ohm" / "areas_1900_91.jsonl"
 DATES = [s[0] for s in SNAPSHOTS]
 TIER_ZH = {1: "县级", 2: "地区级", 3: "省级", 4: "大区级", 5: "整个政治单元", 6: "岛屿属地"}
 TIER_EN = {1: "county", 2: "district", 3: "province", 4: "region", 5: "whole unit", 6: "territory"}
@@ -98,7 +98,7 @@ def taiwan():
     for p, g in read_projected(LAW / "taiwan_1930.geojson", 3826):
         out.append(cand(f"TW1930-{p['ID']}", p["NAME"], 1, 1, g,
                         "Academia Sinica, Taiwan 1930 gun/shi boundaries (CC BY-NC-SA 4.0), via K. Lawson",
-                        "historical_1930", "郡/市", name_zh=p["NAMEC"], start="1920-10-01"))
+                        "historical_1930", "郡/市", name_zh=p["NAMEC"], start="1920-10-01", end=TAIWAN_ROC[0]))
     return out
 
 
@@ -148,7 +148,7 @@ def korea():
                 out.append(cand(f"KR1914-{key}-{gun}", gun, 1, 2, g,
                                 "Reconstructed (Voronoi of township and facility points) from NIKH Modern Geographic "
                                 "Information DB 1914-1926, clipped to K. Lawson's 13 provinces",
-                                "reconstructed_1914_1926", "郡/府", name_zh=gun, start="1914-04-01"))
+                                "reconstructed_1914_1926", "郡/府", name_zh=gun, start="1914-04-01", end=KOREA_END))
     return out
 
 
@@ -158,7 +158,7 @@ def burma():
         name = p.get("name") or f"{p.get('group') or 'Burma'} (unit {k})"
         out.append(cand(f"MM1931-{k:03d}", name, 1, 3, g, "Burma 1931 census districts and states, traced by "
                         "K. Lawson (CC0)", "historical_1931", "district / state", parent_hint=p.get("group") or None,
-                        start="1897-05-01"))
+                        start="1897-05-01", end="1974-01-02"))
     return out
 
 
@@ -179,6 +179,9 @@ def ohm():
         lv = t.get("admin_level")
         if lv not in OHM_TIER or t.get("name") in OHM_SKIP:
             continue
+        sd, ed = ohm_date(t.get("start_date")), ohm_date(t.get("end_date"), True)
+        if not any((sd is None or sd <= d) and (ed is None or ed >= d) for d in DATES):
+            continue  # not in force on any date of this set
         g = polys(fix_rings(wkb.loads(o["wkb"], hex=True)))
         if g is None:
             continue
@@ -189,8 +192,7 @@ def ohm():
         out.append(cand(f"OHM-r{o['id']}", name, tier, prio, g,
                         f"OpenHistoricalMap relation {o['id']} (CC0), planet 2026-10-03", "ohm_dated",
                         t.get("border_type") or f"admin_level {lv}", name_zh=zh, name_en=t.get("name:en"),
-                        start=ohm_date(t.get("start_date")), end=ohm_date(t.get("end_date"), True),
-                        ohm_level=int(lv), wikidata=t.get("wikidata")))
+                        start=sd, end=ed, ohm_level=int(lv), wikidata=t.get("wikidata")))
     return out
 
 
@@ -204,6 +206,14 @@ RECON = "reconstructed_from_1928_outlines"
 RECON_NOTE = ("outline of the province of 1928-45 (ENP-China, K. Lawson), merged or split to the units of this "
               "period; the boundaries between provinces moved little, those with Mongolia and Tibet more")
 QING = ("1885-01-01", "1911-10-09")      # after Xinjiang became a province; until the Wuchang uprising
+SURRENDER = "1945-09-02"                 # Manchukuo, Mengjiang and Kwantung end with the Japanese surrender
+ROC_END = "1949-09-30"                   # the Republic's provinces on the mainland, until the People's Republic
+KOREA_END = "1946-07-31"                 # the 13 provinces of 1896, until Jeju and Seoul were separated (August 1946)
+TAIWAN_ROC = ("1945-10-24", "1945-10-25")  # Japanese prefectures until the handover; Taiwan Province from the next day
+# When the princely states of 1931 were merged into the provinces and unions of India and Pakistan
+PRINCELY_END = {"Bastar": "1947-12-31", "Cooch Behar": "1949-12-31", "Hyderbad": "1956-10-31",
+                "Kashmir and Jammu": "1947-10-25", "Khairpur": "1955-10-13", "Madras States": "1949-06-30",
+                "Mysore": "1956-10-31", "Punjab States": "1948-07-14", "Tripura": "1949-10-14"}
 BEIYANG = ("1914-06-01", "1928-10-16")   # the special regions of 1914; until the provinces of 1928
 ROC_EARLY = ("1928-10-17", "1938-12-31")
 
@@ -289,34 +299,37 @@ def east_asia():
             if g.contains(Point(x, y)):
                 n_en, n_zh = en, z
         out.append(cand(f"MJ1940-{k}", n_en, 3, 0, g, "Mengjiang 1940, traced by K. Lawson", "historical_1940",
-                        "政厅 (Mengjiang)", name_zh=n_zh, start="1937-10-28"))
+                        "政厅 (Mengjiang)", name_zh=n_zh, start="1937-10-28", end=SURRENDER))
     for p, g in read_geojson(LAW / "manchukuo-provinces-v2.geojson"):
         out.append(cand(f"MK-{p['fid']}", p["Name"], 3, 1, g, "Manchukuo provinces c. 1941, traced by K. Lawson",
-                        "historical_1941", "省 (Manchukuo)", name_zh=p.get("Name_zh"), start="1939-06-01"))
+                        "historical_1941", "省 (Manchukuo)", name_zh=p.get("Name_zh"), start="1939-06-01", end=SURRENDER))
     kw = polys(unary_union([g for _, g in read_geojson(LAW / "kwantung-1935.geojson")]))
     out.append(cand("KW1935", "Kwantung Leased Territory", 2, 0, kw, "Kwantung 1935, traced by K. Lawson",
-                    "historical_1935", "租借地", name_zh="关东州", start="1898-03-27"))
+                    "historical_1935", "租借地", name_zh="关东州", start="1898-03-27", end=SURRENDER))
     alias = {"Tibet": "Xizang", "Rehe": "Jehol", "Chahar": "Chahaer"}
     roc = {}
     for p, g in read_geojson(LAW / "republican-china-provinces-v5.geojson"):
         n = alias.get(p["name"].strip(), p["name"].strip())
         roc[n] = g
-        # Xikang became a province in 1939, taking the Ya'an and Xichang areas from Sichuan
+        # Xikang became a province in 1939, taking the Ya'an and Xichang areas from Sichuan; the three provinces
+        # of the north-east became nine after the war; the rest lasted until the People's Republic
         start = "1939-01-01" if n in ("Xikang", "Sichuan") else "1928-10-17"
+        end = SURRENDER  # after the war: postwar_china()
         out.append(cand(f"ROC-{norm(n)}", n, 3, 2, g, "Republican China provinces 1928-1945 (ENP-China, adjusted by "
-                        "K. Lawson)", "historical_1928_1945", "省 (ROC)", name_zh=zh(n), start=start))
+                        "K. Lawson)", "historical_1928_1945", "省 (ROC)", name_zh=zh(n), start=start, end=end))
     out += early_china(roc)
+    out += postwar_china(roc)
     for key, z, en, g in korea_provinces():
         out.append(cand(f"KR-{key}", en, 3, 3, g, "Korea, 13 provinces, traced by K. Lawson", "historical_1941",
-                        "道", name_zh=z, start="1896-08-04"))
+                        "道", name_zh=z, start="1896-08-04", end=KOREA_END))
     for p, g in read_projected(LAW / "taiwan_1930_shu.geojson", 3826):
         out.append(cand(f"TWS-{norm(p['NAME'])}", p["NAME"], 3, 4, g, "Academia Sinica, Taiwan 1930 prefectures, "
                         "via K. Lawson", "historical_1930", p.get("TYPE") or "州/庁", name_zh=p["NAME"],
-                        start="1920-10-01"))
+                        start="1920-10-01", end=TAIWAN_ROC[0]))
     for p, g in read_geojson(LAW / "dei-1941-admin.geojson"):
         out.append(cand(f"DEI-{p['fid']}", p["name"], 2, 1, g, "Dutch East Indies 1941 residencies, traced by "
                         "K. Lawson", "historical_1941", "residentie", parent_hint=p.get("gouvernement"),
-                        start="1938-01-01"))
+                        start="1938-01-01", end="1950-08-14"))  # the unitary republic's provinces followed
         # before the Borneo governorate (1938) its residencies answered to Batavia directly
         gov = p.get("gouvernement")
         out.append(cand(f"DEI26-{p['fid']}", p["name"], 2, 1, g, "Dutch East Indies residencies, 1941 outlines traced "
@@ -327,14 +340,225 @@ def east_asia():
         n = p["name"] + (f" ({p['name_french']})" if p.get("name_french") and p["name_french"] != p["name"] else "")
         out.append(cand(f"FIC-{k:03d}", n, 2, 2, g, "French Indochina provinces, traced by K. Lawson",
                         "historical_1941", "province", parent_hint=p.get("protectorate"),
-                        start="1907-03-23" if p.get("ceded") else None))  # ceded by Siam in 1904 and 1907
+                        start="1907-03-23" if p.get("ceded") else None, end="1954-07-21"))  # Siam 1904/07; Geneva
     for k, (p, g) in enumerate(read_geojson(LAW / "adm2_PHL_1939.json")):
         out.append(cand(f"PH1939-{k:02d}", p["shapeName"], 3, 5, g, "Philippine provinces 1939, via K. Lawson",
-                        "historical_1939", "province", start="1917-01-01"))
+                        "historical_1939", "province", start="1917-01-01", end="1959-12-31"))
     for p, g in read_geojson(LAW / "princely-states-india-1931-v1.2026.8.11.geojson"):
         if p.get("name"):
             out.append(cand(f"IPS-{p['fid']}", p["name"], 3, 30, g, "Indian princely states 1931, traced by "
-                            "K. Lawson", "historical_1931", "princely state"))
+                            "K. Lawson", "historical_1931", "princely state", end=PRINCELY_END.get(p["name"])))
+    return out
+
+
+# ---------------------------------------------------------------- China, Taiwan and Lüda after the war
+
+# Provinces of 1946-54 that changed shape: their counties (present-day outlines, the reference layer)
+# from curated/china_counties_1946_1954.csv. Key -> (English, Chinese, kind). The 1928-45 provinces
+# (ROC-*) end with the war; after it each is a unit of its own period (ROC1945-*, PRC49-*, PRC53-*).
+CN_PROV = {
+    "Liaoning": ("Liaoning", "辽宁省", "省 (ROC)"), "Andong": ("Andong", "安东省", "省 (ROC)"),
+    "Liaobei": ("Liaobei", "辽北省", "省 (ROC)"), "Jilin": ("Jilin", "吉林省", "省"),
+    "Songjiang": ("Songjiang", "松江省", "省"), "Hejiang": ("Hejiang", "合江省", "省 (ROC)"),
+    "Heilongjiang": ("Heilongjiang", "黑龙江省", "省"), "Nenjiang": ("Nenjiang", "嫩江省", "省 (ROC)"),
+    "Xingan": ("Xing'an", "兴安省", "省 (ROC)"), "Liaodong": ("Liaodong", "辽东省", "省 (PRC)"),
+    "Liaoxi": ("Liaoxi", "辽西省", "省 (PRC)"), "Shenyang": ("Shenyang", "沈阳市", "中央直辖市"),
+    "IMAR": ("Inner Mongolia Autonomous Region", "内蒙古自治区", "自治区"),
+    "Rehe": ("Rehe", "热河省", "省"), "Chahar": ("Chahar", "察哈尔省", "省"), "Suiyuan": ("Suiyuan", "绥远省", "省"),
+    "Pingyuan": ("Pingyuan", "平原省", "省 (PRC)"), "Hebei": ("Hebei", "河北省", "省"), "Shanxi": ("Shanxi", "山西省", "省"),
+    "Henan": ("Henan", "河南省", "省"), "Shandong": ("Shandong", "山东省", "省"), "Ningxia": ("Ningxia", "宁夏省", "省"),
+}
+CN_ROC_KEY = {"Rehe": "Jehol", "Chahar": "Chahaer", "Suiyuan": "Suiyuan", "Hebei": "Hebei", "Shanxi": "Shanxi",
+              "Henan": "Henan", "Shandong": "Shandong", "Ningxia": "Ningxia"}
+NINE = ("Liaoning", "Andong", "Liaobei", "Jilin", "Songjiang", "Hejiang", "Heilongjiang", "Nenjiang", "Xingan")
+PRC49 = ("1949-10-01", "1952-11-14")   # Pingyuan and Chahar abolished on 15 November 1952
+PRC53 = ("1952-11-15", "1954-06-18")   # Liaodong and Liaoxi merged in 1954, the other regions soon after
+YANGTZE_SOUTH = Polygon([(115.0, 29.75), (115.9, 29.75), (116.5, 30.0), (117.05, 30.47), (117.5, 30.72), (117.85, 31.05),
+                         (118.28, 31.42), (118.36, 31.6), (118.45, 31.8), (118.65, 32.0), (118.75, 32.15), (119.4, 32.25),
+                         (119.75, 32.25), (120.2, 32.0), (120.6, 31.97), (121.0, 31.85), (121.9, 31.5), (123.0, 31.5),
+                         (123.0, 27.0), (115.0, 27.0)])  # land south and east of the lower Yangtze (approximate line)
+CHAMDO = {"Karub District", "Jomda County", "Gonjo County", "Riwoqê County", "Dêngqên County", "Zhag'yab County",
+          "Baxoi County", "Zogang County", "Markam County", "Lhorong County", "Banbar County"}
+CN_SRC = ("Counties (present-day outlines, geoBoundaries) grouped as in curated/china_counties_1946_1954.csv, "
+          "joined to the 1928-45 provincial outlines (ENP-China, K. Lawson) where the province kept them")
+CN_NOTE = ("boundaries approximate: the province is put together from present-day counties, so its edges follow "
+           "today's county lines")
+
+
+def ref_lookup(iso):
+    """Present-day reference units of one country: (name, rounded label point) -> geometry."""
+    rows = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False)
+    rows = rows[rows.iso3 == iso]
+    feats = {f["properties"]["ref_id"]: f for f in json.load(open(REF_WORK / "ref_units.geojson"))["features"]}
+    return [(r.name, r.label_lon, r.label_lat, shape(feats[r.ref_id]["geometry"])) for r in rows.itertuples()]
+
+
+def postwar_china(roc):
+    """Provinces of China after the war: the nine provinces of the north-east (1945-49), Taiwan Province, Lüda,
+    and the provinces of the People's Republic as they stood in 1949-52 and 1952-54."""
+    if SET != "postwar" or not (ROOT / "curated" / "china_counties_1946_1954.csv").exists():
+        return []
+    xw = pd.read_csv(ROOT / "curated" / "china_counties_1946_1954.csv")
+    refs = ref_lookup("CHN")
+    tree = STRtree([Point(x, y) for _, x, y, _ in refs])
+
+    def county(name, x, y):
+        for i in tree.query(Point(x, y).buffer(0.08)):
+            if refs[i][0] == name:
+                return refs[i][3]
+        raise KeyError(name)
+    geom = {(r.county, r.lon, r.lat): county(r.county, r.lon, r.lat) for r in xw.itertuples()}
+    out = []
+    kw = polys(unary_union([g for _, g in read_geojson(LAW / "kwantung-1935.geojson")]))
+    out.append(cand("KW1945", "Port Arthur and Dalny (Lüda)", 3, 0, kw, "Kwantung 1935, traced by K. Lawson",
+                    "historical_1935", "租借地 / 行政区", name_zh="旅大（旅顺、大连）", start="1945-09-03",
+                    end="1954-08-01", note="Soviet naval base under the treaty of 14 August 1945; a municipality of "
+                    "the People's Republic directly under the centre in 1953-54"))
+    tw = polys(unary_union([g for _, g in read_projected(LAW / "taiwan_1930_shu.geojson", 3826)]))
+    out.append(cand("TW1945", "Taiwan Province", 3, 1, tw, "Union of the Taiwan 1930 prefectures (Academia Sinica, via "
+                    "K. Lawson)", "historical_1930", "省", name_zh="台湾省", start=TAIWAN_ROC[1], end="1979-06-30"))
+
+    def group(col, key):
+        gs = [geom[(r.county, r.lon, r.lat)] for r in xw.itertuples() if getattr(r, col) == key]
+        return polys(union(gs)) if gs else None
+
+    def build(col, key, uid, start, end, roc_name=None):
+        en, z, kind = CN_PROV[key]
+        mine = group(col, key)
+        others = polys(union([geom[(r.county, r.lon, r.lat)] for r in xw.itertuples()
+                              if getattr(r, col) != key]))
+        if roc_name:
+            g = polys(union([roc[roc_name], mine])) if mine is not None else roc[roc_name]
+            g = polys(diff(g, others)) if others is not None else g
+            src, basis, note = CN_SRC, "reconstructed_from_1928_outlines", RECON_NOTE
+        else:
+            g = mine
+            src, basis, note = CN_SRC, "reconstructed_from_present_day_counties", CN_NOTE
+        if g is not None:
+            out.append(cand(uid, en, 3, 1, g, src, basis, kind, name_zh=z, start=start, end=end, note=note))
+        return g
+
+    for key in NINE:
+        build("roc_1946", key, f"ROC1945-{norm(key)}", "1945-09-03", ROC_END)
+    for key, roc_name in CN_ROC_KEY.items():  # the 1928-45 outlines, closed up against the nine provinces
+        build("roc_1946", key, f"ROC1945-{norm(key)}", "1945-09-03", ROC_END, roc_name)
+    built = {}
+    for era, (start, end), col in (("49", PRC49, "prc_1949"), ("53", PRC53, "prc_1953")):
+        keys = sorted(set(xw[col]) - {"Luda"})
+        for key in keys:
+            built[(era, key)] = build(col, key, f"PRC{era}-{norm(key)}", start, end, CN_ROC_KEY.get(key))
+    # a province the same in both periods is one unit
+    by_uid = {c["uid"]: c for c in out}
+    for key in CN_PROV:
+        a, b = built.get(("49", key)), built.get(("53", key))
+        if a is not None and b is not None and a.equals(b):
+            by_uid[f"PRC49-{norm(key)}"]["end"] = PRC53[1]
+            out.remove(by_uid[f"PRC53-{norm(key)}"])
+    # the rest of the Republic's provinces carried over; Jiangsu and Anhui split at the Yangtze in 1949-52,
+    # Chamdo apart from Xikang and Tibet in 1950-55
+    chamdo = polys(union([g for n, _, _, g in refs if n in CHAMDO]))
+    touched = {"Jehol", "Chahaer", "Suiyuan", "Hebei", "Shanxi", "Henan", "Shandong", "Ningxia", "Liaoning", "Jilin",
+               "Heilongjiang"}
+    china = pd.read_csv(EA / "china.csv").set_index("key")
+    simp = str.maketrans("廣東甘肅貴雲陝蘇寧熱綏遼黑龍藏灣閩浙", "广东甘肃贵云陕苏宁热绥辽黑龙藏湾闽浙")
+    zh = lambda n: (china["zh"].get(n).translate(simp) + ("" if n == "Xizang" else "省")) if n in china.index else None
+    src = "Republican China provinces 1928-1945 (ENP-China, adjusted by K. Lawson), kept by the People's Republic"
+    for n, g in roc.items():
+        if n in touched:
+            continue
+        z = zh(n)
+        out.append(cand(f"ROC1945-{norm(n)}", n, 3, 2, g, "Republican China provinces 1928-1945 (ENP-China, adjusted by "
+                        "K. Lawson)", "historical_1928_1945", "省 (ROC)", name_zh=z, start="1945-09-03", end=ROC_END))
+        if n in ("Jiangsu", "Anhui"):
+            south, north = polys(inter(g, YANGTZE_SOUTH)), polys(diff(g, YANGTZE_SOUTH))
+            for half, gg, en_, zz in (("south", south, f"South {n}", "南"), ("north", north, f"North {n}", "北")):
+                pz = {"Jiangsu": "苏", "Anhui": "皖"}[n]
+                out.append(cand(f"PRC49-{norm(n)}-{half}", f"{en_} Administrative Region", 3, 1, gg, src + "; split at "
+                                "the Yangtze", "reconstructed_from_1928_outlines", "行署区", name_zh=f"{pz}{zz}行署区",
+                                start=PRC49[0], end="1952-08-06" if n == "Anhui" else PRC49[1],
+                                note="the 1928-45 province cut along the Yangtze (approximate line)"))
+            out.append(cand(f"PRC53-{norm(n)}", n, 3, 1, g, src, "historical_1928_1945", "省", name_zh=z,
+                            start="1952-08-07" if n == "Anhui" else PRC53[0], end=PRC53[1]))
+            continue
+        if n in ("Xikang", "Xizang") and chamdo is not None and g.intersection(chamdo).area > 0.01 * chamdo.area:
+            out.append(cand(f"PRC49-{norm(n)}", n, 3, 1, g, src, "historical_1928_1945", "省" if n == "Xikang" else
+                            "地方", name_zh=z, start=PRC49[0], end="1950-10-18"))
+            out.append(cand(f"PRC50-{norm(n)}", n, 3, 1, polys(diff(g, chamdo)), src + "; less the Chamdo area",
+                            "reconstructed_from_1928_outlines", "省" if n == "Xikang" else "地方", name_zh=z,
+                            start="1950-10-19", end=PRC53[1], note="without the Chamdo area (present-day Qamdo)"))
+            continue
+        out.append(cand(f"PRC49-{norm(n)}", n, 3, 1, g, src, "historical_1928_1945", "省", name_zh=z, start=PRC49[0],
+                        end=PRC53[1]))
+    if chamdo is not None:
+        out.append(cand("PRC50-chamdo", "Chamdo Area", 3, 0, chamdo, "Present-day Qamdo prefecture (geoBoundaries "
+                        "counties)", "present_day_outline_same_unit", "地区", name_zh="昌都地区", start="1950-10-19",
+                        end="1956-04-21", note="under the central government from 1950 until the Tibet preparatory "
+                        "committee (1956); present-day outline of Qamdo"))
+    return out
+
+
+# ---------------------------------------------------------------- present-day outlines of the same units, 1946-91
+
+def present_day_postwar():
+    """Units whose present-day outline (geoBoundaries) is the outline they had, or the union of the present-day
+    units they split into: curated/present_day_units_1946_1991.csv. A member is a first-level name of the row's
+    country (iso3, or iso3/ADM2 for second-level), or ISO:Name / ISO:* in another country's file; "*" in the name
+    column stands for each remaining unit of the file on its own."""
+    path = ROOT / "curated" / "present_day_units_1946_1991.csv"
+    if SET != "postwar" or not path.exists():
+        return []
+    tab = pd.read_csv(path, dtype=str).fillna("")
+    files = {}
+
+    def units(iso, lv="ADM1"):
+        if (iso, lv) not in files:
+            files[(iso, lv)] = [((p["shapeName"] or "").replace("\xa0", " ").strip(), g)
+                                for p, g in read_geojson(gb_path(iso, lv)) if g is not None]
+        return files[(iso, lv)]
+    out = []
+    used = defaultdict(list)  # (iso, level) -> [(start, end, names)]
+    rows = tab.to_dict("records")
+    for wild in (False, True):
+        for k, r in enumerate(rows):
+            if (r["name"] == "*") != wild:
+                continue
+            iso, _, lv = r["iso3"].partition("/")
+            lv = lv or "ADM1"
+            start, end = r["start"] or None, r["end"] or None
+            prio = int(r["prio"] or 5)
+            if wild:
+                taken = set()
+                for s0, e0, names in used[(iso, lv)]:
+                    if (end is None or s0 is None or s0 <= end) and (start is None or e0 is None or e0 >= start):
+                        taken |= names
+                for n, g in units(iso, lv):
+                    if n not in taken:
+                        out.append(cand(f"PD-{iso}-{norm(n)}-{start[:4]}", n.strip(), 3, prio, g,
+                                        f"Present-day outline (geoBoundaries {iso} {lv}) of the same unit",
+                                        "present_day_outline_same_unit", r["kind"], start=start, end=end,
+                                        note=r["note"] or None))
+                continue
+            gs, names = [], set()
+            for m in r["members"].split("|"):
+                m = m.strip()
+                fiso, flv, nm = iso, lv, m
+                if ":" in m:
+                    pre, nm = m.split(":", 1)
+                    fiso, _, flv = pre.partition("/")
+                    flv = flv or "ADM1"
+                hit = [g for n, g in units(fiso, flv) if nm == "*" or n == nm]
+                if not hit:
+                    raise KeyError(f"{r['iso3']} {r['name']}: no unit {m}")
+                gs += hit
+                if fiso == iso and flv == lv:
+                    names |= {n for n, _ in units(fiso, flv) if nm == "*" or n == nm}
+            used[(iso, lv)].append((start, end, names))
+            one = len(gs) == 1
+            out.append(cand(f"PD-{iso}-{norm(r['name'])}-{(start or '0000')[:4]}", r["name"], 3, prio,
+                            polys(union(gs)), f"Present-day outline (geoBoundaries {iso} {lv}) of the same unit" if one
+                            else f"Union of present-day units (geoBoundaries) that the unit later split into",
+                            "present_day_outline_same_unit" if one else "present_day_outline_merged", r["kind"],
+                            name_zh=r["name_zh"] or None, start=start, end=end, note=r["note"] or None))
     return out
 
 
@@ -350,6 +574,10 @@ FRANCE_1939 = {  # 1939 departement <- present-day departements (most are one-to
     "Charente-Inférieure": ["Charente-Maritime"], "Côtes-du-Nord": ["Côtes d'Armor"],
 }
 ALSACE = ("Bas-Rhin", "Haut-Rhin", "Moselle")
+FRANCE_END = "1982-03-01"   # the regions of the decentralisation laws became the first-level units
+# renamed before the post-war dates: Charente-Inférieure became Charente-Maritime on 4 September 1941
+# (the wartime dates keep the 1939 name)
+FRANCE_RENAMED = {"Charente-Inférieure": ("1945-09-02", "Charente-Maritime")}
 ALSACE_DE_END, ALSACE_FR = "1918-11-21", "1918-11-22"   # French troops entered Strasbourg on 22 November 1918
 FRANCE_APPROX = {"Seine": "the 1968 reform moved 43 communes from Seine-et-Oise into the three new departements "
                           "around Paris, so this outline is larger than the 1939 Seine",
@@ -373,12 +601,17 @@ def from_present_day():
         used.update(parts)
         out.append(cand(f"FR1939-{norm(dep)}", dep, 3, 7, g, "French departements of 1939, outline merged from "
                         "present-day departements (geoBoundaries)", "present_day_outline_same_unit", "département",
-                        note=FRANCE_APPROX.get(dep)))
+                        note=FRANCE_APPROX.get(dep), end=FRANCE_RENAMED.get(dep, (FRANCE_END,))[0]))
+        if dep in FRANCE_RENAMED:  # the same departement under its post-war name
+            _, new = FRANCE_RENAMED[dep]
+            out.append(cand(f"FR1946-{norm(new)}", new, 3, 7, g, "French departements, outline from present-day data "
+                            "(unchanged unit)", "present_day_outline_same_unit", "département", start="1945-09-03",
+                            end=FRANCE_END))
     for name, g in present.items():
         if name not in used:
             out.append(cand(f"FR1939-{norm(name)}", name, 3, 7, g, "French departements of 1939, outline from "
                             "present-day data (unchanged unit)", "present_day_outline_same_unit", "département",
-                            note=FRANCE_APPROX.get(name), start=ALSACE_FR if name in ALSACE else None))
+                            note=FRANCE_APPROX.get(name), start=ALSACE_FR if name in ALSACE else None, end=FRANCE_END))
     # 1871-1918: the three departements were the German Reichsland of Alsace-Lorraine
     out.append(cand("DE1871-elsass-lothringen", "Reichsland Elsaß-Lothringen", 3, 7,
                     polys(unary_union([present[x] for x in ALSACE])), "Union of the present-day departements Bas-Rhin, "
@@ -517,7 +750,7 @@ def parents(units, cands, date):
 
 
 def load_inputs():
-    cands = us_counties() + taiwan() + korea() + burma() + east_asia() + from_present_day() + ohm()
+    cands = us_counties() + taiwan() + korea() + burma() + east_asia() + from_present_day() + present_day_postwar() + ohm()
     for c in cands:
         if not c["geom"].is_valid:
             c["geom"] = polys(fix_rings(c["geom"]))

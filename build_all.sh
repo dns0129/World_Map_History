@@ -15,10 +15,10 @@ python3 export_years.py
 python3 render_maps.py
 python3 verify_database.py
 
-# 1900-1945 historical administrative divisions, control databases and interactive maps
+# 1900-1991 historical administrative divisions, control databases and interactive maps
 #   (also needs: pip install osmium)
 python3 ww2_fetch.py          # geoBoundaries, US county atlas, K. Lawson's East Asia layers
-python3 ww2_ohm.py            # OpenHistoricalMap planet -> administrative areas dated 1900-1945
+python3 ww2_ohm.py            # OpenHistoricalMap planet -> administrative areas dated 1900-1991
 python3 ww2_reference.py      # present-day reference names for the control rules (internal)
 python3 ww2_histunits.py      # divisions in force on each of the six dates
 printf "%s\n" 1939-09-01 1940-07-01 1941-12-07 1942-11-01 1944-06-06 1945-09-02 | xargs -P 3 -I{} python3 ww2_snapshots.py {}
@@ -31,6 +31,14 @@ python3 ww2_histunits.py
 printf "%s\n" 1900-08-14 1914-08-04 1918-11-11 1934-10-16 | xargs -P 2 -I{} python3 ww2_snapshots.py {}
 python3 ww2_provinces.py
 python3 ww2_database.py      # db/divisions_1900_1934.sqlite
+python3 ww2_coverage.py
+# the same steps for the six dates after the war (1946-06-26 ... 1991-12-26), in work/postwar
+export WW2_SET=postwar
+printf "%s\n" 1946-06-26 1947-08-15 1948-09-12 1949-10-01 1953-07-27 1991-12-26 | xargs -P 3 -I{} python3 ww2_histunits.py --part {}
+python3 ww2_histunits.py --merge
+printf "%s\n" 1946-06-26 1947-08-15 1948-09-12 1949-10-01 1953-07-27 1991-12-26 | xargs -P 3 -I{} python3 ww2_snapshots.py {}
+python3 ww2_provinces.py
+python3 ww2_database.py      # db/divisions_1946_1991.sqlite
 python3 ww2_coverage.py
 unset WW2_SET
 python3 ww2_relief.py         # shaded relief sheets for the maps (Terrarium elevation tiles)

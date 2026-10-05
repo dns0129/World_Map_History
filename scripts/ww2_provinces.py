@@ -1,4 +1,4 @@
-"""Province-level partition of the six 1939-1945 snapshots.
+"""Province-level partition of the snapshots of one set (1939-1945 by default; see ww2_common.py).
 
 ww2_histunits.py lays down the finest historical division known for each place
 (county, district, province, region, whole country). This step dissolves every
@@ -88,6 +88,9 @@ ZH = {
 }
 # Provinces known only under a later name: name -> (date of the new name, earlier name, earlier zh)
 RENAMED_BEFORE = {"Federated Shan States": ("1922-10-01", "Shan States", "掸邦（南、北掸邦）")}
+# ... and under a later name from the date given (Burma's independence constitution of 1948)
+RENAMED_AFTER = {"Federated Shan States": ("1948-01-04", "Shan State", "掸邦"),
+                 "Karenni States": ("1948-01-04", "Karenni State", "克伦尼邦")}
 # Layers that divide their whole country into provinces: a stray OpenHistoricalMap unit with no
 # ancestor inside such a country is one of their counties, not a province of its own
 COMPLETE = {"AHCB", "KR1914", "TW1930", "MM1931"}
@@ -333,6 +336,8 @@ def groups_for(date, hist, ugeom, rows, resolve):
     for g in out:
         if g["name"] in RENAMED_BEFORE and date < RENAMED_BEFORE[g["name"]][0]:
             g["name"], g["name_zh"] = RENAMED_BEFORE[g["name"]][1:]
+        elif g["name"] in RENAMED_AFTER and date >= RENAMED_AFTER[g["name"]][0]:
+            g["name"], g["name_zh"] = RENAMED_AFTER[g["name"]][1:]
     return out
 
 
