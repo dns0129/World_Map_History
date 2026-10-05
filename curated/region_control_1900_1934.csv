@@ -68,3 +68,4 @@ snapshots,iso3,field,match,controller_name,controller_name_zh,controller_gwcode,
 1934-10-16,ESP,adm1_modern,Principado de Asturias,Contested: Asturian miners' rising (5-19 October 1934),交战区（阿斯图里亚斯矿工起义，10 月 5–19 日）,-20,contested,approximate,Suppressed by the army under Franco's direction
 1900-08-14|1914-08-04|1918-11-11|1934-10-16,CHN,adm1_modern,Hong Kong Special Administrative Region,British Hong Kong,英属香港,200,colony,whole,Not drawn by CShapes; New Territories leased 1898
 1900-08-14|1914-08-04|1918-11-11|1934-10-16,CHN,adm1_modern,Macau Special Administrative Region,Portuguese Macau,葡属澳门,235,colony,whole,Not drawn by CShapes
+1918-11-11,RUS,unit,Estonia,"German Army (Ober Ost, Baltic occupation)",德军（东方总司令部，波罗的海占领区）,255,military_occupation,whole,"Estonia as CShapes draws it beyond its present border (east of the Narva, around Pechory), where the 1897 Petrograd and Pskov governorates cross into it"
