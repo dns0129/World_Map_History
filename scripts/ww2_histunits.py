@@ -169,7 +169,10 @@ def burma():
 OHM_TIER = {"6": (1, 10), "5": (2, 10), "4": (3, 20), "3": (4, 10)}
 # Wrappers that would hide the real first-level units under them: before 1918 OpenHistoricalMap
 # draws the whole Kingdom of Hungary at level 4 above its counties (vármegye)
-OHM_SKIP = {"Magyar Királyság", "Transleithania"}
+# OpenHistoricalMap areas left to other layers: the Hungarian crown as a whole; the South Seas Mandate and
+# Kuwait, whose outlines span open sea and neighbouring land and which ww2_territories.py draws from the land
+# of the islands and of present-day Kuwait
+OHM_SKIP = {"Magyar Királyság", "Transleithania", "委任統治地域南洋群島", "مشيخة الكويت"}
 OHM_NAME = {"达里尼 Квантунская Область": ("Kwantung Leased Territory", "关东州")}
 
 
