@@ -16,7 +16,7 @@ For each snapshot date, every unit in force (work/ww2/hist_units, see ww2_histun
   * population estimate: GHS-POP 1975 at 30 arc-seconds summed per piece, scaled so the
     pieces of each political unit add up to that unit's population in the main database
     (US: to each state's census estimate)
-Outputs in work/ww2/: snapshot_<date>.csv and split_<date>.geojson (pieces whose shape
+Outputs in work/ww2/: snapshot_<date>.csv and split_<date>.wkb (pieces whose shape
 differs from their unit).
 """
 import json

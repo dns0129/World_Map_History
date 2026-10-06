@@ -8,7 +8,7 @@ different controllers, and only its names are used, never its outlines as divisi
 Level per country: the geoBoundaries level whose median area is closest to a typical
 county (about 1,500 km2), with first-level areas added where that level leaves holes.
 
-Output: work/ww2/ref_units.geojson, ref_units.csv, ref_levels.csv
+Output: work/ww2/ref_units.wkb (outlines, see ww2_geo.write_outlines), ref_units.csv, ref_levels.csv
 """
 import math
 from collections import defaultdict

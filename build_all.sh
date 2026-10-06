@@ -30,6 +30,7 @@ per_date() {
 # the steps of one set of dates (WW2_SET): divisions in force on each date, control and population,
 # counties and districts dissolved into their provinces (borders still cut them), database, coverage
 build_set() {
+  python3 ww2_histunits.py --prepare   # candidate units, shared by the per-date runs
   per_date 3 python3 ww2_histunits.py --part {}
   python3 ww2_histunits.py --merge
   per_date 4.5 python3 ww2_snapshots.py {}

@@ -22,11 +22,12 @@ finer unit covers, so the result is one partition of the land per date.
 Land outlines come from present-day data (the reference units); historical units
 are extended to that coastline where small slivers of land were left over.
 
-Output: work/ww2/hist_units.geojson (one feature per distinct unit, with the dates it
+Output: work/ww2/hist_units.wkb (one feature per distinct unit, with the dates it
 is in force) and hist_units.csv.
 """
 import hashlib
 import json
+import os
 import pickle
 import re
 import sys
@@ -684,7 +685,16 @@ def remainder(accepted, refs, units, date, namer):
     snap = defaultdict(list)
     by_unit = defaultdict(list)
     by_island = defaultdict(list)
-    for r in refs:
+    # reference units lying wholly inside one historical unit leave nothing over: found in one pass with each
+    # historical outline prepared once, and skipped below
+    ag = np.array([a["geom"] for a in accepted])
+    rg = np.array([r["geom"] for r in refs])
+    shapely.prepare(ag)
+    ai, ri = STRtree(rg).query(ag, predicate="intersects")
+    covered = set(ri[shapely.covers(ag[ai], rg[ri])].tolist())
+    for j, r in enumerate(refs):
+        if j in covered:
+            continue
         near = clip_to([accepted[k]["geom"] for k in acc_tree.query(r["geom"], predicate="intersects")], r["geom"].bounds)
         if near:
             left = opening(polys(diff(r["geom"], union(near))))
@@ -788,12 +798,31 @@ def clip_to_land(cands, refs):
     print("OpenHistoricalMap outlines cut back to land:", n, flush=True)
 
 
-def load_inputs():
+def inputs_key():
+    """Fingerprint of everything the candidate units are built from: this set, the code, and the size and
+    time of every source file (OpenHistoricalMap, geoBoundaries, the East Asia layers, the curated tables)."""
+    h = hashlib.md5(SET.encode())
+    for f in ("ww2_histunits.py", "ww2_geo.py", "ww2_common.py", "ww2_territories.py", "topo.py"):
+        h.update((ROOT / "scripts" / f).read_bytes())
+    files = [REF_WORK / "ref_units.csv", REF_WORK / "ref_units.wkb", RAW / "cshapes_2_gw.topojson", OHM]
+    for d in (WW2_RAW, RAW / "geoboundaries", ROOT / "curated"):
+        files += sorted(p for p in d.rglob("*") if p.is_file())
+    for p in files:
+        st = p.stat() if p.exists() else None
+        h.update(f"{p}|{st and st.st_size}|{st and st.st_mtime_ns}".encode())
+    return h.hexdigest()
+
+
+def candidates(refs):
+    """All candidate units of the set, kept in work/<set>/candidates.pkl for the next process that needs them
+    (the per-date runs of --part share it; `--prepare` fills it before they start)."""
+    key, path = inputs_key(), WW2_WORK / "candidates.pkl"
+    if path.exists():
+        with open(path, "rb") as f:
+            c = pickle.load(f)
+        if c["key"] == key:
+            return c["cands"]
     cands = us_counties() + taiwan() + korea() + burma() + east_asia() + from_present_day() + present_day_postwar() + ohm()
-    refs = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False).to_dict("records")
-    rgeom = read_outlines(REF_WORK / "ref_units.geojson", "ref_id")
-    for r in refs:
-        r["geom"] = rgeom[r["ref_id"]]
     for c in cands:
         if not c["geom"].is_valid:
             c["geom"] = polys(fix_rings(c["geom"]))
@@ -801,6 +830,19 @@ def load_inputs():
     for c in cands:
         c["area"] = c["geom"].area
         c["area_km2"] = eq_area_km2(c["geom"])
+    tmp = path.with_suffix(f".{os.getpid()}.tmp")
+    with open(tmp, "wb") as f:
+        pickle.dump({"key": key, "cands": cands}, f, protocol=pickle.HIGHEST_PROTOCOL)
+    tmp.replace(path)  # whole file or nothing, when several processes write it at once
+    return cands
+
+
+def load_inputs():
+    refs = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False).to_dict("records")
+    rgeom = read_outlines(REF_WORK / "ref_units.geojson", "ref_id")
+    for r in refs:
+        r["geom"] = rgeom[r["ref_id"]]
+    cands = candidates(refs)
     print("candidate units:", len(cands), pd.Series([c["basis"] for c in cands]).value_counts().to_dict(), flush=True)
     arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
     cshapes = [dict(g["properties"], geom=topo.to_shape(arcs, g)) for g in gs]
@@ -853,7 +895,11 @@ def write(per_date):
 def main(args):
     """  ww2_histunits.py [DATE ...]       all dates (or those given) in one process
       ww2_histunits.py --part DATE      one date, saved to work/<set>/hist_part_<DATE>.pkl
-      ww2_histunits.py --merge          write the outputs from the saved parts of all dates"""
+      ww2_histunits.py --merge          write the outputs from the saved parts of all dates
+      ww2_histunits.py --prepare        only build the candidate units (cached for the --part runs)"""
+    if args[:1] == ["--prepare"]:
+        load_inputs()
+        return
     if args[:1] == ["--merge"]:
         write([(d, pickle.load(open(WW2_WORK / f"hist_part_{d}.pkl", "rb"))) for d in DATES])
         return
