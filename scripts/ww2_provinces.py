@@ -22,11 +22,13 @@ Borders still cut provinces: wherever a province lies in two political units
 annexations, occupation zones), it is split into pieces along the finer units the
 controller was decided on, so the border keeps that resolution.
 
-Input: work/ww2/hist_units.* and snapshot_<date>.csv / split_<date>.geojson, or,
+Input: work/ww2/hist_units.* and snapshot_<date>.csv / split_<date>.wkb, or,
 when those are missing, a county-level release of the database (--county-db PATH;
 the 2026-10-03 release is in git history as db/ww2_divisions_1939_1945.sqlite).
-Output in work/ww2/: prov_units.csv / prov_units.geojson, prov_snapshot_<date>.csv
-and prov_split_<date>.geojson (same columns as the county-level files).
+Output in work/ww2/: prov_units.csv / prov_units.wkb, prov_snapshot_<date>.csv
+and prov_split_<date>.wkb (same columns as the county-level files).
+Each date's provinces are kept in prov_part_<date>.pkl with a fingerprint of their inputs; a date whose
+inputs did not change is read from there (--force recomputes every date).
 """
 import argparse
 import hashlib
