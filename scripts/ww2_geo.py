@@ -1,5 +1,6 @@
 """Geometry helpers shared by the 1939-1945 build."""
 import json
+import pickle
 import re
 import unicodedata
 
@@ -113,6 +114,30 @@ def opening(g, d=0.005):
 def read_geojson(path):
     d = json.load(open(path))
     return [(f["properties"], polys(shape(f["geometry"]))) for f in d["features"] if f.get("geometry")]
+
+
+def wkb_path(path):
+    return path.with_suffix(".wkb")
+
+
+def write_outlines(path, items):
+    """Outlines passed between the build steps, as {id: WKB} next to `path` (path.wkb in place of path.geojson):
+    read many times faster than GeoJSON, with the same coordinates."""
+    items = list(items)
+    blobs = shapely.to_wkb([g for _, g in items])
+    with open(wkb_path(path), "wb") as f:
+        pickle.dump({"ids": [k for k, _ in items], "wkb": list(blobs)}, f, protocol=pickle.HIGHEST_PROTOCOL)
+    if path.suffix == ".geojson" and path.exists():
+        path.unlink()  # an older build's copy would otherwise shadow nothing but take space
+
+
+def read_outlines(path, key):
+    """{id: geometry} written by write_outlines, or read from the GeoJSON of an older build (id = properties[key])."""
+    w = wkb_path(path)
+    if w.exists():
+        d = pickle.load(open(w, "rb"))
+        return dict(zip(d["ids"], shapely.from_wkb(d["wkb"])))
+    return {f["properties"][key]: shape(f["geometry"]) for f in json.load(open(path))["features"]}
 
 
 def read_projected(path, epsg):

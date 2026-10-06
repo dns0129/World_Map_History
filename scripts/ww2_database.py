@@ -11,10 +11,11 @@ import sqlite3
 
 import numpy as np
 import pandas as pd
-from shapely.geometry import mapping, shape
+from shapely.geometry import mapping
 
 from common import ROOT
 from ww2_common import RULES, SET, SNAPSHOTS, WW2_DB, WW2_WORK
+from ww2_geo import read_outlines
 
 TOL = 0.006  # degrees (~600 m) for stored geometry
 ND = 3  # decimals kept (~110 m)
@@ -135,11 +136,9 @@ def main():
                    ignore_index=True).drop_duplicates(["snapshot", "piece_id"])
     pgeom = {}
     for s in SNAPSHOTS:
-        for f in json.load(open(WW2_WORK / f"prov_split_{s[0]}.geojson"))["features"]:
-            pgeom[f["properties"]["piece_id"]] = shape(f["geometry"])
+        pgeom.update(read_outlines(WW2_WORK / f"prov_split_{s[0]}.geojson", "piece_id"))
     hist = pd.read_csv(WW2_WORK / "prov_units.csv", low_memory=False)
-    hgeom = {f["properties"]["unit_id"]: shape(f["geometry"])
-             for f in json.load(open(WW2_WORK / "prov_units.geojson"))["features"]}
+    hgeom = read_outlines(WW2_WORK / "prov_units.geojson", "unit_id")
 
     meta = {
         "title": "Historical province-level divisions and de facto control, "

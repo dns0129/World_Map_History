@@ -63,3 +63,22 @@ else:
 UNCOVERED = {"1918-11-11": "Russia (Soviet Union)"}
 
 TYPICAL_COUNTY_KM2 = 1500.0  # target size used to pick each country's county level
+
+
+def workers(n, gb_each):
+    """Worker processes for n independent jobs that each hold about gb_each GB: as many as the memory
+    available now allows (one GB kept free), at most n; WW2_POOL fixes the number instead."""
+    if os.environ.get("WW2_POOL"):
+        return max(1, min(n, int(os.environ["WW2_POOL"])))
+    try:
+        kb = next(int(line.split()[1]) for line in open("/proc/meminfo") if line.startswith("MemAvailable"))
+    except (OSError, StopIteration):
+        return 1
+    return max(1, min(n, int((kb / 2 ** 20 - 1) / gb_each)))
+
+
+if __name__ == "__main__":
+    # `python3 ww2_common.py jobs N GB` prints how many of N jobs of GB each to run at once (for xargs -P)
+    import sys
+    if sys.argv[1:2] == ["jobs"]:
+        print(workers(int(sys.argv[2]), float(sys.argv[3])))

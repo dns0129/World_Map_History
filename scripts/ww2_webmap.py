@@ -17,6 +17,7 @@ import colorsys
 import hashlib
 import json
 import math
+import multiprocessing
 import unicodedata
 from collections import Counter, defaultdict
 
@@ -30,8 +31,8 @@ from shapely.geometry import MultiPolygon, Polygon, shape
 import topo
 from common import RAW, WORK
 import cities
-from ww2_common import SNAPSHOTS, SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, WW2_WORK, WW2_OUT
-from ww2_geo import polys, union
+from ww2_common import SNAPSHOTS, SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, WW2_WORK, WW2_OUT, workers
+from ww2_geo import polys, read_outlines, union
 
 OUT = WW2_OUT / "maps" / "data"
 MODERN = WORK / "modern"
@@ -467,31 +468,34 @@ def hydro():
 
 # ---------------------------------------------------------------- main
 
+G = {}  # set in main() before the worker processes fork
+
+
+def _one_snapshot(k):
+    return G["one"](k)
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     hist = pd.read_csv(WW2_WORK / "prov_units.csv", low_memory=False)
     snaps = {s[0]: pd.read_csv(WW2_WORK / f"prov_snapshot_{s[0]}.csv", low_memory=False) for s in SNAPSHOTS}
-    hgeom = {f["properties"]["unit_id"]: shape(f["geometry"])
-             for f in json.load(open(WW2_WORK / "prov_units.geojson"))["features"]}
+    hgeom = read_outlines(WW2_WORK / "prov_units.geojson", "unit_id")
     pgeom = {}
     for s in SNAPSHOTS:
-        for f in json.load(open(WW2_WORK / f"prov_split_{s[0]}.geojson"))["features"]:
-            pgeom[f["properties"]["piece_id"]] = shape(f["geometry"])
+        pgeom.update(read_outlines(WW2_WORK / f"prov_split_{s[0]}.geojson", "piece_id"))
     # the 1900-1934 snapshots, built the same way in work/early; their ids get a prefix
     early = []
     if (EARLY / "prov_units.csv").exists():
         eh = pd.read_csv(EARLY / "prov_units.csv", low_memory=False)
         eh["unit_id"] = "E:" + eh.unit_id
         hist = pd.concat([eh, hist], ignore_index=True)
-        hgeom.update({"E:" + f["properties"]["unit_id"]: shape(f["geometry"])
-                      for f in json.load(open(EARLY / "prov_units.geojson"))["features"]})
+        hgeom.update({"E:" + k: g for k, g in read_outlines(EARLY / "prov_units.geojson", "unit_id").items()})
         for d, _, _ in SNAPSHOTS_EARLY:
             df = pd.read_csv(EARLY / f"prov_snapshot_{d}.csv", low_memory=False)
             df["piece_id"] = "E:" + df.piece_id
             df["admin_id"] = "E:" + df.admin_id
             snaps[d] = df
-            pgeom.update({"E:" + f["properties"]["piece_id"]: shape(f["geometry"])
-                          for f in json.load(open(EARLY / f"prov_split_{d}.geojson"))["features"]})
+            pgeom.update({"E:" + k: g for k, g in read_outlines(EARLY / f"prov_split_{d}.geojson", "piece_id").items()})
         early = list(SNAPSHOTS_EARLY)
     # the 1946-1991 snapshots, built the same way in work/postwar; their ids get the prefix P:
     postwar = []
@@ -499,15 +503,13 @@ def main():
         ph = pd.read_csv(POSTWAR / "prov_units.csv", low_memory=False)
         ph["unit_id"] = "P:" + ph.unit_id
         hist = pd.concat([hist, ph], ignore_index=True)
-        hgeom.update({"P:" + f["properties"]["unit_id"]: shape(f["geometry"])
-                      for f in json.load(open(POSTWAR / "prov_units.geojson"))["features"]})
+        hgeom.update({"P:" + k: g for k, g in read_outlines(POSTWAR / "prov_units.geojson", "unit_id").items()})
         for d, _, _ in SNAPSHOTS_POSTWAR:
             df = pd.read_csv(POSTWAR / f"prov_snapshot_{d}.csv", low_memory=False)
             df["piece_id"] = "P:" + df.piece_id
             df["admin_id"] = "P:" + df.admin_id
             snaps[d] = df
-            pgeom.update({"P:" + f["properties"]["piece_id"]: shape(f["geometry"])
-                          for f in json.load(open(POSTWAR / f"prov_split_{d}.geojson"))["features"]})
+            pgeom.update({"P:" + k: g for k, g in read_outlines(POSTWAR / f"prov_split_{d}.geojson", "piece_id").items()})
         postwar = list(SNAPSHOTS_POSTWAR)
     # the present-day map (modern_2026.py) rides along as the last tab
     snapshots = early + list(SNAPSHOTS) + postwar
@@ -516,10 +518,8 @@ def main():
         snapshots.append(("2026", "2026 年：当今世界", "The world in 2026"))
         hist = pd.concat([hist, pd.read_csv(MODERN / "prov_units_2026.csv", low_memory=False)], ignore_index=True)
         snaps["2026"] = pd.read_csv(MODERN / "prov_snapshot_2026.csv", low_memory=False)
-        hgeom.update({f["properties"]["unit_id"]: shape(f["geometry"])
-                      for f in json.load(open(MODERN / "prov_units_2026.geojson"))["features"]})
-        pgeom.update({f["properties"]["piece_id"]: shape(f["geometry"])
-                      for f in json.load(open(MODERN / "prov_split_2026.geojson"))["features"]})
+        hgeom.update(read_outlines(MODERN / "prov_units_2026.geojson", "unit_id"))
+        pgeom.update(read_outlines(MODERN / "prov_split_2026.geojson", "piece_id"))
         units26 = json.load(open(MODERN / "units_2026.geojson"))["features"]
         modern_ug = {f["properties"]["unit_id"]: shape(f["geometry"]) for f in units26}
         modern_zh = {f["properties"]["a3"]: f["properties"]["name_zh"] for f in units26}
@@ -561,9 +561,11 @@ def main():
     (OUT / "geo-units.bin").write_bytes(encode([ug[u] for u in unit_ids], TOL_UNIT))
     uidx = {u: i for i, u in enumerate(unit_ids)}
 
-    ctrl_geoms = []
-    summary = []
-    for snap, tzh, ten in snapshots:
+    def one_snapshot(k):
+        """The data file of one snapshot, its summary and the control-view outlines it adds (numbered from 0
+        here; shifted when the snapshots are put together)."""
+        snap, tzh, ten = snapshots[k]
+        ctrl_geoms = []
         d = snaps[snap].drop_duplicates("piece_id").reset_index(drop=True)
         modern = "country_key" in d.columns
         d["country"] = d.country_key if modern else [country_key(r) for r in d.to_dict("records")]
@@ -648,13 +650,26 @@ def main():
             "tier_count": {str(t): int(n) for t, n in hist.set_index("unit_id").loc[sorted(set(d.admin_id))]
                            .tier.value_counts().sort_index().items()},
         }
-        (OUT / f"snap-{snap}.json").write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")))
-        summary.append({"snapshot": snap, "title_zh": tzh, "title_en": ten, "pieces": len(d),
-                        "admin_units": int(d.admin_id.nunique()), "countries": len(countries),
-                        "population": int(d.population_est.sum()), "bloc_pop": doc["bloc_pop"],
-                        "tier_count": doc["tier_count"]})
+        summary = {"snapshot": snap, "title_zh": tzh, "title_en": ten, "pieces": len(d),
+                   "admin_units": int(d.admin_id.nunique()), "countries": len(countries),
+                   "population": int(d.population_est.sum()), "bloc_pop": doc["bloc_pop"],
+                   "tier_count": doc["tier_count"]}
         print(snap, "pieces", len(d), "provinces", d.admin_id.nunique(), "countries", len(countries),
               "labels", len(clabels), flush=True)
+        return doc, summary, ctrl_geoms
+
+    # the snapshots are independent: one worker process each, as many as fit in memory (forked, so they
+    # share everything loaded above)
+    G["one"] = one_snapshot
+    with multiprocessing.get_context("fork").Pool(workers(len(snapshots), 2.5)) as pool:
+        results = pool.map(_one_snapshot, range(len(snapshots)))
+    ctrl_geoms, summary = [], []
+    for doc, row, geoms in results:
+        for c in doc["countries"]:
+            c[8] += len(ctrl_geoms)  # index of the country's outline in geo-ctrl.bin
+        ctrl_geoms += geoms
+        (OUT / f"snap-{doc['snapshot']}.json").write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")))
+        summary.append(row)
     (OUT / "geo-ctrl.bin").write_bytes(encode(ctrl_geoms, TOL_CTRL))
     (OUT / "index.json").write_text(json.dumps({"snapshots": summary, "blocs": BLOCS, "tiers": TIER_ZH,
                                                 "quantum": Q}, ensure_ascii=False, indent=1))

@@ -37,7 +37,7 @@ from build_database import Namer
 from common import RAW, WORK, ROOT
 from ww2_territories import ALL_ISLANDS, island_unit
 from ww2_common import REF_WORK, RULES, SET, SNAPSHOTS, UNCOVERED, WW2_RAW, WW2_WORK
-from ww2_geo import diff, eq_area_km2, inter, opening, polys, read_geojson, union
+from ww2_geo import diff, eq_area_km2, inter, opening, polys, read_geojson, read_outlines, union, write_outlines
 
 LAW = WW2_RAW / "lawson"
 SPLIT_MIN_SHARE = 0.03
@@ -440,10 +440,9 @@ def control_pieces(g, refs_here, ctrl_of):
 
 def main(only=None):
     hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
-    hgeom = {f["properties"]["unit_id"]: shape(f["geometry"])
-             for f in json.load(open(WW2_WORK / "hist_units.geojson"))["features"]}
+    hgeom = read_outlines(WW2_WORK / "hist_units.geojson", "unit_id")
     refs = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False).to_dict("records")
-    rgeom = {f["properties"]["ref_id"]: shape(f["geometry"]) for f in json.load(open(REF_WORK / "ref_units.geojson"))["features"]}
+    rgeom = read_outlines(REF_WORK / "ref_units.geojson", "ref_id")
     for r in refs:
         r["geom"] = rgeom[r["ref_id"]]
         r["pt"] = Point(r["label_lon"], r["label_lat"])
@@ -617,10 +616,7 @@ def main(only=None):
     for snap, d in out.groupby("snapshot"):
         d.to_csv(WW2_WORK / f"snapshot_{snap}.csv", index=False)
         keep = set(d.piece_id)
-        with open(WW2_WORK / f"split_{snap}.geojson", "w") as f:
-            json.dump({"type": "FeatureCollection", "features": [
-                {"type": "Feature", "properties": {"piece_id": k}, "geometry": mapping(g)}
-                for k, g in piece_geom.items() if k in keep]}, f)
+        write_outlines(WW2_WORK / f"split_{snap}.geojson", ((k, g) for k, g in piece_geom.items() if k in keep))
     print(out.groupby("snapshot").agg(pieces=("piece_id", "count"), pop=("population_est", "sum")))
     print(out.groupby(["snapshot", "bloc"]).population_est.sum().unstack())
 
