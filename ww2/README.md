@@ -359,18 +359,17 @@ SELECT snapshot, bloc, SUM(population_est) FROM snapshot_full GROUP BY snapshot,
 
 | 文件 | 内容 |
 |---|---|
-| `geo.bin` | 所有断面用到的块（省，及被国界、战线切开的部分；填色用） |
-| `geo-admin.bin` | 省级区划轮廓（画省界用） |
-| `geo-units.bin` | CShapes 政治单元边界（阵营视图的国界） |
-| `geo-ctrl.bin` | 各断面每个国家的实际控制区，已合并成片（控制国视图的边界和选中轮廓） |
-| `admin.json` | 省级区划的静态属性（列式存储：每列为 `lut` 去重表 + `idx` 下标），`feature_admin` 把块对到所属的省，`merged` 为合并的下级单位数 |
-| `snap-<日期>.json` | 该断面出现的块、当日施行的省、阵营、可信度、估计人口和控制属性；`countries` 为控制国视图的国家（键、中英文名、颜色、阵营、人口、面积、省数、在 `geo-ctrl.bin` 中的序号、所辖地区），`country` 把每块对到国家；`nations` / `nation` 为国家视图的法理政治单元及颜色；`country_labels`、`unit_labels` 为国名的位置（经纬度）及该处可容纳的宽度和高度（Web 墨卡托单位，页面据此判断各缩放级是否显示） |
+| `geo-<日期>.bin` | 该断面用到的全部轮廓（gzip 压缩），页面只下载正在看的断面：依次为当日施行的省（`admin_active` 的顺序）、被国界或战线切开的块（`geo_feature`；没被切开的块直接用所属省的轮廓画，不重复存）、CShapes 政治单元（`units_active`）、各国的实际控制区（已合并成片，`countries` 中的序号从 0 起） |
+| `admin.bin` | 省级区划的静态属性（gzip 压缩的 JSON，列式存储：每列为 `lut` 去重表 + `idx` 下标），`feature_admin` 把块对到所属的省，`merged` 为合并的下级单位数 |
+| `snap-<日期>.json` | 该断面出现的块、当日施行的省、阵营、可信度、估计人口和控制属性；`countries` 为控制国视图的国家（键、中英文名、颜色、阵营、人口、面积、省数、控制区轮廓的序号、所辖地区），`country` 把每块对到国家；`nations` / `nation` 为国家视图的法理政治单元及颜色；`country_labels`、`unit_labels` 为国名的位置（经纬度）及该处可容纳的宽度和高度（Web 墨卡托单位，页面据此判断各缩放级是否显示） |
 | `relief/` | 地形底图：`r<缩放级>_<列>_<行>.webp` 为分层设色晕渲，`s…` 为只含明暗的山体阴影；缩放级 0–5，每级切成 2048 像素的图块，页面自己从中切出 256 像素瓦片（`ww2_relief.py` 生成） |
 | `glyphs/sans/` | 拉丁、西里尔等字母的字形（OpenMapTiles 字库的 Noto Sans）；汉字由浏览器本地绘制 |
-| `hydro.json` | Natural Earth 1:1000 万河流与湖泊（`k` 为 `r` 河流、`l` 湖泊、`n` 标注河名用的拼接河道；`r` 为等级，`n` 为中文名；湖泊为 1939–45 年的样子） |
-| `hydro-detail.json` | 欧洲、北美的细部河流与湖泊，放大后才载入 |
+| `hydro.bin` | Natural Earth 1:1000 万河流与湖泊（gzip 压缩的 GeoJSON；`k` 为 `r` 河流、`l` 湖泊、`n` 标注河名用的拼接河道；`r` 为等级，`n` 为中文名；湖泊为 1939–45 年的样子）。地图画好后才在后台载入 |
+| `hydro-detail.bin` | 欧洲、北美的细部河流与湖泊，放大后才载入 |
 
-四个 `.bin` 文件的编码相同：逐个要素写 varint 序列，依次为多边形数 → 每个多边形的环数 → 每个环的点数，后接 zigzag 编码的坐标差分。坐标单位为 1/1000 度，差分在同一要素内连续累计。解码函数见 `index.html` 的 `decodeGeo`。
+轮廓的编码：逐个要素写 varint 序列，依次为多边形数 → 每个多边形的环数 → 每个环的点数，后接 zigzag 编码的坐标差分。坐标单位为 1/1000 度，差分在同一要素内连续累计。解码函数见 `index.html` 的 `decodeGeo`；以 gzip 文件头开头的数据文件，页面先用浏览器自带的 `DecompressionStream` 解压。
+
+打开页面时只下载索引、`admin.bin`、当前断面的 `snap-<日期>.json` 和 `geo-<日期>.bin`（合计约 2–3 MB），切换到其他断面时再下载该断面的两个文件。`work/artifact/` 是发布到 claude.ai 的版本：二进制文件另附 base64 文本（`<名称>.b64.txt`），页面找不到 `.bin` 时改读这些文本。
 
 ## 构建与重算
 

@@ -259,8 +259,11 @@ const LABEL_PX = 12;
 const blocName = (sd, b) => (sd.bloc_names || BLOC_ZH)[b];
 const isModern = (sd) => sd.snapshot === "2026";        // country names: the small serif lettering, the same at every zoom
 
-const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: null, adminGeo: null, units: null, ctrl: null,
+// outlines arrive per snapshot (data/geo-<date>.bin) and are kept by their global index: pieces cut from a
+// province (geo), province outlines (adminGeo), CShapes units (units); a snapshot's control areas stay on it (ctrlGeo)
+const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: [], adminGeo: [], units: [], loading: 0,
   admin: null, hydro: null, hydroDetail: null, sel: null, hover: null };
+const geoOf = (f) => state.geo[f] || state.adminGeo[state.admin.feature_admin[f]];  // a whole province is drawn with its outline
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const fmt = (n) => n >= 1e8 ? (n / 1e8).toFixed(2) + " 亿" : n >= 1e4 ? (n / 1e4).toFixed(n >= 1e6 ? 0 : 1) + " 万" : String(Math.round(n));
@@ -288,16 +291,32 @@ function decodeGeo(buf) {
 }
 
 async function getJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }
+let b64Only = false;  // set once a .bin is missing: the host serves the .b64.txt copies, so ask for those first
 async function getBin(u) {
   // binary files; where only text and media files can be served they ship as <name>.b64.txt
-  const r = await fetch(u).catch(() => null);
-  if (r && r.ok) return r.arrayBuffer();
-  const t = await fetch(u.replace(/\.(bin|pbf)$/, ".b64.txt"));
-  if (!t.ok) throw new Error(u + " " + t.status);
-  const s = atob((await t.text()).trim()); const a = new Uint8Array(s.length);
-  for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
-  return a.buffer;
+  const r = b64Only ? null : await fetch(u).catch(() => null);
+  let buf;
+  if (r && r.ok) buf = await r.arrayBuffer();
+  else {
+    const t = await fetch(u.replace(/\.(bin|pbf)$/, ".b64.txt"));
+    if (!t.ok) throw new Error(u + " " + t.status);
+    b64Only = true;
+    const s = atob((await t.text()).trim()); const a = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
+    buf = a.buffer;
+  }
+  const b = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
+  return b[0] === 0x1f && b[1] === 0x8b ? inflate(buf) : buf;  // gzip-compressed data files
 }
+async function inflate(buf) {
+  if (typeof DecompressionStream === "undefined") {  // older browsers: pako from the CDN, loaded only then
+    if (!window.pako) await new Promise((ok, no) => { const sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"; sc.onload = ok; sc.onerror = no; document.head.append(sc); });
+    return window.pako.ungzip(new Uint8Array(buf)).buffer;
+  }
+  return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
+}
+async function getPacked(u) { return JSON.parse(new TextDecoder().decode(await getBin(u))); }
 
 // ------------------------------------------------------------------ relief tiles and glyphs
 // The relief ships as 2048-pixel WebP sheets per zoom level; tiles are cut from them here.
@@ -350,7 +369,7 @@ function buildFeatures(sd) {
   for (let k = 0; k < sd.feature.length; k++) {
     const f = sd.feature[k]; const ai = state.admin.feature_admin[f]; const ci = sd.country[k];
     const contested = sd.countries[ci][0] === "-20";
-    feats[k] = { type: "Feature", id: k, geometry: { type: "MultiPolygon", coordinates: state.geo[f] },
+    feats[k] = { type: "Feature", id: k, geometry: { type: "MultiPolygon", coordinates: geoOf(f) },
       properties: { b: sd.bloc[k], a: sd.conf[k], t: state.admin.tier[ai], p: ai, c: ci, u: unitKey(sd, k),
         h: contested ? 2 : sd.conf[k], col: sd.countries[ci][3], nc: sd.nations[sd.nation[k]][3], d: densityClass(sd.pop[k], sd.area[k]) } };
   }
@@ -362,7 +381,7 @@ const adminFeatures = (sd) => fc(sd.admin_active.map((a) => ({ type: "Feature", 
 const unitFeatures = (sd) => fc(sd.units_active.map((u) => ({ type: "Feature", id: u,
   geometry: { type: "MultiPolygon", coordinates: state.units[u] }, properties: {} })));
 const ctrlFeatures = (sd) => fc(sd.countries.map((c, ci) => ({ type: "Feature", id: ci,
-  geometry: { type: "MultiPolygon", coordinates: state.ctrl[c[8]] }, properties: { k: c[0] } })));
+  geometry: { type: "MultiPolygon", coordinates: sd.ctrlGeo[c[8]] }, properties: { k: c[0] } })));
 
 // ------------------------------------------------------------------ labels, drawn by the map itself
 // Country names sit at a fixed point deep inside each territory and are shown only at zooms
@@ -674,7 +693,7 @@ function selectCountry(cid, fly, kAny) {
   const sd = sdNow(); if (kAny == null) kAny = piecesOf(cid)[0];
   if (kAny == null) return;
   state.sel = { level: "country", country: cid, admin: -1, piece: kAny }; applyPaint(); showCountry(cid, kAny);
-  if (fly) { const bb = state.mode === "control" ? geoBounds(state.ctrl[sd.countries[cid][8]]) : piecesBounds(piecesOf(cid));
+  if (fly) { const bb = state.mode === "control" ? geoBounds(sd.ctrlGeo[sd.countries[cid][8]]) : piecesBounds(piecesOf(cid));
     if (bb) map.fitBounds(bb, { padding: 60, maxZoom: 6, duration: 700 }); }
 }
 function selectProvince(k, fly) {
@@ -689,7 +708,7 @@ function geoBounds(polys) {
     const s = (a1 - a0) * (b1 - b0); if (s > best) { best = s; bb = [[a0, b0], [a1, b1]]; } x0 = Math.min(x0, a0); x1 = Math.max(x1, a1); y0 = Math.min(y0, b0); y1 = Math.max(y1, b1); }
   return (x1 - x0) > 200 ? bb : [[x0, y0], [x1, y1]];
 }
-function piecesBounds(ks) { const sd = sdNow(); const polys = []; for (const k of ks) polys.push(...state.geo[sd.feature[k]]); return polys.length ? geoBounds(polys) : null; }
+function piecesBounds(ks) { const sd = sdNow(); const polys = []; for (const k of ks) polys.push(...geoOf(sd.feature[k])); return polys.length ? geoBounds(polys) : null; }
 
 function onClick(k) {
   const sd = sdNow(); const cid = countryOf(sd, k); const s = state.sel;
@@ -699,8 +718,26 @@ function onClick(k) {
 // ------------------------------------------------------------------ snapshots, views
 function setHash() { try { history.replaceState(null, "", "#" + state.snap + (state.mode !== "bloc" ? "/" + state.mode : "")); } catch (e) {} }
 
+async function fetchSnap(snap) {
+  // the snapshot's rows and its outlines, in the order ww2_webmap.py wrote them
+  const [sd, buf] = await Promise.all([getJSON(`data/snap-${snap}.json`), getBin(`data/geo-${snap}.bin`)]);
+  const recs = decodeGeo(buf); let i = 0;
+  for (const a of sd.admin_active) state.adminGeo[a] = recs[i++];
+  for (const f of sd.geo_feature) state.geo[f] = recs[i++];
+  for (const u of sd.units_active) state.units[u] = recs[i++];
+  sd.ctrlGeo = recs.slice(i);
+  return sd;
+}
+
 async function loadSnap(snap) {
-  if (!state.data[snap]) state.data[snap] = await getJSON(`data/snap-${snap}.json`);
+  const ticket = ++state.loading;
+  if (!state.data[snap]) {
+    document.body.classList.add("busy");
+    state.data[snap] = fetchSnap(snap);
+    try { await state.data[snap]; } catch (e) { delete state.data[snap]; document.body.classList.remove("busy"); throw e; }
+  }
+  if (ticket !== state.loading) return;  // another tab was clicked while this one loaded
+  state.data[snap] = await state.data[snap];
   const prev = state.sel && state.data[state.snap] ? { admin: state.sel.admin, level: state.sel.level } : null;
   state.snap = snap; const sd = sdNow();
   for (const b of document.querySelectorAll("#tabs button")) {
@@ -743,11 +780,11 @@ function addPattern() {
 async function boot() {
   registerProtocols();
   const fonts = Promise.all(["600 12px 'Noto Serif SC'", "400 12px 'Noto Serif SC'"].map((f) => document.fonts.load(f, "中国")));
-  const [index, admin, geo, adminGeo, units, ctrl, hydro] = await Promise.all([getJSON("data/index.json"), getJSON("data/admin.json"),
-    getBin("data/geo.bin"), getBin("data/geo-admin.bin"), getBin("data/geo-units.bin"), getBin("data/geo-ctrl.bin"), getJSON("data/hydro.json")]);
+  // only what the first view needs: the outlines of the other snapshots load when their tab is chosen,
+  // the rivers once the map is drawn
+  const [index, admin] = await Promise.all([getJSON("data/index.json"), getPacked("data/admin.bin")]);
   await Promise.race([fonts.catch(() => null), new Promise((r) => setTimeout(r, 2500))]);
-  state.admin = admin; state.geo = decodeGeo(geo); state.adminGeo = decodeGeo(adminGeo); state.units = decodeGeo(units);
-  state.ctrl = decodeGeo(ctrl); state.hydro = hydro;
+  state.admin = admin;
   const saved = store.get("ww2-base"); if (saved && BASE[saved]) state.base = saved;
   const tabs = $("tabs");
   for (const s of index.snapshots) {
@@ -796,7 +833,7 @@ async function onLoad(index) {
   map.addSource("admin", { type: "geojson", data: empty, tolerance: 0.25 });
   map.addSource("units", { type: "geojson", data: empty, tolerance: 0.3 });
   map.addSource("ctrl", { type: "geojson", data: empty, tolerance: 0.3 });
-  map.addSource("hydro", { type: "geojson", data: state.hydro });
+  map.addSource("hydro", { type: "geojson", data: empty });
   map.addSource("lbl-country", { type: "geojson", data: empty });
   map.addSource("lbl-prov", { type: "geojson", data: empty });
   map.addSource("cities", { type: "geojson", data: empty });
@@ -839,6 +876,7 @@ async function onLoad(index) {
   await loadSnap(index.snapshots.some((s) => s.snapshot === start) ? start : DEFAULT_SNAPSHOT);
   await new Promise((r) => map.once("idle", r));
   $("loading").hidden = true;
+  getPacked("data/hydro.bin").then((h) => { state.hydro = h; map.getSource("hydro").setData(h); }).catch((e) => console.warn(e));
   map.on("zoomend", loadDetailHydro); loadDetailHydro();
 }
 
@@ -846,7 +884,7 @@ async function loadDetailHydro() {
   if (state.hydroDetail || state.hydroLoading || map.getZoom() < 4.3) return;
   state.hydroLoading = true;
   try {
-    state.hydroDetail = await getJSON("data/hydro-detail.json");
+    state.hydroDetail = await getPacked("data/hydro-detail.bin");
     map.addSource("hydro2", { type: "geojson", data: state.hydroDetail });
     const vis = $("tHydro").checked ? "visible" : "none";
     map.addLayer({ id: "hydro2-fill", type: "fill", source: "hydro2", minzoom: 4.3, filter: ["==", ["get", "k"], "l"], layout: { visibility: vis }, paint: { "fill-color": BASE[state.base].lake } }, "prov-line");
