@@ -4,21 +4,21 @@
    "snapshot": "1900-08-14",
    "title_zh": "八国联军攻入北京",
    "title_en": "The Eight-Nation Alliance enters Beijing",
-   "pieces": 1128,
-   "admin_units": 1028,
+   "pieces": 1129,
+   "admin_units": 1029,
    "countries": 53,
-   "population": 1559571544,
+   "population": 1559654969,
    "bloc_pop": {
-    "allied": 911266342,
-    "axis": 158348279,
-    "neutral": 479345119,
-    "contested": 10611804
+    "allied": 911305435,
+    "axis": 158388671,
+    "neutral": 479345704,
+    "contested": 10615159
    },
    "tier_count": {
-    "3": 880,
-    "4": 23,
-    "5": 112,
-    "6": 13
+    "3": 878,
+    "4": 24,
+    "5": 113,
+    "6": 14
    }
   },
   {
@@ -28,60 +28,60 @@
    "pieces": 1181,
    "admin_units": 1085,
    "countries": 56,
-   "population": 1779689049,
+   "population": 1779753899,
    "bloc_pop": {
-    "allied": 726960138,
-    "axis": 134124322,
-    "neutral": 918604589,
+    "allied": 727026354,
+    "axis": 134124320,
+    "neutral": 918603225,
     "contested": 0
    },
    "tier_count": {
-    "3": 947,
-    "4": 22,
-    "5": 103,
-    "6": 13
+    "3": 943,
+    "4": 23,
+    "5": 105,
+    "6": 14
    }
   },
   {
    "snapshot": "1918-11-11",
    "title_zh": "贡比涅停战协定生效，第一次世界大战结束",
    "title_en": "The Armistice of Compiègne",
-   "pieces": 1358,
-   "admin_units": 1143,
+   "pieces": 1361,
+   "admin_units": 1146,
    "countries": 74,
-   "population": 1791258179,
+   "population": 1791279681,
    "bloc_pop": {
-    "allied": 1398521158,
-    "axis": 143856661,
-    "neutral": 240021999,
-    "contested": 8858361
+    "allied": 1398544138,
+    "axis": 143857441,
+    "neutral": 240026230,
+    "contested": 8851872
    },
    "tier_count": {
-    "3": 999,
+    "3": 1000,
     "4": 21,
-    "5": 110,
-    "6": 13
+    "5": 111,
+    "6": 14
    }
   },
   {
    "snapshot": "1934-10-16",
    "title_zh": "中央红军开始长征",
    "title_en": "The Long March begins",
-   "pieces": 1286,
-   "admin_units": 1170,
+   "pieces": 1284,
+   "admin_units": 1167,
    "countries": 75,
-   "population": 2114923295,
+   "population": 2114931600,
    "bloc_pop": {
-    "allied": 1683428706,
-    "axis": 216949548,
-    "neutral": 213810997,
-    "contested": 734044
+    "allied": 1683499912,
+    "axis": 216979163,
+    "neutral": 213717935,
+    "contested": 734590
    },
    "tier_count": {
-    "3": 1023,
-    "4": 19,
-    "5": 116,
-    "6": 12
+    "3": 1017,
+    "4": 20,
+    "5": 117,
+    "6": 13
    }
   },
   {
@@ -91,18 +91,18 @@
    "pieces": 1348,
    "admin_units": 1212,
    "countries": 69,
-   "population": 2230600906,
+   "population": 2230578859,
    "bloc_pop": {
-    "allied": 1064033739,
-    "axis": 503307230,
-    "neutral": 663259937,
+    "allied": 1064051846,
+    "axis": 503362520,
+    "neutral": 663164493,
     "contested": 0
    },
    "tier_count": {
-    "3": 1054,
-    "4": 28,
-    "5": 119,
-    "6": 11
+    "3": 1051,
+    "4": 29,
+    "5": 120,
+    "6": 12
    }
   },
   {
@@ -112,60 +112,60 @@
    "pieces": 1351,
    "admin_units": 1200,
    "countries": 63,
-   "population": 2241742729,
+   "population": 2241719832,
    "bloc_pop": {
-    "allied": 893858327,
-    "axis": 575574089,
-    "neutral": 772310313,
+    "allied": 893897522,
+    "axis": 575616850,
+    "neutral": 772205460,
     "contested": 0
    },
    "tier_count": {
-    "3": 1044,
+    "3": 1042,
     "4": 28,
-    "5": 117,
-    "6": 11
+    "5": 118,
+    "6": 12
    }
   },
   {
    "snapshot": "1941-12-07",
    "title_zh": "珍珠港事件当日，德军止步莫斯科城下",
    "title_en": "Pearl Harbor; Germans before Moscow",
-   "pieces": 1391,
+   "pieces": 1390,
    "admin_units": 1204,
    "countries": 66,
-   "population": 2261948411,
+   "population": 2261924576,
    "bloc_pop": {
-    "allied": 1206417435,
-    "axis": 691309435,
-    "neutral": 351967089,
-    "contested": 12254452
+    "allied": 1206363426,
+    "axis": 691346923,
+    "neutral": 351959806,
+    "contested": 12254421
    },
    "tier_count": {
-    "3": 1050,
+    "3": 1048,
     "4": 26,
-    "5": 117,
-    "6": 11
+    "5": 118,
+    "6": 12
    }
   },
   {
    "snapshot": "1942-11-01",
    "title_zh": "轴心国扩张的最大范围（阿拉曼、斯大林格勒之前）",
    "title_en": "Greatest Axis extent",
-   "pieces": 1408,
+   "pieces": 1407,
    "admin_units": 1210,
    "countries": 67,
-   "population": 2281670037,
+   "population": 2281646316,
    "bloc_pop": {
-    "allied": 1214645258,
-    "axis": 827663744,
-    "neutral": 232663997,
-    "contested": 6697038
+    "allied": 1214749837,
+    "axis": 827532109,
+    "neutral": 232656854,
+    "contested": 6707516
    },
    "tier_count": {
-    "3": 1056,
-    "4": 26,
-    "5": 117,
-    "6": 11
+    "3": 1053,
+    "4": 27,
+    "5": 118,
+    "6": 12
    }
   },
   {
@@ -173,20 +173,20 @@
    "title_zh": "诺曼底登陆日",
    "title_en": "D-Day",
    "pieces": 1399,
-   "admin_units": 1228,
+   "admin_units": 1229,
    "countries": 66,
-   "population": 2317644977,
+   "population": 2317618789,
    "bloc_pop": {
-    "allied": 1368386205,
-    "axis": 781241671,
-    "neutral": 160092729,
-    "contested": 7924372
+    "allied": 1368363811,
+    "axis": 781231121,
+    "neutral": 160092728,
+    "contested": 7931129
    },
    "tier_count": {
-    "3": 1073,
-    "4": 28,
-    "5": 116,
-    "6": 11
+    "3": 1071,
+    "4": 29,
+    "5": 117,
+    "6": 12
    }
   },
   {
@@ -196,81 +196,81 @@
    "pieces": 1413,
    "admin_units": 1270,
    "countries": 68,
-   "population": 2345147099,
+   "population": 2344679761,
    "bloc_pop": {
-    "allied": 1878130234,
-    "axis": 229133374,
-    "neutral": 237883491,
+    "allied": 1877753378,
+    "axis": 229042903,
+    "neutral": 237883480,
     "contested": 0
    },
    "tier_count": {
-    "3": 1112,
-    "4": 30,
-    "5": 117,
-    "6": 11
+    "3": 1109,
+    "4": 31,
+    "5": 118,
+    "6": 12
    }
   },
   {
    "snapshot": "1946-06-26",
    "title_zh": "国共内战全面爆发（中原突围）",
    "title_en": "Full-scale Chinese Civil War begins",
-   "pieces": 1400,
-   "admin_units": 1251,
+   "pieces": 1401,
+   "admin_units": 1253,
    "countries": 77,
-   "population": 2350610937,
+   "population": 2351208875,
    "bloc_pop": {
-    "allied": 1526481014,
-    "axis": 387506409,
-    "neutral": 433065691,
-    "contested": 3557823
+    "allied": 1527073456,
+    "axis": 387514165,
+    "neutral": 433062858,
+    "contested": 3558396
    },
    "tier_count": {
     "3": 1100,
     "4": 27,
-    "5": 113,
-    "6": 11
+    "5": 114,
+    "6": 12
    }
   },
   {
    "snapshot": "1947-08-15",
    "title_zh": "印度、巴基斯坦分治独立",
    "title_en": "Partition and independence of India and Pakistan",
-   "pieces": 1413,
-   "admin_units": 1264,
+   "pieces": 1412,
+   "admin_units": 1262,
    "countries": 82,
-   "population": 2384144470,
+   "population": 2384753745,
    "bloc_pop": {
-    "allied": 1222512938,
-    "axis": 361896835,
-    "neutral": 776017011,
-    "contested": 23717686
+    "allied": 1222237030,
+    "axis": 361908535,
+    "neutral": 776887555,
+    "contested": 23720625
    },
    "tier_count": {
-    "3": 1115,
+    "3": 1111,
     "4": 27,
-    "5": 111,
-    "6": 11
+    "5": 112,
+    "6": 12
    }
   },
   {
    "snapshot": "1948-09-12",
    "title_zh": "辽沈战役开始；朝鲜半岛南北分立",
    "title_en": "Liaoshen campaign begins; two Korean states",
-   "pieces": 1417,
-   "admin_units": 1273,
+   "pieces": 1415,
+   "admin_units": 1269,
    "countries": 84,
-   "population": 2410237865,
+   "population": 2410866336,
    "bloc_pop": {
-    "allied": 1139354690,
-    "axis": 441256109,
-    "neutral": 822979031,
-    "contested": 6648035
+    "allied": 1139020003,
+    "axis": 441284338,
+    "neutral": 823913805,
+    "contested": 6648190
    },
    "tier_count": {
-    "3": 1125,
+    "3": 1119,
     "4": 28,
-    "5": 110,
-    "6": 10
+    "5": 111,
+    "6": 11
    }
   },
   {
@@ -278,61 +278,61 @@
    "title_zh": "中华人民共和国成立",
    "title_en": "Founding of the People's Republic of China",
    "pieces": 1407,
-   "admin_units": 1279,
+   "admin_units": 1277,
    "countries": 84,
-   "population": 2442104544,
+   "population": 2442729173,
    "bloc_pop": {
-    "allied": 909036443,
-    "axis": 662166191,
-    "neutral": 864573493,
-    "contested": 6328417
+    "allied": 909307109,
+    "axis": 662227104,
+    "neutral": 864866388,
+    "contested": 6328572
    },
    "tier_count": {
-    "3": 1130,
+    "3": 1126,
     "4": 29,
-    "5": 110,
-    "6": 10
+    "5": 111,
+    "6": 11
    }
   },
   {
    "snapshot": "1953-07-27",
    "title_zh": "朝鲜停战协定签署",
    "title_en": "Korean Armistice Agreement",
-   "pieces": 1395,
-   "admin_units": 1286,
+   "pieces": 1394,
+   "admin_units": 1285,
    "countries": 87,
-   "population": 2632541027,
+   "population": 2633260181,
    "bloc_pop": {
-    "allied": 819429490,
-    "axis": 875957611,
-    "neutral": 934473139,
-    "contested": 2680787
+    "allied": 820053819,
+    "axis": 876041283,
+    "neutral": 934484278,
+    "contested": 2680801
    },
    "tier_count": {
-    "3": 1149,
+    "3": 1146,
     "4": 27,
-    "5": 101,
-    "6": 9
+    "5": 102,
+    "6": 10
    }
   },
   {
    "snapshot": "1991-12-26",
    "title_zh": "苏联解体",
    "title_en": "Dissolution of the Soviet Union",
-   "pieces": 1937,
-   "admin_units": 1804,
+   "pieces": 1932,
+   "admin_units": 1797,
    "countries": 190,
-   "population": 5418345316,
+   "population": 5418096152,
    "bloc_pop": {
-    "allied": 697115091,
-    "axis": 277897772,
-    "neutral": 4437848533,
-    "contested": 5483920
+    "allied": 696668595,
+    "axis": 277898103,
+    "neutral": 4438045665,
+    "contested": 5483789
    },
    "tier_count": {
-    "3": 1672,
+    "3": 1663,
     "4": 24,
-    "5": 92,
+    "5": 94,
     "6": 16
    }
   },

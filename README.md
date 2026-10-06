@@ -140,12 +140,18 @@ pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas p
 ./build_all.sh
 ```
 
-全流程约 1.5–2 小时，需要下载约 4 GB：
+首次全流程约 2 小时，需要下载约 4 GB：
 
 - 1900–2000 部分约 30 分钟；
-- 1900–1991 部分需要 OpenHistoricalMap 全球数据约 1.3 GB，构建约 3 小时。
+- 1900–1991 部分需要 OpenHistoricalMap 全球数据约 1.3 GB。三个时期、2026 年图层和网页地图共 67 个任务，由 `scripts/pipeline.py` 调度，首次构建约 80 分钟（16 GB 内存的机器上）。
 
-各步骤见 `build_all.sh` 中的注释。
+`pipeline.py` 为每个任务记下输入的指纹，再次运行时只重算输入变了的部分：
+
+- 没有改动时约 3 秒（全部跳过）；
+- 改一个时期的控制规则约 6 分钟（只重算该时期各日期的快照和数据库，结果没变的下游任务也跳过）；
+- 构建被中断（容器重启、进程被杀）后，再运行 `python3 scripts/pipeline.py` 从断点继续。
+
+各步骤见 `build_all.sh` 和 `scripts/pipeline.py` 开头的说明。
 
 ## 来源与许可
 

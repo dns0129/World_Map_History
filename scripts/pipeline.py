@@ -32,6 +32,7 @@ with a larger expectation; any other failure stops the run, and the end of the j
   python3 pipeline.py --only snapshot     only jobs whose name contains this text
   python3 pipeline.py --force province    rerun matching jobs even when up to date
   python3 pipeline.py --dry-run           list the jobs and whether they would run
+  python3 pipeline.py --adopt             take the existing outputs as up to date (no job runs)
 Logs: work/pipeline/logs/<job>.log, and a line per job in work/pipeline/pipeline.log.
 """
 import argparse
@@ -62,7 +63,18 @@ DEFAULT_GB = {"prepare": 4, "part": 4, "merge": 4, "snapshot": 5, "province": 8,
 
 # sources: compared by size and time (some are gigabytes); work files: by content
 SOURCES = [RAW / "ww2", RAW / "geoboundaries", RAW / "ohm" / "areas_1900_91.jsonl", RAW / "cshapes_2_gw.topojson",
-           RAW / "ghs_pop", RAW / "naturalearth", RAW / "terrarium", ROOT / "curated", ROOT / "ww2" / "maps" / "template.html"]
+           RAW / "ghs_pop", RAW / "naturalearth", RAW / "terrarium", ROOT / "ww2" / "maps" / "template.html"]
+CURATED = ROOT / "curated"
+RULES = {"ww2": "ww2_region_control.csv", "early": "region_control_1900_1934.csv",
+         "postwar": "region_control_1946_1991.csv"}
+CITIES = {"ww2_cities.csv", "cities_1900_1934.csv", "cities_1946_1991.csv", "cities_2026.csv"}
+
+
+def curated(s=None):
+    """The curated tables a step reads: the city lists only for the web map; control rules only for the steps
+    of their own set that apply them (curated(set)), none for the units (curated())."""
+    skip = CITIES | {f for k, f in RULES.items() if k != s}
+    return [p for p in sorted(CURATED.rglob("*")) if p.is_file() and p.name not in skip]
 BASE_WORK = [WORK / "unit_year.csv", WORK / "admin1_targets.csv", WORK / "years.csv", WORK / "ww2" / "ref_units.csv",
              WORK / "ww2" / "ref_units.wkb", WORK / "ww2" / "ref_units.geojson"]
 
@@ -149,27 +161,27 @@ def jobs_for(sets):
         dates = [d for d, _, _ in SETS[s]]
         env = {"WW2_SET": s}
         J = lambda name, cmd, step, **kw: jobs.append(Job(f"{s}:{name}", cmd, env=env, step=step, **kw))
-        J("prepare", py("ww2_histunits.py", "--prepare"), "prepare", reads=SOURCES + BASE_WORK,
+        J("prepare", py("ww2_histunits.py", "--prepare"), "prepare", reads=SOURCES + curated() + BASE_WORK,
           outputs=[w / "candidates.pkl"])
         for d in dates:
             J(f"part:{d}", py("ww2_histunits.py", "--part", d), "part", deps=[f"{s}:prepare"],
-              reads=SOURCES + BASE_WORK + [w / "candidates.pkl"], outputs=[w / f"hist_part_{d}.pkl"])
+              reads=SOURCES + curated() + BASE_WORK + [w / "candidates.pkl"], outputs=[w / f"hist_part_{d}.pkl"])
         J("merge", py("ww2_histunits.py", "--merge"), "merge", deps=[f"{s}:part:{d}" for d in dates],
           reads=[w / f"hist_part_{d}.pkl" for d in dates], outputs=[w / "hist_units.csv", w / "hist_units.wkb"])
         units = [w / "hist_units.csv", w / "hist_units.wkb"]
         for d in dates:
             J(f"snapshot:{d}", py("ww2_snapshots.py", d), "snapshot", deps=[f"{s}:merge"],
-              reads=SOURCES + BASE_WORK + units, outputs=[w / f"snapshot_{d}.csv", w / f"split_{d}.wkb"])
+              reads=SOURCES + curated(s) + BASE_WORK + units, outputs=[w / f"snapshot_{d}.csv", w / f"split_{d}.wkb"])
             J(f"province:{d}", py("ww2_provinces.py", "--date", d), "province", deps=[f"{s}:snapshot:{d}"],
-              reads=SOURCES + units + [w / f"snapshot_{d}.csv", w / f"split_{d}.wkb"],
+              reads=SOURCES + [CURATED / "east_asia"] + units + [w / f"snapshot_{d}.csv", w / f"split_{d}.wkb"],
               outputs=[w / f"prov_part_{d}.pkl"])
         J("provinces", py("ww2_provinces.py", "--merge"), "provinces", deps=[f"{s}:province:{d}" for d in dates],
           reads=[w / f"prov_part_{d}.pkl" for d in dates],
           outputs=[w / "prov_units.csv", w / "prov_units.wkb"] + [w / f"prov_snapshot_{d}.csv" for d in dates])
         prov = [w / "prov_units.csv", w / "prov_units.wkb"] + \
             [w / f"prov_{k}_{d}.{e}" for d in dates for k, e in (("snapshot", "csv"), ("split", "wkb"))]
-        J("database", py("ww2_database.py"), "database", deps=[f"{s}:provinces"], reads=SOURCES + prov)
-        J("coverage", py("ww2_coverage.py"), "coverage", deps=[f"{s}:provinces"], reads=SOURCES + prov)
+        J("database", py("ww2_database.py"), "database", deps=[f"{s}:provinces"], reads=SOURCES + curated(s) + prov)
+        J("coverage", py("ww2_coverage.py"), "coverage", deps=[f"{s}:provinces"], reads=prov)
     jobs.append(Job("relief", py("ww2_relief.py"), step="relief", reads=[RAW / "terrarium"]))
     jobs.append(Job("modern", py("modern_2026.py"), step="modern", reads=SOURCES + [WORK / "ww2" / "ref_units.csv"]))
     maps = [WORK / s / f for s in SETS for f in ("prov_units.csv", "prov_units.wkb")] + \
@@ -177,7 +189,7 @@ def jobs_for(sets):
          (("snapshot", "csv"), ("split", "wkb"))]
     jobs.append(Job("webmap", py("ww2_webmap.py"), step="webmap", exclusive=True,
                     deps=[j.name for j in jobs if j.step in ("provinces", "relief", "modern")],
-                    reads=SOURCES + maps + [WORK / "modern"]))
+                    reads=SOURCES + [CURATED / c for c in sorted(CITIES)] + maps + [WORK / "modern"]))
     jobs.append(Job("html", py("ww2_html.py"), step="html", deps=["webmap"],
                     reads=[ROOT / "ww2" / "maps" / "template.html", ROOT / "ww2" / "maps" / "data" / "index.json"]))
     return jobs
@@ -218,7 +230,14 @@ class Runner:
         sp = self.stamp_path(job)
         if not sp.exists() or not all(p.exists() for p in job.outputs):
             return False
-        return json.loads(sp.read_text()).get("fingerprint") == fingerprint(job, self.hashes)
+        st = json.loads(sp.read_text())
+        # the outputs as the job left them (not cut short by a kill, nor changed by hand since)
+        if any(self.hashes.of(Path(p)) != h for p, h in st.get("outputs", {}).items() if Path(p).exists()):
+            return False
+        return st.get("fingerprint") == fingerprint(job, self.hashes)
+
+    def output_hashes(self, job):
+        return {str(p): self.hashes.of(p) for p in job.outputs if WORK in p.parents}
 
     def launch(self, job):
         logp = STATE / "logs" / (job.name.replace(":", "_") + ".log")
@@ -242,6 +261,7 @@ class Runner:
             if missing:
                 return self.fail(job, logp, f"finished without writing {missing}")
             self.stamp_path(job).write_text(json.dumps({"fingerprint": fingerprint(job, self.hashes),
+                                                        "outputs": self.output_hashes(job),
                                                         "seconds": round(secs), "peak_gb": round(peak, 2)}))
             self.done.add(job.name)
             self.log(f"done   {job.name}  {secs / 60:.1f} min, peak {peak:.1f} GB")
@@ -281,7 +301,20 @@ class Runner:
             return False
         return self.committed() + self.expected(job) <= self.limit and self.expected(job) <= memory_free_gb() - 0.5
 
+    def stop(self, signum, frame):
+        """Stopped by hand or by the system: the jobs run in sessions of their own, so stop them too."""
+        for pid, (j, *_) in list(self.running.items()):
+            self.log(f"stopping {j.name}")
+            try:
+                os.killpg(pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+        self.hashes.save()
+        sys.exit(128 + signum)
+
     def run(self):
+        signal.signal(signal.SIGTERM, self.stop)
+        signal.signal(signal.SIGINT, self.stop)
         self.log(f"memory limit {self.limit + RESERVE_GB:.1f} GB; {len(self.jobs)} jobs")
         while True:
             settled = 0  # jobs found up to date (or listed by --dry-run) in this pass: their dependants may be ready
@@ -291,6 +324,13 @@ class Runner:
                         self.done.add(j.name)
                         settled += 1
                         self.log(f"skip   {j.name}  (up to date)")
+                        continue
+                    if self.args.adopt and all(p.exists() for p in j.outputs):
+                        self.stamp_path(j).write_text(json.dumps({"fingerprint": fingerprint(j, self.hashes),
+                                                                  "outputs": self.output_hashes(j), "adopted": True}))
+                        self.done.add(j.name)
+                        settled += 1
+                        self.log(f"adopt  {j.name}  (existing outputs taken as up to date)")
                         continue
                     if self.args.dry_run:
                         self.done.add(j.name)
@@ -329,6 +369,8 @@ def main():
     ap.add_argument("--force", help="rerun the jobs whose name contains this text even when up to date")
     ap.add_argument("--no-maps", action="store_true", help="leave out relief, modern, webmap and html")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--adopt", action="store_true", help="record the existing outputs as up to date without running "
+                    "(after the code changed in a way that does not change the results, or a build by hand)")
     args = ap.parse_args()
     sets = [s for s in args.sets.split(",") if s]
     jobs = jobs_for(sets)
