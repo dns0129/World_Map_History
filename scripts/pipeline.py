@@ -54,6 +54,8 @@ STATE = WORK / "pipeline"
 SETS = {"ww2": SNAPSHOTS_WW2, "early": SNAPSHOTS_EARLY, "postwar": SNAPSHOTS_POSTWAR}
 RESERVE_GB = 1.0          # kept free for this process, the shell and the page cache
 TIMEOUT_S = 4 * 3600      # a job running longer than this is taken to hang
+STAGES = ["prepare", "part", "relief", "modern", "merge", "snapshot", "province", "provinces", "database", "coverage",
+          "webmap", "html"]
 # expected peak memory (GB) of a step before it has been measured here
 DEFAULT_GB = {"prepare": 4, "part": 4, "merge": 4, "snapshot": 5, "province": 8, "provinces": 3, "database": 3,
               "coverage": 2, "relief": 2, "modern": 6, "webmap": 0, "html": 1}
@@ -260,7 +262,8 @@ class Runner:
         self.log(f"FAILED {job.name}: {why}; end of {logp}:\n    " + "\n    ".join(tail))
 
     def ready(self):
-        for n in self.order:
+        """Jobs whose dependencies are done, later stages first (they are closer to a finished set)."""
+        for n in sorted(self.order, key=lambda n: -STAGES.index(self.jobs[n].step)):
             j = self.jobs[n]
             if n in self.done or n in self.failed or any(pid_job[0].name == n for pid_job in self.running.values()):
                 continue
@@ -294,8 +297,9 @@ class Runner:
                         settled += 1
                         self.log(f"would run {j.name}  (expects {self.expected(j):.1f} GB)")
                         continue
-                    if self.fits(j):
-                        self.launch(j)
+                    if not self.fits(j):
+                        break  # wait for memory rather than let smaller jobs of earlier stages overtake it
+                    self.launch(j)
                 self.hashes.save()
             if not self.running:
                 if settled:
