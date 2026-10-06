@@ -200,3 +200,54 @@ FRA/ADM2,Picardie,皮卡第大区,Aisne|Oise|Somme,1982-03-02,2015-12-31,région
 FRA/ADM2,Poitou-Charentes,普瓦图-夏朗德大区,Charente|Charente-Maritime|Deux-Sèvres|Vienne,1982-03-02,2015-12-31,région,5,
 FRA/ADM2,Provence-Alpes-Côte d'Azur,普罗旺斯-阿尔卑斯-蓝色海岸大区,Alpes-de-Haute-Provence|Hautes-Alpes|Alpes-Maritimes|Bouches-du-Rhône|Var|Vaucluse,1982-03-02,,région,5,
 FRA/ADM2,Rhône-Alpes,罗讷-阿尔卑斯大区,Ain|Ardèche|Drôme|Isère|Loire|Rhône|Savoie|Haute-Savoie,1982-03-02,2015-12-31,région,5,
+THA,Ubon Ratchathani Province,乌汶府,Ubon Ratchathani Province|Amnat Charoen Province,1982-09-27,1993-01-11,changwat,5,with Amnat Charoen (separate from 1993)
+THA,Udon Thani Province,乌隆府,Udon Thani Province|Nong Bua Lam Phu Province,1982-09-27,1993-11-30,changwat,5,with Nong Bua Lamphu (separate from 1993)
+THA,Prachin Buri Province,巴真武里府,Prachin Buri Province|Sa Kaeo Province,1982-09-27,1993-11-30,changwat,5,with Sa Kaeo (separate from 1993)
+THA,Nong Khai Province,廊开府,Nong Khai Province|Bueng Kan Province,1982-09-27,2011-03-22,changwat,5,with Bueng Kan (separate from 2011)
+THA,*,,*,1982-09-27,1993-01-11,changwat,5,the 73 provinces from the creation of Mukdahan (1982)
+PHL/ADM2,Metro Manila,马尼拉大都会,"NCR, City of Manila, First District|NCR, Second District|NCR, Third District|NCR, Fourth District",1979-08-13,,metropolitan area,5,
+PHL/ADM2,Leyte,莱特省,Leyte|Biliran,1979-08-13,1992-05-10,province,5,with Biliran (separate from 1992)
+PHL/ADM2,Iloilo,伊洛伊洛省,Iloilo|Guimaras,1979-08-13,1992-05-21,province,5,with Guimaras (separate from 1992)
+PHL/ADM2,South Cotabato,南哥打巴托省,South Cotabato|Sarangani,1979-08-13,1992-03-15,province,5,with Sarangani (separate from 1992)
+PHL/ADM2,Kalinga-Apayao,卡林阿-阿巴尧省,Kalinga|Apayao,1979-08-13,1995-02-13,province,5,split into Kalinga and Apayao in 1995
+PHL/ADM2,Davao del Norte,北达沃省,Davao del Norte|Compostela Valley,1979-08-13,1998-01-30,province,5,with Compostela Valley (separate from 1998)
+PHL/ADM2,Zamboanga del Sur,南三宝颜省,Zamboanga del Sur|Zamboanga Sibugay,1979-08-13,2001-02-21,province,5,with Zamboanga Sibugay (separate from 2001)
+PHL/ADM2,Surigao del Norte,北苏里高省,Surigao del Norte|Dinagat Islands,1979-08-13,2006-12-01,province,5,with the Dinagat Islands (separate from 2006)
+PHL/ADM2,Davao del Sur,南达沃省,Davao del Sur|Davao Occidental,1979-08-13,2013-10-27,province,5,with Davao Occidental (separate from 2013)
+PHL/ADM2,Basilan,巴西兰省,Basilan|City of Isabela,1979-08-13,,province,5,with Isabela City
+PHL/ADM2,Maguindanao,马京达瑙省,Maguindanao|Cotabato City,1979-08-13,,province,5,with Cotabato City
+PHL/ADM2,*,,*,1979-08-13,1992-03-15,province,5,the 73 provinces from the creation of Aurora (1979)
+VNM,Hà Bắc,河北省,Bắc Giang|Bắc Ninh,1991-08-12,1996-12-31,tỉnh,5,split into Bắc Giang and Bắc Ninh in 1997
+VNM,Nam Hà,南河省,Nam Định|Hà Nam,1991-08-12,1996-12-31,tỉnh,5,split into Nam Định and Hà Nam in 1997
+VNM,Hải Hưng,海兴省,Hải Dương|Hưng Yên,1991-08-12,1996-12-31,tỉnh,5,split into Hải Dương and Hưng Yên in 1997
+VNM,Vĩnh Phú,永富省,Vĩnh Phúc|Phú Thọ|VNM/ADM2:Me Linh,1991-08-12,1996-12-31,tỉnh,5,split into Vĩnh Phúc and Phú Thọ in 1997; with Mê Linh (to Hanoi in 2008; district outline approximate)
+VNM,Bắc Thái,北太省,Bắc Kạn|Thái Nguyên,1991-08-12,1996-12-31,tỉnh,5,split into Bắc Kạn and Thái Nguyên in 1997
+VNM,Quảng Nam – Đà Nẵng,广南-岘港省,Quảng Nam|Đà Nẵng,1991-08-12,1996-12-31,tỉnh,5,split into Quảng Nam and Đà Nẵng in 1997
+VNM,Sông Bé,小河省,Bình Dương|Bình Phước,1991-08-12,1996-12-31,tỉnh,5,split into Bình Dương and Bình Phước in 1997
+VNM,Minh Hải,明海省,Bạc Liêu|Cà Mau,1991-08-12,1996-12-31,tỉnh,5,split into Bạc Liêu and Cà Mau in 1997
+VNM,Lai Châu,莱州省,Lai Châu|Điện Biên,1991-08-12,2003-12-31,tỉnh,5,with Điện Biên (separate from 2004)
+VNM,Đắk Lắk,多乐省,Đắk Lắk|Đắk Nông,1991-08-12,2003-12-31,tỉnh,5,with Đắk Nông (separate from 2004)
+VNM,Cần Thơ,芹苴省,Cần Thơ|Hậu Giang,1991-08-12,2003-12-31,tỉnh,5,with Hậu Giang (separate from 2004)
+VNM,Bà Rịa – Vũng Tàu,巴地-头顿省,Bà Rịa–Vũng Tàu|Côn Đảo,1991-08-12,,tỉnh,5,with Côn Đảo
+VNM,Hà Tây,河西省,Hà Nội|-VNM/ADM2:Me Linh,1991-08-12,2008-07-31,tỉnh,25,present-day Hanoi less the 1991-2008 city (OpenHistoricalMap) and Mê Linh; merged into Hanoi in 2008
+VNM,*,,*,1991-08-12,1996-12-31,tỉnh,5,the provinces after the splits of 12 August 1991
+COD,Kinshasa,金沙萨,Kinshasa,1988-01-01,1997-05-16,ville,5,
+COD,Bas-Zaïre,下扎伊尔区,Kongo-Central,1988-01-01,1997-05-16,région,5,Bas-Congo from 1997
+COD,Bandundu,班顿杜区,Kwango|Kwilu|Mai-Ndombe,1988-01-01,1997-05-16,région,5,split in 2015
+COD,Équateur,赤道区,Équateur|Mongala|Nord-Ubangi|Sud-Ubangi|Tshuapa,1988-01-01,1997-05-16,région,5,split in 2015
+COD,Haut-Zaïre,上扎伊尔区,Lower Uele|Upper Uele|Ituri|Tshopo,1988-01-01,1997-05-16,région,5,Orientale from 1997; split in 2015
+COD,Kasaï-Occidental,西开赛区,Kasai|Central Kasai,1988-01-01,1997-05-16,région,5,split in 2015
+COD,Kasaï-Oriental,东开赛区,Kasai-Oriental|Lomami|Sankuru,1988-01-01,1997-05-16,région,5,split in 2015
+COD,Shaba,沙巴区,Haut-Katanga|Haut-Lomami|Lualaba|Tanganyika,1988-01-01,1997-05-16,région,5,Katanga from 1997; split in 2015
+COD,Maniema,马尼埃马区,Maniema,1988-01-01,1997-05-16,région,5,formed from Kivu in 1988
+COD,Nord-Kivu,北基伍区,North Kivu,1988-01-01,1997-05-16,région,5,formed from Kivu in 1988
+COD,Sud-Kivu,南基伍区,South Kivu,1988-01-01,1997-05-16,région,5,formed from Kivu in 1988
+SDN,Khartoum,喀土穆州,Khartoum,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Northern,北方州,Northern|River Nile,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Eastern,东部州,Red Sea|Kassala|Gedaref,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Central,中部州,Gezira|White Nile|Blue Nile|Sennar,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Kordofan,科尔多凡州,North Kordofan|South Kordofan|West Kordofan|Abyei PCA,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Darfur,达尔富尔州,North Darfur|South Darfur|West Darfur|Central Darfur|East Darfur,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Upper Nile,上尼罗州,SSD:Upper Nile|SSD:Jonglei|SSD:Unity,1991-02-14,1994-02-13,state,5,the nine states of 1991 (now in South Sudan)
+SDN,Bahr al-Ghazal,加扎勒河州,SSD:Northern Bahr el Ghazal|SSD:Western Bahr el Ghazal|SSD:Warrap|SSD:Lakes,1991-02-14,1994-02-13,state,5,the nine states of 1991 (now in South Sudan)
+SDN,Equatoria,赤道州,SSD:Central Equatoria|SSD:Eastern Equatoria|SSD:Western Equatoria,1991-02-14,1994-02-13,state,5,the nine states of 1991 (now in South Sudan)
