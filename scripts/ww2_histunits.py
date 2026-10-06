@@ -772,6 +772,7 @@ def parents(units, cands, date):
             u["parent"] = u["parent_hint"]
 
 
+LAND_TOL = 0.002  # degrees, about 200 m
 SEA_SHARE = 0.10  # an OpenHistoricalMap outline with more water than this (territorial sea, lakes) is cut to land
 
 
@@ -794,7 +795,9 @@ def clip_to_land(cands, refs):
         inside = shapely.contains_properly(g, near)
         land = shapely.area(near[inside]).sum() + shapely.area(shapely.intersection(g, near[~inside])).sum()
         if land < (1 - SEA_SHARE) * g.area:
-            g2 = polys(inter(g, union(list(near))))
+            # the coast is taken from the reference units, simplified so the outline does not inherit their
+            # detail (well below what the map draws; see TOL_PROV in ww2_webmap.py)
+            g2 = polys(inter(g, union(list(near)).simplify(LAND_TOL)))
             if g2 is not None:
                 c["geom"] = g2
                 n += 1
