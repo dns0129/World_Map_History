@@ -440,7 +440,9 @@ def control_pieces(g, refs_here, ctrl_of):
 
 def main(only=None):
     hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
-    hgeom = read_outlines(WW2_WORK / "hist_units.geojson", "unit_id")
+    dates = [s[0] for s in SNAPSHOTS if not only or s[0] in only]
+    used = set(hist[hist.snapshots.apply(lambda x: any(d in x for d in dates))].unit_id)
+    hgeom = read_outlines(WW2_WORK / "hist_units.geojson", "unit_id", only=used)  # the dates' units only
     refs = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False).to_dict("records")
     rgeom = read_outlines(REF_WORK / "ref_units.geojson", "ref_id")
     for r in refs:

@@ -20,6 +20,7 @@ import math
 import multiprocessing
 import unicodedata
 from collections import Counter, defaultdict
+from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 import pandas as pd
@@ -661,8 +662,9 @@ def main():
     # the snapshots are independent: one worker process each, as many as fit in memory (forked, so they
     # share everything loaded above)
     G["one"] = one_snapshot
-    with multiprocessing.get_context("fork").Pool(workers(len(snapshots), 2.5)) as pool:
-        results = pool.map(_one_snapshot, range(len(snapshots)))
+    # a worker killed for memory stops the run (BrokenProcessPool) instead of leaving it waiting
+    with ProcessPoolExecutor(workers(len(snapshots), 2.5), mp_context=multiprocessing.get_context("fork")) as pool:
+        results = list(pool.map(_one_snapshot, range(len(snapshots))))
     ctrl_geoms, summary = [], []
     for doc, row, geoms in results:
         for c in doc["countries"]:
