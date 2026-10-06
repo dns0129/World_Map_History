@@ -34,6 +34,7 @@ import argparse
 import hashlib
 import json
 import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
 import pickle
 import re
 import sqlite3
@@ -302,6 +303,7 @@ def groups_for(date, hist, ugeom, rows, resolve):
                     dist = 0.0 if g.intersects(geo[j]) else g.distance(geo[j])
                     if dist <= CLUSTER_DEG:
                         pairs.append((dist, i, j))
+        shapely.destroy_prepared(geo)  # the outlines are shared by all dates; their indexes would pile up
         par = list(range(len(its)))
         pus = [{p} if p is not None else set() for p in pu]
 
@@ -546,8 +548,10 @@ def main():
     todo = [d for d in DATES if d not in done]
     print("dates from cache:", sorted(done), "to compute:", todo, flush=True)
     if todo:
-        with multiprocessing.get_context("fork").Pool(workers(len(todo), 3.0)) as pool:
-            for d, out in zip(todo, pool.map(one_date, todo)):  # dates are independent; G is shared by fork
+        # dates are independent; G is shared by fork. A worker killed for memory fails the run at once
+        # (BrokenProcessPool) instead of leaving it waiting; the dates finished so far stay cached
+        with ProcessPoolExecutor(workers(len(todo), 6.0), mp_context=multiprocessing.get_context("fork")) as pool:
+            for d, out in zip(todo, pool.map(one_date, todo)):
                 with open(WW2_WORK / f"prov_part_{d}.pkl", "wb") as f:
                     pickle.dump({"key": keys[d], "out": out}, f, protocol=pickle.HIGHEST_PROTOCOL)
                 done[d] = out
