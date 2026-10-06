@@ -729,15 +729,28 @@ async function fetchSnap(snap) {
   return sd;
 }
 
+// state.data[snap] holds the snapshot, or the promise of it while it loads (also when fetched ahead)
+function fetchOnce(snap) {
+  if (!state.data[snap]) {
+    const p = fetchSnap(snap).then((sd) => (state.data[snap] = sd), (e) => { delete state.data[snap]; throw e; });
+    p.catch(() => {});  // a failed prefetch is retried when the tab is chosen
+    state.data[snap] = p;
+  }
+  return state.data[snap];
+}
+function prefetchNear(snap) {
+  // the neighbouring tabs, fetched quietly once the map is drawn, so that stepping through the dates is quick
+  const order = [...document.querySelectorAll("#tabs button")].map((b) => b.dataset.snap); const i = order.indexOf(snap);
+  setTimeout(() => { for (const s of [order[i + 1], order[i - 1]]) if (s) fetchOnce(s); }, 800);
+}
+
 async function loadSnap(snap) {
   const ticket = ++state.loading;
-  if (!state.data[snap]) {
+  if (!state.data[snap] || state.data[snap] instanceof Promise) {
     document.body.classList.add("busy");
-    state.data[snap] = fetchSnap(snap);
-    try { await state.data[snap]; } catch (e) { delete state.data[snap]; document.body.classList.remove("busy"); throw e; }
+    try { await fetchOnce(snap); } catch (e) { document.body.classList.remove("busy"); throw e; }
   }
   if (ticket !== state.loading) return;  // another tab was clicked while this one loaded
-  state.data[snap] = await state.data[snap];
   const prev = state.sel && state.data[state.snap] ? { admin: state.sel.admin, level: state.sel.level } : null;
   state.snap = snap; const sd = sdNow();
   for (const b of document.querySelectorAll("#tabs button")) {
@@ -758,7 +771,7 @@ async function loadSnap(snap) {
   map.getSource("units").setData(unitFeatures(sd));
   map.getSource("ctrl").setData(ctrlFeatures(sd));
   map.getSource("cities").setData(cityFeatures(sd));
-  map.once("idle", () => document.body.classList.remove("busy"));
+  map.once("idle", () => { document.body.classList.remove("busy"); prefetchNear(snap); });
   applyPaint(); legend(); setLabels(); setHash();
   if (prev && prev.level === "province") { const k = sd.feature.findIndex((f) => state.admin.feature_admin[f] === prev.admin); if (k >= 0) selectProvince(k, false); }
 }
