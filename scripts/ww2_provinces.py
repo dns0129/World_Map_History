@@ -292,12 +292,14 @@ def groups_for(date, hist, ugeom, rows, resolve):
         # single linkage over everything that names this province, nearest pairs first; two units of
         # that name in different political units (Limburg, Amazonas) are never joined
         tree = STRtree([g.envelope for g in geo])
+        shapely.prepare(geo)
         pairs = []
         for i, g in enumerate(geo):
             for j in tree.query(g.envelope.buffer(CLUSTER_DEG)):
                 j = int(j)
                 if j > i:
-                    dist = g.distance(geo[j])
+                    # most are neighbours that touch: a prepared test answers those without the slow distance
+                    dist = 0.0 if g.intersects(geo[j]) else g.distance(geo[j])
                     if dist <= CLUSTER_DEG:
                         pairs.append((dist, i, j))
         par = list(range(len(its)))
@@ -360,6 +362,7 @@ def absorb_orphans(groups, ugeom, rows, hist_tier):
     geoms = [merged([ugeom[m] for m in g["members"]]) for g in groups]
     tree = STRtree(geoms)
     alive = [True] * len(groups)
+    changed = set()
     for i in sorted(range(len(groups)), key=lambda i: garea[i]):
         g = groups[i]
         sparse = unit_sub[gunit[i]] < ORPHAN_SHARE * unit_total[gunit[i]]
@@ -389,6 +392,10 @@ def absorb_orphans(groups, ugeom, rows, hist_tier):
         geoms[j] = merged([geoms[j], geoms[i]])
         garea[j] += garea[i]
         alive[i] = False
+        changed.add(j)
+    for i, g in enumerate(groups):
+        if i not in changed:
+            g["outline"] = geoms[i]  # the union of its members, as one_date would compute it again
     return [g for g, a in zip(groups, alive) if a]
 
 
@@ -485,7 +492,10 @@ def one_date(date):
         if ids[pid] > 1:
             pid += f"-{ids[pid]}"
         kids = [m for m in g["members"] if a is None or m != a["unit_id"]]
-        geom = merged([ugeom[m] for m in g["members"]]) if kids else ugeom[g["members"][0]]
+        if not kids:
+            geom = ugeom[g["members"][0]]
+        else:
+            geom = g["outline"] if "outline" in g else merged([ugeom[m] for m in g["members"]])
         if a is not None:
             rec = {c: nn(a.get(c)) for c in UNIT_COLS if c in a}
             if pid.startswith("PH1939"):
