@@ -9,6 +9,7 @@ Each set has its own work directory, control rules and database; the present-day
 units (ww2_reference.py) are shared.
 """
 import os
+from pathlib import Path
 
 from common import RAW, WORK, ROOT, DB_DIR
 
@@ -65,16 +66,68 @@ UNCOVERED = {"1918-11-11": "Russia (Soviet Union)"}
 TYPICAL_COUNTY_KM2 = 1500.0  # target size used to pick each country's county level
 
 
+def _cgroup_memory():
+    """(limit, in use) in bytes of the memory cgroup of this process (v1 or v2; page cache that can be dropped
+    is not counted as in use), or None when there is no limit."""
+    try:
+        for line in open("/proc/self/cgroup"):
+            _, ctrl, path = line.rstrip("\n").split(":", 2)
+            if ctrl == "memory":
+                d, lim, use, stat = Path("/sys/fs/cgroup/memory") / path.lstrip("/"), "memory.limit_in_bytes", \
+                    "memory.usage_in_bytes", "total_inactive_file"
+            elif ctrl == "" and Path("/sys/fs/cgroup/memory.max").exists():
+                d, lim, use, stat = Path("/sys/fs/cgroup") / path.lstrip("/"), "memory.max", "memory.current", \
+                    "inactive_file"
+            else:
+                continue
+            limit = (d / lim).read_text().strip()
+            if limit == "max" or int(limit) >= 2 ** 60:
+                return None
+            st = dict(x.split() for x in (d / "memory.stat").read_text().splitlines())
+            return int(limit), int((d / use).read_text()) - int(st.get(stat, 0))
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+def memory_limit_gb():
+    """Memory this process and its children may use in all: the cgroup limit, else the machine's memory."""
+    cg = _cgroup_memory()
+    if cg:
+        return cg[0] / 2 ** 30
+    kb = next(int(line.split()[1]) for line in open("/proc/meminfo") if line.startswith("MemTotal"))
+    return kb / 2 ** 20
+
+
+def memory_free_gb():
+    """Memory that can still be taken now: what the machine has available, and no more than the cgroup allows
+    (the cgroup limit can be lower than the machine's memory; the kernel kills a process that goes past it)."""
+    kb = next(int(line.split()[1]) for line in open("/proc/meminfo") if line.startswith("MemAvailable"))
+    free = kb / 2 ** 20
+    cg = _cgroup_memory()
+    if cg:
+        free = min(free, (cg[0] - cg[1]) / 2 ** 30)
+    return free
+
+
 def workers(n, gb_each):
-    """Worker processes for n independent jobs that each hold about gb_each GB: as many as the memory
-    available now allows (one GB kept free), at most n; WW2_POOL fixes the number instead."""
+    """Worker processes for n independent jobs that each hold about gb_each GB: as many as the memory free now
+    allows (one GB kept free), at most n; WW2_POOL fixes the number instead."""
     if os.environ.get("WW2_POOL"):
         return max(1, min(n, int(os.environ["WW2_POOL"])))
     try:
-        kb = next(int(line.split()[1]) for line in open("/proc/meminfo") if line.startswith("MemAvailable"))
+        return max(1, min(n, int((memory_free_gb() - 1) / gb_each)))
     except (OSError, StopIteration):
         return 1
-    return max(1, min(n, int((kb / 2 ** 20 - 1) / gb_each)))
+
+
+def memory_gb():
+    """(current, peak) resident memory of this process in GB, for the progress lines of the long steps."""
+    try:
+        st = dict(line.split(":", 1) for line in open("/proc/self/status"))
+        return int(st["VmRSS"].split()[0]) / 2 ** 20, int(st["VmHWM"].split()[0]) / 2 ** 20
+    except (OSError, KeyError):
+        return 0.0, 0.0
 
 
 if __name__ == "__main__":

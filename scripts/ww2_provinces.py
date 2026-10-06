@@ -33,12 +33,14 @@ inputs did not change is read from there (--force recomputes every date).
 import argparse
 import hashlib
 import json
-import multiprocessing
-from concurrent.futures import ProcessPoolExecutor
+import os
 import pickle
 import re
 import sqlite3
+import subprocess
+import sys
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 import pandas as pd
@@ -48,7 +50,7 @@ from shapely import STRtree
 from shapely.geometry import MultiPolygon, Polygon, shape
 
 from common import ROOT
-from ww2_common import SNAPSHOTS, WW2_RAW, WW2_WORK, workers
+from ww2_common import SNAPSHOTS, WW2_RAW, WW2_WORK, memory_gb, workers
 from ww2_geo import eq_area_km2, polys, read_outlines, union, write_outlines
 
 DATES = [s[0] for s in SNAPSHOTS]
@@ -126,14 +128,14 @@ def src_of(uid):
 
 # ---------------------------------------------------------------- input
 
-def load_work():
+def load_date(date):
+    """The inputs of one date only: its rows and pieces and the outlines of the units it uses (all units'
+    table rows, which the parent resolver reads, but not their outlines)."""
     hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
-    ugeom = read_outlines(WW2_WORK / "hist_units.geojson", "unit_id")
-    snaps, pgeom = {}, {}
-    for d in DATES:
-        snaps[d] = pd.read_csv(WW2_WORK / f"snapshot_{d}.csv", low_memory=False)
-        pgeom.update(read_outlines(WW2_WORK / f"split_{d}.geojson", "piece_id"))
-    return hist, ugeom, snaps, pgeom
+    rows = pd.read_csv(WW2_WORK / f"snapshot_{date}.csv", low_memory=False)
+    ugeom = read_outlines(WW2_WORK / "hist_units.geojson", "unit_id", only=set(rows.admin_id))
+    pgeom = read_outlines(WW2_WORK / f"split_{date}.geojson", "piece_id")
+    return hist, ugeom, {date: rows}, pgeom
 
 
 def _shape(gj):
@@ -441,7 +443,7 @@ CODE = [ROOT / "scripts" / f for f in ("ww2_provinces.py", "ww2_common.py", "ww2
     [ROOT / "curated" / "east_asia" / "korea.csv", WW2_RAW / "lawson" / "burma-1931-admin-units.geojson"]
 
 
-def date_keys(hist, ugeom, snaps, pgeom):
+def date_keys(hist, ugeom, snaps, pgeom, dates=DATES):
     """Fingerprint of everything one_date(date) reads: this code, the resolver's tables (built from all units),
     and the date's own rows, units and outlines. A date whose fingerprint is unchanged is read from its cache."""
     common = hashlib.md5()
@@ -451,7 +453,7 @@ def date_keys(hist, ugeom, snaps, pgeom):
     common.update(repr(sorted(set(hist[hist.unit_id.str.startswith("AHCB")].parent.dropna()))).encode())
     rows_of = hist.set_index("unit_id")
     keys = {}
-    for d in DATES:
+    for d in dates:
         h = common.copy()
         rows = snaps[d]
         h.update(pd.util.hash_pandas_object(rows, index=False).values.tobytes())
@@ -479,7 +481,9 @@ def one_date(date):
     hist, ugeom, snaps, pgeom, hrow = G["hist"], G["ugeom"], G["snaps"], G["pgeom"], G["hrow"]
     rows = snaps[date]
     groups = groups_for(date, hist, ugeom, rows, G["resolve"])
+    print(date, "groups: %d, memory %.1f GB (peak %.1f)" % (len(groups), *memory_gb()), flush=True)
     groups = absorb_orphans(groups, ugeom, rows, G["hist_tier"])
+    print(date, "orphans absorbed: %d groups, memory %.1f GB (peak %.1f)" % (len(groups), *memory_gb()), flush=True)
     ids = Counter()
     out = []
     for g in sorted(groups, key=lambda g: (g["name"], ugeom[g["members"][0]].centroid.x)):
@@ -522,40 +526,62 @@ def one_date(date):
         if rec["tier"] in (1, 2):
             rec["tier"] = 3
         out.append((pid, rec, geom, pieces_for(g, rows, ugeom, pgeom)))
-    print(date, "done", flush=True)
+    print(date, "done, memory %.1f GB (peak %.1f)" % memory_gb(), flush=True)
     return out
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--county-db", help="county-level database to read when work/ww2 has no county-level files")
-    ap.add_argument("--force", action="store_true", help="recompute every date, ignoring the per-date caches")
-    args = ap.parse_args()
-    if (WW2_WORK / "hist_units.csv").exists() and not args.county_db:
-        hist, ugeom, snaps, pgeom = load_work()
-    else:
-        path = args.county_db or (WW2_WORK / "county_level_1939_1945.sqlite")
-        hist, ugeom, snaps, pgeom = load_db(path)
+def setup(hist, ugeom, snaps, pgeom):
     hist = hist.copy()
     hist["tier"] = hist.tier.astype(int)
-    hrow = {r["unit_id"]: r for r in hist.to_dict("records")}
-    hist_tier = dict(zip(hist.unit_id, hist.tier))
-    resolve = Resolver(hist)
+    G.update(hist=hist, ugeom=ugeom, snaps=snaps, pgeom=pgeom, hrow={r["unit_id"]: r for r in hist.to_dict("records")},
+             hist_tier=dict(zip(hist.unit_id, hist.tier)), resolve=Resolver(hist))
+    return hist
 
-    G.update(hist=hist, ugeom=ugeom, snaps=snaps, pgeom=pgeom, hrow=hrow, hist_tier=hist_tier, resolve=resolve)
-    keys = date_keys(hist, ugeom, snaps, pgeom)
-    done = {} if args.force else {d: c for d in DATES if (c := cached(d, keys[d])) is not None}
-    todo = [d for d in DATES if d not in done]
-    print("dates from cache:", sorted(done), "to compute:", todo, flush=True)
-    if todo:
-        # dates are independent; G is shared by fork. A worker killed for memory fails the run at once
-        # (BrokenProcessPool) instead of leaving it waiting; the dates finished so far stay cached
-        with ProcessPoolExecutor(workers(len(todo), 8.0), mp_context=multiprocessing.get_context("fork")) as pool:
-            for d, out in zip(todo, pool.map(one_date, todo)):
-                with open(WW2_WORK / f"prov_part_{d}.pkl", "wb") as f:
-                    pickle.dump({"key": keys[d], "out": out}, f, protocol=pickle.HIGHEST_PROTOCOL)
-                done[d] = out
-    results = [done[d] for d in DATES]
+
+def compute_date(date, force=False):
+    """One date in this process, from the work files: read from its cache when its inputs are unchanged."""
+    hist, ugeom, snaps, pgeom = load_date(date)
+    hist = setup(hist, ugeom, snaps, pgeom)
+    key = date_keys(hist, ugeom, snaps, pgeom, [date])[date]
+    if not force and cached(date, key) is not None:
+        print(date, "unchanged, provinces read from the cache", flush=True)
+        return
+    out = one_date(date)
+    tmp = WW2_WORK / f"prov_part_{date}.{os.getpid()}.tmp"
+    with open(tmp, "wb") as f:
+        pickle.dump({"key": key, "out": out}, f, protocol=pickle.HIGHEST_PROTOCOL)
+    tmp.replace(WW2_WORK / f"prov_part_{date}.pkl")
+
+
+def main():
+    ap = argparse.ArgumentParser(description="province-level partition; see the module docstring")
+    ap.add_argument("--county-db", help="county-level database to read when work/ww2 has no county-level files")
+    ap.add_argument("--force", action="store_true", help="recompute, ignoring the per-date caches")
+    ap.add_argument("--date", help="compute this date only (its cache, prov_part_<date>.pkl); see pipeline.py")
+    ap.add_argument("--merge", action="store_true", help="only write the outputs from the per-date caches")
+    args = ap.parse_args()
+    from_work = (WW2_WORK / "hist_units.csv").exists() and not args.county_db
+    if args.date:
+        compute_date(args.date, args.force)
+        return
+    if not args.merge and from_work:
+        # each date in a process of its own, as many at once as fit in memory; a process killed for memory
+        # stops the run with an error instead of leaving it waiting, and the dates finished stay cached
+        cmd = [sys.executable, "-u", __file__] + (["--force"] if args.force else [])
+        with ThreadPoolExecutor(workers(len(DATES), 8.0)) as pool:
+            codes = list(pool.map(lambda d: subprocess.run(cmd + ["--date", d]).returncode, DATES))
+        if any(codes):
+            sys.exit(f"province step failed for {[d for d, c in zip(DATES, codes) if c]}")
+    elif not from_work:  # an old county-level release: everything in this process
+        hist, ugeom, snaps, pgeom = load_db(args.county_db or (WW2_WORK / "county_level_1939_1945.sqlite"))
+        setup(hist, ugeom, snaps, pgeom)
+        for d in DATES:
+            with open(WW2_WORK / f"prov_part_{d}.pkl", "wb") as f:
+                pickle.dump({"key": None, "out": one_date(d)}, f, protocol=pickle.HIGHEST_PROTOCOL)
+    results = []
+    for d in DATES:
+        with open(WW2_WORK / f"prov_part_{d}.pkl", "rb") as f:
+            results.append(pickle.load(f)["out"])
     final = {}       # (prov_id, geom hash) -> unit record
     piece_rows = []  # (date, prov key, row, geom)
     for date, provs in zip(DATES, results):
