@@ -550,7 +550,7 @@ def main():
     if todo:
         # dates are independent; G is shared by fork. A worker killed for memory fails the run at once
         # (BrokenProcessPool) instead of leaving it waiting; the dates finished so far stay cached
-        with ProcessPoolExecutor(workers(len(todo), 6.0), mp_context=multiprocessing.get_context("fork")) as pool:
+        with ProcessPoolExecutor(workers(len(todo), 8.0), mp_context=multiprocessing.get_context("fork")) as pool:
             for d, out in zip(todo, pool.map(one_date, todo)):
                 with open(WW2_WORK / f"prov_part_{d}.pkl", "wb") as f:
                     pickle.dump({"key": keys[d], "out": out}, f, protocol=pickle.HIGHEST_PROTOCOL)
