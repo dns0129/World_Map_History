@@ -1,19 +1,20 @@
 """Data files for the interactive province maps (ww2/maps/): 1900-1934, 1939-1945, 1946-1991 and 2026.
 
-  geo.bin           all pieces of the six snapshots (provinces, cut where a border or the
-                    controller runs through them), simplified; zigzag-varint deltas of
-                    1/1000 degree, per feature: parts, rings, points
-  geo-units.bin     CShapes units valid on any snapshot date (same encoding)
-  geo-admin.bin     outlines of the province-level units (same encoding)
-  geo-ctrl.bin      the area each country actually controls on each date, dissolved (same encoding)
-  admin.json        static attributes of the province-level units (columnar)
+  geo-<date>.bin    the outlines one snapshot needs, gzip-compressed, so that the page loads only the
+                    date shown: its provinces, the pieces of the provinces a border or front cuts
+                    (a piece that is a whole province is drawn with the province's outline), its
+                    CShapes units and the area each country actually controls, dissolved. Each
+                    outline is simplified and written as zigzag-varint deltas of 1/1000 degree
+                    (per feature: parts, rings, points); snap-<date>.json says which is which
+  admin.bin         static attributes of the province-level units (columnar JSON, gzip-compressed)
   snap-<date>.json  per-snapshot rows: which pieces exist, who controls them, the countries
                     of the control view with their colours and where their names sit
   relief/           shaded relief sheets, written by ww2_relief.py
-  hydro.json        rivers and lakes as they were in 1939-45 (Natural Earth 10m)
-  hydro-detail.json the denser European and North American river and lake layers
+  hydro.bin         rivers and lakes as they were in 1939-45 (Natural Earth 10m; gzip-compressed GeoJSON)
+  hydro-detail.bin  the denser European and North American river and lake layers (the same)
 """
 import colorsys
+import gzip
 import hashlib
 import json
 import math
@@ -243,6 +244,11 @@ def zz(n):
     return (n << 1) ^ (n >> 63)
 
 
+def packed(path, data):
+    """gzip-compressed file (mtime 0, so that the same data gives the same bytes); the page inflates it."""
+    path.write_bytes(gzip.compress(data, compresslevel=9, mtime=0))
+
+
 def encode(geoms, tol):
     buf = bytearray()
     for g in geoms:
@@ -458,13 +464,15 @@ def hydro():
         if (NE / "shp" / f"{layer}.shp").exists():
             detail += river_features(NE / "shp" / f"{layer}.shp", 0.008)
     main += name_lines(main + detail)
-    (OUT / "hydro.json").write_text(json.dumps({"type": "FeatureCollection", "features": main}, ensure_ascii=False,
-                                               separators=(",", ":")))
+    packed(OUT / "hydro.bin", json.dumps({"type": "FeatureCollection", "features": main}, ensure_ascii=False,
+                                         separators=(",", ":")).encode())
     for layer in ("ne_10m_lakes_europe", "ne_10m_lakes_north_america"):
         if (NE / f"{layer}.geojson").exists():
             detail += lake_features(NE / f"{layer}.geojson", 0.006)
-    (OUT / "hydro-detail.json").write_text(json.dumps({"type": "FeatureCollection", "features": detail},
-                                                      ensure_ascii=False, separators=(",", ":")))
+    packed(OUT / "hydro-detail.bin", json.dumps({"type": "FeatureCollection", "features": detail},
+                                                ensure_ascii=False, separators=(",", ":")).encode())
+    for old in ("hydro.json", "hydro-detail.json"):
+        (OUT / old).unlink(missing_ok=True)  # the uncompressed files of earlier builds
 
 
 # ---------------------------------------------------------------- main
@@ -534,8 +542,9 @@ def main():
     aids = sorted(set(padmin.values()))
     aidx = {a: i for i, a in enumerate(aids)}
     geom_of = lambda p: pgeom.get(p) or hgeom[padmin[p]]
-    (OUT / "geo.bin").write_bytes(encode([geom_of(p) for p in used], TOL_PROV))
-    (OUT / "geo-admin.bin").write_bytes(encode([hgeom[a] for a in aids], TOL_PROV))
+    # each outline encoded once; the per-snapshot files are put together from these
+    admin_rec = [encode([hgeom[a]], TOL_PROV) for a in aids]
+    feat_rec = {fidx[p]: encode([pgeom[p]], TOL_PROV) for p in used if p in pgeom}  # pieces cut from a province
 
     arow = hist.set_index("unit_id").loc[aids]
     cols = {}
@@ -551,7 +560,7 @@ def main():
         "label": [[round(float(x), 3), round(float(y), 3)] for x, y in zip(arow.label_lon, arow.label_lat)],
         "feature_admin": [aidx[padmin[p]] for p in used],
     }
-    (OUT / "admin.json").write_text(json.dumps(static, ensure_ascii=False, separators=(",", ":")))
+    packed(OUT / "admin.bin", json.dumps(static, ensure_ascii=False, separators=(",", ":")).encode())
 
     # political units (CShapes) for borders and labels
     arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
@@ -559,7 +568,7 @@ def main():
     ug = {g["properties"]["fid"]: topo.to_shape(arcs, g) for g in gs if g["properties"]["fid"] in unit_ids}
     ug.update({u: g for u, g in modern_ug.items() if u in unit_ids})
     unit_ids = [u for u in unit_ids if u in ug]  # territories CShapes does not draw have no outline
-    (OUT / "geo-units.bin").write_bytes(encode([ug[u] for u in unit_ids], TOL_UNIT))
+    unit_rec = [encode([ug[u]], TOL_UNIT) for u in unit_ids]
     uidx = {u: i for i, u in enumerate(unit_ids)}
 
     def one_snapshot(k):
@@ -643,6 +652,7 @@ def main():
             "pop": [int(x) for x in d.population_est], "luts": luts, "rows": rows,
             "units_active": sorted(set(uidx[u] for u in d.unit_id if u in uidx)),
             "admin_active": sorted(set(aidx[a] for a in d.admin_id)), "unit_labels": lab,
+            "geo_feature": sorted(set(fidx[p] for p in d.piece_id) & feat_rec.keys()),
             "countries": countries, "country_labels": clabels,
             "cities": cities.y2026(modern_zh) if modern else cities.ww2(snap),
             "bloc_names": modern_meta.get("bloc_names") if modern else META.get(snap, {}).get("bloc_names"),
@@ -657,7 +667,13 @@ def main():
                    "tier_count": doc["tier_count"]}
         print(snap, "pieces", len(d), "provinces", d.admin_id.nunique(), "countries", len(countries),
               "labels", len(clabels), flush=True)
-        return doc, summary, ctrl_geoms
+        # the snapshot's outlines, in the order the page reads them: provinces (admin_active), cut pieces
+        # (geo_feature), units (units_active), then the control areas (countries[i][8] counts from 0)
+        packed(OUT / f"geo-{snap}.bin", b"".join([admin_rec[a] for a in doc["admin_active"]]
+                                                 + [feat_rec[f] for f in doc["geo_feature"]]
+                                                 + [unit_rec[u] for u in doc["units_active"]])
+               + encode(ctrl_geoms, TOL_CTRL))
+        return doc, summary
 
     # the snapshots are independent: one worker process each, as many as fit in memory (forked, so they
     # share everything loaded above)
@@ -665,14 +681,12 @@ def main():
     # a worker killed for memory stops the run (BrokenProcessPool) instead of leaving it waiting
     with ProcessPoolExecutor(workers(len(snapshots), 2.5), mp_context=multiprocessing.get_context("fork")) as pool:
         results = list(pool.map(_one_snapshot, range(len(snapshots))))
-    ctrl_geoms, summary = [], []
-    for doc, row, geoms in results:
-        for c in doc["countries"]:
-            c[8] += len(ctrl_geoms)  # index of the country's outline in geo-ctrl.bin
-        ctrl_geoms += geoms
+    summary = []
+    for doc, row in results:
         (OUT / f"snap-{doc['snapshot']}.json").write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")))
         summary.append(row)
-    (OUT / "geo-ctrl.bin").write_bytes(encode(ctrl_geoms, TOL_CTRL))
+    for old in ("geo.bin", "geo-admin.bin", "geo-units.bin", "geo-ctrl.bin", "admin.json"):
+        (OUT / old).unlink(missing_ok=True)  # the layout before the per-snapshot files
     (OUT / "index.json").write_text(json.dumps({"snapshots": summary, "blocs": BLOCS, "tiers": TIER_ZH,
                                                 "quantum": Q}, ensure_ascii=False, indent=1))
     hydro()

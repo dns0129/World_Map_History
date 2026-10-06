@@ -5,8 +5,10 @@ from Google Fonts); the script is vendored and falls back to public CDNs.
 Each per-date page opens on its own snapshot and can switch to the others.
 """
 import base64
+import shutil
 
-from ww2_common import SNAPSHOTS, SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, WW2_OUT, WW2_WORK
+from common import WORK
+from ww2_common import SNAPSHOTS, SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, WW2_OUT
 
 MAPS = WW2_OUT / "maps"
 
@@ -25,14 +27,21 @@ def main():
         body = tpl.replace("__DEFAULT_SNAPSHOT__", snap)
         (MAPS / name).write_text(head + body + "\n</html>\n")
         print(MAPS / name)
-    # the artifact host supplies the document skeleton itself and serves only text and media types,
-    # so the binary geometry goes along base64-encoded
-    (WW2_WORK / "artifact_index.html").write_text(tpl.replace("__DEFAULT_SNAPSHOT__", "1942-11-01"))
-    for name in ("geo", "geo-admin", "geo-units", "geo-ctrl"):
-        raw = (MAPS / "data" / f"{name}.bin").read_bytes()
-        (WW2_WORK / f"{name}.b64.txt").write_text(base64.b64encode(raw).decode())
-    for pbf in sorted((MAPS / "data" / "glyphs" / "sans").glob("*.pbf")):
-        (WW2_WORK / f"glyphs-sans-{pbf.stem}.b64.txt").write_text(base64.b64encode(pbf.read_bytes()).decode())
+    # work/artifact/: the page as published on claude.ai. The host supplies the document skeleton itself and
+    # serves only text and media types, so the binary data files go along base64-encoded (<name>.b64.txt,
+    # which the page asks for when <name>.bin is missing); the relief sheets and the vendored script are
+    # published as they are
+    out = WORK / "artifact"
+    shutil.rmtree(out, ignore_errors=True)
+    (out / "data" / "glyphs" / "sans").mkdir(parents=True)
+    (out / "index.html").write_text(tpl.replace("__DEFAULT_SNAPSHOT__", "1942-11-01"))
+    data = MAPS / "data"
+    for f in sorted(data.glob("*.json")):
+        shutil.copy(f, out / "data" / f.name)
+    for f in sorted(data.glob("*.bin")) + sorted((data / "glyphs" / "sans").glob("*.pbf")):
+        dst = out / f.relative_to(MAPS).with_suffix(".b64.txt")
+        dst.write_text(base64.b64encode(f.read_bytes()).decode())
+    print(out)
 
 
 if __name__ == "__main__":
