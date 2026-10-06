@@ -813,7 +813,8 @@ def inputs_key():
         h.update((ROOT / "scripts" / f).read_bytes())
     files = [REF_WORK / "ref_units.csv", REF_WORK / "ref_units.wkb", RAW / "cshapes_2_gw.topojson", OHM]
     for d in (WW2_RAW, RAW / "geoboundaries", ROOT / "curated"):
-        files += sorted(p for p in d.rglob("*") if p.is_file())
+        # the control rules and city lists are read by later steps only
+        files += sorted(p for p in d.rglob("*") if p.is_file() and not re.search(r"region_control|cities", p.name))
     for p in files:
         st = p.stat() if p.exists() else None
         h.update(f"{p}|{st and st.st_size}|{st and st.st_mtime_ns}".encode())
@@ -918,7 +919,11 @@ def main(args):
     namer = Namer()
     if args[:1] == ["--part"]:
         allu = partition(args[1], cands, refs, cshapes, namer)
-        pickle.dump(allu, open(WW2_WORK / f"hist_part_{args[1]}.pkl", "wb"))
+        out = WW2_WORK / f"hist_part_{args[1]}.pkl"
+        tmp = out.with_suffix(f".{os.getpid()}.tmp")
+        with open(tmp, "wb") as f:
+            pickle.dump(allu, f, protocol=pickle.HIGHEST_PROTOCOL)
+        tmp.replace(out)  # whole file or nothing
         return
     write([(d, partition(d, cands, refs, cshapes, namer)) for d in (args or DATES)])
 
