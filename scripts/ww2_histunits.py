@@ -502,8 +502,9 @@ def postwar_china(roc):
 def present_day_postwar():
     """Units whose present-day outline (geoBoundaries) is the outline they had, or the union of the present-day
     units they split into: curated/present_day_units_1946_1991.csv. A member is a first-level name of the row's
-    country (iso3, or iso3/ADM2 for second-level), or ISO:Name / ISO:* in another country's file; "*" in the name
-    column stands for each remaining unit of the file on its own."""
+    country (iso3, or iso3/ADM2 for second-level), or ISO:Name / ISO:* in another country's file; a member written
+    -Name is cut out of the union (land that joined the unit later); "*" in the name column stands for each
+    remaining unit of the file on its own."""
     path = ROOT / "curated" / "present_day_units_1946_1991.csv"
     if SET != "postwar" or not path.exists():
         return []
@@ -538,9 +539,11 @@ def present_day_postwar():
                                         "present_day_outline_same_unit", r["kind"], start=start, end=end,
                                         note=r["note"] or None))
                 continue
-            gs, names = [], set()
+            gs, cut, names = [], [], set()
             for m in r["members"].split("|"):
                 m = m.strip()
+                minus = m.startswith("-")
+                m = m.lstrip("-")
                 fiso, flv, nm = iso, lv, m
                 if ":" in m:
                     pre, nm = m.split(":", 1)
@@ -549,15 +552,21 @@ def present_day_postwar():
                 hit = [g for n, g in units(fiso, flv) if nm == "*" or n == nm]
                 if not hit:
                     raise KeyError(f"{r['iso3']} {r['name']}: no unit {m}")
+                if minus:
+                    cut += hit
+                    continue
                 gs += hit
                 if fiso == iso and flv == lv:
                     names |= {n for n, _ in units(fiso, flv) if nm == "*" or n == nm}
             used[(iso, lv)].append((start, end, names))
-            one = len(gs) == 1
+            one = len(gs) == 1 and not cut
+            geom = diff(union(gs), union(cut)) if cut else union(gs)
             out.append(cand(f"PD-{iso}-{norm(r['name'])}-{(start or '0000')[:4]}", r["name"], 3, prio,
-                            polys(union(gs)), f"Present-day outline (geoBoundaries {iso} {lv}) of the same unit" if one
+                            polys(geom), f"Present-day outline (geoBoundaries {iso} {lv}) of the same unit" if one
+                            else f"Present-day unit (geoBoundaries) less the districts that joined it later" if cut
                             else f"Union of present-day units (geoBoundaries) that the unit later split into",
-                            "present_day_outline_same_unit" if one else "present_day_outline_merged", r["kind"],
+                            "present_day_outline_same_unit" if one else "present_day_outline_less_later" if cut
+                            else "present_day_outline_merged", r["kind"],
                             name_zh=r["name_zh"] or None, start=start, end=end, note=r["note"] or None))
     return out
 
