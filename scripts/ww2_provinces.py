@@ -32,7 +32,7 @@ import argparse
 import hashlib
 import json
 import multiprocessing
-import os
+import pickle
 import re
 import sqlite3
 from collections import Counter, defaultdict
@@ -42,11 +42,11 @@ import pandas as pd
 import shapely
 import shapely.ops
 from shapely import STRtree
-from shapely.geometry import MultiPolygon, Polygon, mapping, shape
+from shapely.geometry import MultiPolygon, Polygon, shape
 
 from common import ROOT
-from ww2_common import SNAPSHOTS, WW2_RAW, WW2_WORK
-from ww2_geo import eq_area_km2, polys, union
+from ww2_common import SNAPSHOTS, WW2_RAW, WW2_WORK, workers
+from ww2_geo import eq_area_km2, polys, read_outlines, union, write_outlines
 
 DATES = [s[0] for s in SNAPSHOTS]
 TIER_ZH = {3: "省级", 4: "大区级", 5: "整个政治单元", 6: "岛屿属地"}
@@ -125,13 +125,11 @@ def src_of(uid):
 
 def load_work():
     hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
-    ugeom = {f["properties"]["unit_id"]: shape(f["geometry"])
-             for f in json.load(open(WW2_WORK / "hist_units.geojson"))["features"]}
+    ugeom = read_outlines(WW2_WORK / "hist_units.geojson", "unit_id")
     snaps, pgeom = {}, {}
     for d in DATES:
         snaps[d] = pd.read_csv(WW2_WORK / f"snapshot_{d}.csv", low_memory=False)
-        for f in json.load(open(WW2_WORK / f"split_{d}.geojson"))["features"]:
-            pgeom[f["properties"]["piece_id"]] = shape(f["geometry"])
+        pgeom.update(read_outlines(WW2_WORK / f"split_{d}.geojson", "piece_id"))
     return hist, ugeom, snaps, pgeom
 
 
@@ -428,6 +426,41 @@ def pieces_for(g, rows, ugeom, pgeom):
 # ---------------------------------------------------------------- main
 
 G = {}  # inputs shared with the worker processes
+CODE = [ROOT / "scripts" / f for f in ("ww2_provinces.py", "ww2_common.py", "ww2_geo.py")] + \
+    [ROOT / "curated" / "east_asia" / "korea.csv", WW2_RAW / "lawson" / "burma-1931-admin-units.geojson"]
+
+
+def date_keys(hist, ugeom, snaps, pgeom):
+    """Fingerprint of everything one_date(date) reads: this code, the resolver's tables (built from all units),
+    and the date's own rows, units and outlines. A date whose fingerprint is unchanged is read from its cache."""
+    common = hashlib.md5()
+    for p in CODE:
+        common.update(p.read_bytes() if p.exists() else b"-")
+    common.update(repr(sorted({(n, int(t)) for n, t in zip(hist.name, hist.tier) if t >= 2})).encode())
+    common.update(repr(sorted(set(hist[hist.unit_id.str.startswith("AHCB")].parent.dropna()))).encode())
+    rows_of = hist.set_index("unit_id")
+    keys = {}
+    for d in DATES:
+        h = common.copy()
+        rows = snaps[d]
+        h.update(pd.util.hash_pandas_object(rows, index=False).values.tobytes())
+        ids = sorted(set(rows.admin_id))
+        h.update(rows_of.loc[ids].to_json().encode())
+        h.update(b"".join(shapely.to_wkb([ugeom[u] for u in ids])))
+        pids = sorted(p for p in rows.piece_id if p in pgeom)
+        h.update(repr(pids).encode() + b"".join(shapely.to_wkb([pgeom[p] for p in pids])))
+        keys[d] = h.hexdigest()
+    return keys
+
+
+def cached(date, key):
+    p = WW2_WORK / f"prov_part_{date}.pkl"
+    if p.exists():
+        with open(p, "rb") as f:
+            c = pickle.load(f)
+        if c["key"] == key:
+            return c["out"]
+    return None
 
 
 def one_date(date):
@@ -482,6 +515,7 @@ def one_date(date):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--county-db", help="county-level database to read when work/ww2 has no county-level files")
+    ap.add_argument("--force", action="store_true", help="recompute every date, ignoring the per-date caches")
     args = ap.parse_args()
     if (WW2_WORK / "hist_units.csv").exists() and not args.county_db:
         hist, ugeom, snaps, pgeom = load_work()
@@ -495,9 +529,17 @@ def main():
     resolve = Resolver(hist)
 
     G.update(hist=hist, ugeom=ugeom, snaps=snaps, pgeom=pgeom, hrow=hrow, hist_tier=hist_tier, resolve=resolve)
-    workers = min(len(DATES), int(os.environ.get("WW2_POOL", 4)))  # each worker holds about 3 GB
-    with multiprocessing.get_context("fork").Pool(workers) as pool:
-        results = pool.map(one_date, DATES)  # dates are independent; the workers share G by fork
+    keys = date_keys(hist, ugeom, snaps, pgeom)
+    done = {} if args.force else {d: c for d in DATES if (c := cached(d, keys[d])) is not None}
+    todo = [d for d in DATES if d not in done]
+    print("dates from cache:", sorted(done), "to compute:", todo, flush=True)
+    if todo:
+        with multiprocessing.get_context("fork").Pool(workers(len(todo), 3.0)) as pool:
+            for d, out in zip(todo, pool.map(one_date, todo)):  # dates are independent; G is shared by fork
+                with open(WW2_WORK / f"prov_part_{d}.pkl", "wb") as f:
+                    pickle.dump({"key": keys[d], "out": out}, f, protocol=pickle.HIGHEST_PROTOCOL)
+                done[d] = out
+    results = [done[d] for d in DATES]
     final = {}       # (prov_id, geom hash) -> unit record
     piece_rows = []  # (date, prov key, row, geom)
     for date, provs in zip(DATES, results):
@@ -531,10 +573,7 @@ def main():
                               label_lat=round(lp.y, 4), geom=u["geom"]))
     df = pd.DataFrame([{c: r.get(c) for c in UNIT_COLS} for r in out_units])
     df.to_csv(WW2_WORK / "prov_units.csv", index=False)
-    with open(WW2_WORK / "prov_units.geojson", "w") as f:
-        json.dump({"type": "FeatureCollection", "features": [
-            {"type": "Feature", "properties": {"unit_id": r["unit_id"]}, "geometry": mapping(r["geom"])}
-            for r in out_units]}, f)
+    write_outlines(WW2_WORK / "prov_units.geojson", ((r["unit_id"], r["geom"]) for r in out_units))
 
     by_date = defaultdict(list)
     for date, k, top, pg in piece_rows:
@@ -551,9 +590,7 @@ def main():
             if pg is not None:
                 geoms[pid] = pg
         pd.DataFrame(rows)[SNAP_COLS].to_csv(WW2_WORK / f"prov_snapshot_{date}.csv", index=False)
-        with open(WW2_WORK / f"prov_split_{date}.geojson", "w") as f:
-            json.dump({"type": "FeatureCollection", "features": [
-                {"type": "Feature", "properties": {"piece_id": k}, "geometry": mapping(g)} for k, g in geoms.items()]}, f)
+        write_outlines(WW2_WORK / f"prov_split_{date}.geojson", geoms.items())
         d = pd.DataFrame(rows)
         print(date, "pieces:", len(d), "split provinces:", int((d.control_split == 1).sum()),
               f"population {d.population_est.sum() / 1e9:.3f} bn", flush=True)

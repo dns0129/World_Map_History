@@ -36,9 +36,10 @@ import numpy as np
 import pandas as pd
 import shapefile
 from pyproj import Transformer
+import shapely
 from shapely import STRtree, voronoi_polygons, wkb
 from shapely import transform as shp_transform
-from shapely.geometry import MultiPoint, Point, Polygon, mapping, shape
+from shapely.geometry import MultiPoint, Point, Polygon
 from shapely.ops import unary_union
 
 import topo
@@ -46,7 +47,7 @@ from build_database import Namer
 from common import RAW, ROOT
 from ww2_common import REF_WORK, SET, SNAPSHOTS, UNCOVERED, WW2_RAW, WW2_WORK
 from ww2_geo import (clip_to, diff, eq_area_km2, fix_rings, gb_path, inter, norm, opening, polys, read_geojson,
-                     read_projected, union)
+                     read_outlines, read_projected, union, write_outlines)
 from ww2_territories import island_unit
 
 LAW = WW2_RAW / "lawson"
@@ -389,8 +390,8 @@ def ref_lookup(iso):
     """Present-day reference units of one country: (name, rounded label point) -> geometry."""
     rows = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False)
     rows = rows[rows.iso3 == iso]
-    feats = {f["properties"]["ref_id"]: f for f in json.load(open(REF_WORK / "ref_units.geojson"))["features"]}
-    return [(r.name, r.label_lon, r.label_lat, shape(feats[r.ref_id]["geometry"])) for r in rows.itertuples()]
+    geom = read_outlines(REF_WORK / "ref_units.geojson", "ref_id")
+    return [(r.name, r.label_lon, r.label_lat, geom[r.ref_id]) for r in rows.itertuples()]
 
 
 def postwar_china(roc):
@@ -563,8 +564,8 @@ def present_day_postwar():
             geom = diff(union(gs), union(cut)) if cut else union(gs)
             out.append(cand(f"PD-{iso}-{norm(r['name'])}-{(start or '0000')[:4]}", r["name"], 3, prio,
                             polys(geom), f"Present-day outline (geoBoundaries {iso} {lv}) of the same unit" if one
-                            else f"Present-day unit (geoBoundaries) less the districts that joined it later" if cut
-                            else f"Union of present-day units (geoBoundaries) that the unit later split into",
+                            else "Present-day unit (geoBoundaries) less the districts that joined it later" if cut
+                            else "Union of present-day units (geoBoundaries) that the unit later split into",
                             "present_day_outline_same_unit" if one else "present_day_outline_less_later" if cut
                             else "present_day_outline_merged", r["kind"],
                             name_zh=r["name_zh"] or None, start=start, end=end, note=r["note"] or None))
@@ -758,18 +759,49 @@ def parents(units, cands, date):
             u["parent"] = u["parent_hint"]
 
 
+SEA_SHARE = 0.10  # an OpenHistoricalMap outline with more water than this (territorial sea, lakes) is cut to land
+
+
+def clip_to_land(cands, refs):
+    """Cut OpenHistoricalMap outlines that take in territorial waters back to the land of the reference units,
+    so that the sea neither shows on the map nor counts in the area; outlines with little water are kept as
+    they are."""
+    rg = np.array([r["geom"] for r in refs])
+    shapely.prepare(rg)
+    tree = STRtree(rg)
+    n = 0
+    for c in cands:
+        if c["basis"] != "ohm_dated":
+            continue
+        g = c["geom"]
+        near = rg[tree.query(g, predicate="intersects")]
+        if not len(near):
+            continue
+        shapely.prepare(g)
+        inside = shapely.contains_properly(g, near)
+        land = shapely.area(near[inside]).sum() + shapely.area(shapely.intersection(g, near[~inside])).sum()
+        if land < (1 - SEA_SHARE) * g.area:
+            g2 = polys(inter(g, union(list(near))))
+            if g2 is not None:
+                c["geom"] = g2
+                n += 1
+    print("OpenHistoricalMap outlines cut back to land:", n, flush=True)
+
+
 def load_inputs():
     cands = us_counties() + taiwan() + korea() + burma() + east_asia() + from_present_day() + present_day_postwar() + ohm()
+    refs = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False).to_dict("records")
+    rgeom = read_outlines(REF_WORK / "ref_units.geojson", "ref_id")
+    for r in refs:
+        r["geom"] = rgeom[r["ref_id"]]
     for c in cands:
         if not c["geom"].is_valid:
             c["geom"] = polys(fix_rings(c["geom"]))
+    clip_to_land(cands, refs)
+    for c in cands:
         c["area"] = c["geom"].area
         c["area_km2"] = eq_area_km2(c["geom"])
     print("candidate units:", len(cands), pd.Series([c["basis"] for c in cands]).value_counts().to_dict(), flush=True)
-    refs = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False).to_dict("records")
-    rgeom = {f["properties"]["ref_id"]: shape(f["geometry"]) for f in json.load(open(REF_WORK / "ref_units.geojson"))["features"]}
-    for r in refs:
-        r["geom"] = rgeom[r["ref_id"]]
     arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
     cshapes = [dict(g["properties"], geom=topo.to_shape(arcs, g)) for g in gs]
     return cands, refs, cshapes
@@ -813,10 +845,7 @@ def write(per_date):
             "wikidata", "cshapes_fid", "snapshots", "area_km2", "label_lon", "label_lat"]
     df = pd.DataFrame([{c: r.get(c) for c in cols} for r in rows])
     df.to_csv(WW2_WORK / "hist_units.csv", index=False)
-    with open(WW2_WORK / "hist_units.geojson", "w") as f:
-        json.dump({"type": "FeatureCollection", "features": [
-            {"type": "Feature", "properties": {"unit_id": r["unit_id"]}, "geometry": mapping(r["geom"])}
-            for r in rows]}, f)
+    write_outlines(WW2_WORK / "hist_units.geojson", ((r["unit_id"], r["geom"]) for r in rows))
     print("distinct units:", len(df))
     print(df.groupby("tier_en").size())
 
