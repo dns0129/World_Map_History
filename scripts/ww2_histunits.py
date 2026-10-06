@@ -773,6 +773,7 @@ def parents(units, cands, date):
 
 
 LAND_TOL = 0.002  # degrees, about 200 m
+OHM_TOL = 0.0005  # degrees (about 50 m): OpenHistoricalMap outlines are simplified to this
 SEA_SHARE = 0.10  # an OpenHistoricalMap outline with more water than this (territorial sea, lakes) is cut to land
 
 
@@ -832,6 +833,10 @@ def candidates(refs):
     for c in cands:
         if not c["geom"].is_valid:
             c["geom"] = polys(fix_rings(c["geom"]))
+        if c["basis"] == "ohm_dated":
+            # OpenHistoricalMap draws coasts to a few metres; a province map needs far less, and the detail
+            # costs memory and time in every later step (one merge of Irish counties: 900,000 points, 7 GB)
+            c["geom"] = polys(c["geom"].simplify(OHM_TOL)) or c["geom"]
     clip_to_land(cands, refs)
     for c in cands:
         c["area"] = c["geom"].area
