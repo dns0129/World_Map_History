@@ -190,6 +190,7 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
           <label><input type="checkbox" id="tProv" checked> 省界</label>
           <label><input type="checkbox" id="tBorders" checked> 国界 / 控制线</label>
           <label><input type="checkbox" id="tTerrain" checked> 山体晕渲</label>
+          <label><input type="checkbox" id="t3d" checked> 3D 地形</label>
           <label><input type="checkbox" id="tHydro" checked> 河流湖泊</label>
           <label><input type="checkbox" id="tLabels" checked> 地名</label>
           <label><input type="checkbox" id="tApprox" checked> 近似斜线</label>
@@ -247,10 +248,10 @@ const DENSITY_STEPS = [5, 25, 50, 100, 250, 500];
 const DENSITY_RAMP = ["#e8f0fa", "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95"];
 // The map keeps its own palette in either page theme: a pale physical map, or a white one.
 const BASE = {
-  relief: { sea: "#d4e4ee", lake: "#b2d3ea", river: "#2b7cc4", riverInk: "#1d5f9c", shade: 0.55,
+  relief: { sea: "#d4e4ee", lake: "#b2d3ea", river: "#2b7cc4", riverInk: "#1d5f9c", shade: 0.55, sky: "#b9d0e2", horizon: "#e4edf1",
     relief: { "raster-saturation": 0, "raster-contrast": 0, "raster-brightness-min": 0, "raster-brightness-max": 1 },
     fill: { bloc: 0.52, nation: 0.6, control: 0.66, density: 0.66, tier: 0.6 } },
-  white: { sea: "#fdfdfc", lake: "#d3e5f1", river: "#3a89cc", riverInk: "#225e94", shade: 0.3,
+  white: { sea: "#fdfdfc", lake: "#d3e5f1", river: "#3a89cc", riverInk: "#225e94", shade: 0.3, sky: "#e8eef2", horizon: "#fbfbfa",
     relief: { "raster-saturation": -1, "raster-contrast": -0.5, "raster-brightness-min": 0.86, "raster-brightness-max": 1 },
     fill: { bloc: 0.42, nation: 0.5, control: 0.56, density: 0.62, tier: 0.5 } },
 };
@@ -261,7 +262,7 @@ const isModern = (sd) => sd.snapshot === "2026";        // country names: the sm
 
 // outlines arrive per snapshot (data/geo-<date>.bin) and are kept by their global index: pieces cut from a
 // province (geo), province outlines (adminGeo), CShapes units (units); a snapshot's control areas stay on it (ctrlGeo)
-const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: [], adminGeo: [], units: [], loading: 0,
+const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: [], adminGeo: [], units: [], loading: 0, terrainEx: 0, userPitch: false,
   admin: null, hydro: null, hydroDetail: null, sel: null, hover: null };
 const geoOf = (f) => state.geo[f] || state.adminGeo[state.admin.feature_admin[f]];  // a whole province is drawn with its outline
 const $ = (id) => document.getElementById(id);
@@ -319,24 +320,34 @@ async function inflate(buf) {
 async function getPacked(u) { return JSON.parse(new TextDecoder().decode(await getBin(u))); }
 
 // ------------------------------------------------------------------ relief tiles and glyphs
-// The relief ships as 2048-pixel WebP sheets per zoom level; tiles are cut from them here.
+// The relief ships as 2048-pixel WebP sheets per zoom level; tiles are cut from them here. The elevation
+// sheets (d…) are decoded without colour conversion, since their pixels are numbers (Terrarium encoding).
 const sheets = new Map();
 function sheet(name) {
   if (sheets.has(name)) { const p = sheets.get(name); sheets.delete(name); sheets.set(name, p); return p; }
-  const p = fetch(`data/relief/${name}.webp`).then((r) => { if (!r.ok) throw new Error(name); return r.blob(); }).then((b) => createImageBitmap(b));
+  const p = fetch(`data/relief/${name}.webp`).then((r) => { if (!r.ok) throw new Error(name); return r.blob(); })
+    .then((b) => createImageBitmap(b, { premultiplyAlpha: "none", colorSpaceConversion: "none" }));
+  p.catch(() => sheets.delete(name));
   sheets.set(name, p);
-  while (sheets.size > 14) sheets.delete(sheets.keys().next().value);
+  while (sheets.size > 24) sheets.delete(sheets.keys().next().value);
   return p;
+}
+const canvas256 = () => typeof OffscreenCanvas !== "undefined" ? new OffscreenCanvas(256, 256) : Object.assign(document.createElement("canvas"), { width: 256, height: 256 });
+const toPng = async (c) => (c.convertToBlob ? await c.convertToBlob({ type: "image/png" }) : await new Promise((r) => c.toBlob(r, "image/png"))).arrayBuffer();
+let flatDem = null;  // open sea has no elevation sheet: 0 m everywhere
+function flatTile() {
+  if (!flatDem) { const c = canvas256(); const g = c.getContext("2d"); g.fillStyle = "rgb(128,0,0)"; g.fillRect(0, 0, 256, 256); flatDem = toPng(c); }
+  return flatDem;
 }
 function registerProtocols() {
   maplibregl.addProtocol("relief", async (params) => {
     const [, set, z, x, y] = /^relief:\/\/(\w)\/(\d+)\/(\d+)\/(\d+)/.exec(params.url).map((v, i) => i > 1 ? +v : v);
     const per = 8, i = Math.floor(x / per), j = Math.floor(y / per);
-    const bmp = await sheet(`${set}${z}_${i}_${j}`);
-    const c = typeof OffscreenCanvas !== "undefined" ? new OffscreenCanvas(256, 256) : Object.assign(document.createElement("canvas"), { width: 256, height: 256 });
-    c.getContext("2d").drawImage(bmp, (x - i * per) * 256, (y - j * per) * 256, 256, 256, 0, 0, 256, 256);
-    const blob = c.convertToBlob ? await c.convertToBlob({ type: "image/png" }) : await new Promise((r) => c.toBlob(r, "image/png"));
-    return { data: await blob.arrayBuffer() };
+    let bmp;
+    try { bmp = await sheet(`${set}${z}_${i}_${j}`); } catch (e) { if (set === "d") return { data: await flatTile() }; throw e; }
+    const c = canvas256(); const g = c.getContext("2d"); g.imageSmoothingEnabled = false;
+    g.drawImage(bmp, (x - i * per) * 256, (y - j * per) * 256, 256, 256, 0, 0, 256, 256);
+    return { data: await toPng(c) };
   });
   // Chinese characters are drawn by the browser itself (localIdeographFontFamily); Latin and
   // Cyrillic province names use the few glyph ranges shipped in data/glyphs/sans
@@ -452,7 +463,12 @@ function applyBase() {
   const b = BASE[state.base];
   map.setPaintProperty("bg", "background-color", b.sea);
   for (const [k, v] of Object.entries(b.relief)) map.setPaintProperty("relief", k, v);
-  map.setPaintProperty("shade", "raster-opacity", b.shade);
+  // the pre-drawn shading gives way to the live hillshade between zoom 5 and 6.3
+  map.setPaintProperty("shade", "raster-opacity", ["interpolate", ["linear"], ["zoom"], 5, b.shade, 6.3, 0]);
+  map.setPaintProperty("hillshade", "hillshade-shadow-color", ["interpolate", ["linear"], ["zoom"], 5, "rgba(28,34,32,0)", 6.3, `rgba(28,34,32,${(b.shade * 1.05).toFixed(2)})`]);
+  map.setPaintProperty("hillshade", "hillshade-highlight-color", ["interpolate", ["linear"], ["zoom"], 5, "rgba(255,255,255,0)", 6.3, `rgba(255,255,255,${(b.shade * 0.5).toFixed(2)})`]);
+  map.setSky({ "sky-color": b.sky, "horizon-color": b.horizon, "fog-color": b.horizon, "sky-horizon-blend": 0.6,
+    "horizon-fog-blend": 0.7, "fog-ground-blend": 0.25, "atmosphere-blend": 0 });
   for (const l of ["hydro-fill", "hydro2-fill"]) if (map.getLayer(l)) map.setPaintProperty(l, "fill-color", b.lake);
   for (const l of ["hydro-line", "hydro2-line"]) if (map.getLayer(l)) map.setPaintProperty(l, "line-color", b.river);
   for (const l of riverLabelLayers()) map.setPaintProperty(l, "text-color", b.riverInk);
@@ -806,12 +822,12 @@ async function boot() {
     b.onclick = () => loadSnap(s.snapshot); tabs.append(b);
   }
   map = new maplibregl.Map({ container: "map", center: [60, 30], zoom: 1.6, minZoom: 1, maxZoom: 11, attributionControl: false,
-    renderWorldCopies: false, localIdeographFontFamily: "'Noto Serif SC', 'Songti SC', 'SimSun', serif", dragRotate: false, pitchWithRotate: false,
+    renderWorldCopies: false, localIdeographFontFamily: "'Noto Serif SC', 'Songti SC', 'SimSun', serif", maxPitch: 65,
     style: { version: 8, glyphs: "glyph://{fontstack}/{range}", sources: {},
       layers: [{ id: "bg", type: "background", paint: { "background-color": BASE[state.base].sea } }] } });
   map.touchZoomRotate.disableRotation();
   if (window.innerWidth > 760) map.setPadding({ left: 320, top: 0, right: 0, bottom: 0 });
-  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
+  map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), "bottom-right");
   map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
   map.on("load", () => onLoad(index).catch(fail));
   wire(admin);
@@ -830,6 +846,24 @@ function riverLabel(id, source, minzoom, lo, hi) {
     layout: { "symbol-placement": "line", "text-field": ["get", "n"], "text-font": ["sans"], "text-size": 11.5, "text-letter-spacing": 0.3,
       "symbol-spacing": 380, "text-max-angle": 45, "text-keep-upright": true, "symbol-sort-key": ["get", "r"] },
     paint: { "text-color": BASE[state.base].riverInk, "text-halo-color": "rgba(255,255,255,0.85)", "text-halo-width": 1.4 } };
+}
+
+// ------------------------------------------------------------------ 3D terrain
+// Zoomed in past continent scale the mountains rise and the camera tilts, more the closer one looks.
+// Mountains are a few kilometres high on a map tens of kilometres per pixel, so the relief is exaggerated,
+// less as one zooms in (the Alps stand about the same height on the screen at every zoom).
+const T3D = { from: 3.2, full: 6.5, pitch: 52 };
+const exaggerationAt = (z) => Math.max(1.4, Math.min(28, 28 * Math.pow(0.55, z - 4)));
+function update3D() {
+  const z = map.getZoom(); const on = $("t3d").checked && z >= T3D.from;
+  if (on) {
+    const ex = Math.round(exaggerationAt(z) * 4) / 4;
+    if (state.terrainEx !== ex) { map.setTerrain({ source: "dem", exaggeration: ex }); state.terrainEx = ex; }
+  } else if (state.terrainEx) { map.setTerrain(null); state.terrainEx = 0; }
+  if (z < T3D.from) state.userPitch = false;
+  if (state.userPitch) return;
+  const pitch = on ? T3D.pitch * Math.min(1, (z - T3D.from) / (T3D.full - T3D.from)) : 0;
+  if (Math.abs(map.getPitch() - pitch) > 1) map.easeTo({ pitch, duration: 600 });
 }
 
 async function onLoad(index) {
@@ -854,6 +888,13 @@ async function onLoad(index) {
   map.addLayer({ id: "prov-fill", type: "fill", source: "prov", paint: { "fill-color": fillColor(), "fill-opacity": 0.6 } });
   map.addLayer({ id: "prov-approx", type: "fill", source: "prov", filter: ["==", ["get", "a"], 1], paint: { "fill-pattern": "hatch", "fill-opacity": 0.6 } });
   map.addLayer({ id: "shade", type: "raster", source: "shade", paint: { "raster-resampling": "linear", "raster-fade-duration": 0 } });
+  // elevation: one source for the 3D terrain, one for the hillshade drawn from it once zoomed in past the
+  // pre-drawn shading (zoom 5), which is sharper there; open sea is flat
+  const dem = { type: "raster-dem", tiles: ["relief://d/{z}/{x}/{y}"], tileSize: 256, encoding: "terrarium", minzoom: 0, maxzoom: 6 };
+  map.addSource("dem", dem); map.addSource("dem-shade", { ...dem });
+  map.addLayer({ id: "hillshade", type: "hillshade", source: "dem-shade", minzoom: 4.8,
+    paint: { "hillshade-illumination-direction": 315, "hillshade-illumination-anchor": "map", "hillshade-exaggeration": 0.6,
+      "hillshade-accent-color": "rgba(0,0,0,0)" } });
   map.addLayer({ id: "hydro-fill", type: "fill", source: "hydro", filter: ["==", ["get", "k"], "l"], paint: { "fill-color": BASE[state.base].lake } });
   map.addLayer({ id: "hydro-line", type: "line", source: "hydro", filter: RIVER_FILTER, layout: { "line-cap": "round", "line-join": "round" }, paint: riverPaint() });
   map.addLayer({ id: "prov-line", type: "line", source: "admin", paint: { "line-color": INK2,
@@ -891,6 +932,10 @@ async function onLoad(index) {
   $("loading").hidden = true;
   getPacked("data/hydro.bin").then((h) => { state.hydro = h; map.getSource("hydro").setData(h); }).catch((e) => console.warn(e));
   map.on("zoomend", loadDetailHydro); loadDetailHydro();
+  map.on("zoomend", update3D);
+  map.on("pitchstart", (e) => { if (e.originalEvent) state.userPitch = true; });  // tilted by hand: leave it
+  $("t3d").onchange = () => { state.userPitch = false; update3D(); };
+  update3D();
 }
 
 async function loadDetailHydro() {
@@ -925,7 +970,7 @@ function wire(admin) {
   for (const b of document.querySelectorAll("[data-mode]")) b.onclick = () => setMode(b.dataset.mode);
   for (const b of document.querySelectorAll("[data-base]")) b.onclick = () => { state.base = b.dataset.base; store.set("ww2-base", state.base); applyBase(); };
   const vis = (id, layers) => $(id).onchange = () => layers.forEach((l) => map.getLayer(l) && map.setLayoutProperty(l, "visibility", $(id).checked ? "visible" : "none"));
-  vis("tProv", ["prov-line"]); vis("tTerrain", ["shade"]); vis("tCities", ["city"]);
+  vis("tProv", ["prov-line"]); vis("tTerrain", ["shade", "hillshade"]); vis("tCities", ["city"]);
   $("tHydro").onchange = () => { for (const l of ["hydro-fill", "hydro-line", "hydro2-fill", "hydro2-line"]) if (map.getLayer(l)) map.setLayoutProperty(l, "visibility", $("tHydro").checked ? "visible" : "none"); setLabels(); };
   $("tBorders").onchange = applyPaint; $("tApprox").onchange = applyPaint; $("tLabels").onchange = setLabels;
   if (window.innerWidth <= 760) { $("controls").classList.add("collapsed"); $("toggleSheet").textContent = "展开"; $("toggleSheet").setAttribute("aria-expanded", "false"); }
