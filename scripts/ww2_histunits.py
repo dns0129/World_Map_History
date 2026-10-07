@@ -13,7 +13,7 @@ finer unit covers, so the result is one partition of the land per date.
                           Korean and Taiwanese provinces; Philippine provinces (1939); Japanese
                           prefectures and French departements of 1939 (present-day outlines of the
                           same units, see FRANCE_1939); OpenHistoricalMap admin_level 4; Indian
-                          princely states (1931)
+                          princely states (1931); provinces of the 1897 Russian census (up to 1918)
   tier 4  region level    OpenHistoricalMap admin_level 3
   tier 5  whole unit      where no subdivision is known: the country, colony or protectorate as
                           drawn by CShapes 2.0 on that date
@@ -40,7 +40,8 @@ from pyproj import Transformer
 import shapely
 from shapely import STRtree, voronoi_polygons, wkb
 from shapely import transform as shp_transform
-from shapely.geometry import MultiPoint, Point, Polygon
+from shapely.affinity import translate
+from shapely.geometry import MultiPoint, Point, Polygon, box, shape
 from shapely.ops import unary_union
 
 import topo
@@ -59,6 +60,7 @@ TIER_ZH = {1: "县级", 2: "地区级", 3: "省级", 4: "大区级", 5: "整个�
 TIER_EN = {1: "county", 2: "district", 3: "province", 4: "region", 5: "whole unit", 6: "territory"}
 MIN_KEEP_KM2 = 300      # smaller remnants of a carved unit are given to their neighbours
 SNAP_KM2 = 800          # leftover land up to this size joins the adjacent historical unit
+FILL_REGION_SHARE = 0.25  # a region the fill-in provinces cover all but this share of gives them the rest
 
 
 def cand(uid, name, tier, prio, geom, source, basis, kind, name_zh=None, name_en=None, start=None, end=None, **kw):
@@ -174,6 +176,10 @@ OHM_TIER = {"6": (1, 10), "5": (2, 10), "4": (3, 20), "3": (4, 10)}
 # of the islands and of present-day Kuwait
 OHM_SKIP = {"Magyar Királyság", "Transleithania", "委任統治地域南洋群島", "مشيخة الكويت"}
 OHM_NAME = {"达里尼 Квантунская Область": ("Kwantung Leased Territory", "关东州")}
+# Drawn at level 4 but above the provinces: the Turkestan governorate-general and the Alash autonomy (1917-20)
+# span several oblasts, which are the first-level divisions (provinces of the 1897 census where
+# OpenHistoricalMap has none)
+OHM_REGION = {"Русский Туркестан", "Алашская автономия"}
 
 
 def ohm():
@@ -194,6 +200,8 @@ def ohm():
         name = t.get("name") or t.get("name:en") or f"OHM relation {o['id']}"
         zh = t.get("name:zh") or t.get("name:zh-Hans") or t.get("name:zh-CN")
         name, zh = OHM_NAME.get(name, (name, zh))
+        if name in OHM_REGION:
+            tier = 4
         out.append(cand(f"OHM-r{o['id']}", name, tier, prio, g,
                         f"OpenHistoricalMap relation {o['id']} (CC0), planet 2026-10-03", "ohm_dated",
                         t.get("border_type") or f"admin_level {lv}", name_zh=zh, name_en=t.get("name:en"),
@@ -576,6 +584,54 @@ def present_day_postwar():
     return out
 
 
+# ---------------------------------------------------------------- Russian Empire, provinces of the 1897 census
+
+RU1897 = WW2_RAW / "russia1897" / "1897RussianEmpire.shp"
+RU1897_END = "1918-12-31"  # used up to the end of 1918; the Soviet reorganisation begins after that
+RU1897_CENSUS = "1897-01-28"  # only units in force on the census date take an 1897 province as their parent
+RU1897_SRC = ("Provinces of the 1897 Russian census, outlines traced from A. Ilyin's school atlas of c. 1914 "
+              "(Sablin et al. 2015, Transcultural Empire GIS, heiDATA doi:10.11588/data/10064, CC BY 4.0); used up "
+              "to 1918 where OpenHistoricalMap has no province, so later boundary changes are not shown")
+
+
+def russia_1897(cshapes):
+    """Governorates and oblasts of the 1897 census, and the provinces of Finland the same GIS draws. They come
+    after OpenHistoricalMap at the province level, so they fill the provinces it lacks, and where it has the
+    province the 1897 outline only adds the land it leaves out (see carve). Bukhara and Khiva, drawn whole,
+    are left out: they are protectorates with CShapes units of their own."""
+    names = pd.read_csv(ROOT / "curated" / "russia_1897.csv", dtype=str).fillna("")
+    rows = defaultdict(list)
+    for r in names.itertuples():
+        rows[r.src].append(r)
+    # the atlas borders run a few kilometres off CShapes: keep each province inside the empire
+    empire = union([u["geom"] for u in cshapes if u["gwcode"] == 365 and u["start"] <= RU1897_END
+                    and u["end"] >= "1897-01-28"])
+    # where a region's leftover may be handed to these provinces (see carve): the empire and its coastal waters,
+    # less the land of the other units of the empire's time, before the states that broke away from it
+    # (Khiva, Bukhara, Austria, Sweden)
+    others = [u["geom"] for u in cshapes if u["gwcode"] != 365 and u["start"] <= "1914-08-04"
+              and u["end"] >= "1897-01-28"]
+    reach = empire.simplify(0.01).buffer(0.5)
+    zone = polys(diff(reach, union([o for o in others if o.intersects(reach)])))
+    # the atlas draws Sakhalin without the south, Japanese from 1905; until then the 1897 unit is the whole island
+    south_sakhalin = union([u["geom"] for u in cshapes if u["country_name"] == "Southern Sakhalin Island"])
+    west, east = box(-180, -90, 180, 90), box(180, -90, 540, 90)
+    out = []
+    shp = shapefile.Reader(str(RU1897), encoding="utf-8")
+    for s, rec in zip(shp.shapes(), shp.records()):
+        if rec["NAMERUS"] not in rows:
+            continue
+        g = polys(fix_rings(shape(s.__geo_interface__)))
+        g = union([inter(g, west), translate(inter(g, east), -360)])  # Chukotka runs past 180 degrees
+        g = polys(inter(g, empire))
+        for r in rows[rec["NAMERUS"]]:
+            geom = polys(union([g, south_sakhalin])) if r.key == "sakhalin" else g
+            out.append(cand(f"RU1897-{r.key}", r.name, 3, 30, geom, RU1897_SRC, "historical_1897", r.kind,
+                            name_zh=r.zh, name_en=r.en, start=r.start or None, end=r.end or RU1897_END,
+                            note=r.note or None, fill_rest=True, fill_within=zone))
+    return out
+
+
 # ---------------------------------------------------------------- 1939 units drawn with present-day outlines
 
 JAPAN_NOTE = "prefecture boundaries essentially unchanged since 1888 (Okinawa 1879)"
@@ -641,6 +697,22 @@ def carve_order(c):
     return c["prio"], -(int(c["start"][:4]) if c["start"] else -9999), c["area"]
 
 
+def share_out(g, targets, step=0.1):
+    """Split g among the target outlines: each cell of a 0.1-degree grid goes to the nearest target."""
+    tree = STRtree(targets)
+    parts = defaultdict(list)
+    x0, y0, x1, y1 = g.bounds
+    for y in np.arange(y0, y1, step):
+        row = polys(inter(g, box(x0, y, x1, y + step)))  # robust: clip_by_rect can fail on degenerate rings
+        if row is None:
+            continue
+        for x in np.arange(x0, x1, step):
+            cell = polys(inter(row, box(x, y, x + step, y + step)))
+            if cell is not None:
+                parts[int(tree.nearest(cell.representative_point()))].append(cell)
+    return {k: union(v) for k, v in parts.items()}
+
+
 def carve(cands, date):
     """Lay the candidate units down from tier 1 to tier 4; each keeps what finer tiers left."""
     accepted = []
@@ -654,12 +726,22 @@ def carve(cands, date):
         kept = {}
         for i, c in enumerate(cs):
             g = c["geom"]
-            same = clip_to([kept[j] for j in ctree.query(g, predicate="intersects") if j in kept], g.bounds)
+            hits = [int(j) for j in ctree.query(g, predicate="intersects") if j in kept]
+            same = clip_to([kept[j] for j in hits], g.bounds)
             carved = False
             if same:
                 ov = sum(inter(g, s).area for s in same)
                 if ov > 0.5 * g.area:
-                    continue  # another version of the same unit, or an overlapping duplicate
+                    if not c.get("fill_rest"):
+                        continue  # another version of the same unit, or an overlapping duplicate
+                    # a source that only fills in (the 1897 Russian provinces): what the other outline
+                    # leaves of this province stays, under that unit's name when both draw one province
+                    # (similar areas), so that the two parts become one province
+                    dup = cs[max(hits, key=lambda j: inter(g, kept[j]).area)]
+                    if 2 / 3 <= dup["area_km2"] / c["area_km2"] <= 1.5:
+                        c = dict(c, uid=c["uid"] + "-rest", name=dup["name"], name_zh=dup.get("name_zh"),
+                                 name_en=dup.get("name_en"), note=f"land the outline of {c['name']} in the 1897 "
+                                 f"census GIS adds to {dup['name']} ({dup['source']})")
                 g = diff(g, union(same))
                 carved = True
             if ftree is not None:
@@ -673,6 +755,23 @@ def carve(cands, date):
             km2 = eq_area_km2(g)
             if km2 < MIN_KEEP_KM2 and km2 < 0.5 * c["area_km2"]:
                 continue
+            if tier == 4 and ftree is not None and km2 < FILL_REGION_SHARE * c["area_km2"]:
+                # what a region keeps beside fill-in provinces (the coast and islands of Finland, which the 1897
+                # outlines draw short, the seams between the Turkestan oblasts) goes to the nearest of them, as
+                # far as it lies in the empire or its waters (not Khiva, Bukhara, Austria or Sweden)
+                fill = [int(k) for k in ftree.query(g.buffer(0.05)) if accepted[int(k)].get("fill_rest")]
+                share = polys(inter(g, accepted[fill[0]]["fill_within"])) if fill else None
+                if share is not None:
+                    for k, part in share_out(share, [accepted[k]["geom"] for k in fill]).items():
+                        a = accepted[fill[k]]
+                        a["geom"] = polys(union([a["geom"], part]))
+                    rest = opening(polys(diff(g, share)))
+                    if rest is None or eq_area_km2(rest) < MIN_KEEP_KM2:
+                        kept[i] = g  # still carved out of the regions laid down after it
+                        continue
+                    kept[i] = g
+                    accepted.append(dict(c, geom=rest, partial=True))
+                    continue
             kept[i] = g
             accepted.append(dict(c, geom=g, partial=km2 < 0.97 * c["area_km2"]))
     return accepted
@@ -758,10 +857,11 @@ def parents(units, cands, date):
             continue
         rp = u["geom"].representative_point()
         found = []
+        late = (u.get("start") or "") > RU1897_CENSUS  # created after the census: cuts across the 1897 provinces
         for t in (2, 3, 4):
             if t <= u["tier"] or t not in trees:
                 continue
-            hit = [i for i in trees[t].query(rp, predicate="within")]
+            hit = [i for i in trees[t].query(rp, predicate="within") if not (late and by_tier[t][i].get("fill_rest"))]
             if hit:  # the unit carve() would have kept: preferred source, newest, smallest
                 found.append(by_tier[t][min(hit, key=lambda i: carve_order(by_tier[t][i]))])
         if found:
@@ -821,7 +921,7 @@ def inputs_key():
     return h.hexdigest()
 
 
-def candidates(refs):
+def candidates(refs, cshapes):
     """All candidate units of the set, kept in work/<set>/candidates.pkl for the next process that needs them
     (the per-date runs of --part share it; `--prepare` fills it before they start)."""
     key, path = inputs_key(), WW2_WORK / "candidates.pkl"
@@ -830,7 +930,8 @@ def candidates(refs):
             c = pickle.load(f)
         if c["key"] == key:
             return c["cands"]
-    cands = us_counties() + taiwan() + korea() + burma() + east_asia() + from_present_day() + present_day_postwar() + ohm()
+    cands = (us_counties() + taiwan() + korea() + burma() + east_asia() + from_present_day() + present_day_postwar() + ohm()
+             + russia_1897(cshapes))
     for c in cands:
         if not c["geom"].is_valid:
             c["geom"] = polys(fix_rings(c["geom"]))
@@ -854,10 +955,10 @@ def load_inputs():
     rgeom = read_outlines(REF_WORK / "ref_units.geojson", "ref_id")
     for r in refs:
         r["geom"] = rgeom[r["ref_id"]]
-    cands = candidates(refs)
-    print("candidate units:", len(cands), pd.Series([c["basis"] for c in cands]).value_counts().to_dict(), flush=True)
     arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
     cshapes = [dict(g["properties"], geom=topo.to_shape(arcs, g)) for g in gs]
+    cands = candidates(refs, cshapes)
+    print("candidate units:", len(cands), pd.Series([c["basis"] for c in cands]).value_counts().to_dict(), flush=True)
     return cands, refs, cshapes
 
 
@@ -874,10 +975,15 @@ def partition(date, cands, refs, cshapes, namer):
 
 def write(per_date):
     final = {}
+    # a unit keeps the parent of its first date; one whose parent becomes or ceases to be an 1897 Russian province
+    # (the powiats of Konin and Slupca: OpenHistoricalMap's Kalisz governorate until 1914, the 1897 one in 1918)
+    # is a new version, so that it joins that province
+    ru1897 = ({u["name"] for _, allu in per_date for u in allu if u["uid"].startswith("RU1897")}
+              - {u["name"] for _, allu in per_date for u in allu if not u["uid"].startswith("RU1897")})
     for date, allu in per_date:
         for u in allu:
             h = hashlib.md5(wkb.dumps(u["geom"])).hexdigest()[:8]
-            key = (u["uid"], h)
+            key = (u["uid"], h, u.get("parent") if u.get("parent") in ru1897 else None)
             if key in final:
                 final[key]["dates"].append(date)
             else:

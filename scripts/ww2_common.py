@@ -62,6 +62,7 @@ else:
 # Land CShapes leaves blank on a date counts as part of this unit: on 11 November 1918, Latvia,
 # renounced by Russia at Brest-Litovsk and not yet independent (18 November)
 UNCOVERED = {"1918-11-11": "Russia (Soviet Union)"}
+UNCOVERED_BOX = {"1918-11-11": (20.9, 55.6, 28.3, 58.1)}  # where that land lies (Latvia), lon/lat bounds
 
 TYPICAL_COUNTY_KM2 = 1500.0  # target size used to pick each country's county level
 

@@ -2,8 +2,9 @@
 
   raw/geoboundaries/   geoBoundaries gbOpen ADM1/ADM2/ADM3 (simplified) for every country
   raw/ww2/             US historical counties (Newberry AHCB via USAboundariesData),
-                       Konrad Lawson's East Asia 1930-1942 layers, NIKH Korea places
-All hosts are GitHub (git, raw and LFS media).
+                       Konrad Lawson's East Asia 1930-1942 layers, NIKH Korea places,
+                       provinces of the 1897 Russian census (heiDATA)
+All hosts are GitHub (git, raw and LFS media), except heidata.uni-heidelberg.de for the 1897 provinces.
 """
 import concurrent.futures as cf
 import re
@@ -30,6 +31,11 @@ LAWSON_FILES = [
     "data/population/japan-1940.csv", "data/population/korea-1942.csv", "data/population/taiwan-1941.csv",
     "data/population/manchukuo-1943.csv",
 ]
+
+# Sablin et al., Transcultural Empire GIS (heiDATA doi:10.11588/data/10064, version 3.0): file ids of the
+# 1897 shapefile
+RU1897_FILES = {2082: "1897RussianEmpire.cpg", 2083: "1897RussianEmpire.dbf", 2084: "1897RussianEmpire.prj",
+                2087: "1897RussianEmpire.shp", 2088: "1897RussianEmpire.shx"}
 
 
 def get(url, dest, tries=5):
@@ -69,9 +75,18 @@ def geoboundaries():
     print("geoBoundaries files:", len(files))
 
 
+def russia_1897():
+    dest = WW2 / "russia1897"
+    dest.mkdir(exist_ok=True)
+    for fid, name in RU1897_FILES.items():
+        if not (dest / name).exists():
+            get(f"https://heidata.uni-heidelberg.de/api/access/datafile/{fid}", dest / name)
+
+
 def main():
     WW2.mkdir(parents=True, exist_ok=True)
     geoboundaries()
+    russia_1897()
     base = "https://raw.githubusercontent.com/ropensci/USAboundariesData/master/data-raw/historical/"
     for f in ("histcounties.geojson", "histstates.geojson"):
         if not (WW2 / f"us_{f}").exists():

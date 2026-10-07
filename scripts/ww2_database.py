@@ -55,6 +55,15 @@ SOURCES = [
      f"(curated/{RULES.name}, curated/control_events.csv).", "curated/", "CC0",
      "De facto control on each snapshot date"),
 ]
+if SET == "early":
+    SOURCES.insert(-3, ("ru1897", "Transcultural Empire GIS (1897 census provinces)",
+                        "Sablin, I., Kuchinskiy, A., Korobeinikov, A., Mikhaylov, S., Kudinov, O., Kitaeva, Y., "
+                        "Aleksandrov, P., Zimina, M., Zhidkov, G. (2015). Transcultural Empire: Geographic Information "
+                        "System of the 1897 and 1926 General Censuses in the Russian Empire and Soviet Union. heiDATA, "
+                        "V3. Outlines traced from A. Ilyin's school atlas of c. 1914.",
+                        "https://doi.org/10.11588/data/10064", "CC BY 4.0",
+                        "Governorates and oblasts of the Russian Empire and provinces of Finland, 1900-1918, where "
+                        "OpenHistoricalMap has no province"))
 
 if SET == "postwar":
     SOURCES = SOURCES + [
