@@ -20,7 +20,7 @@ TOL = 0.006  # degrees (~600 m) for stored geometry
 ND = 3  # decimals kept (~110 m)
 
 SOURCES = [
-    ("ohm", "OpenHistoricalMap", "OpenHistoricalMap contributors, planet file of 2026-10-03; administrative boundary "
+    ("ohm", "OpenHistoricalMap", "OpenHistoricalMap contributors, planet file of 2026-10-06; administrative boundary "
      "relations with start_date/end_date in force on each snapshot date.", "https://www.openhistoricalmap.org/",
      "CC0", "Dated administrative units worldwide (admin_level 3-6)"),
     ("ahcb", "Atlas of Historical County Boundaries", "Newberry Library, Dr. William M. Scholl Center (2010). Via R package "
@@ -45,8 +45,23 @@ SOURCES = [
     ("geoboundaries", "geoBoundaries gbOpen", "Runfola, D. et al. (2020) geoBoundaries: A global database of political "
      "administrative boundaries. PLoS ONE 15(4): e0231866.", "https://github.com/wmgeolab/geoBoundaries",
      "CC BY 4.0 (per country, see metadata)",
-     "Outlines of Japanese prefectures and French departements (same units as in 1939), land outline, and the "
+     "Outlines of Japanese prefectures, French departements, Portuguese districts and Belgian provinces (same units "
+     "as at the time), land outline, and the "
      "present-day region names the control rules refer to"),
+    ("princeton_colonial", "Historical administrative boundaries of British colonies in Africa",
+     "Map and Geospatial Information Center, Lewis Library, Princeton University (2017): conflated and extracted "
+     "historical administrative boundaries (GADM outlines conflated with scanned British Colonial Office maps): "
+     "Nigeria 1934 and 1939, Northern Rhodesia 1938, Uganda, Kenya and Gold Coast 1948, Sierra Leone 1922.",
+     "https://maps.princeton.edu/", "No known copyright; non-commercial academic use",
+     "Provinces of Nigeria (with the British Cameroons), Northern Rhodesia, Uganda, Kenya, the Gold Coast and "
+     "Sierra Leone"),
+    ("riksarkivet", "Historiska GIS-kartor", "Riksarkivet (Swedish National Archives): Historiska GIS-kartor, "
+     "territorial divisions of Sweden from the late 16th to the late 20th century; via J. Junkka, histmaps R package.",
+     "https://github.com/junkka/histmaps", "CC0", "Swedish counties (län) with the years each outline was valid"),
+    ("geospatial_ro", "Romania: interwar counties (1930)", "geo-spatial.org: limitele administrative ale județelor "
+     "interbelice (1930), after the 1925 administrative law.",
+     "http://geo-spatial.org/vechi/download/romania-limitele-administrative-ale-jude-elor-interbelice-1930",
+     "CC BY-SA 3.0", "Romanian counties (județe) 1926-1950"),
     ("ghspop", "GHS-POP R2023A", "European Commission JRC (2023).", "https://human-settlement.emergency.copernicus.eu/",
      "CC BY 4.0", "Spatial pattern for population estimates (1975 grid)"),
     ("curated", "Curated control rules", "Compiled for this database from standard histories of the war "

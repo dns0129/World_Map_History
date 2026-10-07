@@ -202,7 +202,7 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
         <input id="q" type="search" placeholder="例如 京畿道、Kursk、Seine、北海道" autocomplete="off">
         <ul class="results" id="results"></ul>
       </div>
-      <p class="foot">点击地图先选中国家，在同一国家内再点一次即进入省级。底图可在“地形”和“白色”之间切换。每个断面只显示当日施行的省级区划；当时的县、地区都已并入所属的省。没有省级资料的地方显示整个国家或殖民地。数据：OpenHistoricalMap、Newberry 美国县界史、中研院台湾 1930、国史编纂委员会 1914–26、K. Lawson 东亚图层、1897 年俄国省界（Sablin 等，heiDATA）、CShapes 2.0、Natural Earth；人口为 GHS-POP 推算。</p>
+      <p class="foot">点击地图先选中国家，在同一国家内再点一次即进入省级。底图可在“地形”和“白色”之间切换。每个断面只显示当日施行的省级区划；当时的县、地区都已并入所属的省。没有省级资料的地方显示整个国家或殖民地。数据：OpenHistoricalMap、Newberry 美国县界史、中研院台湾 1930、国史编纂委员会 1914–26、K. Lawson 东亚图层、1897 年俄国省界（Sablin 等，heiDATA）、普林斯顿大学英属非洲殖民地区划、瑞典国家档案馆历史 GIS、geo-spatial.org 罗马尼亚 1930 年县界、CShapes 2.0、Natural Earth；人口为 GHS-POP 推算。</p>
     </aside>
     <aside class="sheet detail" id="detail" hidden aria-live="polite"></aside>
     <div class="tip" id="tip" hidden></div>
@@ -239,7 +239,9 @@ const BASIS_ZH = {
   merged_subunits: "由当时的下级区划合并而成（外界即这些区划的历史界线）",
   present_day_admin1: "当今一级行政区（Natural Earth 1:1000 万，约 2020 年前后的划分）",
   reconstructed_from_1928_outlines: "据 1928–45 年省界复原（合并或拆分为当时的省份）",
-  historical_1941_outline: "1941 年的界线，按 1930 年代的归属分组"
+  historical_1941_outline: "1941 年的界线，按 1930 年代的归属分组",
+  historical_1922: "历史界线（1922）", historical_1934: "历史界线（1934）", historical_1938: "历史界线（1938）",
+  historical_1948_outline: "1948 年的界线（同一批省份，早年的省界可能略有出入）"
 };
 const DENSITY_STEPS = [5, 25, 50, 100, 250, 500];
 const DENSITY_RAMP = ["#e8f0fa", "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95"];

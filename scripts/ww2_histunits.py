@@ -13,7 +13,10 @@ finer unit covers, so the result is one partition of the land per date.
                           Korean and Taiwanese provinces; Philippine provinces (1939); Japanese
                           prefectures and French departements of 1939 (present-day outlines of the
                           same units, see FRANCE_1939); OpenHistoricalMap admin_level 4; Indian
-                          princely states (1931); provinces of the 1897 Russian census (up to 1918)
+                          princely states (1931); provinces of the 1897 Russian census (up to 1918);
+                          provinces of British colonies in Africa (Princeton University Library); Swedish
+                          counties (Riksarkivet); Romanian counties of 1930; Portuguese districts and Belgian
+                          provinces (present-day outlines of the same units)
   tier 4  region level    OpenHistoricalMap admin_level 3
   tier 5  whole unit      where no subdivision is known: the country, colony or protectorate as
                           drawn by CShapes 2.0 on that date
@@ -35,11 +38,11 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 import shapefile
-from pyproj import Transformer
+from pyproj import CRS, Transformer
 from shapely import STRtree, voronoi_polygons, wkb
 from shapely import transform as shp_transform
 from shapely.affinity import translate
-from shapely.geometry import MultiPoint, Point, box, mapping, shape
+from shapely.geometry import MultiPoint, MultiPolygon, Point, box, mapping, shape
 from shapely.ops import unary_union
 
 import topo
@@ -175,6 +178,11 @@ OHM_NAME = {"达里尼 Квантунская Область": ("Kwantung Leased
 # span several oblasts, which are the first-level divisions (provinces of the 1897 census where
 # OpenHistoricalMap has none)
 OHM_REGION = {"Русский Туркестан", "Алашская автономия"}
+# Swedish hundreds and towns OpenHistoricalMap draws at level 4, all in Stockholm County: below the counties (län) of
+# the Swedish National Archives, so they join their county (named outright: the archive's coastline is coarser, and
+# some archipelago hundreds fall outside it)
+OHM_SE_HUNDRED = re.compile(r"(härad|skeppslag|tingslag|bergslag| stad)$|^Östhammar$")
+OHM_SE_COUNTY = ("Stockholms län", "斯德哥尔摩省")
 
 
 def ohm():
@@ -194,11 +202,14 @@ def ohm():
         name, zh = OHM_NAME.get(name, (name, zh))
         if name in OHM_REGION:
             tier = 4
+        se = tier == 3 and OHM_SE_HUNDRED.search(name) and 10.5 < g.representative_point().x < 24.5
+        if se:
+            tier = 1
         out.append(cand(f"OHM-r{o['id']}", name, tier, prio, g,
-                        f"OpenHistoricalMap relation {o['id']} (CC0), planet 2026-10-03", "ohm_dated",
+                        f"OpenHistoricalMap relation {o['id']} (CC0), planet 2026-10-06", "ohm_dated",
                         t.get("border_type") or f"admin_level {lv}", name_zh=zh, name_en=t.get("name:en"),
                         start=ohm_date(t.get("start_date")), end=ohm_date(t.get("end_date"), True),
-                        ohm_level=int(lv), wikidata=t.get("wikidata")))
+                        ohm_level=int(lv), wikidata=t.get("wikidata"), parent_of=OHM_SE_COUNTY if se else None))
     return out
 
 
@@ -394,6 +405,203 @@ def russia_1897(cshapes):
     return out
 
 
+# ---------------------------------------------------------------- traced and archival province layers, Africa and Europe
+
+EXTRA = ROOT / "curated" / "extra_provinces.csv"
+PRINCETON_DIR = WW2_RAW / "princeton"
+PRINCETON_SRC = ("Princeton University Library, Map and Geospatial Information Center: {title} (GADM outlines "
+                 "conflated with a scanned British Colonial Office map; catalog princeton-{ark}; no known copyright, "
+                 "non-commercial use)")
+# dataset: catalog id, title, field naming the province, in force (start, end), note
+COLONIAL = {
+    "nigeria_1934": ("5712mb02k", "Nigeria conflated historical administrative boundaries, 1934", "1934-01-01",
+                     "1938-12-31", "outline of the 1934 map"),
+    "nigeria_1939": ("zp38wh12z", "Nigeria conflated historical administrative boundaries, 1939", "1939-01-01",
+                     "1946-12-31", "outline of the 1939 map; the same provinces until Rivers Province was formed in "
+                     "1947 (the Southern Provinces were divided into the Western and Eastern Provinces in April 1939)"),
+    "zambia_1938": ("m900nx92q", "Zambia conflated historical administrative boundaries, 1938", "1938-01-01",
+                    "1947-12-31", "outline of the 1938 map; the map of 1948 has the same six provinces"),
+    "uganda_1948": ("kk91fq05g", "Uganda conflated historical administrative boundaries, 1948", "1939-01-01",
+                    "1948-12-31", "outline of the 1948 map, used for 1939-1945 (the four provinces of the 1940s; "
+                    "boundaries between them may have moved a little)"),
+    "kenya_1948": ("4j03d315k", "Kenya conflated historical administrative boundaries, 1948", "1939-01-01",
+                   "1948-12-31", "outline of the 1948 map, used for 1939-1945 (boundaries between the provinces may "
+                   "have moved a little)"),
+    "ghana_1948": ("9593tz627", "Ghana conflated historical administrative boundaries, 1948", "1902-01-01",
+                   "1948-12-31", "outline of the 1948 map; the Colony, Ashanti and the Northern Territories were the "
+                   "divisions of the Gold Coast from 1902 (Togoland from 1922)"),
+    "sierra_leone_1922": ("qf85nf92z", "Sierra Leone extracted historical administrative boundaries, 1922",
+                          "1922-01-01", "1945-12-31", "chiefdoms of the 1922 map joined into the Colony and the three "
+                          "provinces of the Protectorate, which were reorganised in 1946"),
+}
+COLONIAL_START = {("ghana_1948", "British Trust Territory"): "1922-07-20"}  # League of Nations mandate
+COLONIAL_SKIP = {"Lake Rudolf"}  # drawn as its own unit on the Kenya map: the lake
+
+
+def read_shp(path, encoding="latin1"):
+    """Records and outlines (lon/lat) of a shapefile in the projection its .prj names."""
+    crs = CRS.from_wkt(open(path.with_suffix(".prj")).read())
+    tr = None if crs.is_geographic else Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
+    out = []
+    r = shapefile.Reader(str(path), encoding=encoding)
+    for s, rec in zip(r.shapes(), r.records()):
+        g = polys(fix_rings(shape(s.__geo_interface__)))
+        if g is not None and tr is not None:
+            g = polys(fix_rings(shp_transform(g, lambda c: np.column_stack(tr.transform(c[:, 0], c[:, 1])))))
+        if g is not None:
+            out.append((rec.as_dict(), g))
+    return out
+
+
+def extra_names(src):
+    rows = pd.read_csv(EXTRA, dtype=str).fillna("")
+    return {r.key: r for r in rows[rows.src == src].itertuples()}
+
+
+def colonial_key(ds, p):
+    if ds.startswith("nigeria"):
+        return "-" if p["Province"] == "-" else p["Province"]  # mandate parts join the province that ran them
+    if ds == "ghana_1948":
+        return "British Trust Territory" if p["Province"] == "British Trust Territory" else p["Colony"]
+    if ds == "sierra_leone_1922":
+        return "Colony" if p["Colony"] == "Y" else p["Province"]
+    return p["Province"]
+
+
+def colonial():
+    """Provinces of British colonies in Africa (Princeton University Library)."""
+    out = []
+    for ds, (ark, title, start, end, note) in COLONIAL.items():
+        names = extra_names("nigeria" if ds.startswith("nigeria") else ds)
+        groups = defaultdict(list)
+        for p, g in read_shp(next((PRINCETON_DIR / ds).glob("*.shp"))):
+            k = colonial_key(ds, p)
+            if k not in COLONIAL_SKIP:
+                groups[names[k].name].append((k, g))
+        year = title[-4:]
+        for name, parts in groups.items():
+            k = parts[0][0]
+            r = names[k]
+            region = r.region.split("|")
+            hint = (region[-1] if ds == "nigeria_1939" else region[0]) or None
+            out.append(cand(f"PU-{ds}-{norm(name)}", name, 3, 25, polys(union([g for _, g in parts])),
+                            PRINCETON_SRC.format(title=title, ark=ark),
+                            f"historical_{year}" if start[:4] >= year else f"historical_{year}_outline",
+                            r.kind, name_zh=r.name_zh, name_en=r.name_en, start=COLONIAL_START.get((ds, k), start),
+                            end=end, note="; ".join(x for x in (r.note, note) if x), parent_hint=hint))
+    return out
+
+
+SWEDEN_SRC = ("Swedish counties (län), Historiska GIS-kartor of the Swedish National Archives (Riksarkivet, CC0), "
+              "as packaged in J. Junkka's histmaps R package")
+
+
+def sweden():
+    """Swedish counties in force 1900-1945, each version with the years it was valid."""
+    import rdata  # reads the R data file of the histmaps package
+    names = extra_names("sweden")
+    df = rdata.conversion.convert(rdata.parser.parse_file(WW2_RAW / "sweden_geom_sp.rda"),
+                                  default_encoding="utf8")["geom_sp"]
+    tr = Transformer.from_crs("EPSG:3006", "EPSG:4326", always_xy=True)
+    ring = lambda a: np.column_stack(tr.transform(np.asarray(a)[:, 0], np.asarray(a)[:, 1]))
+    out = []
+    for r in df[df.type_id == "county"].itertuples():
+        s, e = int(float(r.start)), int(float(r.end))
+        if e < 1900 or s > 1945:
+            continue
+        geo = r.geometry
+        multi = [geo] if np.asarray(geo[0]).ndim == 2 else geo  # a polygon is a list of rings
+        g = polys(fix_rings(MultiPolygon([(ring(p[0]), [ring(h) for h in p[1:]]) for p in multi])))
+        n = names[r.ref_code[3:5]]
+        out.append(cand(f"SE-{r.ref_code[3:5]}-{s}", n.name, 3, 15, g, SWEDEN_SRC, "historical_dated", n.kind,
+                        name_zh=n.name_zh, name_en=n.name_en, start=f"{s}-01-01" if s > 1900 else None,
+                        end=f"{e}-12-31" if e < 9999 else None))
+    return out
+
+
+ROMANIA_SRC = ("Romanian counties (județe) of 1930, geo-spatial.org (CC BY-SA 3.0), after the administrative law of "
+               "1925 (in force from 1926) and the decree of 1929")
+RO_ROMANIA = ("1926-01-01", "1950-09-05")  # the 1925 law; until the Soviet-style regions of 1950
+RO_BESSARABIA = {"Hotin", "Soroca", "Bălți", "Orhei", "Lăpușna", "Tighina", "Cahul", "Cetatea Albă", "Ismail",
+                 "Cernăuți", "Storojineț"}  # Soviet from 28 June 1940; Romanian again 1941-1944
+RO_NORTH_TRANSYLVANIA = {"Maramureș", "Satu Mare", "Sălaj", "Someș", "Năsăud", "Ciuc", "Odorhei", "Trei Scaune",
+                         "Mureș"}  # wholly Hungarian under the Second Vienna Award, 5 September 1940 - 1945
+RO_SOUTH_DOBRUJA = {"Durostor", "Caliacra"}  # Bulgarian by the Treaty of Craiova, 7 September 1940
+RO_SPELL = str.maketrans({"ş": "ș", "ţ": "ț", "Ş": "Ș", "Ţ": "Ț"})
+
+
+def romania():
+    out = []
+    for p, g in read_shp(WW2_RAW / "romania1930" / "judete_1930_GEOwgs84.shp", encoding="cp1250"):
+        name = p["Nume"].translate(RO_SPELL)
+        if name in RO_BESSARABIA:
+            spans = [(RO_ROMANIA[0], "1940-06-27"), ("1941-08-01", "1944-08-23")]
+        elif name in RO_NORTH_TRANSYLVANIA:
+            spans = [(RO_ROMANIA[0], "1940-09-04"), ("1945-03-09", RO_ROMANIA[1])]
+        elif name in RO_SOUTH_DOBRUJA:
+            spans = [(RO_ROMANIA[0], "1940-09-06")]
+        else:
+            spans = [RO_ROMANIA]
+        for k, (s, e) in enumerate(spans):
+            out.append(cand(f"RO1930-{norm(name)}-{k}", name, 3, 25, g, ROMANIA_SRC, "historical_1930", "județ",
+                            name_en=f"{name} County", start=s, end=e))
+    return out
+
+
+AZORES = {"Ponta Delgada": {"Ponta Delgada", "Ribeira Grande", "Lagoa", "Vila Franca do Campo", "Povoacao", "Nordeste",
+                            "Vila do Porto"},
+          "Angra do Heroísmo": {"Angra do Heroismo", "Praia da Vitoria", "Velas", "Calheta", "Santa Cruz da Graciosa"},
+          "Horta": {"Horta", "Madalena", "Lajes do Pico", "Sao Roque do Pico", "Santa Cruz das Flores",
+                    "Lajes das Flores", "Corvo"}}
+PRESENT_SRC = "{what}, outline from present-day data (geoBoundaries)"
+
+
+def portugal_belgium(cshapes):
+    """Portuguese districts and Belgian provinces: units that existed throughout 1900-1945 with nearly the same
+    boundaries as today's districts and provinces."""
+    out = []
+    pt = extra_names("portugal")
+    adm1 = {p["shapeName"].encode("latin1").decode("utf8"): g for p, g in read_geojson(gb_path("PRT", "ADM1"))}
+    azores = adm1.pop("Região Autónoma dos Açores")
+    units = {k: g for k, g in adm1.items() if k.isupper()}
+    units["Funchal"] = adm1["Região Autónoma da Madeira"]
+    muni = [(p["shapeName"], g) for p, g in read_geojson(gb_path("PRT", "ADM2"))
+            if g.representative_point().within(azores.buffer(0.01))]
+    for d, ms in AZORES.items():
+        units[d] = polys(union([g for n, g in muni if n in ms]))
+    src = PRESENT_SRC.format(what="Portuguese districts (distritos), unchanged since 1926 but for small transfers of "
+                                  "parishes")
+    setubal = "1926-12-22"
+    for k, g in units.items():
+        n = pt[k]
+        start = setubal if k in ("SETÚBAL", "LISBOA") else None
+        out.append(cand(f"PT-{norm(k)}", n.name, 3, 25, g, src, "present_day_outline_same_unit", n.kind,
+                        name_zh=n.name_zh, name_en=n.name_en, start=start, note=n.note or None))
+    n = pt["LISBOA"]
+    out.append(cand("PT-lisboa-1835", n.name, 3, 25, polys(union([units["LISBOA"], units["SETÚBAL"]])), src,
+                    "present_day_outline_same_unit", n.kind, name_zh=n.name_zh, name_en=n.name_en,
+                    end="1926-12-21", note="with the later district of Setúbal (until 22 December 1926)"))
+    be = extra_names("belgium")
+    adm2 = {p["shapeName"]: g for p, g in read_geojson(gb_path("BEL", "ADM2"))}
+    adm2["Brabant"] = polys(union([adm2.pop(x) for x in ("Brussels", "Vlaams-Brabant", "Waals-Brabant")]))
+    src = PRESENT_SRC.format(what="Belgian provinces (1839-1995; Brabant joined from Brussels, Flemish and Walloon "
+                                  "Brabant)")
+    note = ("present-day outline: the communes moved across the language border in 1963 (Comines-Mouscron from West "
+            "Flanders to Hainaut, Voeren from Liège to Limburg) are counted in their present province")
+    belgium_1914 = union([u["geom"] for u in cshapes if u["gwcode"] == 211 and u["start"] <= "1914-08-04" <= u["end"]])
+    eupen = "1920-09-20"  # Eupen-Malmedy, German until then, became part of the province of Liège
+    for k, g in adm2.items():
+        n = be[k]
+        versions = [(g, eupen if k == "Luik" else None, None)]
+        if k == "Luik":
+            versions.append((opening(polys(inter(g, belgium_1914))), None, "1920-09-19"))
+        for v, (geom, s, e) in enumerate(versions):
+            out.append(cand(f"BE-{norm(k)}" + ("-1839" if e else ""), n.name, 3, 25, geom, src,
+                            "present_day_outline_same_unit", n.kind, name_zh=n.name_zh, name_en=n.name_en, start=s,
+                            end=e, note=note + ("; without Eupen-Malmedy, German until 1920" if e else "")))
+    return out
+
+
 # ---------------------------------------------------------------- 1939 units drawn with present-day outlines
 
 JAPAN_NOTE = "prefecture boundaries essentially unchanged since 1888 (Okinawa 1879)"
@@ -556,6 +764,12 @@ def remainder(accepted, refs, units, date, namer):
             km2 = eq_area_km2(part)
             if km2 <= SNAP_KM2:
                 close = acc_tree.query(part.buffer(0.02), predicate="intersects")
+                # only a unit of the same country or colony: not a Romanian county across the Danube
+                home = utree.query(part.representative_point(), predicate="within")
+                if len(home):
+                    ctx = part.buffer(0.3).bounds
+                    close = [k for k in close
+                             if (a := clip_to([accepted[k]["geom"]], ctx)) and inter(a[0], ug[home[0]]).area > 0.5 * a[0].area]
                 if len(close):
                     best = max(close, key=lambda k: inter(accepted[k]["geom"], part.buffer(0.02)).area)
                     snap[best].append(part)
@@ -599,6 +813,10 @@ def parents(units, cands, date):
         u["parent"] = u["parent_zh"] = u["grandparent"] = u["parent_tier"] = u["grandparent_tier"] = None
         if u["tier"] >= 4:
             continue
+        if u.get("parent_of"):
+            u["parent"], u["parent_zh"] = u["parent_of"]
+            u["parent_tier"] = 3
+            continue
         rp = u["geom"].representative_point()
         found = []
         late = (u.get("start") or "") > RU1897_CENSUS  # created after the census: cuts across the 1897 provinces
@@ -620,7 +838,7 @@ def load_inputs():
     arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
     cshapes = [dict(g["properties"], geom=topo.to_shape(arcs, g)) for g in gs]
     cands = (us_counties() + taiwan() + korea() + burma() + east_asia() + from_present_day() + ohm()
-             + russia_1897(cshapes))
+             + russia_1897(cshapes) + colonial() + sweden() + romania() + portugal_belgium(cshapes))
     for c in cands:
         if not c["geom"].is_valid:
             c["geom"] = polys(fix_rings(c["geom"]))

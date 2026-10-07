@@ -1,6 +1,6 @@
 #!/bin/sh
 # Rebuild the whole database from scratch.
-#   pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas pyreadr osmium
+#   pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas pyreadr rdata osmium
 #   ./build_all.sh            (add "hyde" to also download HYDE 3.5 where reachable)
 set -e
 cd "$(dirname "$0")/scripts"
@@ -17,7 +17,8 @@ python3 verify_database.py
 
 # 1900-1945 historical administrative divisions, control databases and interactive maps
 #   (also needs: pip install osmium)
-python3 ww2_fetch.py          # geoBoundaries, US county atlas, K. Lawson's East Asia layers
+python3 ww2_fetch.py          # geoBoundaries, US county atlas, K. Lawson's East Asia layers, 1897 Russia,
+                              # British African provinces, Swedish counties, Romanian counties of 1930
 python3 ww2_ohm.py            # OpenHistoricalMap planet -> administrative areas dated 1900-1945
 python3 ww2_reference.py      # present-day reference names for the control rules (internal)
 python3 ww2_histunits.py      # divisions in force on each of the six dates
