@@ -267,7 +267,7 @@ const isModern = (sd) => sd.snapshot === "2026";        // country names: the sm
 
 // outlines arrive per snapshot (data/geo-<date>.bin) and are kept by their global index: pieces cut from a
 // province (geo), province outlines (adminGeo), CShapes units (units); a snapshot's control areas stay on it (ctrlGeo)
-const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: [], adminGeo: [], units: [], loading: 0, terrainEx: 0, userPitch: false,
+const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: [], adminGeo: [], units: [], loading: 0, userPitch: false, pitchEasing: false, seenPitch: null,
   admin: null, hydro: null, hydroDetail: null, sel: null, hover: null };
 const geoOf = (f) => state.geo[f] || state.adminGeo[state.admin.feature_admin[f]];  // a whole province is drawn with its outline
 const $ = (id) => document.getElementById(id);
@@ -827,7 +827,7 @@ async function boot() {
     b.onclick = () => loadSnap(s.snapshot); tabs.append(b);
   }
   map = new maplibregl.Map({ container: "map", center: [60, 30], zoom: 1.6, minZoom: 1, maxZoom: 11, attributionControl: false,
-    renderWorldCopies: false, localIdeographFontFamily: "'Noto Serif SC', 'Songti SC', 'SimSun', serif", maxPitch: 65,
+    renderWorldCopies: false, localIdeographFontFamily: "'Noto Serif SC', 'Songti SC', 'SimSun', serif", maxPitch: 65, transformCameraUpdate: cameraUpdate,
     style: { version: 8, glyphs: "glyph://{fontstack}/{range}", sources: {},
       layers: [{ id: "bg", type: "background", paint: { "background-color": BASE[state.base].sea } }] } });
   map.touchZoomRotate.disableRotation();
@@ -857,18 +857,36 @@ function riverLabel(id, source, minzoom, lo, hi) {
 // Zoomed in past continent scale the mountains rise and the camera tilts, more the closer one looks.
 // Mountains are a few kilometres high on a map tens of kilometres per pixel, so the relief is exaggerated,
 // less as one zooms in (the Alps stand about the same height on the screen at every zoom).
-const T3D = { from: 3.2, full: 6.5, pitch: 52 };
-const exaggerationAt = (z) => Math.max(1.4, Math.min(28, 28 * Math.pow(0.55, z - 4)));
+// Tilt and height follow the zoom frame by frame (transformCameraUpdate), so a wheel turn, a pinch or a
+// flight tilts the map as it goes rather than after it stops; both ease in from flat at T3D.from.
+const T3D = { from: 3.2, full: 6.5, pitch: 52, rise: 1.2 };
+const smooth = (a, b, z) => { const t = Math.max(0, Math.min(1, (z - a) / (b - a))); return t * t * (3 - 2 * t); };
+const exaggerationAt = (z) => Math.max(1.4, Math.min(28, 28 * Math.pow(0.55, z - 4))) * smooth(T3D.from, T3D.from + T3D.rise, z);
+const autoPitchAt = (z) => $("t3d").checked ? T3D.pitch * smooth(T3D.from, T3D.full, z) : 0;
+// the camera for every frame: the auto tilt, unless the pitch is being changed by hand (right-drag,
+// two-finger drag, the compass) or eased to a new auto tilt. Then the pitch requested is passed on as a
+// change from the last frame, since what MapLibre requests still holds the tilt from before the move began.
+function cameraUpdate(next) {
+  if (!map) return {};
+  if (map.terrain) { const ex = exaggerationAt(next.zoom); map.terrain.exaggeration = ex; map.terrain.options.exaggeration = ex; }
+  const seen = state.seenPitch; state.seenPitch = next.pitch;  // null: a move begins, from the camera as it is
+  if (state.userPitch || state.pitchEasing) return { pitch: seen == null ? next.pitch : Math.max(0, Math.min(65, map.getPitch() + next.pitch - seen)) };
+  return { pitch: autoPitchAt(next.zoom) };
+}
+// terrain on above T3D.from (where its height is still zero, so it rises from flat), off a little below
 function update3D() {
-  const z = map.getZoom(); const on = $("t3d").checked && z >= T3D.from;
-  if (on) {
-    const ex = Math.round(exaggerationAt(z) * 4) / 4;
-    if (state.terrainEx !== ex) { map.setTerrain({ source: "dem", exaggeration: ex }); state.terrainEx = ex; }
-  } else if (state.terrainEx) { map.setTerrain(null); state.terrainEx = 0; }
-  if (z < T3D.from) state.userPitch = false;
-  if (state.userPitch) return;
-  const pitch = on ? T3D.pitch * Math.min(1, (z - T3D.from) / (T3D.full - T3D.from)) : 0;
-  if (Math.abs(map.getPitch() - pitch) > 1) map.easeTo({ pitch, duration: 600 });
+  const z = map.getZoom(), want = $("t3d").checked && z >= T3D.from - (map.terrain ? 0.3 : 0);
+  if (want && !map.terrain) map.setTerrain({ source: "dem", exaggeration: exaggerationAt(z) });
+  else if (!want && map.terrain) map.setTerrain(null);
+}
+// back to the auto tilt, eased: after the 3D switch, or once zoomed out of 3D after tilting by hand
+function easeToAutoPitch() {
+  state.userPitch = false;
+  const pitch = autoPitchAt(map.getZoom());
+  if (Math.abs(map.getPitch() - pitch) < 0.5) return;
+  state.pitchEasing = true;
+  map.once("moveend", () => { state.pitchEasing = false; });
+  map.easeTo({ pitch, duration: 700 });
 }
 
 async function onLoad(index) {
@@ -937,9 +955,10 @@ async function onLoad(index) {
   $("loading").hidden = true;
   getPacked("data/hydro.bin").then((h) => { state.hydro = h; map.getSource("hydro").setData(h); }).catch((e) => console.warn(e));
   map.on("zoomend", loadDetailHydro); loadDetailHydro();
-  map.on("zoomend", update3D);
-  map.on("pitchstart", (e) => { if (e.originalEvent) state.userPitch = true; });  // tilted by hand: leave it
-  $("t3d").onchange = () => { state.userPitch = false; update3D(); };
+  map.on("zoom", update3D);
+  map.on("pitchstart", (e) => { if (e.originalEvent && !state.pitchEasing) state.userPitch = true; });  // tilted by hand: leave it
+  map.on("moveend", () => { state.seenPitch = null; if (state.userPitch && !state.pitchEasing && map.getZoom() < T3D.from) easeToAutoPitch(); });
+  $("t3d").onchange = () => { update3D(); easeToAutoPitch(); };
   update3D();
 }
 
