@@ -36,4 +36,5 @@ unset WW2_SET
 python3 ww2_relief.py         # shaded relief sheets for the maps (Terrarium elevation tiles)
 python3 modern_2026.py        # the 2026 tab: present-day provinces, control and population
 python3 ww2_webmap.py
+python3 ww1_maps.py           # 1915/1916/1917; same early SQLite database and map assets
 python3 ww2_html.py

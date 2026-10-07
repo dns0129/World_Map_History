@@ -36,6 +36,14 @@ SNAPSHOTS_EARLY = [
     ("1918-11-11", "贡比涅停战协定生效，第一次世界大战结束", "The Armistice of Compiègne"),
     ("1934-10-16", "中央红军开始长征", "The Long March begins"),
 ]
+# Supplemental WWI dates are built from the shipped SQLite databases by ww1_maps.py.
+# Keep the original raw-data pipeline's four dates separate so a full rebuild retains
+# the same historical reference divisions before adding these snapshots.
+SNAPSHOTS_WWI = [
+    ("1915-05-23", "意大利对奥匈帝国宣战，加入协约国", "Italy declares war on Austria-Hungary"),
+    ("1916-08-27", "罗马尼亚对奥匈帝国宣战，加入协约国", "Romania declares war on Austria-Hungary"),
+    ("1917-04-06", "美国对德国宣战，加入第一次世界大战", "The United States declares war on Germany"),
+]
 SNAPSHOTS = SNAPSHOTS_EARLY if SET == "early" else SNAPSHOTS_WW2
 SNAP_DATES = [s[0] for s in SNAPSHOTS]
 

@@ -26,7 +26,8 @@ from ww2_geo import norm
 
 CODE = {"1939-09-01": "39", "1940-07-01": "40", "1941-12-07": "41", "1942-11-01": "42", "1944-06-06": "44",
         "1945-09-02": "45"}
-EARLY_CODE = {"1900-08-14": "00", "1914-08-04": "14", "1918-11-11": "18", "1934-10-16": "34"}
+EARLY_CODE = {"1900-08-14": "00", "1914-08-04": "14", "1915-05-23": "15", "1916-08-27": "16",
+              "1917-04-06": "17", "1918-11-11": "18", "1934-10-16": "34"}
 KIND_FLAG = {"I": 4, "P": 8, "C": 16}
 NAME_FIX = {"Washington,  D.C.": "华盛顿", "Washington, D.C.": "华盛顿"}
 NOTE_2026 = {"Jerusalem": "以色列宣布的首都，其地位未获国际社会普遍承认",
@@ -66,7 +67,7 @@ def roles(s, code):
     return None
 
 
-def ww2(snap):
+def ww2(snap, use_curated_coordinates=False):
     early = snap in EARLY_CODE
     code = EARLY_CODE[snap] if early else CODE[snap]
     out = []
@@ -84,7 +85,7 @@ def ww2(snap):
         rank = int(r["rank"])
         if cap:
             rank = min(rank, 1)
-        p = locate(r["name_en"], float(r["lon"]), float(r["lat"]))
+        p = None if use_curated_coordinates else locate(r["name_en"], float(r["lon"]), float(r["lat"]))
         lon, lat = (p["LONGITUDE"], p["LATITUDE"]) if p else (float(r["lon"]), float(r["lat"]))
         role = "；".join(x for x in [f"首都：{cap}" if cap else None, f"首府 / 政府驻地：{seat}" if seat else None] if x)
         out.append([r["name_zh"], round(lon, 3), round(lat, 3), flags, rank, role, r["note"] or None, None])
