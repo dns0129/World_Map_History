@@ -147,7 +147,7 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
   <header class="bar">
     <div class="brand">
       <h1>世界省级战局图 1900–1945</h1>
-      <small>1900–1945 十个断面与 2026 年 · 省级区划 · 阵营、国家与实际控制区 · 重要城市</small>
+      <small>1900–1945 十三个断面与 2026 年 · 省级区划 · 阵营、国家与实际控制区 · 重要城市</small>
     </div>
     <nav class="tabs" id="tabs" role="tablist" aria-label="时间断面"></nav>
   </header>
@@ -662,7 +662,7 @@ function showProvince(k) {
   const [dl2, add2] = kvList();
   const det = L(sd, "controller_detail_zh", k); if (det && det !== L(sd, "controller_name_zh", k)) add2("控制细节", det);
   const src = L(sd, "control_source", k) || "";
-  add2("判定依据", src.startsWith("rule:") ? `人工整理规则 第 ${src.slice(5)} 行` : src.startsWith("event:") ? `控制事件 ${src.slice(6)}` : src.startsWith("overlay:") ? `历史占领图层 ${src.slice(8)}` : "CShapes 2.0 国界");
+  add2("判定依据", src.startsWith("ww1_rule:") ? `一战整理规则 第 ${src.slice(9)} 行` : src.startsWith("baseline:") ? "1914 年断面的既有控制规则" : src.startsWith("rule:") ? `人工整理规则 第 ${src.slice(5)} 行` : src.startsWith("event:") ? `控制事件 ${src.slice(6)}` : src.startsWith("overlay:") ? `历史占领图层 ${src.slice(8)}` : "CShapes 2.0 国界");
   add2("局部控制事件", L(sd, "partial_control_events", k));
   D.append(dl2, el("p", "foot", "来源：" + col("source", ai)));
 }
