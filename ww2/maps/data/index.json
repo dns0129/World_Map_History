@@ -5,19 +5,19 @@
    "title_zh": "八国联军攻入北京",
    "title_en": "The Eight-Nation Alliance enters Beijing",
    "pieces": 1194,
-   "admin_units": 1086,
+   "admin_units": 1110,
    "countries": 53,
-   "population": 1559571545,
+   "population": 1559571597,
    "bloc_pop": {
-    "allied": 911273970,
-    "axis": 158225148,
-    "neutral": 479551569,
-    "contested": 10520858
+    "allied": 911135181,
+    "axis": 158602298,
+    "neutral": 479317391,
+    "contested": 10516727
    },
    "tier_count": {
-    "3": 937,
-    "4": 25,
-    "5": 111,
+    "3": 959,
+    "4": 28,
+    "5": 110,
     "6": 13
    }
   },
@@ -25,20 +25,20 @@
    "snapshot": "1914-08-04",
    "title_zh": "英国对德宣战，第一次世界大战全面爆发",
    "title_en": "Britain declares war on Germany",
-   "pieces": 1247,
-   "admin_units": 1141,
+   "pieces": 1245,
+   "admin_units": 1165,
    "countries": 56,
-   "population": 1779689066,
+   "population": 1779689098,
    "bloc_pop": {
-    "allied": 726960869,
-    "axis": 134124324,
-    "neutral": 918603873,
+    "allied": 726807426,
+    "axis": 134124335,
+    "neutral": 918757337,
     "contested": 0
    },
    "tier_count": {
-    "3": 1002,
-    "4": 24,
-    "5": 102,
+    "3": 1025,
+    "4": 27,
+    "5": 100,
     "6": 13
    }
   },
@@ -46,20 +46,20 @@
    "snapshot": "1918-11-11",
    "title_zh": "贡比涅停战协定生效，第一次世界大战结束",
    "title_en": "The Armistice of Compiègne",
-   "pieces": 1480,
-   "admin_units": 1202,
+   "pieces": 1487,
+   "admin_units": 1231,
    "countries": 74,
-   "population": 1791137234,
+   "population": 1791229382,
    "bloc_pop": {
-    "allied": 1398427281,
-    "axis": 144370508,
-    "neutral": 239575363,
-    "contested": 8764082
+    "allied": 1398486981,
+    "axis": 144390419,
+    "neutral": 239585914,
+    "contested": 8766068
    },
    "tier_count": {
-    "3": 1061,
-    "4": 22,
-    "5": 106,
+    "3": 1089,
+    "4": 25,
+    "5": 104,
     "6": 13
    }
   },
@@ -67,20 +67,20 @@
    "snapshot": "1934-10-16",
    "title_zh": "中央红军开始长征",
    "title_en": "The Long March begins",
-   "pieces": 1286,
-   "admin_units": 1170,
+   "pieces": 1355,
+   "admin_units": 1274,
    "countries": 75,
-   "population": 2114923300,
+   "population": 2114923298,
    "bloc_pop": {
-    "allied": 1683428710,
-    "axis": 216949548,
-    "neutral": 213810998,
-    "contested": 734044
+    "allied": 1683422221,
+    "axis": 216957898,
+    "neutral": 213811067,
+    "contested": 732112
    },
    "tier_count": {
-    "3": 1023,
-    "4": 19,
-    "5": 116,
+    "3": 1134,
+    "4": 20,
+    "5": 108,
     "6": 12
    }
   },
@@ -88,20 +88,20 @@
    "snapshot": "1939-09-01",
    "title_zh": "德国入侵波兰，第二次世界大战在欧洲爆发",
    "title_en": "Germany invades Poland",
-   "pieces": 1348,
-   "admin_units": 1211,
+   "pieces": 1425,
+   "admin_units": 1330,
    "countries": 69,
-   "population": 2230600902,
+   "population": 2230600932,
    "bloc_pop": {
-    "allied": 1064033739,
-    "axis": 503307230,
-    "neutral": 663259933,
+    "allied": 1064027776,
+    "axis": 503360580,
+    "neutral": 663212576,
     "contested": 0
    },
    "tier_count": {
-    "3": 1053,
-    "4": 28,
-    "5": 119,
+    "3": 1181,
+    "4": 29,
+    "5": 109,
     "6": 11
    }
   },
@@ -109,20 +109,20 @@
    "snapshot": "1940-07-01",
    "title_zh": "法国停战后，德国控制西欧",
    "title_en": "After the fall of France",
-   "pieces": 1351,
-   "admin_units": 1199,
+   "pieces": 1428,
+   "admin_units": 1316,
    "countries": 63,
-   "population": 2241742730,
+   "population": 2241742708,
    "bloc_pop": {
-    "allied": 893858327,
-    "axis": 575574089,
-    "neutral": 772310314,
+    "allied": 893852327,
+    "axis": 575638887,
+    "neutral": 772251494,
     "contested": 0
    },
    "tier_count": {
-    "3": 1043,
-    "4": 28,
-    "5": 117,
+    "3": 1170,
+    "4": 29,
+    "5": 106,
     "6": 11
    }
   },
@@ -130,20 +130,20 @@
    "snapshot": "1941-12-07",
    "title_zh": "珍珠港事件当日，德军止步莫斯科城下",
    "title_en": "Pearl Harbor; Germans before Moscow",
-   "pieces": 1392,
-   "admin_units": 1204,
+   "pieces": 1472,
+   "admin_units": 1318,
    "countries": 66,
-   "population": 2261948414,
+   "population": 2261948435,
    "bloc_pop": {
-    "allied": 1206417479,
-    "axis": 691504572,
-    "neutral": 351771906,
-    "contested": 12254457
+    "allied": 1206381059,
+    "axis": 691366504,
+    "neutral": 351939153,
+    "contested": 12261719
    },
    "tier_count": {
-    "3": 1050,
-    "4": 26,
-    "5": 117,
+    "3": 1173,
+    "4": 27,
+    "5": 107,
     "6": 11
    }
   },
@@ -151,20 +151,20 @@
    "snapshot": "1942-11-01",
    "title_zh": "轴心国扩张的最大范围（阿拉曼、斯大林格勒之前）",
    "title_en": "Greatest Axis extent",
-   "pieces": 1409,
-   "admin_units": 1210,
+   "pieces": 1487,
+   "admin_units": 1322,
    "countries": 67,
-   "population": 2281670037,
+   "population": 2281670055,
    "bloc_pop": {
-    "allied": 1214645295,
-    "axis": 827635965,
-    "neutral": 232691735,
-    "contested": 6697042
+    "allied": 1214605669,
+    "axis": 827730259,
+    "neutral": 232633148,
+    "contested": 6700979
    },
    "tier_count": {
-    "3": 1056,
-    "4": 26,
-    "5": 117,
+    "3": 1179,
+    "4": 25,
+    "5": 107,
     "6": 11
    }
   },
@@ -172,20 +172,20 @@
    "snapshot": "1944-06-06",
    "title_zh": "诺曼底登陆日",
    "title_en": "D-Day",
-   "pieces": 1397,
-   "admin_units": 1226,
+   "pieces": 1481,
+   "admin_units": 1340,
    "countries": 66,
-   "population": 2317644980,
+   "population": 2317644968,
    "bloc_pop": {
-    "allied": 1368392413,
-    "axis": 781241675,
-    "neutral": 160120944,
-    "contested": 7889948
+    "allied": 1368335140,
+    "axis": 781279149,
+    "neutral": 160092822,
+    "contested": 7937857
    },
    "tier_count": {
-    "3": 1071,
-    "4": 28,
-    "5": 116,
+    "3": 1196,
+    "4": 27,
+    "5": 106,
     "6": 11
    }
   },
@@ -193,20 +193,20 @@
    "snapshot": "1945-09-02",
    "title_zh": "日本签署投降书，战争结束",
    "title_en": "Japan signs the surrender",
-   "pieces": 1414,
-   "admin_units": 1271,
+   "pieces": 1480,
+   "admin_units": 1376,
    "countries": 68,
-   "population": 2345147099,
+   "population": 2345144514,
    "bloc_pop": {
-    "allied": 1878130234,
-    "axis": 229364521,
-    "neutral": 237652344,
+    "allied": 1878127908,
+    "axis": 229130035,
+    "neutral": 237886571,
     "contested": 0
    },
    "tier_count": {
-    "3": 1113,
-    "4": 30,
-    "5": 117,
+    "3": 1229,
+    "4": 29,
+    "5": 107,
     "6": 11
    }
   },
