@@ -4,20 +4,20 @@
    "snapshot": "1900-08-14",
    "title_zh": "八国联军攻入北京",
    "title_en": "The Eight-Nation Alliance enters Beijing",
-   "pieces": 1129,
-   "admin_units": 1029,
+   "pieces": 1201,
+   "admin_units": 1090,
    "countries": 53,
-   "population": 1559654969,
+   "population": 1559654977,
    "bloc_pop": {
-    "allied": 911305435,
-    "axis": 158388671,
-    "neutral": 479345704,
-    "contested": 10615159
+    "allied": 911313032,
+    "axis": 158265532,
+    "neutral": 479552232,
+    "contested": 10524181
    },
    "tier_count": {
-    "3": 878,
-    "4": 24,
-    "5": 113,
+    "3": 935,
+    "4": 29,
+    "5": 112,
     "6": 14
    }
   },
@@ -25,20 +25,20 @@
    "snapshot": "1914-08-04",
    "title_zh": "英国对德宣战，第一次世界大战全面爆发",
    "title_en": "Britain declares war on Germany",
-   "pieces": 1181,
-   "admin_units": 1085,
+   "pieces": 1253,
+   "admin_units": 1144,
    "countries": 56,
-   "population": 1779753899,
+   "population": 1779753892,
    "bloc_pop": {
-    "allied": 727026354,
-    "axis": 134124320,
-    "neutral": 918603225,
+    "allied": 727027000,
+    "axis": 134124322,
+    "neutral": 918602570,
     "contested": 0
    },
    "tier_count": {
-    "3": 943,
-    "4": 23,
-    "5": 105,
+    "3": 998,
+    "4": 28,
+    "5": 104,
     "6": 14
    }
   },
@@ -46,20 +46,20 @@
    "snapshot": "1918-11-11",
    "title_zh": "贡比涅停战协定生效，第一次世界大战结束",
    "title_en": "The Armistice of Compiègne",
-   "pieces": 1361,
-   "admin_units": 1146,
+   "pieces": 1499,
+   "admin_units": 1209,
    "countries": 74,
-   "population": 1791279681,
+   "population": 1791175703,
    "bloc_pop": {
-    "allied": 1398544138,
-    "axis": 143857441,
-    "neutral": 240026230,
-    "contested": 8851872
+    "allied": 1398443596,
+    "axis": 144384128,
+    "neutral": 239587815,
+    "contested": 8760164
    },
    "tier_count": {
-    "3": 1000,
-    "4": 21,
-    "5": 111,
+    "3": 1063,
+    "4": 25,
+    "5": 107,
     "6": 14
    }
   },
@@ -67,19 +67,19 @@
    "snapshot": "1934-10-16",
    "title_zh": "中央红军开始长征",
    "title_en": "The Long March begins",
-   "pieces": 1284,
-   "admin_units": 1167,
+   "pieces": 1286,
+   "admin_units": 1169,
    "countries": 75,
-   "population": 2114931600,
+   "population": 2114931596,
    "bloc_pop": {
-    "allied": 1683499912,
-    "axis": 216979163,
+    "allied": 1683499911,
+    "axis": 216979160,
     "neutral": 213717935,
     "contested": 734590
    },
    "tier_count": {
     "3": 1017,
-    "4": 20,
+    "4": 22,
     "5": 117,
     "6": 13
    }
@@ -88,19 +88,19 @@
    "snapshot": "1939-09-01",
    "title_zh": "德国入侵波兰，第二次世界大战在欧洲爆发",
    "title_en": "Germany invades Poland",
-   "pieces": 1348,
-   "admin_units": 1212,
+   "pieces": 1350,
+   "admin_units": 1214,
    "countries": 69,
-   "population": 2230578859,
+   "population": 2230578860,
    "bloc_pop": {
-    "allied": 1064051846,
-    "axis": 503362520,
+    "allied": 1064051844,
+    "axis": 503362523,
     "neutral": 663164493,
     "contested": 0
    },
    "tier_count": {
     "3": 1051,
-    "4": 29,
+    "4": 31,
     "5": 120,
     "6": 12
    }
@@ -109,19 +109,19 @@
    "snapshot": "1940-07-01",
    "title_zh": "法国停战后，德国控制西欧",
    "title_en": "After the fall of France",
-   "pieces": 1351,
-   "admin_units": 1200,
+   "pieces": 1353,
+   "admin_units": 1202,
    "countries": 63,
-   "population": 2241719832,
+   "population": 2241719830,
    "bloc_pop": {
     "allied": 893897522,
-    "axis": 575616850,
-    "neutral": 772205460,
+    "axis": 575616746,
+    "neutral": 772205562,
     "contested": 0
    },
    "tier_count": {
     "3": 1042,
-    "4": 28,
+    "4": 30,
     "5": 118,
     "6": 12
    }
@@ -130,19 +130,19 @@
    "snapshot": "1941-12-07",
    "title_zh": "珍珠港事件当日，德军止步莫斯科城下",
    "title_en": "Pearl Harbor; Germans before Moscow",
-   "pieces": 1390,
-   "admin_units": 1204,
+   "pieces": 1392,
+   "admin_units": 1206,
    "countries": 66,
-   "population": 2261924576,
+   "population": 2261924573,
    "bloc_pop": {
     "allied": 1206363426,
-    "axis": 691346923,
-    "neutral": 351959806,
+    "axis": 691346823,
+    "neutral": 351959903,
     "contested": 12254421
    },
    "tier_count": {
     "3": 1048,
-    "4": 26,
+    "4": 28,
     "5": 118,
     "6": 12
    }
@@ -154,11 +154,11 @@
    "pieces": 1407,
    "admin_units": 1210,
    "countries": 67,
-   "population": 2281646316,
+   "population": 2281646311,
    "bloc_pop": {
     "allied": 1214749837,
-    "axis": 827532109,
-    "neutral": 232656854,
+    "axis": 827532007,
+    "neutral": 232656951,
     "contested": 6707516
    },
    "tier_count": {
@@ -175,10 +175,10 @@
    "pieces": 1399,
    "admin_units": 1229,
    "countries": 66,
-   "population": 2317618789,
+   "population": 2317618786,
    "bloc_pop": {
-    "allied": 1368363811,
-    "axis": 781231121,
+    "allied": 1368363813,
+    "axis": 781231116,
     "neutral": 160092728,
     "contested": 7931129
    },
@@ -196,9 +196,9 @@
    "pieces": 1413,
    "admin_units": 1270,
    "countries": 68,
-   "population": 2344679761,
+   "population": 2344679763,
    "bloc_pop": {
-    "allied": 1877753378,
+    "allied": 1877753380,
     "axis": 229042903,
     "neutral": 237883480,
     "contested": 0
@@ -217,9 +217,9 @@
    "pieces": 1401,
    "admin_units": 1253,
    "countries": 77,
-   "population": 2351208875,
+   "population": 2351208876,
    "bloc_pop": {
-    "allied": 1527073456,
+    "allied": 1527073457,
     "axis": 387514165,
     "neutral": 433062858,
     "contested": 3558396
@@ -238,9 +238,9 @@
    "pieces": 1412,
    "admin_units": 1262,
    "countries": 82,
-   "population": 2384753745,
+   "population": 2384753750,
    "bloc_pop": {
-    "allied": 1222237030,
+    "allied": 1222237035,
     "axis": 361908535,
     "neutral": 776887555,
     "contested": 23720625
@@ -259,9 +259,9 @@
    "pieces": 1415,
    "admin_units": 1269,
    "countries": 84,
-   "population": 2410866336,
+   "population": 2410866337,
    "bloc_pop": {
-    "allied": 1139020003,
+    "allied": 1139020004,
     "axis": 441284338,
     "neutral": 823913805,
     "contested": 6648190
@@ -280,9 +280,9 @@
    "pieces": 1407,
    "admin_units": 1277,
    "countries": 84,
-   "population": 2442729173,
+   "population": 2442729175,
    "bloc_pop": {
-    "allied": 909307109,
+    "allied": 909307111,
     "axis": 662227104,
     "neutral": 864866388,
     "contested": 6328572
@@ -301,17 +301,17 @@
    "pieces": 1394,
    "admin_units": 1285,
    "countries": 87,
-   "population": 2633260181,
+   "population": 2633260186,
    "bloc_pop": {
-    "allied": 820053819,
+    "allied": 820053825,
     "axis": 876041283,
-    "neutral": 934484278,
+    "neutral": 934484277,
     "contested": 2680801
    },
    "tier_count": {
-    "3": 1146,
+    "3": 1147,
     "4": 27,
-    "5": 102,
+    "5": 101,
     "6": 10
    }
   },
@@ -319,18 +319,18 @@
    "snapshot": "1991-12-26",
    "title_zh": "苏联解体",
    "title_en": "Dissolution of the Soviet Union",
-   "pieces": 1932,
-   "admin_units": 1797,
+   "pieces": 1934,
+   "admin_units": 1799,
    "countries": 190,
-   "population": 5418096152,
+   "population": 5418096155,
    "bloc_pop": {
-    "allied": 696668595,
+    "allied": 696668594,
     "axis": 277898103,
-    "neutral": 4438045665,
+    "neutral": 4438045669,
     "contested": 5483789
    },
    "tier_count": {
-    "3": 1663,
+    "3": 1665,
     "4": 24,
     "5": 94,
     "6": 16
