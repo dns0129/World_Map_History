@@ -127,7 +127,7 @@ checks.json                1900–2000 数据库的核对结果
 所有数据都可以从原始来源重新生成。原始下载放在 `raw/`，中间文件放在 `work/`，这两个目录不提交。
 
 ```sh
-pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas pyreadr osmium
+pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas pyreadr rdata osmium
 ./build_all.sh
 ```
 
@@ -136,7 +136,7 @@ pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas p
 - 1900–2000 部分约 30 分钟；
 - 1900–1945 部分需要 OpenHistoricalMap 全球数据约 1.3 GB，构建约 2 小时。
 
-下载来源都在 GitHub 和 AWS S3 上，只有 1897 年俄国省界来自 heidata.uni-heidelberg.de；在受限网络中构建时，需要把这个域名加入允许列表。
+下载来源大多在 GitHub 和 AWS S3 上，另有：OpenHistoricalMap 全球数据（planet.openhistoricalmap.org）、1897 年俄国省界（heidata.uni-heidelberg.de）、英属非洲殖民地区划（figgy.princeton.edu）、罗马尼亚 1930 年县界（geo-spatial.org）；在受限网络中构建时，需要把这些域名加入允许列表。
 
 各步骤见 `build_all.sh` 中的注释。
 
@@ -147,6 +147,9 @@ pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas p
 - **地形：** Mapzen / AWS Terrarium 高程瓦片（SRTM、GMTED2010、ETOPO1 等，见其说明）；地图文字字形取自 OpenMapTiles 字库的 Noto Sans（SIL OFL）。
 - **GHS-POP、geoBoundaries：** CC BY 4.0（2026 年人口用 GHS-POP 2025）。
 - **1897 年俄国省界（Sablin 等，Transcultural Empire GIS，heiDATA doi:10.11588/data/10064）：** CC BY 4.0，用于 1900–1918 年的俄国与芬兰各省。
+- **英属非洲殖民地各省（普林斯顿大学图书馆）：** 无已知版权，供非商业学术使用；用于尼日利亚、北罗得西亚、乌干达、肯尼亚、黄金海岸、塞拉利昂。
+- **瑞典历史各省（瑞典国家档案馆历史 GIS，经 histmaps 数据包）：** CC0。
+- **罗马尼亚 1930 年县界（geo-spatial.org）：** CC BY-SA 3.0。
 - **人口与 GDP 序列：** 联合国 WPP、Gapminder、Maddison Project，许可见各自来源。
 
 完整引用写在两个数据库的 `sources` 表中。本仓库的代码与 `curated/` 整理表为 CC0。

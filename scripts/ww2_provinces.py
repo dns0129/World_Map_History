@@ -32,6 +32,7 @@ import argparse
 import hashlib
 import json
 import multiprocessing
+import os
 import re
 import sqlite3
 from collections import Counter, defaultdict
@@ -360,6 +361,11 @@ def absorb_orphans(groups, ugeom, rows, hist_tier):
     for i in sorted(range(len(groups)), key=lambda i: garea[i]):
         g = groups[i]
         sparse = unit_sub[gunit[i]] < ORPHAN_SHARE * unit_total[gunit[i]]
+        if not g["self"] and (gtier[i] != 5 or garea[i] >= REMNANT_KM2
+                              or garea[i] >= REMNANT_SHARE * unit_total[gunit[i]]):
+            continue  # neither a stray first-level unit nor a small remnant (checked before the costly buffer)
+        if g["self"] and garea[i] >= ORPHAN_KM2 and not sparse and gsrc[i] != "OHM":
+            continue  # large enough, and only OpenHistoricalMap units can be strays
         b = geoms[i].buffer(0.02)
         if g["self"]:
             near = [int(j) for j in tree.query(b) if int(j) != i and alive[int(j)] and gunit[int(j)] == gunit[i]]
@@ -492,8 +498,12 @@ def main():
     resolve = Resolver(hist)
 
     G.update(hist=hist, ugeom=ugeom, snaps=snaps, pgeom=pgeom, hrow=hrow, hist_tier=hist_tier, resolve=resolve)
-    with multiprocessing.get_context("fork").Pool(min(len(DATES), 4)) as pool:
-        results = pool.map(one_date, DATES)  # dates are independent; the workers share G by fork
+    procs = int(os.environ.get("WW2_PROCS", 4))  # each date can take several GB: lower this on small machines
+    if procs <= 1:
+        results = [one_date(d) for d in DATES]
+    else:
+        with multiprocessing.get_context("fork").Pool(min(len(DATES), procs)) as pool:
+            results = pool.map(one_date, DATES)  # dates are independent; the workers share G by fork
     final = {}       # (prov_id, geom hash) -> unit record
     piece_rows = []  # (date, prov key, row, geom)
     for date, provs in zip(DATES, results):

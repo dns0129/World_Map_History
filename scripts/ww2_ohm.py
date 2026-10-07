@@ -19,7 +19,8 @@ import osmium
 
 from common import RAW
 
-BUCKET = "https://s3.amazonaws.com/planet.openhistoricalmap.org"
+BUCKET = "https://s3.amazonaws.com/planet.openhistoricalmap.org"   # listing
+FILES = "https://planet.openhistoricalmap.org"   # downloads (CloudFront; the bucket refuses direct GETs)
 OUT = RAW / "ohm"
 FIRST, LAST = "1900-01-01", "1945-09-02"
 
@@ -98,7 +99,7 @@ def main():
         planet = OUT / key.split("/")[-1]
         if not planet.exists():
             print("downloading", key, flush=True)
-            urllib.request.urlretrieve(f"{BUCKET}/{key}", planet)
+            urllib.request.urlretrieve(f"{FILES}/{key}", planet)
     extract(planet)
 
 
