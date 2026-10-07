@@ -12,6 +12,7 @@ Needs: pip install osmium
 """
 import json
 import re
+import shutil
 import sys
 import urllib.request
 
@@ -19,7 +20,8 @@ import osmium
 
 from common import RAW
 
-BUCKET = "https://s3.amazonaws.com/planet.openhistoricalmap.org"
+BUCKET = "https://s3.amazonaws.com/planet.openhistoricalmap.org"  # listed here
+DOWNLOAD = "https://planet.openhistoricalmap.org"  # and fetched here: the bucket itself refuses downloads
 OUT = RAW / "ohm"
 FIRST, LAST = "1900-01-01", "1991-12-31"
 
@@ -98,7 +100,11 @@ def main():
         planet = OUT / key.split("/")[-1]
         if not planet.exists():
             print("downloading", key, flush=True)
-            urllib.request.urlretrieve(f"{BUCKET}/{key}", planet)
+            # the download host turns away urllib's own User-Agent
+            req = urllib.request.Request(f"{DOWNLOAD}/{key}", headers={"User-Agent": "World_Map_History build (ww2_ohm.py)"})
+            with urllib.request.urlopen(req, timeout=120) as r, open(planet.with_suffix(".part"), "wb") as f:
+                shutil.copyfileobj(r, f, 1 << 20)
+            planet.with_suffix(".part").replace(planet)
     extract(planet)
 
 
