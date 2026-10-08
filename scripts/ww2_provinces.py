@@ -1,4 +1,4 @@
-"""Province-level partition of the six 1939-1945 snapshots.
+"""Province-level partition of the snapshots of one set (1939-1945 by default; see ww2_common.py).
 
 ww2_histunits.py lays down the finest historical division known for each place
 (county, district, province, region, whole country). This step dissolves every
@@ -22,30 +22,36 @@ Borders still cut provinces: wherever a province lies in two political units
 annexations, occupation zones), it is split into pieces along the finer units the
 controller was decided on, so the border keeps that resolution.
 
-Input: work/ww2/hist_units.* and snapshot_<date>.csv / split_<date>.geojson, or,
+Input: work/ww2/hist_units.* and snapshot_<date>.csv / split_<date>.wkb, or,
 when those are missing, a county-level release of the database (--county-db PATH;
 the 2026-10-03 release is in git history as db/ww2_divisions_1939_1945.sqlite).
-Output in work/ww2/: prov_units.csv / prov_units.geojson, prov_snapshot_<date>.csv
-and prov_split_<date>.geojson (same columns as the county-level files).
+Output in work/ww2/: prov_units.csv / prov_units.wkb, prov_snapshot_<date>.csv
+and prov_split_<date>.wkb (same columns as the county-level files).
+Each date's provinces are kept in prov_part_<date>.pkl with a fingerprint of their inputs; a date whose
+inputs did not change is read from there (--force recomputes every date).
 """
 import argparse
 import hashlib
 import json
-import multiprocessing
+import os
+import pickle
 import re
 import sqlite3
+import subprocess
+import sys
 from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 import pandas as pd
 import shapely
 import shapely.ops
 from shapely import STRtree
-from shapely.geometry import MultiPolygon, Polygon, mapping, shape
+from shapely.geometry import MultiPolygon, Polygon, shape
 
 from common import ROOT
-from ww2_common import SNAPSHOTS, WW2_RAW, WW2_WORK
-from ww2_geo import eq_area_km2, polys, union
+from ww2_common import SNAPSHOTS, WW2_RAW, WW2_WORK, memory_gb, workers
+from ww2_geo import eq_area_km2, polys, read_outlines, union, write_outlines
 
 DATES = [s[0] for s in SNAPSHOTS]
 TIER_ZH = {3: "省级", 4: "大区级", 5: "整个政治单元", 6: "岛屿属地"}
@@ -91,6 +97,9 @@ ZH = {
 }
 # Provinces known only under a later name: name -> (date of the new name, earlier name, earlier zh)
 RENAMED_BEFORE = {"Federated Shan States": ("1922-10-01", "Shan States", "掸邦（南、北掸邦）")}
+# ... and under a later name from the date given (Burma's independence constitution of 1948)
+RENAMED_AFTER = {"Federated Shan States": ("1948-01-04", "Shan State", "掸邦"),
+                 "Karenni States": ("1948-01-04", "Karenni State", "克伦尼邦")}
 # Layers that divide their whole country into provinces: a stray OpenHistoricalMap unit with no
 # ancestor inside such a country is one of their counties, not a province of its own
 COMPLETE = {"AHCB", "KR1914", "TW1930", "MM1931"}
@@ -122,16 +131,14 @@ def src_of(uid):
 
 # ---------------------------------------------------------------- input
 
-def load_work():
+def load_date(date):
+    """The inputs of one date only: its rows and pieces and the outlines of the units it uses (all units'
+    table rows, which the parent resolver reads, but not their outlines)."""
     hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
-    ugeom = {f["properties"]["unit_id"]: shape(f["geometry"])
-             for f in json.load(open(WW2_WORK / "hist_units.geojson"))["features"]}
-    snaps, pgeom = {}, {}
-    for d in DATES:
-        snaps[d] = pd.read_csv(WW2_WORK / f"snapshot_{d}.csv", low_memory=False)
-        for f in json.load(open(WW2_WORK / f"split_{d}.geojson"))["features"]:
-            pgeom[f["properties"]["piece_id"]] = shape(f["geometry"])
-    return hist, ugeom, snaps, pgeom
+    rows = pd.read_csv(WW2_WORK / f"snapshot_{date}.csv", low_memory=False)
+    ugeom = read_outlines(WW2_WORK / "hist_units.geojson", "unit_id", only=set(rows.admin_id))
+    pgeom = read_outlines(WW2_WORK / f"split_{date}.geojson", "piece_id")
+    return hist, ugeom, {date: rows}, pgeom
 
 
 def _shape(gj):
@@ -291,14 +298,17 @@ def groups_for(date, hist, ugeom, rows, resolve):
         # single linkage over everything that names this province, nearest pairs first; two units of
         # that name in different political units (Limburg, Amazonas) are never joined
         tree = STRtree([g.envelope for g in geo])
+        shapely.prepare(geo)
         pairs = []
         for i, g in enumerate(geo):
             for j in tree.query(g.envelope.buffer(CLUSTER_DEG)):
                 j = int(j)
                 if j > i:
-                    dist = g.distance(geo[j])
+                    # most are neighbours that touch: a prepared test answers those without the slow distance
+                    dist = 0.0 if g.intersects(geo[j]) else g.distance(geo[j])
                     if dist <= CLUSTER_DEG:
                         pairs.append((dist, i, j))
+        shapely.destroy_prepared(geo)  # the outlines are shared by all dates; their indexes would pile up
         par = list(range(len(its)))
         pus = [{p} if p is not None else set() for p in pu]
 
@@ -336,6 +346,8 @@ def groups_for(date, hist, ugeom, rows, resolve):
     for g in out:
         if g["name"] in RENAMED_BEFORE and date < RENAMED_BEFORE[g["name"]][0]:
             g["name"], g["name_zh"] = RENAMED_BEFORE[g["name"]][1:]
+        elif g["name"] in RENAMED_AFTER and date >= RENAMED_AFTER[g["name"]][0]:
+            g["name"], g["name_zh"] = RENAMED_AFTER[g["name"]][1:]
     return out
 
 
@@ -357,6 +369,7 @@ def absorb_orphans(groups, ugeom, rows, hist_tier):
     geoms = [merged([ugeom[m] for m in g["members"]]) for g in groups]
     tree = STRtree(geoms)
     alive = [True] * len(groups)
+    changed = set()
     for i in sorted(range(len(groups)), key=lambda i: garea[i]):
         g = groups[i]
         sparse = unit_sub[gunit[i]] < ORPHAN_SHARE * unit_total[gunit[i]]
@@ -386,6 +399,10 @@ def absorb_orphans(groups, ugeom, rows, hist_tier):
         geoms[j] = merged([geoms[j], geoms[i]])
         garea[j] += garea[i]
         alive[i] = False
+        changed.add(j)
+    for i, g in enumerate(groups):
+        if i not in changed:
+            g["outline"] = geoms[i]  # the union of its members, as one_date would compute it again
     return [g for g, a in zip(groups, alive) if a]
 
 
@@ -425,6 +442,41 @@ def pieces_for(g, rows, ugeom, pgeom):
 # ---------------------------------------------------------------- main
 
 G = {}  # inputs shared with the worker processes
+CODE = [ROOT / "scripts" / f for f in ("ww2_provinces.py", "ww2_common.py", "ww2_geo.py")] + \
+    [ROOT / "curated" / "east_asia" / "korea.csv", WW2_RAW / "lawson" / "burma-1931-admin-units.geojson"]
+
+
+def date_keys(hist, ugeom, snaps, pgeom, dates=DATES):
+    """Fingerprint of everything one_date(date) reads: this code, the resolver's tables (built from all units),
+    and the date's own rows, units and outlines. A date whose fingerprint is unchanged is read from its cache."""
+    common = hashlib.md5()
+    for p in CODE:
+        common.update(p.read_bytes() if p.exists() else b"-")
+    common.update(repr(sorted({(n, int(t)) for n, t in zip(hist.name, hist.tier) if t >= 2})).encode())
+    common.update(repr(sorted(set(hist[hist.unit_id.str.startswith("AHCB")].parent.dropna()))).encode())
+    rows_of = hist.set_index("unit_id")
+    keys = {}
+    for d in dates:
+        h = common.copy()
+        rows = snaps[d]
+        h.update(pd.util.hash_pandas_object(rows, index=False).values.tobytes())
+        ids = sorted(set(rows.admin_id))
+        h.update(rows_of.loc[ids].to_json().encode())
+        h.update(b"".join(shapely.to_wkb([ugeom[u] for u in ids])))
+        pids = sorted(p for p in rows.piece_id if p in pgeom)
+        h.update(repr(pids).encode() + b"".join(shapely.to_wkb([pgeom[p] for p in pids])))
+        keys[d] = h.hexdigest()
+    return keys
+
+
+def cached(date, key):
+    p = WW2_WORK / f"prov_part_{date}.pkl"
+    if p.exists():
+        with open(p, "rb") as f:
+            c = pickle.load(f)
+        if c["key"] == key:
+            return c["out"]
+    return None
 
 
 def one_date(date):
@@ -432,7 +484,9 @@ def one_date(date):
     hist, ugeom, snaps, pgeom, hrow = G["hist"], G["ugeom"], G["snaps"], G["pgeom"], G["hrow"]
     rows = snaps[date]
     groups = groups_for(date, hist, ugeom, rows, G["resolve"])
+    print(date, "groups: %d, memory %.1f GB (peak %.1f)" % (len(groups), *memory_gb()), flush=True)
     groups = absorb_orphans(groups, ugeom, rows, G["hist_tier"])
+    print(date, "orphans absorbed: %d groups, memory %.1f GB (peak %.1f)" % (len(groups), *memory_gb()), flush=True)
     ids = Counter()
     out = []
     for g in sorted(groups, key=lambda g: (g["name"], ugeom[g["members"][0]].centroid.x)):
@@ -447,7 +501,10 @@ def one_date(date):
         if ids[pid] > 1:
             pid += f"-{ids[pid]}"
         kids = [m for m in g["members"] if a is None or m != a["unit_id"]]
-        geom = merged([ugeom[m] for m in g["members"]]) if kids else ugeom[g["members"][0]]
+        if not kids:
+            geom = ugeom[g["members"][0]]
+        else:
+            geom = g["outline"] if "outline" in g else merged([ugeom[m] for m in g["members"]])
         if a is not None:
             rec = {c: nn(a.get(c)) for c in UNIT_COLS if c in a}
             if pid.startswith("PH1939"):
@@ -472,28 +529,62 @@ def one_date(date):
         if rec["tier"] in (1, 2):
             rec["tier"] = 3
         out.append((pid, rec, geom, pieces_for(g, rows, ugeom, pgeom)))
-    print(date, "done", flush=True)
+    print(date, "done, memory %.1f GB (peak %.1f)" % memory_gb(), flush=True)
     return out
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--county-db", help="county-level database to read when work/ww2 has no county-level files")
-    args = ap.parse_args()
-    if (WW2_WORK / "hist_units.csv").exists() and not args.county_db:
-        hist, ugeom, snaps, pgeom = load_work()
-    else:
-        path = args.county_db or (WW2_WORK / "county_level_1939_1945.sqlite")
-        hist, ugeom, snaps, pgeom = load_db(path)
+def setup(hist, ugeom, snaps, pgeom):
     hist = hist.copy()
     hist["tier"] = hist.tier.astype(int)
-    hrow = {r["unit_id"]: r for r in hist.to_dict("records")}
-    hist_tier = dict(zip(hist.unit_id, hist.tier))
-    resolve = Resolver(hist)
+    G.update(hist=hist, ugeom=ugeom, snaps=snaps, pgeom=pgeom, hrow={r["unit_id"]: r for r in hist.to_dict("records")},
+             hist_tier=dict(zip(hist.unit_id, hist.tier)), resolve=Resolver(hist))
+    return hist
 
-    G.update(hist=hist, ugeom=ugeom, snaps=snaps, pgeom=pgeom, hrow=hrow, hist_tier=hist_tier, resolve=resolve)
-    with multiprocessing.get_context("fork").Pool(min(len(DATES), 4)) as pool:
-        results = pool.map(one_date, DATES)  # dates are independent; the workers share G by fork
+
+def compute_date(date, force=False):
+    """One date in this process, from the work files: read from its cache when its inputs are unchanged."""
+    hist, ugeom, snaps, pgeom = load_date(date)
+    hist = setup(hist, ugeom, snaps, pgeom)
+    key = date_keys(hist, ugeom, snaps, pgeom, [date])[date]
+    if not force and cached(date, key) is not None:
+        print(date, "unchanged, provinces read from the cache", flush=True)
+        return
+    out = one_date(date)
+    tmp = WW2_WORK / f"prov_part_{date}.{os.getpid()}.tmp"
+    with open(tmp, "wb") as f:
+        pickle.dump({"key": key, "out": out}, f, protocol=pickle.HIGHEST_PROTOCOL)
+    tmp.replace(WW2_WORK / f"prov_part_{date}.pkl")
+
+
+def main():
+    ap = argparse.ArgumentParser(description="province-level partition; see the module docstring")
+    ap.add_argument("--county-db", help="county-level database to read when work/ww2 has no county-level files")
+    ap.add_argument("--force", action="store_true", help="recompute, ignoring the per-date caches")
+    ap.add_argument("--date", help="compute this date only (its cache, prov_part_<date>.pkl); see pipeline.py")
+    ap.add_argument("--merge", action="store_true", help="only write the outputs from the per-date caches")
+    args = ap.parse_args()
+    from_work = (WW2_WORK / "hist_units.csv").exists() and not args.county_db
+    if args.date:
+        compute_date(args.date, args.force)
+        return
+    if not args.merge and from_work:
+        # each date in a process of its own, as many at once as fit in memory; a process killed for memory
+        # stops the run with an error instead of leaving it waiting, and the dates finished stay cached
+        cmd = [sys.executable, "-u", __file__] + (["--force"] if args.force else [])
+        with ThreadPoolExecutor(workers(len(DATES), 8.0)) as pool:
+            codes = list(pool.map(lambda d: subprocess.run(cmd + ["--date", d]).returncode, DATES))
+        if any(codes):
+            sys.exit(f"province step failed for {[d for d, c in zip(DATES, codes) if c]}")
+    elif not from_work:  # an old county-level release: everything in this process
+        hist, ugeom, snaps, pgeom = load_db(args.county_db or (WW2_WORK / "county_level_1939_1945.sqlite"))
+        setup(hist, ugeom, snaps, pgeom)
+        for d in DATES:
+            with open(WW2_WORK / f"prov_part_{d}.pkl", "wb") as f:
+                pickle.dump({"key": None, "out": one_date(d)}, f, protocol=pickle.HIGHEST_PROTOCOL)
+    results = []
+    for d in DATES:
+        with open(WW2_WORK / f"prov_part_{d}.pkl", "rb") as f:
+            results.append(pickle.load(f)["out"])
     final = {}       # (prov_id, geom hash) -> unit record
     piece_rows = []  # (date, prov key, row, geom)
     for date, provs in zip(DATES, results):
@@ -527,10 +618,7 @@ def main():
                               label_lat=round(lp.y, 4), geom=u["geom"]))
     df = pd.DataFrame([{c: r.get(c) for c in UNIT_COLS} for r in out_units])
     df.to_csv(WW2_WORK / "prov_units.csv", index=False)
-    with open(WW2_WORK / "prov_units.geojson", "w") as f:
-        json.dump({"type": "FeatureCollection", "features": [
-            {"type": "Feature", "properties": {"unit_id": r["unit_id"]}, "geometry": mapping(r["geom"])}
-            for r in out_units]}, f)
+    write_outlines(WW2_WORK / "prov_units.geojson", ((r["unit_id"], r["geom"]) for r in out_units))
 
     by_date = defaultdict(list)
     for date, k, top, pg in piece_rows:
@@ -547,9 +635,7 @@ def main():
             if pg is not None:
                 geoms[pid] = pg
         pd.DataFrame(rows)[SNAP_COLS].to_csv(WW2_WORK / f"prov_snapshot_{date}.csv", index=False)
-        with open(WW2_WORK / f"prov_split_{date}.geojson", "w") as f:
-            json.dump({"type": "FeatureCollection", "features": [
-                {"type": "Feature", "properties": {"piece_id": k}, "geometry": mapping(g)} for k, g in geoms.items()]}, f)
+        write_outlines(WW2_WORK / f"prov_split_{date}.geojson", geoms.items())
         d = pd.DataFrame(rows)
         print(date, "pieces:", len(d), "split provinces:", int((d.control_split == 1).sum()),
               f"population {d.population_est.sum() / 1e9:.3f} bn", flush=True)

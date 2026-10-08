@@ -1,5 +1,7 @@
 """Geometry helpers shared by the 1939-1945 build."""
 import json
+import os
+import pickle
 import re
 import unicodedata
 
@@ -113,6 +115,40 @@ def opening(g, d=0.005):
 def read_geojson(path):
     d = json.load(open(path))
     return [(f["properties"], polys(shape(f["geometry"]))) for f in d["features"] if f.get("geometry")]
+
+
+def wkb_path(path):
+    return path.with_suffix(".wkb")
+
+
+def write_outlines(path, items):
+    """Outlines passed between the build steps, as {id: WKB} next to `path` (path.wkb in place of path.geojson):
+    read many times faster than GeoJSON, with the same coordinates."""
+    items = list(items)
+    blobs = shapely.to_wkb([g for _, g in items])
+    tmp = wkb_path(path).with_suffix(f".{os.getpid()}.tmp")
+    with open(tmp, "wb") as f:
+        pickle.dump({"ids": [k for k, _ in items], "wkb": list(blobs)}, f, protocol=pickle.HIGHEST_PROTOCOL)
+    tmp.replace(wkb_path(path))  # whole file or nothing, should the process be killed while writing
+    if path.suffix == ".geojson" and path.exists():
+        path.unlink()  # an older build's copy would otherwise shadow nothing but take space
+
+
+def read_outlines(path, key, only=None):
+    """{id: geometry} written by write_outlines, or read from the GeoJSON of an older build (id = properties[key]);
+    with `only` (a set of ids), just those outlines are decoded."""
+    w = wkb_path(path)
+    if w.exists():
+        with open(w, "rb") as f:
+            d = pickle.load(f)
+        ids, blobs = d["ids"], d["wkb"]
+        if only is not None:
+            keep = [i for i, k in enumerate(ids) if k in only]
+            ids, blobs = [ids[i] for i in keep], [blobs[i] for i in keep]
+        return dict(zip(ids, shapely.from_wkb(blobs)))
+    feats = json.load(open(path))["features"]
+    return {f["properties"][key]: shape(f["geometry"]) for f in feats
+            if only is None or f["properties"][key] in only}
 
 
 def read_projected(path, epsg):

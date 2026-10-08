@@ -8,6 +8,7 @@ industrial cities and ports.
   1900-1934  curated/cities_1900_1934.csv, the same columns plus `dates`: the snapshots a row
              is shown on, so a renamed city has one row per name (St Petersburg, Petrograd,
              Leningrad).
+  1946-1991  curated/cities_1946_1991.csv, the same columns as 1900-1934 (codes 46 47 48 49 53 91).
   2026       the national capitals of Natural Earth populated places, plus
              curated/cities_2026.csv (major industrial cities and ports).
 
@@ -28,6 +29,8 @@ CODE = {"1939-09-01": "39", "1940-07-01": "40", "1941-12-07": "41", "1942-11-01"
         "1945-09-02": "45"}
 EARLY_CODE = {"1900-08-14": "00", "1914-08-04": "14", "1915-05-23": "15", "1916-08-27": "16",
               "1917-04-06": "17", "1918-11-11": "18", "1934-10-16": "34"}
+POSTWAR_CODE = {"1946-06-26": "46", "1947-08-15": "47", "1948-09-12": "48", "1949-10-01": "49", "1953-07-27": "53",
+                "1991-12-26": "91"}
 KIND_FLAG = {"I": 4, "P": 8, "C": 16}
 NAME_FIX = {"Washington,  D.C.": "华盛顿", "Washington, D.C.": "华盛顿"}
 NOTE_2026 = {"Jerusalem": "以色列宣布的首都，其地位未获国际社会普遍承认",
@@ -68,10 +71,12 @@ def roles(s, code):
 
 
 def ww2(snap, use_curated_coordinates=False):
-    early = snap in EARLY_CODE
-    code = EARLY_CODE[snap] if early else CODE[snap]
+    early = snap in EARLY_CODE or snap in POSTWAR_CODE   # the tables with a `dates` column
+    code = EARLY_CODE.get(snap) or POSTWAR_CODE.get(snap) or CODE[snap]
+    table = "cities_1900_1934.csv" if snap in EARLY_CODE else "cities_1946_1991.csv" if snap in POSTWAR_CODE else \
+        "ww2_cities.csv"
     out = []
-    for r in csv.DictReader(open(ROOT / "curated" / ("cities_1900_1934.csv" if early else "ww2_cities.csv"))):
+    for r in csv.DictReader(open(ROOT / "curated" / table)):
         if early and r["dates"] != "*" and code not in r["dates"].split():
             continue
         cap, seat = roles(r["capital"], code), roles(r["seat"], code)

@@ -16,7 +16,7 @@ For each snapshot date, every unit in force (work/ww2/hist_units, see ww2_histun
   * population estimate: GHS-POP 1975 at 30 arc-seconds summed per piece, scaled so the
     pieces of each political unit add up to that unit's population in the main database
     (US: to each state's census estimate)
-Outputs in work/ww2/: snapshot_<date>.csv and split_<date>.geojson (pieces whose shape
+Outputs in work/ww2/: snapshot_<date>.csv and split_<date>.wkb (pieces whose shape
 differs from their unit).
 """
 import json
@@ -29,7 +29,7 @@ import rasterio
 from rasterio.features import rasterize
 from rasterio.windows import Window
 from shapely import STRtree
-from shapely.geometry import Point, box, mapping, shape
+from shapely.geometry import Point, Polygon, box, mapping, shape
 from shapely.ops import unary_union
 
 import topo
@@ -37,7 +37,7 @@ from build_database import Namer
 from common import RAW, WORK, ROOT
 from ww2_territories import ALL_ISLANDS, island_unit
 from ww2_common import REF_WORK, RULES, SET, SNAPSHOTS, UNCOVERED, UNCOVERED_BOX, WW2_RAW, WW2_WORK
-from ww2_geo import diff, eq_area_km2, inter, opening, polys, read_geojson, union
+from ww2_geo import diff, eq_area_km2, inter, opening, polys, read_geojson, read_outlines, union, write_outlines
 
 LAW = WW2_RAW / "lawson"
 SPLIT_MIN_SHARE = 0.03
@@ -94,6 +94,8 @@ EARLY_STATE_ON = {"1918-11-11": {300: ("Austria-Hungary", "奥匈帝国"), 345: 
 
 def names_on(snap):
     """Controller names for one date: the special codes, then states named for that date only."""
+    if SET == "postwar":
+        return {**STATE, **POSTWAR_STATE_ON.get(snap, {})}
     return {**STATE, **EARLY_STATE_ON.get(snap, {})} if SET == "early" else STATE
 # Bloc of each controller on each date; colonies follow their sovereign (the controller).
 #   1900  the Eight-Nation Alliance against the Qing court; the provinces of the Southeast Mutual
@@ -115,8 +117,60 @@ EARLY_BLOCS = {
 }
 
 
+# ---- 1946-1991 (WW2_SET=postwar). Controllers without a state of their own on the date, and
+# states CShapes does not yet (or no longer) list on the date
+POSTWAR_STATE = {
+    -1: ("Allied powers (four-power administration)", "盟国（四国共管）"), -20: ("Contested (fighting)", "交战区（双方争夺）"),
+    -2: ("Chinese Communist Party", "中国共产党"), -3: ("United Nations", "联合国"),
+    -100: ("Azerbaijan People's Government", "阿塞拜疆人民政府"), -101: ("Republic of Mahabad", "马哈巴德共和国"),
+    -102: ("East Turkestan Republic (Three Districts)", "东突厥斯坦共和国（三区）"),
+    -104: ("Hyderabad State", "海得拉巴土邦"), -105: ("Jammu and Kashmir (princely state)", "查谟和克什米尔土邦"),
+    -106: ("Junagadh State", "朱纳格特土邦"), -107: ("Khanate of Kalat", "卡拉特汗国"),
+    -110: ("Allied Military Government (UK/US)", "英美军政府"),
+    -113: ("Republic of Serbian Krajina", "塞尔维亚克拉伊纳共和国"),
+    -114: ("Pridnestrovian Moldavian Republic", "德涅斯特河沿岸摩尔达维亚共和国"),
+    -116: ("Chechen Republic of Ichkeria", "车臣伊奇克里亚共和国"),
+    -118: ("Turkish Republic of Northern Cyprus", "北塞浦路斯土耳其共和国"),
+    -122: ("Provisional Government of Eritrea (EPLF)", "厄立特里亚临时政府（厄人阵）"),
+    -123: ("Kurdistan Region (Kurdistan Front)", "库尔德斯坦地区（库尔德斯坦阵线）"),
+    -126: ("Liberation Tigers of Tamil Eelam", "泰米尔伊拉姆猛虎解放组织"),
+    -129: ("Sikkim (protectorate)", "锡金（保护国）"),
+}
+_VIET_MINH = {816: ("Democratic Republic of Vietnam (Viet Minh)", "越南民主共和国（越盟）"), 812: ("Pathet Lao", "巴特寮")}
+# States named for one date only: the People's Republic proclaimed in the CCP-held land on 1 October 1949;
+# Russia, Croatia and Slovenia at the end of 1991
+POSTWAR_STATE_ON = {
+    "1946-06-26": _VIET_MINH, "1947-08-15": _VIET_MINH, "1948-09-12": _VIET_MINH,
+    "1949-10-01": {**_VIET_MINH, -2: ("People's Republic of China", "中华人民共和国")},
+    "1953-07-27": _VIET_MINH,
+    "1991-12-26": {365: ("Russia", "俄罗斯"), 344: ("Croatia", "克罗地亚"), 349: ("Slovenia", "斯洛文尼亚"),
+                   345: ("Yugoslavia", "南斯拉夫"), 260: ("Germany", "德国")},
+}
+# Bloc of each controller on each date; colonies follow their sovereign (the controller).
+#   1946  the Western Allies and the Soviet sphere of the "iron curtain" speech (March 1946)
+#   1947  the Truman Doctrine and the Marshall Plan against the Soviet bloc
+#   1948  after the Brussels Treaty, the Prague coup and Yugoslavia's expulsion from the Cominform
+#   1949  NATO (April 1949) and the US allies in Asia; the Soviet bloc with the new PRC
+#   1953  NATO, ANZUS and the US allies in Asia; the Soviet bloc, the PRC and North Korea
+#   1991  NATO; the Commonwealth of Independent States (Alma-Ata, 21 December 1991)
+_WEST = {2, 200, 220, 20, 900, 920, 560, 210, 211, 212, 385, 390, 395, 350, 710}
+_EAST = {365, 712, 290, 345, 339, 355, 360, 310, 315, -2, -100, -101, -102}
+_NATO49 = {2, 200, 220, 20, 210, 211, 212, 390, 395, 325, 385, 235}
+POSTWAR_BLOCS = {
+    "1946-06-26": dict(allied=_WEST | {640, -110}, axis=_EAST),
+    "1947-08-15": dict(allied=_WEST | {640, 325, -110}, axis=_EAST),
+    "1948-09-12": dict(allied=_WEST | {640, 325, 732, -110}, axis=(_EAST - {345}) | {731}),
+    "1949-10-01": dict(allied=_NATO49 | {350, 640, 900, 920, 710, 732, 840, -110}, axis=(_EAST - {345}) | {731, 816}),
+    "1953-07-27": dict(allied=_NATO49 | {350, 640, 260, 900, 920, 732, 713, 840, 740, -110}, axis=(_EAST - {345, -2}) | {731, 816, 710, 265}),
+    "1991-12-26": dict(allied=_NATO49 | {350, 640, 260, 230},
+                       axis={365, 369, 370, 359, 371, 373, 705, 703, 702, 701, 704}),
+}
+
+
 if SET == "early":
     STATE = EARLY_STATE  # other states take the name the period used (build_database.Namer)
+elif SET == "postwar":
+    STATE = POSTWAR_STATE
 
 
 def early_bloc(gw, snap, detail):
@@ -130,9 +184,20 @@ def early_bloc(gw, snap, detail):
     return "allied" if gw in b["allied"] else "axis" if gw in b["axis"] else "neutral"
 
 
+def postwar_bloc(gw, snap, detail):
+    if gw in CONTESTED:
+        return "contested"
+    b = POSTWAR_BLOCS[snap]
+    if gw == 365 and detail and "Soviet" not in detail and snap == "1991-12-26":
+        return "axis"
+    return "allied" if gw in b["allied"] else "axis" if gw in b["axis"] else "neutral"
+
+
 def bloc(gw, snap, detail):
     if SET == "early":
         return early_bloc(gw, snap, detail)
+    if SET == "postwar":
+        return postwar_bloc(gw, snap, detail)
     if gw in CONTESTED:
         return "contested"
     if detail and "Vichy" in detail:
@@ -173,12 +238,25 @@ MANCHU_ROC = {"Liaoning": ("Fengtian", "奉天"), "Jilin": ("Jilin", "吉林"), 
 # Political units whose CShapes status on the date misdescribes them: (date, CShapes name) ->
 # (status, sovereign gw, name en, name zh). Serbia and Montenegro had been freed by 11 November 1918.
 UNIT_FIX = {("1918-11-11", "Serbia"): ("independent", 345, "Serbia", "塞尔维亚"),
-            ("1918-11-11", "Montenegro"): ("independent", 341, "Montenegro", "黑山")}
+            ("1918-11-11", "Montenegro"): ("independent", 341, "Montenegro", "黑山"),
+            ("1991-12-26", "Russia (Soviet Union)"): ("independent", 365, "Russia", "俄罗斯"),
+            ("1991-12-26", "German Federal Republic"): ("independent", 260, "Germany", "德国")}
 
 
 def control_overlay(snap, county, pt, occ, meng, ccp, ceded):
     """East Asia occupation layers; returns (gw, detail_en, detail_zh, type, source, confidence) or None."""
     year = int(snap[:4])
+    if snap > "1945-09-02":
+        # after the war only two layers still mean something: the Indochinese land Thailand kept until
+        # the Washington agreement of November 1946, and the Kwantung territory (Port Arthur and Dalny),
+        # held by the Soviet Union under the treaty of August 1945
+        if ceded is not None and county["iso3"] in ("KHM", "LAO") and snap <= "1946-11-17" and ceded.contains(pt):
+            return (800, "Thailand (territory ceded by French Indochina in 1941, returned in November 1946)",
+                    "泰国（1941 年法属印度支那割让地，1946 年 11 月归还）", "annexation", "overlay:indochina_ceded", "whole")
+        if county.get("defacto_parent_kind") == "leased territory" and snap < "1949-10-01":
+            return (365, "Soviet Union (Port Arthur naval base and Dalny, treaty of 14 August 1945)",
+                    "苏联（旅顺海军基地与大连，1945 年 8 月 14 日条约）", "leased_territory", "overlay:kwantung", "whole")
+        return None
     if snap < "1937-07-07":
         if county.get("defacto_parent_kind") == "ROC Manchuria" and snap >= "1932-03-01":
             name = county.get("defacto_parent")
@@ -223,11 +301,36 @@ def control_overlay(snap, county, pt, occ, meng, ccp, ceded):
     return None
 
 
+def geo_shapes(match):
+    """Shapes of a "geo" rule: box:W,S,E,N | circle:LON,LAT,KM | poly:LON LAT;LON LAT;... joined by "|"."""
+    out = []
+    for part in match.split("|"):
+        kind, _, arg = part.strip().partition(":")
+        if kind == "box":
+            w, s_, e, n = map(float, arg.split(","))
+            out.append(box(w, s_, e, n))
+        elif kind == "circle":
+            x, y, km = map(float, arg.split(","))
+            out.append(Point(x, y).buffer(km / 111.32 / max(np.cos(np.radians(y)), 0.2), 32))
+        elif kind == "poly":
+            out.append(Polygon([tuple(map(float, xy.split())) for xy in arg.split(";")]))
+        else:
+            raise ValueError(part)
+    return unary_union(out)
+
+
+_GEO = {}
+
+
 def rule_match(rule, c):
     if rule["iso3"] != "*" and c["iso3"] not in rule["iso3"].split("|"):
         return False
     if rule["field"] == "*":
         return True
+    if rule["field"] == "geo":  # the reference unit's label point lies in the drawn area
+        if rule["match"] not in _GEO:
+            _GEO[rule["match"]] = geo_shapes(rule["match"])
+        return _GEO[rule["match"]].contains(Point(c["label_lon"], c["label_lat"]))
     if rule["field"] == "unit":
         return any(m in (c["unit"], c["unit_cs"]) for m in rule["match"].split("|"))
     if rule["field"] == "hist":  # the historical unit itself, or the province it belongs to
@@ -252,7 +355,6 @@ def ghs_zonal(pieces):
                 wt = src.window_transform(w)
                 west, north = wt.c, wt.f
                 east, south = west + w.width * wt.a, north + w.height * wt.e
-                from shapely.geometry import box
                 idx = tree.query(box(west, south, east, north))
                 if len(idx) == 0:
                     continue
@@ -352,10 +454,11 @@ def blank_land(g, units, refs, rtree, snap):
 
 def main(only=None):
     hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
-    hgeom = {f["properties"]["unit_id"]: shape(f["geometry"])
-             for f in json.load(open(WW2_WORK / "hist_units.geojson"))["features"]}
+    dates = [s[0] for s in SNAPSHOTS if not only or s[0] in only]
+    used = set(hist[hist.snapshots.apply(lambda x: any(d in x for d in dates))].unit_id)
+    hgeom = read_outlines(WW2_WORK / "hist_units.geojson", "unit_id", only=used)  # the dates' units only
     refs = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False).to_dict("records")
-    rgeom = {f["properties"]["ref_id"]: shape(f["geometry"]) for f in json.load(open(REF_WORK / "ref_units.geojson"))["features"]}
+    rgeom = read_outlines(REF_WORK / "ref_units.geojson", "ref_id")
     for r in refs:
         r["geom"] = rgeom[r["ref_id"]]
         r["pt"] = Point(r["label_lon"], r["label_lat"])
@@ -412,7 +515,7 @@ def main(only=None):
                 shares = [(i, s_) for i, s_ in shares if s_ >= min_share]
                 fb = [i for i, u in enumerate(act) if u["country_name"] == UNCOVERED.get(snap)]
                 isl = None
-                if not shares and SET == "early":  # land CShapes does not draw: a known territory (Greenland)?
+                if not shares and SET != "ww2":  # land CShapes does not draw: a known territory (Greenland)?
                     isl = next((iu for k in rtree.query(pt) if refs[k]["geom"].contains(pt)
                                 for iu in [island_unit(refs[k], snap)] if iu), None)
                 if isl:
@@ -441,6 +544,8 @@ def main(only=None):
                     iu = ref_u
                     u = {"fid": iu[0], "gwcode": None, "country_name": iu[1], "status": iu[3]}
                     status, uen, uzh, sov_gw = iu[3], iu[1], iu[2], iu[4]
+                    if sov_gw is None:  # an island state that became independent: its own sovereign
+                        sov_gw = iu[0]
                 else:
                     u = act[ref_u]
                     status = u["status"]
@@ -449,11 +554,12 @@ def main(only=None):
                     fix = UNIT_FIX.get((snap, u["country_name"]))
                     if fix:
                         status, sov_gw, uen, uzh = fix
-                sov_en, sov_zh = names_on(snap).get(sov_gw) or state_name.get(str(sov_gw)) or (None, None)
+                sov_en, sov_zh = names_on(snap).get(sov_gw) or state_name.get(str(sov_gw)) or \
+                    ((uen, uzh) if ptype == "island" and sov_gw == ref_u[0] else (None, None))
 
                 def ctrl_of(r, u=u, uen=uen, uzh=uzh, status=status, sov_gw=sov_gw, sov_en=sov_en, sov_zh=sov_zh,
                             gpart=gpart):
-                    key = (r["ref_id"], u["fid"], hid if SET == "early" else (kind_flag and hid))
+                    key = (r["ref_id"], u["fid"], hid if SET != "ww2" else (kind_flag and hid))
                     if key not in cache:
                         c = dict(r, defacto_parent_kind={"manchukuo": "省 (Manchukuo)", "kwantung": "leased territory",
                                                          "manchu_roc": "ROC Manchuria"}.get(kind_flag),
@@ -495,6 +601,11 @@ def main(only=None):
         base = ghs_zonal([(r["piece_id"], r["_geom"]) for r in cur])
         upop = uy[uy.year == year].set_index("unit_id").population.to_dict()
         ugw = uy[uy.year == year].groupby("gwcode").population.sum().to_dict()
+        if SET == "postwar":
+            # the yearly table describes 1 July: a unit created later in the year (India and Pakistan on 15 August
+            # 1947, the states that left the Soviet Union in 1991) takes its population of the next year
+            nxt = uy[uy.year == year + 1].set_index("unit_id").population.to_dict()
+            upop = {**{u: v for u, v in nxt.items() if u not in upop}, **upop}
         world_ratio = years.loc[year, "world_population"] / 4.069e9
         by_unit = defaultdict(float)
         for r in cur:
@@ -514,7 +625,8 @@ def main(only=None):
                 r["pop_method"] = "GHS-1975 pattern scaled to state census estimate"
             elif r["unit_id"] in island_pop and by_unit[r["unit_id"]] > 0:
                 f = island_pop[r["unit_id"]] / by_unit[r["unit_id"]]
-                r["pop_method"] = "GHS-1975 pattern scaled to an approximate territory population c. 1940"
+                r["pop_method"] = "GHS-1975 pattern scaled to an approximate territory population " + \
+                    ("on the date" if SET == "postwar" else "c. 1940")
             elif by_unit[r["unit_id"]] > 0 and (r["unit_id"] in upop):
                 f = upop[r["unit_id"]] / by_unit[r["unit_id"]]
                 r["pop_method"] = "GHS-1975 pattern scaled to unit population"
@@ -531,10 +643,7 @@ def main(only=None):
     for snap, d in out.groupby("snapshot"):
         d.to_csv(WW2_WORK / f"snapshot_{snap}.csv", index=False)
         keep = set(d.piece_id)
-        with open(WW2_WORK / f"split_{snap}.geojson", "w") as f:
-            json.dump({"type": "FeatureCollection", "features": [
-                {"type": "Feature", "properties": {"piece_id": k}, "geometry": mapping(g)}
-                for k, g in piece_geom.items() if k in keep]}, f)
+        write_outlines(WW2_WORK / f"split_{snap}.geojson", ((k, g) for k, g in piece_geom.items() if k in keep))
     print(out.groupby("snapshot").agg(pieces=("piece_id", "count"), pop=("population_est", "sum")))
     print(out.groupby(["snapshot", "bloc"]).population_est.sum().unstack())
 

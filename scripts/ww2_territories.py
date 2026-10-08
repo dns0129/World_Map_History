@@ -1,5 +1,6 @@
 """Territories that CShapes 2.0 does not draw (small islands, protectorates, the Dodecanese,
 the Kurils). Their land would otherwise be attached to the nearest drawn unit.
+Records give the owner on each date: EARLIER before the Second World War, LATER after it.
 """
 
 
@@ -61,14 +62,69 @@ EARLIER = {
             ("1912-05-04", "1923-08-05", (-1111, "Dodecanese (Italian occupation)", "多德卡尼斯群岛（意大利占领）",
                                           "occupied", 325, 100000))],
 }
+# After the war (1946-1991). None: on these dates the land belongs to a unit CShapes draws (the
+# Dodecanese in Greece from the peace treaty, Kuwait and Bahrain once independent).
+LATER = {
+    -1001: [("1945-09-03", "1947-07-17", (-1201, "Former South Seas Mandate (US military government)",
+                                          "原南洋群岛（美国军政府）", "occupied", 2, 50000)),
+            ("1947-07-18", "1986-11-02", (-1202, "Trust Territory of the Pacific Islands (US)",
+                                          "太平洋岛屿托管地（美国托管）", "mandate", 2, 60000)),
+            ("1986-11-03", "1994-09-30", (-1203, "Micronesia, Marshall Islands, Northern Marianas and Palau "
+                                          "(US free association, commonwealth and trust territory)",
+                                          "密克罗尼西亚、马绍尔群岛、北马里亚纳与帕劳（与美国自由联系、美国联邦属地及托管地）",
+                                          "dependency", 2, 205000))],
+    -1002: [("1976-01-01", "2100-01-01", (-1204, "Kiribati and Tuvalu", "基里巴斯和图瓦卢", "independent", None,
+                                          80000))],
+    -1005: [("1945-09-03", "1961-12-31", (-1205, "Western Samoa (New Zealand trust territory)",
+                                          "西萨摩亚（新西兰托管地）", "mandate", 920, 80000)),
+            ("1962-01-01", "2100-01-01", (-1206, "Western Samoa", "西萨摩亚", "independent", None, 160000))],
+    -1006: [("1974-10-19", "2100-01-01", (-1207, "Niue (self-governing, in free association with New Zealand)",
+                                          "纽埃（与新西兰自由联系的自治领地）", "dependency", 920, 2300))],
+    -1007: [("1970-06-04", "2100-01-01", (-1208, "Tonga", "汤加", "independent", None, 95000))],
+    -1008: [("1945-09-14", "1968-01-30", (-1209, "Nauru (Australian-administered trust territory)",
+                                          "瑙鲁（澳大利亚管理的托管地）", "mandate", 900, 3000)),
+            ("1968-01-31", "2100-01-01", (-1210, "Nauru", "瑙鲁", "independent", None, 9500))],
+    -1009: [("1980-07-30", "2100-01-01", (-1211, "Vanuatu", "瓦努阿图", "independent", None, 150000))],
+    -1010: [("1945-09-03", "1961-06-18", (-1226, "Kuwait (British protectorate)", "科威特（英国保护国）", "protectorate",
+                                          200, 170000)),
+            ("1961-06-19", "2100-01-01", None)],
+    -1011: [("1945-09-03", "1971-08-14", (-1227, "Bahrain (British protectorate)", "巴林（英国保护国）", "protectorate",
+                                          200, 115000)),
+            ("1971-08-15", "2100-01-01", None)],
+    -1012: [("1953-06-05", "1979-04-30", (-1212, "Greenland (Danish county)", "格陵兰（丹麦的一个郡）", "dependency",
+                                          390, 30000)),
+            ("1979-05-01", "2100-01-01", (-1213, "Greenland (Danish home rule)", "格陵兰（丹麦自治领地）", "dependency",
+                                          390, 56000))],
+    -1013: [("1981-11-01", "2100-01-01", (-1214, "Antigua and Barbuda", "安提瓜和巴布达", "independent", None, 63000))],
+    -1014: [("1983-09-19", "2100-01-01", (-1215, "Saint Kitts and Nevis", "圣基茨和尼维斯", "independent", None,
+                                          41000))],
+    -1015: [("1978-11-03", "2100-01-01", (-1216, "Dominica", "多米尼克", "independent", None, 71000))],
+    -1016: [("1979-02-22", "2100-01-01", (-1217, "Saint Lucia", "圣卢西亚", "independent", None, 135000))],
+    -1017: [("1979-10-27", "2100-01-01", (-1218, "Saint Vincent and the Grenadines", "圣文森特和格林纳丁斯",
+                                          "independent", None, 108000))],
+    -1018: [("1974-02-07", "2100-01-01", (-1219, "Grenada", "格林纳达", "independent", None, 96000))],
+    -1019: [("1976-06-29", "2100-01-01", (-1220, "Seychelles", "塞舌尔", "independent", None, 70000))],
+    -1020: [("1975-07-12", "2100-01-01", (-1221, "São Tomé and Príncipe", "圣多美和普林西比", "independent", None,
+                                          120000))],
+    -1021: [("1945-09-03", "1947-03-30", (-1222, "Dodecanese (British Military Administration)",
+                                          "多德卡尼斯群岛（英国军事管理）", "occupied", 200, 115000)),
+            ("1947-03-31", "1947-09-14", (-1223, "Dodecanese (Greek military administration, ceded by Italy)",
+                                          "多德卡尼斯群岛（希腊军事管理，意大利割让）", "occupied", 350, 115000)),
+            ("1947-09-15", "2100-01-01", None)],
+    -1022: [("1945-09-03", "1991-12-25", (-1224, "Kuril Islands (Soviet Union)", "千岛群岛（苏联）", "independent", 365,
+                                          20000)),
+            ("1991-12-26", "2100-01-01", (-1225, "Kuril Islands (Russia; the southern islands claimed by Japan)",
+                                          "千岛群岛（俄罗斯；南部诸岛日本主张主权）", "independent", 365, 25000))],
+}
 ALL_ISLANDS = {v[0]: v for v in ISLAND_UNITS.values()}
 ALL_ISLANDS.update({rec[0]: rec for vs in EARLIER.values() for _, _, rec in vs})
+ALL_ISLANDS.update({rec[0]: rec for vs in LATER.values() for _, _, rec in vs if rec})
 
 
 def island_unit(c, date=None):
     u = ISLAND_UNITS.get(c["iso3"]) or ISLAND_UNITS.get((c["iso3"], c.get("name")))
     if u and date:
-        for first, last, rec in EARLIER.get(u[0], ()):
+        for first, last, rec in [*EARLIER.get(u[0], ()), *LATER.get(u[0], ())]:
             if first <= date <= last:
                 return rec
     return u

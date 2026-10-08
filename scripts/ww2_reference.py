@@ -8,20 +8,18 @@ different controllers, and only its names are used, never its outlines as divisi
 Level per country: the geoBoundaries level whose median area is closest to a typical
 county (about 1,500 km2), with first-level areas added where that level leaves holes.
 
-Output: work/ww2/ref_units.geojson, ref_units.csv, ref_levels.csv
+Output: work/ww2/ref_units.wkb (outlines, see ww2_geo.write_outlines), ref_units.csv, ref_levels.csv
 """
-import json
 import math
 from collections import defaultdict
 
 import numpy as np
 import pandas as pd
 from shapely import STRtree
-from shapely.geometry import mapping
 from shapely.ops import unary_union
 
 from ww2_common import GB, REF_WORK as WW2_WORK, TYPICAL_COUNTY_KM2
-from ww2_geo import eq_area_km2, gb_path, polys, read_geojson
+from ww2_geo import eq_area_km2, gb_path, polys, read_geojson, write_outlines
 
 
 def choose_levels():
@@ -133,9 +131,7 @@ def main():
         r["label_lon"], r["label_lat"] = round(rp.x, 4), round(rp.y, 4)
     pd.DataFrame([{k: v for k, v in r.items() if k != "geom"} for r in rows]).to_csv(WW2_WORK / "ref_units.csv",
                                                                                    index=False)
-    with open(WW2_WORK / "ref_units.geojson", "w") as f:
-        json.dump({"type": "FeatureCollection", "features": [
-            {"type": "Feature", "properties": {"ref_id": r["ref_id"]}, "geometry": mapping(r["geom"])} for r in rows]}, f)
+    write_outlines(WW2_WORK / "ref_units.geojson", ((r["ref_id"], r["geom"]) for r in rows))
     print("reference units:", len(rows))
 
 

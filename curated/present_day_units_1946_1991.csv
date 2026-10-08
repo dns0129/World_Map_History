@@ -1,0 +1,253 @@
+iso3,name,name_zh,members,start,end,kind,prio,note
+CHN,Beijing,北京市,Beijing Municipality,1958-10-20,,直辖市,5,
+CHN,Tianjin,天津市,Tianjin Municipality,1973-07-01,,直辖市,5,
+CHN,Shanghai,上海市,Shanghai Municipality,1958-12-01,,直辖市,5,
+CHN,Hebei,河北省,Hebei Province,1973-07-01,,省,5,
+CHN,Shanxi,山西省,Shanxi Province,1954-06-19,,省,5,
+CHN,Inner Mongolia,内蒙古自治区,Inner Mongolia Autonomous Region,1979-07-01,,自治区,5,
+CHN,Liaoning,辽宁省,Liaoning Province,1979-07-01,,省,5,
+CHN,Jilin,吉林省,Jilin Province,1979-07-01,,省,5,
+CHN,Heilongjiang,黑龙江省,Heilongjiang Province,1979-07-01,,省,5,
+CHN,Jiangsu,江苏省,Jiangsu Province,1958-12-01,,省,5,
+CHN,Zhejiang,浙江省,Zhejiang Province,1954-06-19,,省,5,
+CHN,Anhui,安徽省,Anhui Province,1955-01-01,,省,5,
+CHN,Fujian,福建省,Fujian Province,1954-06-19,,省,5,
+CHN,Jiangxi,江西省,Jiangxi Province,1954-06-19,,省,5,
+CHN,Shandong,山东省,Shandong Province,1964-01-01,,省,5,
+CHN,Henan,河南省,Henan Province,1964-01-01,,省,5,
+CHN,Hubei,湖北省,Hubei Province,1954-06-19,,省,5,
+CHN,Hunan,湖南省,Hunan Province,1954-06-19,,省,5,
+CHN,Guangdong,广东省,Guangzhou Province,1988-04-13,,省,5,
+CHN,Guangxi,广西壮族自治区,Guangxi Zhuang Autonomous Region,1965-06-01,,自治区,5,
+CHN,Hainan,海南省,Hainan Province,1988-04-13,,省,5,
+CHN,Sichuan,四川省,Sichuan Province|Chongqing Municipality,1955-10-01,1997-03-13,省,5,with Chongqing (a municipality only from 1997)
+CHN,Guizhou,贵州省,Guizhou Province,1954-06-19,,省,5,
+CHN,Yunnan,云南省,Yunnan Province,1954-06-19,,省,5,
+CHN,Tibet,西藏自治区,Tibet Autonomous Region,1965-09-09,,自治区,5,
+CHN,Shaanxi,陕西省,Shaanxi Province,1954-06-19,,省,5,
+CHN,Gansu,甘肃省,Gansu Province,1979-07-01,,省,5,
+CHN,Qinghai,青海省,Qinghai Province,1954-06-19,,省,5,
+CHN,Ningxia,宁夏回族自治区,Ningxia Ningxia Hui Autonomous Region,1979-07-01,,自治区,5,
+CHN,Xinjiang,新疆维吾尔自治区,Xinjiang Uyghur Autonomous Region,1955-10-01,,自治区,5,
+CHN,Hong Kong (British dependent territory),香港（英国属土）,Hong Kong Special Administrative Region,1898-07-01,1997-06-30,dependent territory,0,
+CHN,Macau (Portuguese administration),澳门（葡萄牙管治）,Macau Special Administrative Region,1887-12-01,1999-12-19,overseas territory,0,
+TWN,Taiwan Province,台湾省,Changhua County|Chiayi|Chiayi County|Hsinchu|Hsinchu County|Hualien County|Kaohsiung|Keelung|Miaoli County|Nantou County|New Taipei|Penghu|Pingtung County|Taichung|Tainan|Taitung County|Taoyuan|Yilan County|Yunlin County,1979-07-01,1998-12-20,省,5,with Kaohsiung City (a special municipality from 1979; its outline of that time is not drawn separately)
+TWN,Taipei,台北市,Taipei,1967-07-01,,院辖市,5,
+TWN,Fujian Province (Kinmen and Matsu),福建省（金门、马祖）,Kinmen|Matsu Islands,1956-07-01,,省,5,
+KOR,Seoul,首尔特别市,Seoul,1946-08-15,,特别市,5,
+KOR,Gyeonggi,京畿道,Gyeonggi|Incheon,1946-08-15,1981-06-30,道,5,with Incheon (separate from 1981)
+KOR,Gangwon,江原道,Gangwon,1946-08-15,,道,5,
+KOR,North Chungcheong,忠清北道,North Chungcheong,1946-08-15,,道,5,
+KOR,South Chungcheong,忠清南道,South Chungcheong|Daejeon|Sejong,1946-08-15,1989-01-01,道,5,with Daejeon (separate from 1989) and Sejong (from 2012)
+KOR,North Jeolla,全罗北道,North Jeolla,1946-08-15,,道,5,
+KOR,South Jeolla,全罗南道,South Jeolla|Gwangju,1946-08-15,1986-10-31,道,5,with Gwangju (separate from 1986)
+KOR,North Gyeongsang,庆尚北道,North Gyeongsang|Daegu,1946-08-15,1981-06-30,道,5,with Daegu (separate from 1981)
+KOR,South Gyeongsang,庆尚南道,South Gyeongsang|Busan|Ulsan,1946-08-15,1962-12-31,道,5,with Busan (separate from 1963) and Ulsan (from 1997)
+KOR,Jeju,济州道,Jeju,1946-08-01,,道,5,
+KOR,Gyeonggi (without Incheon),京畿道,Gyeonggi,1981-07-01,,道,5,
+KOR,Incheon,仁川直辖市,Incheon,1981-07-01,,直辖市,5,
+KOR,South Chungcheong (without Daejeon),忠清南道,South Chungcheong|Sejong,1989-01-01,2012-06-30,道,5,with Sejong (from 2012)
+KOR,Daejeon,大田直辖市,Daejeon,1989-01-01,,直辖市,5,
+KOR,South Jeolla (without Gwangju),全罗南道,South Jeolla,1986-11-01,,道,5,
+KOR,Gwangju,光州直辖市,Gwangju,1986-11-01,,直辖市,5,
+KOR,North Gyeongsang (without Daegu),庆尚北道,North Gyeongsang,1981-07-01,,道,5,
+KOR,Daegu,大邱直辖市,Daegu,1981-07-01,,直辖市,5,
+KOR,South Gyeongsang (without Busan),庆尚南道,South Gyeongsang|Ulsan,1963-01-01,1997-07-14,道,5,with Ulsan (separate from 1997)
+KOR,Busan,釜山直辖市,Busan,1963-01-01,,直辖市,5,
+PRK,Pyongyang,平壤直辖市,Pyongyang,1946-09-01,,直辖市,5,
+PRK,South Pyongan,平安南道,South Pyongan|Nampo,1946-09-01,1979-12-31,道,5,with Nampo (a separate city 1980-2004)
+PRK,North Pyongan (with Jagang),平安北道,North Pyongan|Jagang,1946-09-01,1949-01-29,道,5,Jagang province formed in January 1949
+PRK,North Pyongan,平安北道,North Pyongan,1949-01-30,,道,5,
+PRK,Jagang,慈江道,Jagang,1949-01-30,,道,5,
+PRK,Hwanghae,黄海道,North Hwanghae|South Hwanghae,1946-09-01,1954-10-29,道,5,split into North and South Hwanghae in 1954
+PRK,Kangwon,江原道,Kangwon,1946-09-01,,道,5,
+PRK,South Hamgyong,咸镜南道,South Hamgyong|Ryanggang,1946-09-01,1954-10-29,道,5,Ryanggang province formed in 1954
+PRK,North Hamgyong,咸镜北道,North Hamgyong,1946-09-01,,道,5,
+PRK,South Pyongan (without Nampo),平安南道,South Pyongan,1980-01-01,2004-01-01,道,5,
+PRK,Nampo,南浦直辖市,Nampo,1980-01-01,2004-01-01,直辖市,5,
+PRK,North Hwanghae,黄海北道,North Hwanghae,1954-10-30,,道,5,with Kaesong (a directly governed city 1955-2002)
+PRK,South Hwanghae,黄海南道,South Hwanghae,1954-10-30,,道,5,
+PRK,South Hamgyong (without Ryanggang),咸镜南道,South Hamgyong,1954-10-30,,道,5,
+PRK,Ryanggang,两江道,Ryanggang,1954-10-30,,道,5,
+IDN,West Java,西爪哇省,West Java|Banten|Jakarta Special Capital Region,1950-08-15,1959-12-31,province,5,with Jakarta (a separate province from 1959) and Banten (2000)
+IDN,Central Java,中爪哇省,Central Java,1950-08-15,,province,5,
+IDN,Yogyakarta,日惹特区,Special Region of Yogyakarta,1950-08-15,,special region,5,
+IDN,East Java,东爪哇省,East Java,1950-08-15,,province,5,
+IDN,North Sumatra,北苏门答腊省,North Sumatra|Aceh,1950-08-15,1956-12-31,province,5,with Aceh (separate from 1957)
+IDN,Central Sumatra,中苏门答腊省,West Sumatra|Riau|Riau Islands|Jambi,1950-08-15,1957-08-08,province,5,"split into West Sumatra, Riau and Jambi in 1957"
+IDN,South Sumatra,南苏门答腊省,South Sumatra|Bengkulu|Lampung|Bangka-Belitung Islands,1950-08-15,1964-03-17,province,5,Lampung and Bengkulu separated in 1964 and 1967
+IDN,Kalimantan,加里曼丹省,West Kalimantan|Central Kalimantan|South Kalimantan|East Kalimantan|North Kalimantan,1950-08-15,1956-12-31,province,5,
+IDN,Sulawesi,苏拉威西省,North Sulawesi|Central Sulawesi|South Sulawesi|Southeast Sulawesi|Gorontalo|West Sulawesi,1950-08-15,1960-12-31,province,5,
+IDN,Maluku,马鲁古省,Maluku|North Maluku,1950-08-15,1999-10-11,province,5,with North Maluku (separate from 1999)
+IDN,Lesser Sunda Islands,小巽他省,Bali|West Nusa Tenggara|East Nusa Tenggara,1950-08-15,1958-08-13,province,5,
+IDN,Aceh,亚齐特区,Aceh,1957-01-01,,special region,5,
+IDN,North Sumatra (without Aceh),北苏门答腊省,North Sumatra,1957-01-01,,province,5,
+IDN,West Sumatra,西苏门答腊省,West Sumatra,1957-08-09,,province,5,
+IDN,Riau,廖内省,Riau|Riau Islands,1957-08-09,2002-09-24,province,5,with the Riau Islands (separate from 2002)
+IDN,Jambi,占碑省,Jambi,1957-08-09,,province,5,
+IDN,South Sumatra (1967-2000),南苏门答腊省,South Sumatra|Bangka-Belitung Islands,1967-11-12,2000-12-03,province,5,with Bangka-Belitung (separate from 2000)
+IDN,Bengkulu,明古鲁省,Bengkulu,1967-11-12,,province,5,
+IDN,Lampung,楠榜省,Lampung,1964-03-18,,province,5,
+IDN,Jakarta,雅加达首都特区,Jakarta Special Capital Region,1960-01-01,,special capital region,5,
+IDN,West Java (without Jakarta),西爪哇省,West Java|Banten,1960-01-01,2000-10-16,province,5,with Banten (separate from 2000)
+IDN,West Kalimantan,西加里曼丹省,West Kalimantan,1957-01-01,,province,5,
+IDN,Central Kalimantan,中加里曼丹省,Central Kalimantan,1957-01-01,,province,5,
+IDN,South Kalimantan,南加里曼丹省,South Kalimantan,1957-01-01,,province,5,
+IDN,East Kalimantan,东加里曼丹省,East Kalimantan|North Kalimantan,1957-01-01,2012-10-24,province,5,with North Kalimantan (separate from 2012)
+IDN,North Sulawesi,北苏拉威西省,North Sulawesi|Gorontalo,1964-09-23,2000-12-05,province,5,with Gorontalo (separate from 2000)
+IDN,Central Sulawesi,中苏拉威西省,Central Sulawesi,1964-04-13,,province,5,
+IDN,South Sulawesi,南苏拉威西省,South Sulawesi|West Sulawesi,1964-04-13,2004-10-04,province,5,with West Sulawesi (separate from 2004)
+IDN,Southeast Sulawesi,东南苏拉威西省,Southeast Sulawesi,1964-04-13,,province,5,
+IDN,Bali,巴厘省,Bali,1958-08-14,,province,5,
+IDN,West Nusa Tenggara,西努沙登加拉省,West Nusa Tenggara,1958-08-14,,province,5,
+IDN,East Nusa Tenggara,东努沙登加拉省,East Nusa Tenggara,1958-08-14,,province,5,
+IDN,Irian Jaya,伊里安查亚省,Papua|West Papua,1969-09-17,1999-10-11,province,5,the western half of New Guinea; Dutch until 1962
+BGD,Dhaka Division,达卡专区,Dhaka|Mymensingh,1971-12-16,2015-09-13,division,5,
+BGD,Chittagong Division,吉大港专区,Chittagong|Sylhet,1971-12-16,1995-07-31,division,5,
+BGD,Rajshahi Division,拉杰沙希专区,Rajshani|Rangpur,1971-12-16,2010-01-24,division,5,
+BGD,Khulna Division,库尔纳专区,Khulna|Barisal,1971-12-16,1993-01-01,division,5,
+NGA,Rivers,河流州,Rivers|Bayelsa,1991-08-27,1996-09-30,state,5,
+NGA,Abia,阿比亚州,Abia|Ebonyi,1991-08-27,1996-09-30,state,5,with the part of Ebonyi taken from it in 1996
+NGA,Enugu,埃努古州,Enugu,1991-08-27,,state,5,without the part of Ebonyi taken from it in 1996
+NGA,Ondo,翁多州,Ondo|Ekiti,1991-08-27,1996-09-30,state,5,
+NGA,Bauchi,包奇州,Bauchi|Gombe,1991-08-27,1996-09-30,state,5,
+NGA,Plateau,高原州,Plateau|Nasarawa,1991-08-27,1996-09-30,state,5,
+NGA,Sokoto,索科托州,Sokoto|Zamfara,1991-08-27,1996-09-30,state,5,
+NGA,*,,*,1991-08-27,1996-09-30,state,5,
+TUR,Kars,卡尔斯省,Kars|Ardahan|Iğdır,1991-05-28,1992-05-26,il,5,with Ardahan and Iğdır (separate from 1992)
+TUR,İstanbul,伊斯坦布尔省,İstanbul|Yalova,1991-05-28,1995-06-05,il,5,with Yalova (separate from 1995)
+TUR,Zonguldak,宗古尔达克省,Zonguldak|Karabük,1991-05-28,1995-06-05,il,5,with Karabük (separate from 1995); Bartın separated in 1991
+TUR,Gaziantep,加济安泰普省,Gaziantep|Kilis,1991-05-28,1995-06-05,il,5,with Kilis (separate from 1995)
+TUR,Adana,阿达纳省,Adana|Osmaniye,1991-05-28,1996-10-23,il,5,with Osmaniye (separate from 1996)
+TUR,Bolu,博卢省,Bolu|Düzce,1991-05-28,1999-12-08,il,5,with Düzce (separate from 1999)
+TUR,*,,*,1991-05-28,1992-05-26,il,5,
+IRN,East Azerbaijan,东阿塞拜疆省,East Azerbaijan|Ardabil,1986-01-01,1993-04-04,ostan,5,with Ardabil (separate from 1993)
+IRN,Tehran,德黑兰省,Tehran|Qom|Alborz,1986-01-01,1995-01-01,ostan,5,with Qom (1995) and Alborz (2010)
+IRN,Zanjan,赞詹省,Zanjan|Qazvin,1986-01-01,1997-01-01,ostan,5,with Qazvin (separate from 1997)
+IRN,Mazandaran,马赞德兰省,Mazandaran|Golestan,1986-01-01,1997-01-01,ostan,5,with Golestan (separate from 1997)
+IRN,Khorasan,呼罗珊省,Razavi Khorasan|North Khorasan|South Khorasan,1986-01-01,2004-09-29,ostan,5,split into three provinces in 2004
+IRN,*,,*,1986-01-01,1993-04-04,ostan,5,
+EGY,Qena Governorate,基纳省,Qena Governorate|Luxor Governate,1979-01-01,2009-12-09,governorate,5,with Luxor (separate from 2009)
+EGY,*,,*,1979-01-01,2009-12-09,governorate,5,
+ARG,*,,*,1990-06-01,,province,5,Tierra del Fuego a province from 1990
+DZA,*,,*,1984-02-04,2019-12-17,wilaya,5,
+IRQ,*,,*,1976-01-01,,governorate,5,
+SAU,*,,*,1975-01-01,,region,5,the regions defined in 1992 follow the emirates of the time
+SYR,*,,*,1987-01-01,,governorate,5,
+ROU,București,布加勒斯特,BUCURESTI|ILFOV,1981-01-23,1997-04-29,municipiu,5,with the Ilfov agricultural sector (a separate county from 1997)
+ROU,*,,*,1981-01-23,1997-04-29,județ,5,
+GHA,Brong-Ahafo Region,布朗阿哈福省,Bono Region|Bono East Region|Ahafo Region,1983-01-01,2019-02-14,region,5,
+GHA,Northern Region,北部省,Northern Region|Savannah Region|North East Region,1983-01-01,2019-02-14,region,5,
+GHA,Volta Region,沃尔特省,Volta Region|Oti Region,1983-01-01,2019-02-14,region,5,
+GHA,Western Region,西部省,Western Region|Western North Region,1983-01-01,2019-02-14,region,5,
+GHA,*,,*,1983-01-01,2019-02-14,region,5,
+MOZ,*,,*,1975-06-25,,province,5,Maputo City (a province of its own) is drawn inside Maputo province
+CMR,*,,*,1984-08-22,,province,5,
+ZWE,*,,*,1980-04-18,,province,5,
+KEN,Nairobi,内罗毕省,KEN:Nairobi,1963-12-12,2013-03-04,province,5,
+KEN,Central,中央省,KEN:Kiambu|KEN:Kirinyaga|KEN:Murang'a|KEN:Nyandarua|KEN:Nyeri,1963-12-12,2013-03-04,province,5,outline from the counties of 2013 (the districts of 1992)
+KEN,Coast,滨海省,KEN:Kilifi|KEN:Kwale|KEN:Lamu|KEN:Mombasa|KEN:Taita Taveta|KEN:Tana River,1963-12-12,2013-03-04,province,5,outline from the counties of 2013
+KEN,Eastern,东部省,KEN:Embu|KEN:Isiolo|KEN:Kitui|KEN:Machakos|KEN:Makueni|KEN:Marsabit|KEN:Meru|KEN:Tharaka,1963-12-12,2013-03-04,province,5,outline from the counties of 2013
+KEN,North Eastern,东北省,KEN:Garissa|KEN:Mandera|KEN:Wajir,1963-12-12,2013-03-04,province,5,outline from the counties of 2013
+KEN,Nyanza,尼扬扎省,KEN:Homa Bay|KEN:Kisii|KEN:Kisumu|KEN:Migori|KEN:Nyamira|KEN:Siaya,1963-12-12,2013-03-04,province,5,outline from the counties of 2013
+KEN,Rift Valley,裂谷省,KEN:Baringo|KEN:Bomet|KEN:Elgeyo-Marakwet|KEN:Kajiado|KEN:Kericho|KEN:Laikipia|KEN:Nakuru|KEN:Nandi|KEN:Narok|KEN:Samburu|KEN:Trans Nzoia|KEN:Turkana|KEN:Uasin Gishu|KEN:West Pokot,1963-12-12,2013-03-04,province,5,outline from the counties of 2013
+KEN,Western,西部省,KEN:Bungoma|KEN:Busia|KEN:Kakamega|KEN:Vihiga,1963-12-12,2013-03-04,province,5,outline from the counties of 2013
+HUN,Pest (with Budapest),佩斯州（含布达佩斯）,Pest,1950-03-16,,megye,5,Budapest is not drawn separately from Pest county
+HUN,*,,*,1950-03-16,,megye,5,the counties of the 1950 reform
+BLR,*,,*,1960-01-08,,oblast,5,
+AUT,*,,*,1945-04-27,,Bundesland,5,the Länder as restored in 1945 (Vienna's boundary changed in 1954)
+CHE,Bern (with the Jura),伯尔尼州（含汝拉）,Bern|Jura,1815-08-07,1978-12-31,canton,5,the canton of Jura separated in 1979
+CHE,*,,*,1815-08-07,1978-12-31,canton,5,
+CHE,*,,*,1979-01-01,,canton,5,
+CHE,Bern,伯尔尼州,Bern,1979-01-01,,canton,5,
+CHE,Jura,汝拉州,Jura,1979-01-01,,canton,5,
+MMR,Mandalay Division,曼德勒省,Mandalay,1974-01-03,2008-12-31,division,5,with Naypyidaw (from 2005)
+MMR,*,,*,1974-01-03,,state / division,5,
+UZB,Bukhara Region,布哈拉州,Bukhara Region|Navoiy Region,1990-02-16,1992-01-19,oblast,5,with the Navoi region (abolished 1988-1992)
+UZB,*,,*,1990-02-16,1992-01-19,oblast,5,
+TKM,*,,*,1991-10-27,,velayat,5,
+TJK,*,,*,1990-01-01,,oblast,5,Khatlon drawn as one: the Kulob and Qurghonteppa oblasts were apart from 1990 to January 1992
+KGZ,Osh Region,奥什州,Osh Region|Batken Region,1990-12-14,1999-10-12,oblast,5,with Batken (separate from 1999)
+KGZ,*,,*,1990-12-14,1999-10-12,oblast,5,
+EST,*,,*,1990-01-01,,maakond,5,
+YUG,Slovenia,斯洛文尼亚,SVN:*,1945-11-29,,republic,5,
+YUG,Croatia,克罗地亚,HRV:*,1945-11-29,,republic,5,
+YUG,Bosnia and Herzegovina,波斯尼亚和黑塞哥维那,BIH:*,1945-11-29,,republic,5,
+YUG,Montenegro,黑山,MNE:*,1945-11-29,,republic,5,
+YUG,Kosovo,科索沃,XKX:*,1945-09-03,,autonomous province,5,Autonomous Region of Kosovo and Metohija (1946); autonomous province from 1963
+YUG,Vojvodina,伏伊伏丁那,SRB:North Backa District|SRB:West Backa District|SRB:South Backa District|SRB:North Banat District|SRB:Central Banat District|SRB:South Banat District|SRB:Syrmia District,1945-09-01,,autonomous province,5,
+YUG,Serbia proper,塞尔维亚本部,SRB:Belgrade|SRB:Bor District|SRB:Branicevo District|SRB:Jablanica District|SRB:Kolubara District|SRB:Macva District|SRB:Moravica District|SRB:Nisava District|SRB:Pcinja District|SRB:Pirot District|SRB:Podunavlje District|SRB:Pomoravlje District|SRB:Rasina District|SRB:Raska District|SRB:Sumadija District|SRB:Toplica District|SRB:Zajecar District|SRB:Zlatibor District,1945-11-29,,republic,5,Serbia without its autonomous provinces
+YUG,Macedonia,马其顿,MKD:*,1945-11-29,1991-11-19,republic,5,
+FRA/ADM2,Alsace,阿尔萨斯大区,Bas-Rhin|Haut-Rhin,1982-03-02,2015-12-31,région,5,regions of the 1982 decentralisation; outlines from the departements
+FRA/ADM2,Aquitaine,阿基坦大区,Dordogne|Gironde|Landes|Lot-et-Garonne|Pyrénées-Atlantiques,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Auvergne,奥弗涅大区,Allier|Cantal|Haute-Loire|Puy-de-Dôme,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Basse-Normandie,下诺曼底大区,Calvados|Manche|Orne,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Bourgogne,勃艮第大区,Côte-d'Or|Nièvre|Saône-et-Loire|Yonne,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Bretagne,布列塔尼大区,Côtes d'Armor|Finistère|Ille-et-Vilaine|Morbihan,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Centre,中央大区,Cher|Eure-et-Loir|Indre|Indre-et-Loire |Loir-et-Cher|Loiret,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Champagne-Ardenne,香槟-阿登大区,Ardennes|Aube|Marne|Haute-Marne,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Corse,科西嘉,Corse-du-Sud|Haute-Corse,1982-03-02,2015-12-31,collectivité territoriale,5,
+FRA/ADM2,Franche-Comté,弗朗什-孔泰大区,Doubs|Jura|Haute-Saône|Territoire de Belfort,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Haute-Normandie,上诺曼底大区,Eure|Seine-Maritime,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Île-de-France,法兰西岛大区,Paris|Seine-et-Marne|Yvelines|Essonne|Hauts-de-Seine|Seine-Saint-Denis|Val-de-Marne|Val-d'Oise,1982-03-02,,région,5,
+FRA/ADM2,Languedoc-Roussillon,朗格多克-鲁西永大区,Aude|Gard|Hérault|Lozère|Pyrénées-Orientales,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Limousin,利穆赞大区,Corrèze|Creuse|Haute-Vienne,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Lorraine,洛林大区,Meurthe-et-Moselle|Meuse|Moselle|Vosges,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Midi-Pyrénées,南部-比利牛斯大区,Ariège|Aveyron|Haute-Garonne|Gers|Lot|Hautes-Pyrénées|Tarn|Tarn-et-Garonne,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Nord-Pas-de-Calais,北部-加来海峡大区,Nord|Pas-de-Calais,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Pays de la Loire,卢瓦尔河地区大区,Loire-Atlantique|Maine-et-Loire|Mayenne|Sarthe|Vendée,1982-03-02,,région,5,
+FRA/ADM2,Picardie,皮卡第大区,Aisne|Oise|Somme,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Poitou-Charentes,普瓦图-夏朗德大区,Charente|Charente-Maritime|Deux-Sèvres|Vienne,1982-03-02,2015-12-31,région,5,
+FRA/ADM2,Provence-Alpes-Côte d'Azur,普罗旺斯-阿尔卑斯-蓝色海岸大区,Alpes-de-Haute-Provence|Hautes-Alpes|Alpes-Maritimes|Bouches-du-Rhône|Var|Vaucluse,1982-03-02,,région,5,
+FRA/ADM2,Rhône-Alpes,罗讷-阿尔卑斯大区,Ain|Ardèche|Drôme|Isère|Loire|Rhône|Savoie|Haute-Savoie,1982-03-02,2015-12-31,région,5,
+THA,Ubon Ratchathani Province,乌汶府,Ubon Ratchathani Province|Amnat Charoen Province,1982-09-27,1993-01-11,changwat,5,with Amnat Charoen (separate from 1993)
+THA,Udon Thani Province,乌隆府,Udon Thani Province|Nong Bua Lam Phu Province,1982-09-27,1993-11-30,changwat,5,with Nong Bua Lamphu (separate from 1993)
+THA,Prachin Buri Province,巴真武里府,Prachin Buri Province|Sa Kaeo Province,1982-09-27,1993-11-30,changwat,5,with Sa Kaeo (separate from 1993)
+THA,Nong Khai Province,廊开府,Nong Khai Province|Bueng Kan Province,1982-09-27,2011-03-22,changwat,5,with Bueng Kan (separate from 2011)
+THA,*,,*,1982-09-27,1993-01-11,changwat,5,the 73 provinces from the creation of Mukdahan (1982)
+PHL/ADM2,Metro Manila,马尼拉大都会,"NCR, City of Manila, First District|NCR, Second District|NCR, Third District|NCR, Fourth District",1979-08-13,,metropolitan area,5,
+PHL/ADM2,Leyte,莱特省,Leyte|Biliran,1979-08-13,1992-05-10,province,5,with Biliran (separate from 1992)
+PHL/ADM2,Iloilo,伊洛伊洛省,Iloilo|Guimaras,1979-08-13,1992-05-21,province,5,with Guimaras (separate from 1992)
+PHL/ADM2,South Cotabato,南哥打巴托省,South Cotabato|Sarangani,1979-08-13,1992-03-15,province,5,with Sarangani (separate from 1992)
+PHL/ADM2,Kalinga-Apayao,卡林阿-阿巴尧省,Kalinga|Apayao,1979-08-13,1995-02-13,province,5,split into Kalinga and Apayao in 1995
+PHL/ADM2,Davao del Norte,北达沃省,Davao del Norte|Compostela Valley,1979-08-13,1998-01-30,province,5,with Compostela Valley (separate from 1998)
+PHL/ADM2,Zamboanga del Sur,南三宝颜省,Zamboanga del Sur|Zamboanga Sibugay,1979-08-13,2001-02-21,province,5,with Zamboanga Sibugay (separate from 2001)
+PHL/ADM2,Surigao del Norte,北苏里高省,Surigao del Norte|Dinagat Islands,1979-08-13,2006-12-01,province,5,with the Dinagat Islands (separate from 2006)
+PHL/ADM2,Davao del Sur,南达沃省,Davao del Sur|Davao Occidental,1979-08-13,2013-10-27,province,5,with Davao Occidental (separate from 2013)
+PHL/ADM2,Basilan,巴西兰省,Basilan|City of Isabela,1979-08-13,,province,5,with Isabela City
+PHL/ADM2,Maguindanao,马京达瑙省,Maguindanao|Cotabato City,1979-08-13,,province,5,with Cotabato City
+PHL/ADM2,*,,*,1979-08-13,1992-03-15,province,5,the 73 provinces from the creation of Aurora (1979)
+VNM,Hà Bắc,河北省,Bắc Giang|Bắc Ninh,1991-08-12,1996-12-31,tỉnh,5,split into Bắc Giang and Bắc Ninh in 1997
+VNM,Nam Hà,南河省,Nam Định|Hà Nam,1991-08-12,1996-12-31,tỉnh,5,split into Nam Định and Hà Nam in 1997
+VNM,Hải Hưng,海兴省,Hải Dương|Hưng Yên,1991-08-12,1996-12-31,tỉnh,5,split into Hải Dương and Hưng Yên in 1997
+VNM,Vĩnh Phú,永富省,Vĩnh Phúc|Phú Thọ|VNM/ADM2:Me Linh,1991-08-12,1996-12-31,tỉnh,5,split into Vĩnh Phúc and Phú Thọ in 1997; with Mê Linh (to Hanoi in 2008; district outline approximate)
+VNM,Bắc Thái,北太省,Bắc Kạn|Thái Nguyên,1991-08-12,1996-12-31,tỉnh,5,split into Bắc Kạn and Thái Nguyên in 1997
+VNM,Quảng Nam – Đà Nẵng,广南-岘港省,Quảng Nam|Đà Nẵng,1991-08-12,1996-12-31,tỉnh,5,split into Quảng Nam and Đà Nẵng in 1997
+VNM,Sông Bé,小河省,Bình Dương|Bình Phước,1991-08-12,1996-12-31,tỉnh,5,split into Bình Dương and Bình Phước in 1997
+VNM,Minh Hải,明海省,Bạc Liêu|Cà Mau,1991-08-12,1996-12-31,tỉnh,5,split into Bạc Liêu and Cà Mau in 1997
+VNM,Lai Châu,莱州省,Lai Châu|Điện Biên,1991-08-12,2003-12-31,tỉnh,5,with Điện Biên (separate from 2004)
+VNM,Đắk Lắk,多乐省,Đắk Lắk|Đắk Nông,1991-08-12,2003-12-31,tỉnh,5,with Đắk Nông (separate from 2004)
+VNM,Cần Thơ,芹苴省,Cần Thơ|Hậu Giang,1991-08-12,2003-12-31,tỉnh,5,with Hậu Giang (separate from 2004)
+VNM,Bà Rịa – Vũng Tàu,巴地-头顿省,Bà Rịa–Vũng Tàu|Côn Đảo,1991-08-12,,tỉnh,5,with Côn Đảo
+VNM,Hà Tây,河西省,Hà Nội|-VNM/ADM2:Me Linh,1991-08-12,2008-07-31,tỉnh,25,present-day Hanoi less the 1991-2008 city (OpenHistoricalMap) and Mê Linh; merged into Hanoi in 2008
+VNM,*,,*,1991-08-12,1996-12-31,tỉnh,5,the provinces after the splits of 12 August 1991
+COD,Kinshasa,金沙萨,Kinshasa,1988-01-01,1997-05-16,ville,5,
+COD,Bas-Zaïre,下扎伊尔区,Kongo-Central,1988-01-01,1997-05-16,région,5,Bas-Congo from 1997
+COD,Bandundu,班顿杜区,Kwango|Kwilu|Mai-Ndombe,1988-01-01,1997-05-16,région,5,split in 2015
+COD,Équateur,赤道区,Équateur|Mongala|Nord-Ubangi|Sud-Ubangi|Tshuapa,1988-01-01,1997-05-16,région,5,split in 2015
+COD,Haut-Zaïre,上扎伊尔区,Lower Uele|Upper Uele|Ituri|Tshopo,1988-01-01,1997-05-16,région,5,Orientale from 1997; split in 2015
+COD,Kasaï-Occidental,西开赛区,Kasai|Central Kasai,1988-01-01,1997-05-16,région,5,split in 2015
+COD,Kasaï-Oriental,东开赛区,Kasai-Oriental|Lomami|Sankuru,1988-01-01,1997-05-16,région,5,split in 2015
+COD,Shaba,沙巴区,Haut-Katanga|Haut-Lomami|Lualaba|Tanganyika,1988-01-01,1997-05-16,région,5,Katanga from 1997; split in 2015
+COD,Maniema,马尼埃马区,Maniema,1988-01-01,1997-05-16,région,5,formed from Kivu in 1988
+COD,Nord-Kivu,北基伍区,North Kivu,1988-01-01,1997-05-16,région,5,formed from Kivu in 1988
+COD,Sud-Kivu,南基伍区,South Kivu,1988-01-01,1997-05-16,région,5,formed from Kivu in 1988
+SDN,Khartoum,喀土穆州,Khartoum,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Northern,北方州,Northern|River Nile,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Eastern,东部州,Red Sea|Kassala|Gedaref,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Central,中部州,Gezira|White Nile|Blue Nile|Sennar,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Kordofan,科尔多凡州,North Kordofan|South Kordofan|West Kordofan|Abyei PCA,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Darfur,达尔富尔州,North Darfur|South Darfur|West Darfur|Central Darfur|East Darfur,1991-02-14,1994-02-13,state,5,the nine states of 1991
+SDN,Upper Nile,上尼罗州,SSD:Upper Nile|SSD:Jonglei|SSD:Unity,1991-02-14,1994-02-13,state,5,the nine states of 1991 (now in South Sudan)
+SDN,Bahr al-Ghazal,加扎勒河州,SSD:Northern Bahr el Ghazal|SSD:Western Bahr el Ghazal|SSD:Warrap|SSD:Lakes,1991-02-14,1994-02-13,state,5,the nine states of 1991 (now in South Sudan)
+SDN,Equatoria,赤道州,SSD:Central Equatoria|SSD:Eastern Equatoria|SSD:Western Equatoria,1991-02-14,1994-02-13,state,5,the nine states of 1991 (now in South Sudan)
