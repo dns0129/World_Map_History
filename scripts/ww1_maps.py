@@ -23,7 +23,8 @@ from itertools import count
 
 import numpy as np
 import pandas as pd
-from shapely import STRtree
+from shapely import STRtree, make_valid
+from shapely.errors import GEOSException
 from shapely.geometry import MultiPolygon, Polygon, shape
 
 import cities
@@ -114,6 +115,17 @@ def decode_geo(raw):
         geoms.append(MultiPolygon(parts) if len(parts) > 1 else parts[0])
         boundaries.append(pos)
     return geoms, boundaries
+
+
+def outline(text):
+    """A GeoJSON outline from the database as Polygon/MultiPolygon. A few rings that touch themselves defeat
+    the default repair (Tierra del Fuego in 1914: "Overlay input is mixed-dimension"); the structural one
+    keeps the same area."""
+    g = shape(json.loads(text))
+    try:
+        return polys(g)
+    except GEOSException:
+        return polys(make_valid(g, method="structure"))
 
 
 def matches(pattern, value):
@@ -245,7 +257,7 @@ def build_snapshot(con, world, snap, rules, rule_hits):
     candidate_ids = {a["admin_id"] for a in admins}
     admins = [a for a in replacements if a["admin_id"] not in candidate_ids and a["basis"] != 'historical_1897'] + admins + [
         a for a in replacements if a["admin_id"] not in candidate_ids and a["basis"] == 'historical_1897']
-    geoms = [polys(shape(json.loads(a["geometry"]))) for a in admins]
+    geoms = [outline(a["geometry"]) for a in admins]
     tree = STRtree(geoms)
     density = {r[0]: r[1] / max(r[2], 1) for r in con.execute(
         "SELECT admin_id,SUM(population_est),SUM(area_km2) FROM snapshot_full WHERE snapshot='1918-11-11' GROUP BY admin_id")}
@@ -256,7 +268,7 @@ def build_snapshot(con, world, snap, rules, rule_hits):
     events = [dict(r) for r in con.execute("SELECT * FROM control_events WHERE start_date<=? AND end_date>=?", (snap, snap))]
     output, used_admins, unit_geoms = [], {}, {}
     for u in active:
-        ug = polys(shape(json.loads(u["geometry"])))
+        ug = outline(u["geometry"])
         if ug is None:
             continue
         uid = u["unit_id"]
@@ -323,7 +335,7 @@ def build_snapshot(con, world, snap, rules, rule_hits):
             continue
         used_admins[a["admin_id"]] = a
         row.update(snapshot=snap, piece_id=f"WW1:{snap}:{row['piece_id']}",
-                   geom=polys(shape(json.loads(row["piece_geometry"] or row["admin_geometry"]))),
+                   geom=outline(row["piece_geometry"] or row["admin_geometry"]),
                    bloc=bloc(row["controller_gwcode"], snap))
         output.append(row)
     piece_counts = Counter(r["admin_id"] for r in output)
@@ -546,7 +558,7 @@ def main():
                                     controller_gwcode=r["controller_gwcode"], controller_name=r["controller_detail_en"] or r["controller_name_en"],
                                     controller_name_zh=r["controller_detail_zh"] or r["controller_name_zh"], control_type=r["control_type"],
                                     confidence=r["control_confidence"], source=f"baseline:{BASE_DATE}:{r['control_source']}",
-                                    mask=polys(shape(json.loads(r["pg"] or r["ag"])))))
+                                    mask=outline(r["pg"] or r["ag"])))
     documents, rule_hits = {}, set()
     with con:
         for snap in DATES:
