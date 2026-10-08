@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>世界省级战局图 1900–1945</title>
+<title>世界省级历史地图 1900–1991</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&display=swap">
@@ -151,8 +151,8 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 <div class="app">
   <header class="bar">
     <div class="brand">
-      <h1>世界省级战局图 1900–1945</h1>
-      <small>1900–1945 十三个断面与 2026 年 · 省级区划 · 阵营、国家与实际控制区 · 重要城市</small>
+      <h1>世界省级历史地图 1900–1991</h1>
+      <small>1900–1991 十九个断面与 2026 年 · 省级区划 · 阵营、国家与实际控制区 · 重要城市</small>
     </div>
     <nav class="tabs" id="tabs" role="tablist" aria-label="时间断面"></nav>
   </header>
@@ -195,6 +195,7 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
           <label><input type="checkbox" id="tProv" checked> 省界</label>
           <label><input type="checkbox" id="tBorders" checked> 国界 / 控制线</label>
           <label><input type="checkbox" id="tTerrain" checked> 山体晕渲</label>
+          <label><input type="checkbox" id="t3d" checked> 3D 地形</label>
           <label><input type="checkbox" id="tHydro" checked> 河流湖泊</label>
           <label><input type="checkbox" id="tLabels" checked> 地名</label>
           <label><input type="checkbox" id="tApprox" checked> 近似斜线</label>
@@ -207,7 +208,7 @@ dl.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
         <input id="q" type="search" placeholder="例如 京畿道、Kursk、Seine、北海道" autocomplete="off">
         <ul class="results" id="results"></ul>
       </div>
-      <p class="foot">点击地图先选中国家，在同一国家内再点一次即进入省级。底图可在“地形”和“白色”之间切换。每个断面只显示当日施行的省级区划；当时的县、地区都已并入所属的省。没有省级资料的地方显示整个国家或殖民地。数据：OpenHistoricalMap、Newberry 美国县界史、中研院台湾 1930、国史编纂委员会 1914–26、K. Lawson 东亚图层、1897 年俄国省界（Sablin 等，heiDATA）、CShapes 2.0、Natural Earth；人口为 GHS-POP 推算。</p>
+      <p class="foot">点击地图先选中国家，在同一国家内再点一次即进入省级。底图可在“地形”和“白色”之间切换。每个断面只显示当日施行的省级区划；当时的县、地区都已并入所属的省。没有省级资料的地方显示整个国家或殖民地。数据：OpenHistoricalMap、Newberry 美国县界史、中研院台湾 1930、国史编纂委员会 1914–26、K. Lawson 东亚图层、1897 年俄国省界（Sablin 等，heiDATA）、CShapes 2.0、geoBoundaries、Natural Earth；人口为 GHS-POP 推算。</p>
     </aside>
     <aside class="sheet detail" id="detail" hidden aria-live="polite"></aside>
     <div class="tip" id="tip" hidden></div>
@@ -231,7 +232,7 @@ const TYPE_ZH = {
   resistance_base: "抗日根据地", leased_territory: "租借地", surrendering_forces: "待受降", defense_agreement: "按防务协定驻军",
   free_french: "自由法国", satellite_state: "卫星国", liberated: "已解放", military_intervention: "军事干预",
   dependency: "属地", control: "实际控制", de_facto_state: "自立政权 / 未获普遍承认的政权", contested: "交战区",
-  international_administration: "国际管理", "N/A": "—"
+  international_administration: "国际管理", civil_war: "内战一方控制区", autonomy: "事实自治", "N/A": "—"
 };
 const TIER = { 3: ["省级", "#3f9a83"], 4: ["大区级（无省级资料）", "#a9d2bd"], 5: ["整个国家 / 殖民地（无下级资料）", "#d8cfbd"], 6: ["岛屿属地", "#e2b65b"] };
 const BASIS_ZH = {
@@ -244,16 +245,19 @@ const BASIS_ZH = {
   merged_subunits: "由当时的下级区划合并而成（外界即这些区划的历史界线）",
   present_day_admin1: "当今一级行政区（Natural Earth 1:1000 万，约 2020 年前后的划分）",
   reconstructed_from_1928_outlines: "据 1928–45 年省界复原（合并或拆分为当时的省份）",
-  historical_1941_outline: "1941 年的界线，按 1930 年代的归属分组"
+  historical_1941_outline: "1941 年的界线，按 1930 年代的归属分组",
+  reconstructed_from_present_day_counties: "由今日的县拼合复原（界线随今日县界，属近似）",
+  present_day_outline_merged: "当时的单位，轮廓为其后来分出的今日各单位之和",
+  present_day_outline_less_later: "当时的单位，轮廓为今日单位减去后来并入的县区（分界近似）"
 };
 const DENSITY_STEPS = [5, 25, 50, 100, 250, 500];
 const DENSITY_RAMP = ["#e8f0fa", "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95"];
 // The map keeps its own palette in either page theme: a pale physical map, or a white one.
 const BASE = {
-  relief: { sea: "#d4e4ee", lake: "#b2d3ea", river: "#2b7cc4", riverInk: "#1d5f9c", shade: 0.55,
+  relief: { sea: "#d4e4ee", lake: "#b2d3ea", river: "#2b7cc4", riverInk: "#1d5f9c", shade: 0.55, sky: "#b9d0e2", horizon: "#e4edf1",
     relief: { "raster-saturation": 0, "raster-contrast": 0, "raster-brightness-min": 0, "raster-brightness-max": 1 },
     fill: { bloc: 0.52, nation: 0.6, control: 0.66, density: 0.66, tier: 0.6 } },
-  white: { sea: "#fdfdfc", lake: "#d3e5f1", river: "#3a89cc", riverInk: "#225e94", shade: 0.3,
+  white: { sea: "#fdfdfc", lake: "#d3e5f1", river: "#3a89cc", riverInk: "#225e94", shade: 0.3, sky: "#e8eef2", horizon: "#fbfbfa",
     relief: { "raster-saturation": -1, "raster-contrast": -0.5, "raster-brightness-min": 0.86, "raster-brightness-max": 1 },
     fill: { bloc: 0.42, nation: 0.5, control: 0.56, density: 0.62, tier: 0.5 } },
 };
@@ -262,8 +266,11 @@ const LABEL_PX = 12;
 const blocName = (sd, b) => (sd.bloc_names || BLOC_ZH)[b];
 const isModern = (sd) => sd.snapshot === "2026";        // country names: the small serif lettering, the same at every zoom
 
-const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: null, adminGeo: null, units: null, ctrl: null,
+// outlines arrive per snapshot (data/geo-<date>.bin) and are kept by their global index: pieces cut from a
+// province (geo), province outlines (adminGeo), CShapes units (units); a snapshot's control areas stay on it (ctrlGeo)
+const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: [], adminGeo: [], units: [], loading: 0, userPitch: false, pitchEasing: false, seenPitch: null,
   admin: null, hydro: null, hydroDetail: null, sel: null, hover: null };
+const geoOf = (f) => state.geo[f] || state.adminGeo[state.admin.feature_admin[f]];  // a whole province is drawn with its outline
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const fmt = (n) => n >= 1e8 ? (n / 1e8).toFixed(2) + " 亿" : n >= 1e4 ? (n / 1e4).toFixed(n >= 1e6 ? 0 : 1) + " 万" : String(Math.round(n));
@@ -291,36 +298,62 @@ function decodeGeo(buf) {
 }
 
 async function getJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }
+let b64Only = false;  // set once a .bin is missing: the host serves the .b64.txt copies, so ask for those first
 async function getBin(u) {
   // binary files; where only text and media files can be served they ship as <name>.b64.txt
-  const r = await fetch(u).catch(() => null);
-  if (r && r.ok) return r.arrayBuffer();
-  const t = await fetch(u.replace(/\.(bin|pbf)$/, ".b64.txt"));
-  if (!t.ok) throw new Error(u + " " + t.status);
-  const s = atob((await t.text()).trim()); const a = new Uint8Array(s.length);
-  for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
-  return a.buffer;
+  const r = b64Only ? null : await fetch(u).catch(() => null);
+  let buf;
+  if (r && r.ok) buf = await r.arrayBuffer();
+  else {
+    const t = await fetch(u.replace(/\.(bin|pbf)$/, ".b64.txt"));
+    if (!t.ok) throw new Error(u + " " + t.status);
+    b64Only = true;
+    const s = atob((await t.text()).trim()); const a = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
+    buf = a.buffer;
+  }
+  const b = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
+  return b[0] === 0x1f && b[1] === 0x8b ? inflate(buf) : buf;  // gzip-compressed data files
 }
+async function inflate(buf) {
+  if (typeof DecompressionStream === "undefined") {  // older browsers: pako from the CDN, loaded only then
+    if (!window.pako) await new Promise((ok, no) => { const sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"; sc.onload = ok; sc.onerror = no; document.head.append(sc); });
+    return window.pako.ungzip(new Uint8Array(buf)).buffer;
+  }
+  return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
+}
+async function getPacked(u) { return JSON.parse(new TextDecoder().decode(await getBin(u))); }
 
 // ------------------------------------------------------------------ relief tiles and glyphs
-// The relief ships as 2048-pixel WebP sheets per zoom level; tiles are cut from them here.
+// The relief ships as 2048-pixel WebP sheets per zoom level; tiles are cut from them here. The elevation
+// sheets (d…) are decoded without colour conversion, since their pixels are numbers (Terrarium encoding).
 const sheets = new Map();
 function sheet(name) {
   if (sheets.has(name)) { const p = sheets.get(name); sheets.delete(name); sheets.set(name, p); return p; }
-  const p = fetch(`data/relief/${name}.webp`).then((r) => { if (!r.ok) throw new Error(name); return r.blob(); }).then((b) => createImageBitmap(b));
+  const p = fetch(`data/relief/${name}.webp`).then((r) => { if (!r.ok) throw new Error(name); return r.blob(); })
+    .then((b) => createImageBitmap(b, { premultiplyAlpha: "none", colorSpaceConversion: "none" }));
+  p.catch(() => sheets.delete(name));
   sheets.set(name, p);
-  while (sheets.size > 14) sheets.delete(sheets.keys().next().value);
+  while (sheets.size > 24) sheets.delete(sheets.keys().next().value);
   return p;
+}
+const canvas256 = () => typeof OffscreenCanvas !== "undefined" ? new OffscreenCanvas(256, 256) : Object.assign(document.createElement("canvas"), { width: 256, height: 256 });
+const toPng = async (c) => (c.convertToBlob ? await c.convertToBlob({ type: "image/png" }) : await new Promise((r) => c.toBlob(r, "image/png"))).arrayBuffer();
+let flatDem = null;  // open sea has no elevation sheet: 0 m everywhere
+function flatTile() {
+  if (!flatDem) { const c = canvas256(); const g = c.getContext("2d"); g.fillStyle = "rgb(128,0,0)"; g.fillRect(0, 0, 256, 256); flatDem = toPng(c); }
+  return flatDem;
 }
 function registerProtocols() {
   maplibregl.addProtocol("relief", async (params) => {
     const [, set, z, x, y] = /^relief:\/\/(\w)\/(\d+)\/(\d+)\/(\d+)/.exec(params.url).map((v, i) => i > 1 ? +v : v);
     const per = 8, i = Math.floor(x / per), j = Math.floor(y / per);
-    const bmp = await sheet(`${set}${z}_${i}_${j}`);
-    const c = typeof OffscreenCanvas !== "undefined" ? new OffscreenCanvas(256, 256) : Object.assign(document.createElement("canvas"), { width: 256, height: 256 });
-    c.getContext("2d").drawImage(bmp, (x - i * per) * 256, (y - j * per) * 256, 256, 256, 0, 0, 256, 256);
-    const blob = c.convertToBlob ? await c.convertToBlob({ type: "image/png" }) : await new Promise((r) => c.toBlob(r, "image/png"));
-    return { data: await blob.arrayBuffer() };
+    let bmp;
+    try { bmp = await sheet(`${set}${z}_${i}_${j}`); } catch (e) { if (set === "d") return { data: await flatTile() }; throw e; }
+    const c = canvas256(); const g = c.getContext("2d"); g.imageSmoothingEnabled = false;
+    g.drawImage(bmp, (x - i * per) * 256, (y - j * per) * 256, 256, 256, 0, 0, 256, 256);
+    return { data: await toPng(c) };
   });
   // Chinese characters are drawn by the browser itself (localIdeographFontFamily); Latin and
   // Cyrillic province names use the few glyph ranges shipped in data/glyphs/sans
@@ -353,7 +386,7 @@ function buildFeatures(sd) {
   for (let k = 0; k < sd.feature.length; k++) {
     const f = sd.feature[k]; const ai = state.admin.feature_admin[f]; const ci = sd.country[k];
     const contested = sd.countries[ci][0] === "-20";
-    feats[k] = { type: "Feature", id: k, geometry: { type: "MultiPolygon", coordinates: state.geo[f] },
+    feats[k] = { type: "Feature", id: k, geometry: { type: "MultiPolygon", coordinates: geoOf(f) },
       properties: { b: sd.bloc[k], a: sd.conf[k], t: state.admin.tier[ai], p: ai, c: ci, u: unitKey(sd, k),
         h: contested ? 2 : sd.conf[k], col: sd.countries[ci][3], nc: sd.nations[sd.nation[k]][3], d: densityClass(sd.pop[k], sd.area[k]) } };
   }
@@ -365,7 +398,7 @@ const adminFeatures = (sd) => fc(sd.admin_active.map((a) => ({ type: "Feature", 
 const unitFeatures = (sd) => fc(sd.units_active.map((u) => ({ type: "Feature", id: u,
   geometry: { type: "MultiPolygon", coordinates: state.units[u] }, properties: {} })));
 const ctrlFeatures = (sd) => fc(sd.countries.map((c, ci) => ({ type: "Feature", id: ci,
-  geometry: { type: "MultiPolygon", coordinates: state.ctrl[c[8]] }, properties: { k: c[0] } })));
+  geometry: { type: "MultiPolygon", coordinates: sd.ctrlGeo[c[8]] }, properties: { k: c[0] } })));
 
 // ------------------------------------------------------------------ labels, drawn by the map itself
 // Country names sit at a fixed point deep inside each territory and are shown only at zooms
@@ -436,7 +469,12 @@ function applyBase() {
   const b = BASE[state.base];
   map.setPaintProperty("bg", "background-color", b.sea);
   for (const [k, v] of Object.entries(b.relief)) map.setPaintProperty("relief", k, v);
-  map.setPaintProperty("shade", "raster-opacity", b.shade);
+  // the pre-drawn shading gives way to the live hillshade between zoom 5 and 6.3
+  map.setPaintProperty("shade", "raster-opacity", ["interpolate", ["linear"], ["zoom"], 5, b.shade, 6.3, 0]);
+  map.setPaintProperty("hillshade", "hillshade-shadow-color", ["interpolate", ["linear"], ["zoom"], 5, "rgba(28,34,32,0)", 6.3, `rgba(28,34,32,${(b.shade * 1.05).toFixed(2)})`]);
+  map.setPaintProperty("hillshade", "hillshade-highlight-color", ["interpolate", ["linear"], ["zoom"], 5, "rgba(255,255,255,0)", 6.3, `rgba(255,255,255,${(b.shade * 0.5).toFixed(2)})`]);
+  map.setSky({ "sky-color": b.sky, "horizon-color": b.horizon, "fog-color": b.horizon, "sky-horizon-blend": 0.6,
+    "horizon-fog-blend": 0.7, "fog-ground-blend": 0.25, "atmosphere-blend": 0 });
   for (const l of ["hydro-fill", "hydro2-fill"]) if (map.getLayer(l)) map.setPaintProperty(l, "fill-color", b.lake);
   for (const l of ["hydro-line", "hydro2-line"]) if (map.getLayer(l)) map.setPaintProperty(l, "line-color", b.river);
   for (const l of riverLabelLayers()) map.setPaintProperty(l, "text-color", b.riverInk);
@@ -677,7 +715,7 @@ function selectCountry(cid, fly, kAny) {
   const sd = sdNow(); if (kAny == null) kAny = piecesOf(cid)[0];
   if (kAny == null) return;
   state.sel = { level: "country", country: cid, admin: -1, piece: kAny }; applyPaint(); showCountry(cid, kAny);
-  if (fly) { const bb = state.mode === "control" ? geoBounds(state.ctrl[sd.countries[cid][8]]) : piecesBounds(piecesOf(cid));
+  if (fly) { const bb = state.mode === "control" ? geoBounds(sd.ctrlGeo[sd.countries[cid][8]]) : piecesBounds(piecesOf(cid));
     if (bb) map.fitBounds(bb, { padding: 60, maxZoom: 6, duration: 700 }); }
 }
 function selectProvince(k, fly) {
@@ -692,7 +730,7 @@ function geoBounds(polys) {
     const s = (a1 - a0) * (b1 - b0); if (s > best) { best = s; bb = [[a0, b0], [a1, b1]]; } x0 = Math.min(x0, a0); x1 = Math.max(x1, a1); y0 = Math.min(y0, b0); y1 = Math.max(y1, b1); }
   return (x1 - x0) > 200 ? bb : [[x0, y0], [x1, y1]];
 }
-function piecesBounds(ks) { const sd = sdNow(); const polys = []; for (const k of ks) polys.push(...state.geo[sd.feature[k]]); return polys.length ? geoBounds(polys) : null; }
+function piecesBounds(ks) { const sd = sdNow(); const polys = []; for (const k of ks) polys.push(...geoOf(sd.feature[k])); return polys.length ? geoBounds(polys) : null; }
 
 function onClick(k) {
   const sd = sdNow(); const cid = countryOf(sd, k); const s = state.sel;
@@ -702,8 +740,39 @@ function onClick(k) {
 // ------------------------------------------------------------------ snapshots, views
 function setHash() { try { history.replaceState(null, "", "#" + state.snap + (state.mode !== "bloc" ? "/" + state.mode : "")); } catch (e) {} }
 
+async function fetchSnap(snap) {
+  // the snapshot's rows and its outlines, in the order ww2_webmap.py wrote them
+  const [sd, buf] = await Promise.all([getJSON(`data/snap-${snap}.json`), getBin(`data/geo-${snap}.bin`)]);
+  const recs = decodeGeo(buf); let i = 0;
+  for (const a of sd.admin_active) state.adminGeo[a] = recs[i++];
+  for (const f of sd.geo_feature) state.geo[f] = recs[i++];
+  for (const u of sd.units_active) state.units[u] = recs[i++];
+  sd.ctrlGeo = recs.slice(i);
+  return sd;
+}
+
+// state.data[snap] holds the snapshot, or the promise of it while it loads (also when fetched ahead)
+function fetchOnce(snap) {
+  if (!state.data[snap]) {
+    const p = fetchSnap(snap).then((sd) => (state.data[snap] = sd), (e) => { delete state.data[snap]; throw e; });
+    p.catch(() => {});  // a failed prefetch is retried when the tab is chosen
+    state.data[snap] = p;
+  }
+  return state.data[snap];
+}
+function prefetchNear(snap) {
+  // the neighbouring tabs, fetched quietly once the map is drawn, so that stepping through the dates is quick
+  const order = [...document.querySelectorAll("#tabs button")].map((b) => b.dataset.snap); const i = order.indexOf(snap);
+  setTimeout(() => { for (const s of [order[i + 1], order[i - 1]]) if (s) fetchOnce(s); }, 800);
+}
+
 async function loadSnap(snap) {
-  if (!state.data[snap]) state.data[snap] = await getJSON(`data/snap-${snap}.json`);
+  const ticket = ++state.loading;
+  if (!state.data[snap] || state.data[snap] instanceof Promise) {
+    document.body.classList.add("busy");
+    try { await fetchOnce(snap); } catch (e) { document.body.classList.remove("busy"); throw e; }
+  }
+  if (ticket !== state.loading) return;  // another tab was clicked while this one loaded
   const prev = state.sel && state.data[state.snap] ? { admin: state.sel.admin, level: state.sel.level } : null;
   state.snap = snap; const sd = sdNow();
   for (const b of document.querySelectorAll("#tabs button")) {
@@ -724,7 +793,7 @@ async function loadSnap(snap) {
   map.getSource("units").setData(unitFeatures(sd));
   map.getSource("ctrl").setData(ctrlFeatures(sd));
   map.getSource("cities").setData(cityFeatures(sd));
-  map.once("idle", () => document.body.classList.remove("busy"));
+  map.once("idle", () => { document.body.classList.remove("busy"); prefetchNear(snap); });
   applyPaint(); legend(); setLabels(); setHash();
   if (prev && prev.level === "province") { const k = sd.feature.findIndex((f) => state.admin.feature_admin[f] === prev.admin); if (k >= 0) selectProvince(k, false); }
 }
@@ -746,11 +815,11 @@ function addPattern() {
 async function boot() {
   registerProtocols();
   const fonts = Promise.all(["600 12px 'Noto Serif SC'", "400 12px 'Noto Serif SC'"].map((f) => document.fonts.load(f, "中国")));
-  const [index, admin, geo, adminGeo, units, ctrl, hydro] = await Promise.all([getJSON("data/index.json"), getJSON("data/admin.json"),
-    getBin("data/geo.bin"), getBin("data/geo-admin.bin"), getBin("data/geo-units.bin"), getBin("data/geo-ctrl.bin"), getJSON("data/hydro.json")]);
+  // only what the first view needs: the outlines of the other snapshots load when their tab is chosen,
+  // the rivers once the map is drawn
+  const [index, admin] = await Promise.all([getJSON("data/index.json"), getPacked("data/admin.bin")]);
   await Promise.race([fonts.catch(() => null), new Promise((r) => setTimeout(r, 2500))]);
-  state.admin = admin; state.geo = decodeGeo(geo); state.adminGeo = decodeGeo(adminGeo); state.units = decodeGeo(units);
-  state.ctrl = decodeGeo(ctrl); state.hydro = hydro;
+  state.admin = admin;
   const saved = store.get("ww2-base"); if (saved && BASE[saved]) state.base = saved;
   const tabs = $("tabs");
   for (const s of index.snapshots) {
@@ -759,12 +828,12 @@ async function boot() {
     b.onclick = () => loadSnap(s.snapshot); tabs.append(b);
   }
   map = new maplibregl.Map({ container: "map", center: [60, 30], zoom: 1.6, minZoom: 1, maxZoom: 11, attributionControl: false,
-    renderWorldCopies: false, localIdeographFontFamily: "'Noto Serif SC', 'Songti SC', 'SimSun', serif", dragRotate: false, pitchWithRotate: false,
+    renderWorldCopies: false, localIdeographFontFamily: "'Noto Serif SC', 'Songti SC', 'SimSun', serif", maxPitch: 65, transformCameraUpdate: cameraUpdate,
     style: { version: 8, glyphs: "glyph://{fontstack}/{range}", sources: {},
       layers: [{ id: "bg", type: "background", paint: { "background-color": BASE[state.base].sea } }] } });
   map.touchZoomRotate.disableRotation();
   if (window.innerWidth > 760) map.setPadding({ left: 320, top: 0, right: 0, bottom: 0 });
-  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
+  map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), "bottom-right");
   map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
   map.on("load", () => onLoad(index).catch(fail));
   wire(admin);
@@ -785,6 +854,42 @@ function riverLabel(id, source, minzoom, lo, hi) {
     paint: { "text-color": BASE[state.base].riverInk, "text-halo-color": "rgba(255,255,255,0.85)", "text-halo-width": 1.4 } };
 }
 
+// ------------------------------------------------------------------ 3D terrain
+// Zoomed in past continent scale the mountains rise and the camera tilts, more the closer one looks.
+// Mountains are a few kilometres high on a map tens of kilometres per pixel, so the relief is exaggerated,
+// less as one zooms in (the Alps stand about the same height on the screen at every zoom).
+// Tilt and height follow the zoom frame by frame (transformCameraUpdate), so a wheel turn, a pinch or a
+// flight tilts the map as it goes rather than after it stops; both ease in from flat at T3D.from.
+const T3D = { from: 3.2, full: 6.5, pitch: 52, rise: 1.2 };
+const smooth = (a, b, z) => { const t = Math.max(0, Math.min(1, (z - a) / (b - a))); return t * t * (3 - 2 * t); };
+const exaggerationAt = (z) => Math.max(1.4, Math.min(28, 28 * Math.pow(0.55, z - 4))) * smooth(T3D.from, T3D.from + T3D.rise, z);
+const autoPitchAt = (z) => $("t3d").checked ? T3D.pitch * smooth(T3D.from, T3D.full, z) : 0;
+// the camera for every frame: the auto tilt, unless the pitch is being changed by hand (right-drag,
+// two-finger drag, the compass) or eased to a new auto tilt. Then the pitch requested is passed on as a
+// change from the last frame, since what MapLibre requests still holds the tilt from before the move began.
+function cameraUpdate(next) {
+  if (!map) return {};
+  if (map.terrain) { const ex = exaggerationAt(next.zoom); map.terrain.exaggeration = ex; map.terrain.options.exaggeration = ex; }
+  const seen = state.seenPitch; state.seenPitch = next.pitch;  // null: a move begins, from the camera as it is
+  if (state.userPitch || state.pitchEasing) return { pitch: seen == null ? next.pitch : Math.max(0, Math.min(65, map.getPitch() + next.pitch - seen)) };
+  return { pitch: autoPitchAt(next.zoom) };
+}
+// terrain on above T3D.from (where its height is still zero, so it rises from flat), off a little below
+function update3D() {
+  const z = map.getZoom(), want = $("t3d").checked && z >= T3D.from - (map.terrain ? 0.3 : 0);
+  if (want && !map.terrain) map.setTerrain({ source: "dem", exaggeration: exaggerationAt(z) });
+  else if (!want && map.terrain) map.setTerrain(null);
+}
+// back to the auto tilt, eased: after the 3D switch, or once zoomed out of 3D after tilting by hand
+function easeToAutoPitch() {
+  state.userPitch = false;
+  const pitch = autoPitchAt(map.getZoom());
+  if (Math.abs(map.getPitch() - pitch) < 0.5) return;
+  state.pitchEasing = true;
+  map.once("moveend", () => { state.pitchEasing = false; });
+  map.easeTo({ pitch, duration: 700 });
+}
+
 async function onLoad(index) {
   addPattern();
   const key = $("cityKey"); key.replaceChildren();
@@ -799,7 +904,7 @@ async function onLoad(index) {
   map.addSource("admin", { type: "geojson", data: empty, tolerance: 0.25 });
   map.addSource("units", { type: "geojson", data: empty, tolerance: 0.3 });
   map.addSource("ctrl", { type: "geojson", data: empty, tolerance: 0.3 });
-  map.addSource("hydro", { type: "geojson", data: state.hydro });
+  map.addSource("hydro", { type: "geojson", data: empty });
   map.addSource("lbl-country", { type: "geojson", data: empty });
   map.addSource("lbl-prov", { type: "geojson", data: empty });
   map.addSource("cities", { type: "geojson", data: empty });
@@ -807,6 +912,13 @@ async function onLoad(index) {
   map.addLayer({ id: "prov-fill", type: "fill", source: "prov", paint: { "fill-color": fillColor(), "fill-opacity": 0.6 } });
   map.addLayer({ id: "prov-approx", type: "fill", source: "prov", filter: ["==", ["get", "a"], 1], paint: { "fill-pattern": "hatch", "fill-opacity": 0.6 } });
   map.addLayer({ id: "shade", type: "raster", source: "shade", paint: { "raster-resampling": "linear", "raster-fade-duration": 0 } });
+  // elevation: one source for the 3D terrain, one for the hillshade drawn from it once zoomed in past the
+  // pre-drawn shading (zoom 5), which is sharper there; open sea is flat
+  const dem = { type: "raster-dem", tiles: ["relief://d/{z}/{x}/{y}"], tileSize: 256, encoding: "terrarium", minzoom: 0, maxzoom: 6 };
+  map.addSource("dem", dem); map.addSource("dem-shade", { ...dem });
+  map.addLayer({ id: "hillshade", type: "hillshade", source: "dem-shade", minzoom: 4.8,
+    paint: { "hillshade-illumination-direction": 315, "hillshade-illumination-anchor": "map", "hillshade-exaggeration": 0.6,
+      "hillshade-accent-color": "rgba(0,0,0,0)" } });
   map.addLayer({ id: "hydro-fill", type: "fill", source: "hydro", filter: ["==", ["get", "k"], "l"], paint: { "fill-color": BASE[state.base].lake } });
   map.addLayer({ id: "hydro-line", type: "line", source: "hydro", filter: RIVER_FILTER, layout: { "line-cap": "round", "line-join": "round" }, paint: riverPaint() });
   map.addLayer({ id: "prov-line", type: "line", source: "admin", paint: { "line-color": INK2,
@@ -842,14 +954,20 @@ async function onLoad(index) {
   await loadSnap(index.snapshots.some((s) => s.snapshot === start) ? start : DEFAULT_SNAPSHOT);
   await new Promise((r) => map.once("idle", r));
   $("loading").hidden = true;
+  getPacked("data/hydro.bin").then((h) => { state.hydro = h; map.getSource("hydro").setData(h); }).catch((e) => console.warn(e));
   map.on("zoomend", loadDetailHydro); loadDetailHydro();
+  map.on("zoom", update3D);
+  map.on("pitchstart", (e) => { if (e.originalEvent && !state.pitchEasing) state.userPitch = true; });  // tilted by hand: leave it
+  map.on("moveend", () => { state.seenPitch = null; if (state.userPitch && !state.pitchEasing && map.getZoom() < T3D.from) easeToAutoPitch(); });
+  $("t3d").onchange = () => { update3D(); easeToAutoPitch(); };
+  update3D();
 }
 
 async function loadDetailHydro() {
   if (state.hydroDetail || state.hydroLoading || map.getZoom() < 4.3) return;
   state.hydroLoading = true;
   try {
-    state.hydroDetail = await getJSON("data/hydro-detail.json");
+    state.hydroDetail = await getPacked("data/hydro-detail.bin");
     map.addSource("hydro2", { type: "geojson", data: state.hydroDetail });
     const vis = $("tHydro").checked ? "visible" : "none";
     map.addLayer({ id: "hydro2-fill", type: "fill", source: "hydro2", minzoom: 4.3, filter: ["==", ["get", "k"], "l"], layout: { visibility: vis }, paint: { "fill-color": BASE[state.base].lake } }, "prov-line");
@@ -877,7 +995,7 @@ function wire(admin) {
   for (const b of document.querySelectorAll("[data-mode]")) b.onclick = () => setMode(b.dataset.mode);
   for (const b of document.querySelectorAll("[data-base]")) b.onclick = () => { state.base = b.dataset.base; store.set("ww2-base", state.base); applyBase(); };
   const vis = (id, layers) => $(id).onchange = () => layers.forEach((l) => map.getLayer(l) && map.setLayoutProperty(l, "visibility", $(id).checked ? "visible" : "none"));
-  vis("tProv", ["prov-line"]); vis("tTerrain", ["shade"]); vis("tCities", ["city"]);
+  vis("tProv", ["prov-line"]); vis("tTerrain", ["shade", "hillshade"]); vis("tCities", ["city"]);
   $("tHydro").onchange = () => { for (const l of ["hydro-fill", "hydro-line", "hydro2-fill", "hydro2-line"]) if (map.getLayer(l)) map.setLayoutProperty(l, "visibility", $("tHydro").checked ? "visible" : "none"); setLabels(); };
   $("tBorders").onchange = applyPaint; $("tApprox").onchange = applyPaint; $("tLabels").onchange = setLabels;
   if (window.innerWidth <= 760) { $("controls").classList.add("collapsed"); $("toggleSheet").textContent = "展开"; $("toggleSheet").setAttribute("aria-expanded", "false"); }

@@ -1,27 +1,30 @@
-"""Add the 1915-1917 event-day maps to the existing early SQLite database.
+"""Add the 1915-1917 event-day maps to the early SQLite database and the map data.
 
-Run python3 scripts/ww1_maps.py from a checkout, or after ww2_webmap.py in a full
-rebuild. No raw downloads are required. Dated CShapes geometry and annual
-population come from world_history_1900_2000.sqlite; historical divisions and
-their population pattern come from divisions_1900_1934.sqlite. Modern reference
-regions are used only as explicitly approximate control masks, never as the
-displayed historical administrative divisions.
+Run as the ww1 job of pipeline.py (after the early database and ww2_webmap.py), or python3 scripts/ww1_maps.py
+from a checkout. No raw downloads are required. Dated CShapes geometry and annual population come from
+world_history_1900_2000.sqlite; historical divisions and their population pattern come from
+divisions_1900_1934.sqlite. Modern reference regions are used only as explicitly approximate control masks,
+never as the displayed historical administrative divisions.
 
-The shared binary geometry is appended, preserving every old feature index.
-ww1-build.json records the original prefixes so repeat runs replace the suffix
-instead of adding duplicate features. Database changes are made in a transaction.
+Each date gets its own snap-<date>.json and geo-<date>.bin, in the layout ww2_webmap.py writes; the divisions
+and pieces they add are appended to admin.bin, after those of the other dates. ww1-build.json records where
+the appended part begins, so that a repeat run replaces it instead of adding it again. Database changes are
+made in a transaction.
 """
 import csv
 import fnmatch
+import gzip
 import hashlib
 import json
 import math
 import sqlite3
-from collections import Counter, defaultdict
+from collections import Counter
+from itertools import count
 
 import numpy as np
 import pandas as pd
-from shapely import STRtree
+from shapely import STRtree, make_valid
+from shapely.errors import GEOSException
 from shapely.geometry import MultiPolygon, Polygon, shape
 
 import cities
@@ -31,7 +34,7 @@ from ww2_common import SNAPSHOTS_WWI, WW2_OUT
 from ww2_database import gj
 from ww2_geo import diff, eq_area_km2, inter, polys, union
 from ww2_webmap import (BLOCS, CONF, LABEL_MIN_KM2, TOL_CTRL, TOL_PROV, TOL_UNIT,
-                        color_of, dissolve, encode, label_anchor, nation_of, table)
+                        color_of, dissolve, encode, label_anchor, nation_of, packed, table)
 
 DATES = {d for d, _, _ in SNAPSHOTS_WWI}
 DATA = WW2_OUT / "maps" / "data"
@@ -68,8 +71,14 @@ def write_json(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, separators=(",", ":")))
 
 
+def unpack(path):
+    """A data file as bytes, gunzipped when it is gzip-compressed."""
+    raw = path.read_bytes()
+    return gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw
+
+
 def decode_geo(raw):
-    """Read the existing varint format and retain byte boundaries for prefix reuse."""
+    """Outlines of a geo-<date>.bin (unpacked), with the byte offset where each ends."""
     pos = 0
     boundaries = [0]
     geoms = []
@@ -106,6 +115,17 @@ def decode_geo(raw):
         geoms.append(MultiPolygon(parts) if len(parts) > 1 else parts[0])
         boundaries.append(pos)
     return geoms, boundaries
+
+
+def outline(text):
+    """A GeoJSON outline from the database as Polygon/MultiPolygon. A few rings that touch themselves defeat
+    the default repair (Tierra del Fuego in 1914: "Overlay input is mixed-dimension"); the structural one
+    keeps the same area."""
+    g = shape(json.loads(text))
+    try:
+        return polys(g)
+    except GEOSException:
+        return polys(make_valid(g, method="structure"))
 
 
 def matches(pattern, value):
@@ -237,7 +257,7 @@ def build_snapshot(con, world, snap, rules, rule_hits):
     candidate_ids = {a["admin_id"] for a in admins}
     admins = [a for a in replacements if a["admin_id"] not in candidate_ids and a["basis"] != 'historical_1897'] + admins + [
         a for a in replacements if a["admin_id"] not in candidate_ids and a["basis"] == 'historical_1897']
-    geoms = [polys(shape(json.loads(a["geometry"]))) for a in admins]
+    geoms = [outline(a["geometry"]) for a in admins]
     tree = STRtree(geoms)
     density = {r[0]: r[1] / max(r[2], 1) for r in con.execute(
         "SELECT admin_id,SUM(population_est),SUM(area_km2) FROM snapshot_full WHERE snapshot='1918-11-11' GROUP BY admin_id")}
@@ -248,7 +268,7 @@ def build_snapshot(con, world, snap, rules, rule_hits):
     events = [dict(r) for r in con.execute("SELECT * FROM control_events WHERE start_date<=? AND end_date>=?", (snap, snap))]
     output, used_admins, unit_geoms = [], {}, {}
     for u in active:
-        ug = polys(shape(json.loads(u["geometry"])))
+        ug = outline(u["geometry"])
         if ug is None:
             continue
         uid = u["unit_id"]
@@ -315,7 +335,7 @@ def build_snapshot(con, world, snap, rules, rule_hits):
             continue
         used_admins[a["admin_id"]] = a
         row.update(snapshot=snap, piece_id=f"WW1:{snap}:{row['piece_id']}",
-                   geom=polys(shape(json.loads(row["piece_geometry"] or row["admin_geometry"]))),
+                   geom=outline(row["piece_geometry"] or row["admin_geometry"]),
                    bloc=bloc(row["controller_gwcode"], snap))
         output.append(row)
     piece_counts = Counter(r["admin_id"] for r in output)
@@ -362,35 +382,33 @@ def store_snapshot(con, rows, admins, snapshot):
                 *[pops[b] for b in BLOCS]))
 
 
+def static_hash(static):
+    return hashlib.sha256(json.dumps(static, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
+
+
 def base_assets():
-    static, index = read_json(DATA / "admin.json"), read_json(DATA / "index.json")
-    old = read_json(MARKER) if MARKER.exists() else None
-    raw, geoms, counts = {}, {}, {}
-    for name in ("geo", "geo-admin", "geo-units", "geo-ctrl"):
-        value = (DATA / f"{name}.bin").read_bytes()
-        gs, boundaries = decode_geo(value)
-        # A full ww2_webmap rebuild removes the supplementary snapshot entries.
-        if old and any(s["snapshot"] in DATES for s in index["snapshots"]):
-            prefix = value[:old["bytes"][name]]
-            if hashlib.sha256(prefix).hexdigest() != old["sha256"][name]:
-                raise ValueError("Shared map geometry changed; rebuild ww2_webmap.py before ww1_maps.py")
-            value = prefix
-            gs = gs[:old["counts"][name]]
-        raw[name], geoms[name], counts[name] = value, gs, len(gs)
-    n = counts["geo-admin"]
-    static["n"] = n
-    for col in ("admin_id", "tier", "partial", "merged", "area", "label"):
-        static[col] = static[col][:n]
-    for col in static["cols"].values():
-        col["idx"] = col["idx"][:n]
-    static["feature_admin"] = static["feature_admin"][:counts["geo"]]
-    index["snapshots"] = [s for s in index["snapshots"] if s["snapshot"] not in DATES]
-    marker = {"counts": counts, "bytes": {k: len(v) for k, v in raw.items()},
-              "sha256": {k: hashlib.sha256(v).hexdigest() for k, v in raw.items()}}
-    return static, index, raw, geoms, marker
+    """admin.bin and index.json as ww2_webmap.py wrote them. When this script has run on them before, what it
+    appended (divisions, pieces, look-up values, the three dates) is taken off again, back to the lengths
+    ww1-build.json recorded; the checksum there makes sure nothing else changed since."""
+    static, index = json.loads(unpack(DATA / "admin.bin")), read_json(DATA / "index.json")
+    if any(s["snapshot"] in DATES for s in index["snapshots"]):
+        old = read_json(MARKER)
+        n = static["n"] = old["admins"]
+        for col in ("admin_id", "tier", "partial", "merged", "area", "label"):
+            static[col] = static[col][:n]
+        for key, col in static["cols"].items():
+            col["idx"] = col["idx"][:n]
+            col["lut"] = col["lut"][:old["luts"][key]]
+        static["feature_admin"] = static["feature_admin"][:old["features"]]
+        if static_hash(static) != old["sha256"]:
+            raise ValueError("admin.bin changed since ww1_maps.py last ran; run ww2_webmap.py before ww1_maps.py")
+        index["snapshots"] = [s for s in index["snapshots"] if s["snapshot"] not in DATES]
+    marker = {"admins": static["n"], "features": len(static["feature_admin"]),
+              "luts": {k: len(c["lut"]) for k, c in static["cols"].items()}, "sha256": static_hash(static)}
+    return static, index, marker
 
 
-def append_admin(static, a, new_geoms):
+def append_admin(static, a):
     aid = "E:" + a["admin_id"]
     if aid in static["admin_id"]:
         return static["admin_id"].index(aid)
@@ -405,7 +423,6 @@ def append_admin(static, a, new_geoms):
         if value not in col["lut"]:
             col["lut"].append(value)
         col["idx"].append(col["lut"].index(value))
-    new_geoms.append(shape(json.loads(a["geometry"])))
     return i
 
 
@@ -418,19 +435,26 @@ def anchors(g):
                 yield a + [round(km2)]
 
 
-def export_snapshot(rows, admins, ug, snapshot, static, unit_indices, new_geo, new_admin, new_units, new_ctrl, counts):
+def export_snapshot(rows, admins, ug, snapshot, static, unit_indices, new_unit):
+    """The date's snap-<date>.json and its summary for index.json; writes its geo-<date>.bin."""
     snap, zh, en = snapshot
     d = pd.DataFrame(rows)
-    features, admin_indices = [], {}
+    features, admin_indices, admin_rec, piece_rec = [], {}, {}, {}
     for r in rows:
-        ai = admin_indices.setdefault(r["admin_id"], append_admin(static, admins[r["admin_id"]], new_admin))
-        features.append(counts["geo"] + len(new_geo))
-        new_geo.append(r["geom"])
-        static["feature_admin"].append(ai)
-    for uid, geom in ug.items():
+        a = admins[r["admin_id"]]
+        if r["admin_id"] not in admin_indices:
+            ai = admin_indices[r["admin_id"]] = append_admin(static, a)
+            admin_rec[ai] = encode([shape(json.loads(a["geometry"]))], TOL_PROV)
+        fi = len(static["feature_admin"])
+        static["feature_admin"].append(admin_indices[r["admin_id"]])
+        features.append(fi)
+        if r["area_km2"] < 0.999 * a["area_km2"]:  # cut from its division: an outline of its own
+            piece_rec[fi] = encode([r["geom"]], TOL_PROV)
+    # the date's units with an outline (territories CShapes does not draw have none), in index order
+    for uid in ug:
         if uid not in unit_indices:
-            unit_indices[uid] = counts["geo-units"] + len(new_units)
-            new_units.append(geom)
+            unit_indices[uid] = next(new_unit)
+    unit_list = sorted({r["unit_id"] for r in rows if r["unit_id"] in ug}, key=unit_indices.get)
     luts, lut_rows = {}, {}
     for col in ("unit_name_zh", "unit_name_en", "unit_status", "sovereign_name_zh", "controller_name_zh",
                 "controller_name_en", "controller_detail_zh", "controller_detail_en", "control_type",
@@ -447,7 +471,7 @@ def export_snapshot(rows, admins, ug, snapshot, static, unit_indices, new_geo, n
             a = label_anchor(big)
             if a:
                 unit_labels.append([unit_indices[uid], first["unit_name_zh"] or first["unit_name_en"]] + a + [round(eq_area_km2(big))])
-    countries, country_indices, country_labels = [], {}, []
+    countries, country_indices, country_labels, ctrl_geoms = [], {}, [], []
     for gw, group in sorted(d.groupby("controller_gwcode"), key=lambda kv: -kv[1].population_est.sum()):
         home = group[group.unit_gwcode == gw]
         first = (home if len(home) else group).sort_values("area_km2").iloc[-1]
@@ -457,20 +481,21 @@ def export_snapshot(rows, admins, ug, snapshot, static, unit_indices, new_geo, n
         comp = group.groupby("unit_name_zh", dropna=False).agg(pop=("population_est", "sum"), km2=("area_km2", "sum"))
         countries.append([str(int(gw)), first.controller_name_zh or first.controller_name_en, first.controller_name_en,
                           color_of(str(int(gw))), BLOCS.index(first.bloc), int(group.population_est.sum()),
-                          round(group.area_km2.sum()), int(group.admin_id.nunique()), counts["geo-ctrl"] + len(new_ctrl),
+                          round(group.area_km2.sum()), int(group.admin_id.nunique()), len(ctrl_geoms),
                           [[n if isinstance(n, str) else "—", int(r["pop"]), round(r.km2)]
                            for n, r in comp.sort_values("km2", ascending=False).head(12).iterrows()]])
-        new_ctrl.append(geom)
+        ctrl_geoms.append(geom)
         if gw != -20:
             country_labels.extend([ci] + a for a in anchors(geom))
     doc = dict(snapshot=snap, title_zh=zh, title_en=en, feature=features,
-               unit=[unit_indices.get(r["unit_id"], -1) for r in rows], country=[country_indices[r["controller_gwcode"]] for r in rows],
+               unit=[unit_indices[r["unit_id"]] if r["unit_id"] in ug else -1 for r in rows], country=[country_indices[r["controller_gwcode"]] for r in rows],
                nation=[nation_indices[r["unit_id"]] for r in rows], nations=nations, bloc=[BLOCS.index(r["bloc"]) for r in rows],
                conf=[CONF.index(r["control_confidence"]) for r in rows], ctrl_gw=[r["controller_gwcode"] for r in rows],
                split=[r["control_split"] for r in rows], area=[round(r["area_km2"], 1) for r in rows],
                pop=[r["population_est"] for r in rows], luts=luts, rows=lut_rows,
-               units_active=sorted({unit_indices[r["unit_id"]] for r in rows if r["unit_id"] in unit_indices}),
-               admin_active=sorted(admin_indices.values()), unit_labels=unit_labels, countries=countries,
+               units_active=[unit_indices[u] for u in unit_list],
+               admin_active=sorted(admin_indices.values()), unit_labels=unit_labels, geo_feature=sorted(piece_rec),
+               countries=countries,
                country_labels=country_labels, cities=cities.ww2(snap, use_curated_coordinates=True),
                bloc_names={"allied": "协约国及其盟国（已参战）", "axis": "同盟国（已参战）", "neutral": "中立国 / 尚未参战", "contested": "交战区"},
                notes=dict(bloc_title="参战国 · 人口", bloc=NOTES[snap], control=CONTROL_NOTE),
@@ -478,6 +503,11 @@ def export_snapshot(rows, admins, ug, snapshot, static, unit_indices, new_geo, n
                tier_count={str(t): n for t, n in sorted(Counter(a["tier"] for a in admins.values()).items())})
     summary = dict(snapshot=snap, title_zh=zh, title_en=en, pieces=len(rows), admin_units=len(admins), countries=len(countries),
                    population=sum(doc["pop"]), bloc_pop=doc["bloc_pop"], tier_count=doc["tier_count"])
+    # in the order the page reads them: divisions, cut pieces, units, control areas (see ww2_webmap.py)
+    packed(DATA / f"geo-{snap}.bin", b"".join([admin_rec[a] for a in doc["admin_active"]]
+                                              + [piece_rec[f] for f in doc["geo_feature"]]
+                                              + [encode([ug[u]], TOL_UNIT) for u in unit_list])
+           + encode(ctrl_geoms, TOL_CTRL))
     return doc, summary
 
 
@@ -500,17 +530,20 @@ def coverage(con):
 
 
 def main():
-    static, index, raw, geoms, marker = base_assets()
-    # Existing unit indices are recoverable from each snapshot's parallel nation/unit arrays.
-    unit_indices = {}
+    static, index, marker = base_assets()
+    # Existing unit indices are recoverable from each snapshot's parallel nation/unit arrays; new units are
+    # numbered after all of them
+    unit_indices, top = {}, -1
     for s in index["snapshots"]:
         doc = read_json(DATA / f"snap-{s['snapshot']}.json")
+        top = max([top] + doc["units_active"])
         for ui, ni in zip(doc["unit"], doc["nation"]):
             if ui >= 0:
                 uid = doc["nations"][ni][0]
                 # 2026 has a separate id space; it must not alias historical CShapes ids.
                 if s["snapshot"] != "2026":
                     unit_indices[uid] = ui
+    new_unit = count(top + 1)
     con = sqlite3.connect(DATABASE)
     con.row_factory = sqlite3.Row
     world = sqlite3.connect(f"file:{DB_DIR / 'world_history_1900_2000.sqlite'}?mode=ro", uri=True)
@@ -525,8 +558,7 @@ def main():
                                     controller_gwcode=r["controller_gwcode"], controller_name=r["controller_detail_en"] or r["controller_name_en"],
                                     controller_name_zh=r["controller_detail_zh"] or r["controller_name_zh"], control_type=r["control_type"],
                                     confidence=r["control_confidence"], source=f"baseline:{BASE_DATE}:{r['control_source']}",
-                                    mask=polys(shape(json.loads(r["pg"] or r["ag"])))))
-    new_geo, new_admin, new_units, new_ctrl = [], [], [], []
+                                    mask=outline(r["pg"] or r["ag"])))
     documents, rule_hits = {}, set()
     with con:
         for snap in DATES:
@@ -537,8 +569,7 @@ def main():
         for snapshot in SNAPSHOTS_WWI:
             rows, admins, ug = build_snapshot(con, world, snapshot[0], inherited_rules + rules, rule_hits)
             store_snapshot(con, rows, admins, snapshot)
-            doc, summary = export_snapshot(rows, admins, ug, snapshot, static, unit_indices,
-                                            new_geo, new_admin, new_units, new_ctrl, marker["counts"])
+            doc, summary = export_snapshot(rows, admins, ug, snapshot, static, unit_indices, new_unit)
             documents[snapshot[0]] = doc
             index["snapshots"].append(summary)
             print(snapshot[0], len(rows), "pieces;", len(admins), "historical divisions;", len(doc["countries"]), "controllers", flush=True)
@@ -564,13 +595,10 @@ def main():
     con.execute("VACUUM")
     con.close()
     world.close()
-    for name, additions, tol in [("geo", new_geo, TOL_PROV), ("geo-admin", new_admin, TOL_PROV),
-                                  ("geo-units", new_units, TOL_UNIT), ("geo-ctrl", new_ctrl, TOL_CTRL)]:
-        (DATA / f"{name}.bin").write_bytes(raw[name] + encode(additions, tol))
     for snap, doc in documents.items():
         write_json(DATA / f"snap-{snap}.json", doc)
     index["snapshots"].sort(key=lambda s: s["snapshot"])
-    write_json(DATA / "admin.json", static)
+    packed(DATA / "admin.bin", json.dumps(static, ensure_ascii=False, separators=(",", ":")).encode())
     write_json(DATA / "index.json", index)
     write_json(MARKER, marker)
     cov.to_csv(WW2_OUT / "coverage_1900_1934.csv", index=False)

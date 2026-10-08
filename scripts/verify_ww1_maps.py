@@ -1,27 +1,29 @@
 """Check database joins, date validity, map references and WWI event-day facts."""
-import hashlib
 import json
 import sqlite3
 
 from shapely.geometry import Point, shape
 
 from common import DB_DIR
-from ww1_maps import DATA, DATABASE, DATES, MARKER, decode_geo
+from ww1_maps import DATA, DATABASE, DATES, MARKER, decode_geo, static_hash, unpack
 
 
 def main():
     con = sqlite3.connect(f"file:{DATABASE}?mode=ro", uri=True)
     con.row_factory = sqlite3.Row
     assert con.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
-    static = json.loads((DATA / "admin.json").read_text())
+    static = json.loads(unpack(DATA / "admin.bin"))
     marker = json.loads(MARKER.read_text())
-    counts = {}
-    for name in ("geo", "geo-admin", "geo-units", "geo-ctrl"):
-        raw = (DATA / f"{name}.bin").read_bytes()
-        assert hashlib.sha256(raw[:marker["bytes"][name]]).hexdigest() == marker["sha256"][name], name
-        counts[name] = len(decode_geo(raw)[0])
-    assert static["n"] == counts["geo-admin"] == len(static["admin_id"])
-    assert len(static["feature_admin"]) == counts["geo"]
+    # what ww2_webmap.py wrote is unchanged: admin.bin cut back to the recorded lengths has the recorded checksum
+    base = json.loads(json.dumps(static))
+    base["n"] = marker["admins"]
+    for col in ("admin_id", "tier", "partial", "merged", "area", "label"):
+        base[col] = base[col][:marker["admins"]]
+    for key, col in base["cols"].items():
+        col["idx"], col["lut"] = col["idx"][:marker["admins"]], col["lut"][:marker["luts"][key]]
+    base["feature_admin"] = base["feature_admin"][:marker["features"]]
+    assert static_hash(base) == marker["sha256"]
+    assert static["n"] == len(static["admin_id"]) == len(set(static["admin_id"]))
     for col in ("tier", "partial", "merged", "area", "label"):
         assert len(static[col]) == static["n"], col
     for col in static["cols"].values():
@@ -37,12 +39,16 @@ def main():
         for col in ("unit", "country", "nation", "bloc", "conf", "ctrl_gw", "split", "area", "pop"):
             assert len(doc[col]) == n, (snap, col)
         assert len(set(doc["feature"])) == n
-        assert all(0 <= v < counts["geo"] for v in doc["feature"])
-        assert all(-1 <= v < counts["geo-units"] for v in doc["unit"])
+        assert all(0 <= v < len(static["feature_admin"]) for v in doc["feature"])
+        assert all(v == -1 or v in set(doc["units_active"]) for v in doc["unit"])
         assert all(0 <= v < len(doc["countries"]) for v in doc["country"])
         assert all(0 <= v < len(doc["nations"]) for v in doc["nation"])
-        assert all(0 <= v[8] < counts["geo-ctrl"] for v in doc["countries"])
+        assert sorted(v[8] for v in doc["countries"]) == list(range(len(doc["countries"])))
         assert all(0 <= v < static["n"] for v in doc["admin_active"])
+        assert {static["feature_admin"][f] for f in doc["feature"]} <= set(doc["admin_active"])
+        # the date's outlines: its divisions, cut pieces, units and control areas, in that order
+        n_geo = len(decode_geo(unpack(DATA / f"geo-{snap}.bin"))[0])
+        assert n_geo == len(doc["admin_active"]) + len(doc["geo_feature"]) + len(doc["units_active"]) + len(doc["countries"]), snap
         assert sum(doc["pop"]) == sum(doc["bloc_pop"].values()) == s["population"]
         assert sum(c[5] for c in doc["countries"]) == sum(n[6] for n in doc["nations"]) == sum(doc["pop"])
         for col, vals in doc["rows"].items():
@@ -86,7 +92,7 @@ def main():
         assert (DATA.parent / f"{snap}.html").exists()
         print(snap, n, "pieces; database, date validity, map references and historical checks passed")
     con.close()
-    print("All shared map references and original geometry prefixes passed")
+    print("All map references passed; admin.bin as ww2_webmap.py wrote it, with the 1915-1917 additions after it")
 
 
 if __name__ == "__main__":
