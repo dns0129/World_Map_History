@@ -239,13 +239,19 @@ CShapes 修补（UNIT_FIX / UNCOVERED / unit_names）：
    - `density_from`：基准日期没有人口密度的区划，改用哪些日期的（可空）；
    - `inherit` / `keep_whole`：基准日期上要沿用到新日期的控制来源（如 `rule:8`、`overlay:kwantung`），前者按块沿用，后者整区沿用。`rule:<行号>` 指该时期规则表的行号，表中插行后要同步改；
    - `names`：该组用到的、没有国家代码的控制者 `{负数码: (英文, 中文)}`。
+   - `min_piece_km2`：小于此面积的碎块并入同省最大的一块（否则并入相接的块），用来消除不同来源轮廓之间的细条；`WW2_1942` 用 30；
+   - `coast_deg`：今日政区掩膜向海外延的度数（不伸进其他政区），因为历史轮廓的海岸线常画得更靠外，否则沿海会留下一圈旧控制者；`WW2_1942` 用 0.1；
+   - `names` 中也可写有国家代码的控制者的短名（如 255 德国），它优先于 `unit_names.csv` 的时期全称；
+   - `client_states`：控制国视图中满洲国、蒙疆、维希法国等单列（与 1939–45 断面一致），追加到 1939–45 时期时设为 `True`。
+   - 示例：`WW2_1942`（1942 年逐月，基准 1942-11-01，沿用该日全部分区规则与东亚图层，再逐月改写）。
 3. **控制规则**：写进该组的规则表（`WW1` 组为 `curated/ww1_region_control.csv`；新组新建一个，如 `curated/added_region_control_<key>.csv`），格式：
    ```
    snapshots,unit_match,admin_match,reference,controller_name,controller_name_zh,controller_gwcode,control_type,confidence,note,source_url
    ```
    - `unit_match`：CShapes 政治单元名，支持 `*` 通配，`|` 分隔；
    - `admin_match`：历史区划的 `admin_id`（如 `FR1939-ardennes`、`OHM-r2945069`），支持 `*`；
-   - `reference`：可选，今日一级政区的 ISO 3166-2 码或今日国名，用作近似裁切的范围（只裁切，不作区划）；
+   - `reference`：可选，今日一级政区的 ISO 3166-2 码或今日国名，用作近似裁切的范围（只裁切，不作区划）；也可写 `base:rule:35` （基准日期上由这些来源控制的块，用来精确撤销沿用的控制），或 `base:rule:35@RU-ROS`（其中落在这些今日政区里的块）；
+   - 岛屿属地（CShapes 未画的小属地，如瑙鲁）也按 `unit_match` 匹配其名称，整块改写；
    - `source_url`：**必填**，每条规则都要能查到来源；
    - 按文件顺序执行，后面的覆盖前面的；
    - **每条规则在它列出的每个日期上都必须命中至少一块，否则脚本报错停止**（`Unmatched control rules`）。
@@ -309,7 +315,9 @@ python3 scripts/pipeline.py --sets <集合>             # 生成；中断后重�
 8. **年中以后成立的国家**取下一年人口；忘了会出现人口为空或被并入前宗主。
 9. **今日轮廓误用为区划**：今日政区只作控制参照；要作区划，必须满足 §2 第 5 条并登记 `basis`。
 10. **近似必须标出**：凡按整省、整区、`geo` 范围、沿用临近年份判定的控制，一律 `approximate`，否则地图不画斜线，读者会当成精确战线。
-11. **受限网络**：1897 年俄国省界来自 `heidata.uni-heidelberg.de`，构建 B 时该域名需在允许列表中。
+11. **今日政区代码的坑**：`admin1_pieces` 中 `RU-MOS` 是莫斯科市、`RU-MOW` 是莫斯科州（与 ISO 相反）；克里米亚 `UA-43`、塞瓦斯托波尔 `UA-40` 的 `modern_country` 记为 Russia。写掩膜前先查一下代码对应的名称。
+12. **沿用的基准块不一定按今日政区划分**：例如 1942-11-01 的 `rule:35` 中斯塔夫罗波尔、卡拉恰伊-切尔克斯、卡巴尔达-巴尔卡尔是同一大块。用 `base:…@今日政区` 选块时，按块的代表点判断，选不到会报错。
+13. **受限网络**：1897 年俄国省界来自 `heidata.uni-heidelberg.de`，构建 B 时该域名需在允许列表中。
 
 ---
 
