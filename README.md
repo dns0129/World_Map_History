@@ -122,6 +122,7 @@ exports/geometry/units.topojson 全部历史政治单元边界
 ```
 README.md                  本文件
 docs/world-1900-2000.md    1900–2000 部分的说明（方法、表结构、核对结果、局限）
+docs/snapshot-sop.md       新增断面的生产 SOP（规则、录入卡片、文件清单、流程）
 ww2/README.md              1900–1991 各断面的说明（区划来源、省级合并、覆盖程度、控制判定、表结构）
 ww2/maps/                  交互地图（index.html、每个断面一页、data/、vendor/）
 ww2/coverage*.csv          各层级、各政治单元的省级区划覆盖程度（*_1900_1934 为早期七个断面，*_1946_1991 为战后六个断面）
