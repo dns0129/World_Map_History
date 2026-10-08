@@ -18,8 +18,9 @@ Control rules (curated/<group.rules>), applied in file order, a later match over
   unit_match      CShapes name of the political unit ("*" wildcards, "|"-separated)
   admin_match     admin_id of the historical division ("*" wildcards, "|"-separated)
   reference       optional: ISO 3166-2 codes or present-day country names of reference regions (admin1_pieces of
-                  the yearly database); only the part of a division inside them is assigned (an approximate
-                  mask, never shown as a division)
+                  the yearly database), or base:<source>|<source> for the pieces those control sources (rule:35,
+                  overlay:mengjiang, ...) held on the base date; only the part of a division inside them is
+                  assigned (a mask, never shown as a division)
   controller_name, controller_name_zh, controller_gwcode, control_type, confidence (whole / approximate), note,
   source_url
 A rule that matches nothing on one of its dates stops the build.
@@ -36,7 +37,7 @@ from itertools import count
 
 import numpy as np
 import pandas as pd
-from shapely import STRtree, make_valid
+from shapely import STRtree, make_valid, prepare
 from shapely.errors import GEOSException
 from shapely.geometry import MultiPolygon, Polygon, shape
 
@@ -47,7 +48,7 @@ from common import DB_DIR, ROOT
 from ww2_common import COVERAGE_SUFFIX, DATABASES, SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, SNAPSHOTS_WW2, WW2_OUT
 from ww2_database import gj
 from ww2_geo import diff, eq_area_km2, inter, polys, union
-from ww2_webmap import (BLOCS, CONF, LABEL_MIN_KM2, TOL_CTRL, TOL_PROV, TOL_UNIT,
+from ww2_webmap import (BLOCS, CONF, LABEL_MIN_KM2, SPECIAL, TOL_CTRL, TOL_PROV, TOL_UNIT,
                         color_of, dissolve, encode, label_anchor, nation_of, packed, table)
 
 DATES = {s.date for g in GROUPS for s in g.snapshots}
@@ -135,15 +136,33 @@ def bloc(gw, s):
 
 
 def names(units, group, s):
-    """Controller names on the date: the group's own codes, the independent states as the period called them
-    (unit_names.csv), then the date's own names."""
+    """Controller names on the date: the independent states as the period called them (unit_names.csv), then the
+    group's names (its own codes, or short names it prefers), then the date's own names."""
     namer = Namer()
-    out = dict(group.names)
+    out = {}
     for u in units:
         if u["status"] == "independent":
             out[u["gwcode"]] = namer(u["cshapes_name"], "independent", int(s.date[:4]))
+    out.update(group.names)
     out.update(s.names)
     return out
+
+
+def absorb(rows, min_km2):
+    """Merge the pieces of one political unit smaller than min_km2 (slivers between outlines from different
+    sources) into the largest piece of the same division, else into the largest piece they touch."""
+    for r in sorted((r for r in rows if r["area_km2"] < min_km2), key=lambda r: r["area_km2"]):
+        others = [o for o in rows if o is not r]
+        same = [o for o in others if o["admin_id"] == r["admin_id"]]
+        near = r["geom"].buffer(0.01)
+        touching = [o for o in others if o["geom"].intersects(near)]
+        target = max(same or touching, key=lambda o: o["area_km2"], default=None)
+        if target is None:
+            continue
+        target["geom"] = polys(union([target["geom"], r["geom"]]))
+        target["area_km2"] += r["area_km2"]
+        target["weight"] += r["weight"]
+        rows.remove(r)
 
 
 def controller(gw, state_names, typ="independent", source="cshapes", confidence="whole", detail=None, detail_zh=None):
@@ -153,22 +172,51 @@ def controller(gw, state_names, typ="independent", source="cshapes", confidence=
                 control_type=typ, control_source=source, control_confidence=confidence)
 
 
-def load_rules(world, group):
+def load_rules(con, world, group):
     rules = list(csv.DictReader((ROOT / "curated" / group.rules).open()))
     references = [dict(r) for r in world.execute("SELECT iso_3166_2, modern_country, geometry FROM admin1_pieces")]
+    for r in references:
+        r["shape"] = shape(json.loads(r["geometry"]))
+    land = STRtree([r["shape"] for r in references])
     mask_cache = {}
     for row, rule in enumerate(rules, 2):
         rule["row"] = row
         rule["source"] = f"{group.key}_rule:{row}"
         pattern = rule["reference"]
         if pattern and pattern not in mask_cache:
-            selected = [shape(json.loads(r["geometry"])) for r in references
-                        if matches(pattern, r["iso_3166_2"]) or matches(pattern, r["modern_country"])]
+            def regions(p):
+                return [r["shape"] for r in references if matches(p, r["iso_3166_2"]) or matches(p, r["modern_country"])]
+            if pattern.startswith("base:"):  # the pieces these control sources held on the base date, or of those
+                sources, _, within = pattern[5:].partition("@")  # the ones lying in these regions
+                sources = sources.split("|")
+                selected = [outline(r[0] or r[1]) for r in con.execute(
+                    "SELECT p.geometry,a.geometry FROM snapshot_full s JOIN pieces p USING(piece_id) JOIN admin_units a "
+                    f"USING(admin_id) WHERE s.snapshot=? AND s.control_source IN ({','.join('?' * len(sources))})",
+                    (group.base, *sources))]
+                if within:
+                    area = polys(union(regions(within)))
+                    selected = [g for g in selected if area.covers(g.representative_point())]
+            else:
+                selected = regions(pattern)
+                if selected and group.coast_deg:  # out to sea, not into other regions: coasts drawn further out
+                    grown = union(selected).buffer(group.coast_deg)
+                    others = [references[i]["shape"] for i in land.query(grown, predicate="intersects")
+                              if not any(references[i]["shape"] is g for g in selected)]
+                    sea = polys(diff(grown, union(others))) if others else grown
+                    if sea is not None:
+                        selected = selected + [sea]
             if not selected:
                 raise ValueError(f"Control rule {row} has no reference geometry: {pattern}")
             mask_cache[pattern] = polys(union(selected))
+            prepare(mask_cache[pattern])
         rule["mask"] = mask_cache.get(pattern)
+        rule["bounds"] = rule["mask"].bounds if rule["mask"] is not None else None
     return rules
+
+
+def overlaps(a, b):
+    """Whether two bounding boxes (minx, miny, maxx, maxy) meet."""
+    return a[0] <= b[2] and b[0] <= a[2] and a[1] <= b[3] and b[1] <= a[3]
 
 
 def control_parts(geom, admin, unit, snap, base, rules, state_names, rule_hits):
@@ -180,7 +228,7 @@ def control_parts(geom, admin, unit, snap, base, rules, state_names, rule_hits):
             continue
         if not matches(rule["admin_match"], admin["admin_id"]):
             continue
-        if rule["mask"] is not None and not geom.intersects(rule["mask"]):
+        if rule["mask"] is not None and (not overlaps(geom.bounds, rule["bounds"]) or not geom.intersects(rule["mask"])):
             continue
         ctrl = controller(int(rule["controller_gwcode"]), state_names, rule["control_type"],
                           rule["source"], rule["confidence"], rule["controller_name"], rule["controller_name_zh"])
@@ -329,6 +377,8 @@ def build_snapshot(con, world, group, s, rules, rule_hits):
             add(a, remaining)
         if not unit_rows:
             raise ValueError(f"Empty political unit: {uid}")
+        if group.min_piece_km2:
+            absorb(unit_rows, group.min_piece_km2)
         allocate_population(unit_rows, population_target(world, u, year))
         output.extend(unit_rows)
     # Small island territories absent from CShapes retain the original database's records.
@@ -340,8 +390,17 @@ def build_snapshot(con, world, group, s, rules, rule_hits):
             continue
         used_admins[a["admin_id"]] = a
         row.update(snapshot=snap, piece_id=f"{group.key.upper()}:{snap}:{row['piece_id']}",
-                   geom=outline(row["piece_geometry"] or row["admin_geometry"]),
-                   bloc=bloc(row["controller_gwcode"], s))
+                   geom=outline(row["piece_geometry"] or row["admin_geometry"]))
+        # the group's own rules (not the inherited ones) may name a territory by its unit name; the last one
+        # that applies takes the whole territory
+        for rule in rules:
+            if rule["row"] > 0 and snap in rule["snapshots"].split("|") \
+                    and matches(rule["unit_match"], row["unit_name_en"]) and matches(rule["admin_match"], row["admin_id"]) \
+                    and (rule["mask"] is None or row["geom"].intersects(rule["mask"])):
+                row.update(controller(int(rule["controller_gwcode"]), state_names, rule["control_type"], rule["source"],
+                                      rule["confidence"], rule["controller_name"], rule["controller_name_zh"]))
+                rule_hits.add((snap, rule["row"]))
+        row["bloc"] = bloc(row["controller_gwcode"], s)
         output.append(row)
     piece_counts = Counter(r["admin_id"] for r in output)
     for r in output:
@@ -349,7 +408,10 @@ def build_snapshot(con, world, group, s, rules, rule_hits):
     return output, used_admins, unit_geoms
 
 
-def store_snapshot(con, rows, admins, s, pop_method):
+def store_snapshot(con, rows, admins, s, pop_method, group, stored):
+    """The date's rows in the database. A piece that is its whole division keeps no outline of its own (as in the
+    sets' databases); one cut from it does, and is stored once for all the group's dates it is the same on
+    (stored: (division, outline) -> piece key)."""
     snap, zh, en = s.date, s.title_zh, s.title_en
     for aid, a in admins.items():
         existing = con.execute("SELECT admin_key,snapshots FROM admin_units WHERE admin_id=?", (aid,)).fetchone()
@@ -376,9 +438,14 @@ def store_snapshot(con, rows, admins, s, pop_method):
         if key not in controls:
             cur = con.execute(f"INSERT INTO controls({','.join(ccols)}) VALUES ({','.join('?' for _ in ccols)})", key)
             controls[key] = cur.lastrowid
-        cur = con.execute("INSERT INTO pieces(piece_id,admin_key,area_km2,geometry) VALUES (?,?,?,?)",
-                          (r["piece_id"], admin_keys[r["admin_id"]], r["area_km2"], gj(r["geom"])))
-        con.execute("INSERT INTO piece_snapshot VALUES (?,?,?,?,?,?,?,?)", (snap, cur.lastrowid, r["unit_id"],
+        geometry = gj(r["geom"]) if r["control_split"] else None
+        piece = (r["admin_id"], geometry)
+        if piece not in stored:
+            digest = hashlib.md5((geometry or "").encode()).hexdigest()[:12]
+            stored[piece] = con.execute("INSERT INTO pieces(piece_id,admin_key,area_km2,geometry) VALUES (?,?,?,?)",
+                                      (f"{group.key.upper()}:{r['admin_id']}" + (f"~{digest}" if geometry else ""),
+                                       admin_keys[r["admin_id"]], r["area_km2"], geometry)).lastrowid
+        con.execute("INSERT INTO piece_snapshot VALUES (?,?,?,?,?,?,?,?)", (snap, stored[piece], r["unit_id"],
                     controls[key], r["control_split"], r["area_km2"], r["population_est"], method))
     pops = Counter()
     for r in rows:
@@ -443,6 +510,26 @@ def anchors(g):
                 yield a + [round(km2)]
 
 
+def country_of(r, group):
+    """Key of the controller's country in the control view: its code; with group.client_states, client states
+    and Vichy France have keys of their own, as ww2_webmap.country_key gives them on the 1939-45 dates."""
+    gw = r["controller_gwcode"]
+    if not group.client_states:
+        return gw
+    det = str(r["controller_detail_en"] or "")
+    if gw == 740 and det.startswith("Manchukuo"):
+        return "MAN"
+    if gw == 740 and det.startswith("Mengjiang"):
+        return "MEN"
+    if gw == 255 and "Italian Social Republic" in det:
+        return "RSI"
+    if gw == -1 and "Kingdom of Italy" in det:
+        return "ITK"
+    if gw == 220 and r["bloc"] == "neutral":
+        return "VICHY"
+    return str(int(gw))
+
+
 def export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit):
     """The date's snap-<date>.json and its summary for index.json; writes its geo-<date>.bin."""
     snap, zh, en = s.date, s.title_zh, s.title_en
@@ -456,7 +543,7 @@ def export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit):
         fi = len(static["feature_admin"])
         static["feature_admin"].append(admin_indices[r["admin_id"]])
         features.append(fi)
-        if r["area_km2"] < 0.999 * a["area_km2"]:  # cut from its division: an outline of its own
+        if r["control_split"]:  # cut from its division: an outline of its own
             piece_rec[fi] = encode([r["geom"]], TOL_PROV)
     # the date's units with an outline (territories CShapes does not draw have none), in index order
     for uid in ug:
@@ -469,34 +556,38 @@ def export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit):
                 "control_source", "partial_control_events"):
         luts[col], lut_rows[col] = table(d[col].tolist())
     nations, nation_indices, unit_labels = [], {}, []
-    for uid, group in sorted(d.groupby("unit_id"), key=lambda kv: -kv[1].population_est.sum()):
-        first = group.iloc[0].to_dict()
+    for uid, part in sorted(d.groupby("unit_id"), key=lambda kv: -kv[1].population_est.sum()):
+        first = part.iloc[0].to_dict()
         nation_indices[uid] = len(nations)
         nations.append([int(uid), first["unit_name_zh"] or first["unit_name_en"], first["unit_name_en"], nation_of(first),
-                        first["unit_status"], first["sovereign_name_zh"], int(group.population_est.sum()), round(group.area_km2.sum())])
+                        first["unit_status"], first["sovereign_name_zh"], int(part.population_est.sum()), round(part.area_km2.sum())])
         if uid in ug:
             big = max(getattr(ug[uid], "geoms", [ug[uid]]), key=lambda g: g.area)
             a = label_anchor(big)
             if a:
                 unit_labels.append([unit_indices[uid], first["unit_name_zh"] or first["unit_name_en"]] + a + [round(eq_area_km2(big))])
     countries, country_indices, country_labels, ctrl_geoms = [], {}, [], []
-    for gw, group in sorted(d.groupby("controller_gwcode"), key=lambda kv: -kv[1].population_est.sum()):
-        home = group[group.unit_gwcode == gw]
-        first = (home if len(home) else group).sort_values("area_km2").iloc[-1]
+    d["country"] = [country_of(r, group) for r in rows]
+    for ckey, part in sorted(d.groupby("country"), key=lambda kv: -kv[1].population_est.sum()):
+        gw = int(part.controller_gwcode.iloc[0])
+        key = ckey if isinstance(ckey, str) else str(int(ckey))
+        home = part[part.unit_gwcode == gw]
+        first = (home if len(home) else part).sort_values("area_km2").iloc[-1]
         ci = len(countries)
-        country_indices[gw] = ci
-        geom = dissolve(group.geom.tolist()) or polys(union(group.geom.tolist()))
-        comp = group.groupby("unit_name_zh", dropna=False).agg(pop=("population_est", "sum"), km2=("area_km2", "sum"))
-        countries.append([str(int(gw)), first.controller_name_zh or first.controller_name_en, first.controller_name_en,
-                          color_of(str(int(gw))), BLOCS.index(first.bloc), int(group.population_est.sum()),
-                          round(group.area_km2.sum()), int(group.admin_id.nunique()), len(ctrl_geoms),
+        country_indices[ckey] = ci
+        geom = dissolve(part.geom.tolist()) or polys(union(part.geom.tolist()))
+        comp = part.groupby("unit_name_zh", dropna=False).agg(pop=("population_est", "sum"), km2=("area_km2", "sum"))
+        name_zh, name_en = SPECIAL[key] if key in SPECIAL and not key.lstrip("-").isdigit() else \
+            (first.controller_name_zh or first.controller_name_en, first.controller_name_en)
+        countries.append([key, name_zh, name_en, color_of(key), BLOCS.index(first.bloc), int(part.population_est.sum()),
+                          round(part.area_km2.sum()), int(part.admin_id.nunique()), len(ctrl_geoms),
                           [[n if isinstance(n, str) else "—", int(r["pop"]), round(r.km2)]
                            for n, r in comp.sort_values("km2", ascending=False).head(12).iterrows()]])
         ctrl_geoms.append(geom)
         if gw != -20:
             country_labels.extend([ci] + a for a in anchors(geom))
     doc = dict(snapshot=snap, title_zh=zh, title_en=en, feature=features,
-               unit=[unit_indices[r["unit_id"]] if r["unit_id"] in ug else -1 for r in rows], country=[country_indices[r["controller_gwcode"]] for r in rows],
+               unit=[unit_indices[r["unit_id"]] if r["unit_id"] in ug else -1 for r in rows], country=[country_indices[k] for k in d.country],
                nation=[nation_indices[r["unit_id"]] for r in rows], nations=nations, bloc=[BLOCS.index(r["bloc"]) for r in rows],
                conf=[CONF.index(r["control_confidence"]) for r in rows], ctrl_gw=[r["controller_gwcode"] for r in rows],
                split=[r["control_split"] for r in rows], area=[round(r["area_km2"], 1) for r in rows],
@@ -554,13 +645,16 @@ def inherited_rules(con, group):
                         controller_name_zh=r["controller_detail_zh"] or r["controller_name_zh"],
                         control_type=r["control_type"], confidence=r["control_confidence"],
                         source=f"baseline:{group.base}:{r['control_source']}", mask=outline(r["pg"] or r["ag"])))
+    for rule in out:
+        prepare(rule["mask"])
+        rule["bounds"] = rule["mask"].bounds
     return out
 
 
 def add_group(con, world, group, static, index, unit_indices, new_unit, documents):
     """Build the group's dates into its set's database (an open transaction) and into the map data."""
     key, dates = group.key, [s.date for s in group.snapshots]
-    rules = load_rules(world, group)
+    rules = load_rules(con, world, group)
     rule_hits = set()
     for snap in dates:
         con.execute("DELETE FROM piece_snapshot WHERE snapshot=?", (snap,))
@@ -568,9 +662,10 @@ def add_group(con, world, group, static, index, unit_indices, new_unit, document
         con.execute("DELETE FROM snapshots WHERE snapshot=?", (snap,))
     con.execute("DELETE FROM pieces WHERE piece_id LIKE ?", (f"{key.upper()}:%",))
     inherited = inherited_rules(con, group)
+    stored = {}
     for s in group.snapshots:
         rows, admins, ug = build_snapshot(con, world, group, s, inherited + rules, rule_hits)
-        store_snapshot(con, rows, admins, s, group.pop_method)
+        store_snapshot(con, rows, admins, s, group.pop_method, group, stored)
         doc, summary = export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit)
         documents[s.date] = doc
         index["snapshots"].append(summary)
