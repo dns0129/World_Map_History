@@ -263,7 +263,7 @@ const isModern = (sd) => sd.snapshot === "2026";        // country names: the sm
 
 // outlines arrive per snapshot (data/geo-<date>.bin) and are kept by their global index: pieces cut from a
 // province (geo), province outlines (adminGeo), CShapes units (units); a snapshot's control areas stay on it (ctrlGeo)
-const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: [], adminGeo: [], units: [], loading: 0, userPitch: false, pitchEasing: false, seenPitch: null, selPainted: new Map(), selLines: {},
+const state = { snap: null, mode: "bloc", base: "relief", data: {}, geo: [], adminGeo: [], units: [], loading: 0, userPitch: false, pitchEasing: false, seenPitch: null, selPainted: new Map(), selLines: {}, dropTerrain: false,
   admin: null, hydro: null, hydroDetail: null, sel: null, hover: null };
 const geoOf = (f) => state.geo[f] || state.adminGeo[state.admin.feature_admin[f]];  // a whole province is drawn with its outline
 const $ = (id) => document.getElementById(id);
@@ -901,11 +901,19 @@ function cameraUpdate(next) {
   if (state.userPitch || state.pitchEasing) return { pitch: seen == null ? next.pitch : Math.max(0, Math.min(65, map.getPitch() + next.pitch - seen)) };
   return { pitch: autoPitchAt(next.zoom) };
 }
-// terrain on above T3D.from (where its height is still zero, so it rises from flat), off a little below
+// terrain on above T3D.from (where its height is still zero, so it rises from flat), off a little below.
+// It is taken off only once the map stands still: MapLibre 4.7 ends a drag or a flight on the terrain with
+// transform.recalculateZoom(map.terrain), which throws when the terrain has gone in the meantime, and the
+// exception leaves its render queue marked as running, so that the map draws and moves no more. Below
+// T3D.from its height is zero, so keeping it until then changes nothing on the screen.
 function update3D() {
   const z = map.getZoom(), want = $("t3d").checked && z >= T3D.from - (map.terrain ? 0.3 : 0);
   if (want && !map.terrain) map.setTerrain({ source: "dem", exaggeration: exaggerationAt(z) });
-  else if (!want && map.terrain) map.setTerrain(null);
+  else if (!want && map.terrain) {
+    if (map.isMoving() || map._elevationFreeze) { state.dropTerrain = true; return; }
+    state.dropTerrain = false;
+    map.setTerrain(null);
+  }
 }
 // back to the auto tilt, eased: after the 3D switch, or once zoomed out of 3D after tilting by hand
 function easeToAutoPitch() {
@@ -988,6 +996,8 @@ async function onLoad(index) {
   map.on("zoomend", loadDetailHydro); loadDetailHydro();
   map.on("zoom", update3D);
   map.on("pitchstart", (e) => { if (e.originalEvent && !state.pitchEasing) state.userPitch = true; });  // tilted by hand: leave it
+  // after the gesture has quite finished (its moveend comes before MapLibre's own end-of-drag work)
+  map.on("moveend", () => { if (state.dropTerrain) setTimeout(update3D, 0); });
   map.on("moveend", () => { state.seenPitch = null; if (state.userPitch && !state.pitchEasing && map.getZoom() < T3D.from) easeToAutoPitch(); });
   $("t3d").onchange = () => { update3D(); easeToAutoPitch(); };
   update3D();
