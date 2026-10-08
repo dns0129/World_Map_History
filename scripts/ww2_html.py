@@ -8,7 +8,8 @@ import base64
 import shutil
 
 from common import WORK
-from ww2_common import SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, SNAPSHOTS_WW2, SNAPSHOTS_WWI, WW2_OUT
+from added_dates import SNAPSHOTS_ADDED
+from ww2_common import SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, SNAPSHOTS_WW2, WW2_OUT
 
 MAPS = WW2_OUT / "maps"
 
@@ -19,7 +20,7 @@ def main():
     tpl = tpl.replace("/*__MAPLIBRE_CSS__*/", css)
     head = ('<!doctype html>\n<html lang="zh-CN">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n')
-    dates = sorted(SNAPSHOTS_EARLY + SNAPSHOTS_WWI + SNAPSHOTS_WW2 + SNAPSHOTS_POSTWAR)
+    dates = sorted(SNAPSHOTS_EARLY + SNAPSHOTS_ADDED + SNAPSHOTS_WW2 + SNAPSHOTS_POSTWAR)
     pages = [("index.html", "1942-11-01")] + [(f"{d}.html", d) for d, _, _ in dates
                                                if (MAPS / "data" / f"snap-{d}.json").exists()]
     if (MAPS / "data" / "snap-2026.json").exists():

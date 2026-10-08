@@ -8,14 +8,14 @@
 
 ## 0. 先选生产路径
 
-| | 路径 A：轻量追加（`ww1_maps.py` 方式） | 路径 B：完整流水线（`pipeline.py`） |
+| | 路径 A：轻量追加（`add_snapshots.py`） | 路径 B：完整流水线（`pipeline.py`） |
 |---|---|---|
 | 做法 | 从仓库内已有的 SQLite 和地图数据出发，借一个已建好的“基准断面”的历史区划，按新日期重切国界、套控制规则、分配人口，追加到数据库和 `admin.bin` 末尾 | 把日期加进某个集合，从原始资料重新提取当日施行的区划，跑完整的区划 → 快照 → 省级合并 → 数据库 → 网页地图 |
 | 需要下载 | 不需要 | 约 4 GB（OpenHistoricalMap 1.3 GB 等） |
 | 用时 | 每批几分钟 | 首次约 80 分钟；之后按指纹只重算变动部分（改一个时期的规则约 6 分钟） |
 | 区划精度 | 沿用基准断面的区划，只加入在新日期前后有明确施行日期的替代区划；**不会**补出基准日期之后才设立、又未收录的新区划 | 当日施行的全部已收录区划 |
 | 适合 | 与已有断面相隔不远、区划基本没变的事件日（如 1915–1917 借 1914） | 区划有大变动的日期，或离所有现有断面都很远的日期 |
-| 现状限制 | `ww1_maps.py` 目前写死为 1900–1934 数据库、基准 1914-08-04、三个一战日期（见 §8.1 的一次性改造） | `ww2` 集合的阵营按断面序号切片（见 §9 坑 1） |
+| 改哪里 | 只改 `scripts/added_dates.py`、该组的控制规则表和城市表（§8.1） | 约 10 处（§8.2） |
 
 **判定规则：** 新日期与最近的已有断面之间，若该地区的一级区划没有大的重划（建省、撤省、领土大规模易手后的新行政体系），走 A；否则走 B。一批里两种都有时，先走 B 把需要重算区划的日期并入集合，再走 A 追加其余日期。
 
@@ -124,8 +124,8 @@ snapshots,iso3,field,match,controller_name,controller_name_zh,controller_gwcode,
 5. 每个断面写两个集合（`allied`、`axis` 的 gwcode），其余自动为 `neutral`：
    - `early`：`ww2_snapshots.EARLY_BLOCS[日期]`；
    - `postwar`：`ww2_snapshots.POSTWAR_BLOCS[日期]`；
-   - `ww2`：`ww2_snapshots.AXIS` / `ALLIED` 按断面序号切片（见 §9 坑 1）；
-   - 路径 A：`ww1_maps.ALLIED` / `AXIS`。
+   - `ww2`：`ww2_snapshots.WW2_BLOCS[日期]`；
+   - 路径 A：`added_dates.py` 中该日期 `Snapshot` 的 `allied` / `axis`。
 6. 特殊判定写在 `early_bloc` / `postwar_bloc` 里，按 `detail`（控制者细节）区分，例如 1900 年东南互保各省（清廷代码但计中立）、满洲国随日本、维希法国计中立。
 
 ---
@@ -141,7 +141,7 @@ snapshots,iso3,field,match,controller_name,controller_name_zh,controller_gwcode,
 
 ## 6. 地图文案
 
-每个断面在 `ww2_webmap.py` 的 `EARLY_META` / `POSTWAR_META`（路径 A 在 `ww1_maps.NOTES` 与 `export_snapshot` 中的 `bloc_names`）写。1939–45 集合目前没有 META，页面用模板里的默认图例（同盟国 / 轴心国）；给该集合加日期且图例需要不同说法时，在 `META` 中加该日期即可：
+每个断面在 `ww2_webmap.py` 的 `EARLY_META` / `POSTWAR_META`（路径 A 在 `added_dates.py`：`Snapshot.bloc_note`，以及组或日期的 `bloc_names`、`bloc_title`、`control_note`）写。1939–45 集合目前没有 META，页面用模板里的默认图例（同盟国 / 轴心国）；给该集合加日期且图例需要不同说法时，在 `META` 中加该日期即可：
 
 ```python
 "YYYY-MM-DD": dict(
@@ -169,7 +169,7 @@ snapshots,iso3,field,match,controller_name,controller_name_zh,controller_gwcode,
 
 列：`name_zh,name_en,lon,lat,kinds,dates,capital,seat,rank,note`
 
-- **新日期必须先在 `scripts/cities.py` 的 `EARLY_CODE` / `POSTWAR_CODE` / `CODE` 中登记两位码**（同一集合内两位码不能重复；若与已有码冲突，用别的两位数并在表头注释中说明）。
+- **新日期必须先登记两位码：** 路径 B 写在 `scripts/cities.py` 的 `EARLY_CODE` / `POSTWAR_CODE` / `CODE`；路径 A 写在该日期 `Snapshot` 的 `city_code`（不改 `cities.py`）。同一张城市表内两位码不能重复；与已有码冲突时用别的两位数（例如 1943 年的第二个断面用 `4a` 之类也可，只要不含空格）。
 - `dates`：该行显示于哪些断面，空格分隔；`*` = 全部。**新增断面时要把码追加到所有仍应显示的行**，否则这些城市在新断面消失。
 - `kinds`：`I` 工业、`P` 港口、`C` 其他重要城市，可组合（`IP`）；空 = 只有首都 / 首府角色。
 - `capital` / `seat`：`码 码=政权名;码=政权名`，`*=政权名` 表示全部断面。`capital` = 当日政府驻地（★），`seat` = 殖民地首府、临时政府驻地、流亡政府（◉）。按**当日政府实际驻地**判定（1942 重庆、维希；1915 塞尔维亚驻尼什；1917 罗马尼亚驻雅西）。
@@ -210,13 +210,36 @@ CShapes 修补（UNIT_FIX / UNCOVERED / unit_names）：
 
 ### 8.1 路径 A：轻量追加
 
-**一次性改造（第一次批量走 A 之前做一次，之后每批不用再做）：** `ww1_maps.py` 目前写死了 `DATABASE`（1900–1934 库）、`BASE_DATE = "1914-08-04"`、`DATES = SNAPSHOTS_WWI`、`ALLIED`/`AXIS`/`NOTES` 三个字典、`export_snapshot` 中的 `bloc_names`，以及继承 1914 年控制的 `control_source IN ('rule:8','rule:9','rule:69','overlay:kwantung')`。要用于其他年代，需把这些改成按断面配置（每个日期：目标数据库、基准日期、阵营、文案、继承的规则），`ww1-build.json` 的“追加部分”逻辑保持不变。`verify_ww1_maps.py` 中写死的历史断言（巴黎、柏林、华沙等的控制者）也要改为按日期配置。
+所有与日期有关的内容都写在 `scripts/added_dates.py`（只含数据），脚本 `add_snapshots.py` 不用改。
+
+**概念：**
+
+- **组（`Group`）：** 追加到同一时期数据库、以同一个基准日期的区划为底的一组日期。已有一组 `WW1`（1900–1934 库，基准 1914-08-04，日期 1915/1916/1917）。
+- 新日期与某组的时期和基准都相同 → 加进该组的 `snapshots`；否则 → 新建一组，加进 `GROUPS`。
+- 基准日期选同一时期中**区划最接近**的已有断面，可以在新日期之前，也可以在之后（脚本两种方向都处理：之后设立或之前撤销、且在新日期施行的区划会被补进来）。
+- 新日期不能与任何时期已有的断面重复，也不能在两组里重复（脚本会报错）。
 
 **每批步骤：**
 
 1. 填卡片（§8.0）。
-2. `scripts/ww2_common.py`：在 `SNAPSHOTS_WWI`（或改造后的追加列表）加 `(日期, 中文, English)`。
-3. 控制规则：写进 `curated/ww1_region_control.csv`（或改造后的对应表），格式：
+2. **`scripts/added_dates.py`**：每个日期加一个 `Snapshot`：
+   ```python
+   Snapshot(
+       "1943-09-08", "意大利停战", "Armistice of Cassibile announced",
+       allied={200, 2, 365, ...}, axis={255, 740, ...}, city_code="43",
+       bloc_note="谁在哪一边，谁当日尚未加入；交战区在哪（斜线）。",
+       names={325: ("Kingdom of Italy (Badoglio)", "意大利王国（巴多格里奥政府）")},   # 只在这天的名称，可省
+       checks=dict(blocs={255: "axis"}, places=[("Rome", 12.5, 41.9, 255)], cities_in=["罗马"])),  # 核对项，可省
+   ```
+   新建一组时另写 `Group`（字段说明在文件开头）：
+   - `key`：短名，决定新增块、整单元剩余区、规则行、来源行的编号前缀；**建好后不能再改**；
+   - `set` / `base`：目标时期（`ww2` / `early` / `postwar`）和基准日期；
+   - `rules` / `cities`：该组的控制规则表、所在时期的城市表；
+   - `pop_method`、`control_note`、`bloc_names`、`bloc_title`：数据库中的人口方法说明和图例默认文字；
+   - `density_from`：基准日期没有人口密度的区划，改用哪些日期的（可空）；
+   - `inherit` / `keep_whole`：基准日期上要沿用到新日期的控制来源（如 `rule:8`、`overlay:kwantung`），前者按块沿用，后者整区沿用。`rule:<行号>` 指该时期规则表的行号，表中插行后要同步改；
+   - `names`：该组用到的、没有国家代码的控制者 `{负数码: (英文, 中文)}`。
+3. **控制规则**：写进该组的规则表（`WW1` 组为 `curated/ww1_region_control.csv`；新组新建一个，如 `curated/added_region_control_<key>.csv`），格式：
    ```
    snapshots,unit_match,admin_match,reference,controller_name,controller_name_zh,controller_gwcode,control_type,confidence,note,source_url
    ```
@@ -224,17 +247,18 @@ CShapes 修补（UNIT_FIX / UNCOVERED / unit_names）：
    - `admin_match`：历史区划的 `admin_id`（如 `FR1939-ardennes`、`OHM-r2945069`），支持 `*`；
    - `reference`：可选，今日一级政区的 ISO 3166-2 码或今日国名，用作近似裁切的范围（只裁切，不作区划）；
    - `source_url`：**必填**，每条规则都要能查到来源；
+   - 按文件顺序执行，后面的覆盖前面的；
    - **每条规则在它列出的每个日期上都必须命中至少一块，否则脚本报错停止**（`Unmatched control rules`）。
-4. 阵营、文案：`ww1_maps.ALLIED` / `AXIS` / `NOTES`（改造后为配置）。
-5. 城市：`cities.py` 登记日期码，城市表追加码、首都 / 首府。
-6. 运行（只生成，不测试）：
+4. **城市**：城市表中给仍应显示的行的 `dates` 追加该日期的 `city_code`，写首都 / 首府（§7）。
+5. 运行（只生成，不测试）：
    ```sh
-   python3 scripts/ww1_maps.py
+   python3 scripts/add_snapshots.py
    python3 scripts/ww2_html.py
    ```
-   在流水线中则是 `ww1` 任务（排在该集合数据库和 `webmap` 之后、`html` 之前）。
-7. 产物：数据库中新增的断面行、`ww2/maps/data/snap-<日期>.json`、`geo-<日期>.bin`、追加后的 `admin.bin`、`index.json`、`ww1-build.json`、`ww2/maps/<日期>.html`、对应 `coverage*_<集合>.csv`。
-8. **禁止**手改 `ww1-build.json` 的校验值。若脚本报 “admin.bin changed since ww1_maps.py last ran”，先重跑 `ww2_webmap.py` 再跑 A。
+   在流水线中则是 `added` 任务（排在所涉时期的数据库和 `webmap` 之后、`html` 之前）。改 `added_dates.py` 只会让 `added` 和 `html` 两个任务重跑。
+6. 产物：数据库中新增的断面行、`ww2/maps/data/snap-<日期>.json`、`geo-<日期>.bin`、追加后的 `admin.bin`、`index.json`、`added-build.json`、`ww2/maps/<日期>.html`、对应时期的 `coverage*.csv`。
+7. **禁止**手改 `added-build.json` 的校验值。若脚本报 “admin.bin changed since add_snapshots.py last ran”，先重跑 `ww2_webmap.py` 再跑 A。
+8. 路径 A 的局限：只会用到数据库里**已有**的区划（基准断面的，加上带施行日期的替代区划）；基准日期与新日期之间若有未收录的行政改革，不会出现，应在图例或提交说明中注明，或改走 B。
 
 ### 8.2 路径 B：完整流水线
 
@@ -243,7 +267,7 @@ CShapes 修补（UNIT_FIX / UNCOVERED / unit_names）：
 | # | 文件 | 改什么 |
 |---|---|---|
 | 1 | `scripts/ww2_common.py` | `SNAPSHOTS_EARLY` / `SNAPSHOTS_WW2` / `SNAPSHOTS_POSTWAR` 加一行（按日期顺序）；必要时 `UNCOVERED` / `UNCOVERED_BOX` |
-| 2 | `scripts/ww2_snapshots.py` | 阵营（`EARLY_BLOCS` / `POSTWAR_BLOCS` / ww2 的 `AXIS`·`ALLIED`）；新控制者名称（`*_STATE`、`*_STATE_ON`）；`UNIT_FIX`；如需东亚图层按新日期生效，改 `control_overlay` 的日期条件 |
+| 2 | `scripts/ww2_snapshots.py` | 阵营（`EARLY_BLOCS` / `POSTWAR_BLOCS` / `WW2_BLOCS`）；新控制者名称（`*_STATE`、`*_STATE_ON`）；`UNIT_FIX`；如需东亚图层按新日期生效，改 `control_overlay` 的日期条件 |
 | 3 | `scripts/ww2_webmap.py` | `EARLY_META` / `POSTWAR_META` 文案；新控制者颜色 `COLOR` |
 | 4 | `scripts/cities.py` | 日期两位码 |
 | 5 | `curated/region_control_*.csv` / `ww2_region_control.csv` | 新规则；已有规则的 `snapshots` 追加新日期 |
@@ -275,13 +299,13 @@ python3 scripts/pipeline.py --sets <集合>             # 生成；中断后重�
 
 ## 9. 已踩过的坑
 
-1. **`ww2` 集合的阵营按序号切片**（`S[2:5]` 之类）。往 `SNAPSHOTS_WW2` 中间插日期会让所有国家的阵营错位。要往 1939–45 加日期，先把 `AXIS` / `ALLIED` 改成按日期的集合（像 `POSTWAR_BLOCS` 那样），再加日期。
+1. **阵营必须按日期写全**：三个时期的阵营都是按日期的字典（`WW2_BLOCS`、`EARLY_BLOCS`、`POSTWAR_BLOCS`），给时期加日期时漏写该日期会直接报 `KeyError`；路径 A 的阵营写在各自的 `Snapshot` 里。
 2. **规则“最后匹配生效”**：例外规则写在大范围规则前面会被覆盖。
 3. **整单元规则不覆盖东亚图层**（`field` 为 `*`/`unit` 时跳过 overlay 来源），要改满洲国、日占区等，用 `hist`、`adm1_modern` 或 `geo` 规则。
 4. **城市漏码**：新日期码没加到旧行的 `dates`，首都、港口会在新断面整体消失。
 5. **CShapes 名称不是当时名称**：控制者、政治单元显示名都要经 `Namer`（`unit_names.csv`）或 `*_STATE_ON` 按日期改，否则会出现“Russia (Soviet Union)”之类。
-6. **`admin.bin` 的追加段**：路径 A 依赖 `ww1-build.json` 的长度和校验值。任何对 `admin.bin` 的其他修改都会让 A 停下；正确做法是重建网页地图后再跑 A。
-7. **2026 图层的单元编号是独立空间**，不能与历史 CShapes 编号混用（`ww1_maps.main` 中已排除）。
+6. **`admin.bin` 的追加段**：路径 A 依赖 `added-build.json` 的长度和校验值。任何对 `admin.bin` 的其他修改都会让 A 停下；正确做法是重建网页地图后再跑 A。
+7. **2026 图层的单元编号是独立空间**，不能与历史 CShapes 编号混用（`add_snapshots.main` 中已排除）。
 8. **年中以后成立的国家**取下一年人口；忘了会出现人口为空或被并入前宗主。
 9. **今日轮廓误用为区划**：今日政区只作控制参照；要作区划，必须满足 §2 第 5 条并登记 `basis`。
 10. **近似必须标出**：凡按整省、整区、`geo` 范围、沿用临近年份判定的控制，一律 `approximate`，否则地图不画斜线，读者会当成精确战线。
@@ -303,7 +327,7 @@ python3 scripts/pipeline.py --sets <集合>             # 生成；中断后重�
 已有的检查脚本，平时生产不跑，需要时再执行：
 
 ```sh
-python3 scripts/verify_ww1_maps.py     # 路径 A：数据库连接、日期有效性、地图引用、历史断言
+python3 scripts/verify_added_snapshots.py   # 全部断面的地图数据；路径 A 各日期的数据库、施行日期和 checks 中的历史核对项
 python3 scripts/verify_database.py     # 1900–2000 逐年数据库
 ```
 

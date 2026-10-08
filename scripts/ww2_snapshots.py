@@ -58,16 +58,28 @@ STATE = {255: ("Germany", "德国"), 325: ("Italy", "意大利"), 740: ("Japan",
          -30: ("Tuvan People's Republic", "图瓦人民共和国"), -3: ("United Nations", "联合国"),
          -4: ("Free France", "自由法国")}
 
-# Alliance bloc of each controller by snapshot (simplified; neutral otherwise)
-S = [s[0] for s in SNAPSHOTS] if SET == "ww2" else [""] * 6
-AXIS = {255: S, 325: S[:4] + [], 740: S, 317: S[:5], -12: S[1:5], -10: S,
-        310: S[2:5], 360: S[2:5], 355: S[2:5], 375: S[2:5], 800: S[3:5]}
-ALLIED = {200: S, 710: S, -2: S, -1: S, -4: S, 900: S, 20: S, 920: S, 560: S, 750: S, 290: S, 210: S, 211: S, 385: S, 212: S,
-          390: S[5:], 350: S[2:], 345: S[2:], 365: S[2:], 2: S[2:], 220: [S[0], S[4], S[5]],
-          140: S[3:], 70: S[3:], 40: S[3:], 42: S[3:], 41: S[3:], 90: S[3:], 91: S[3:], 92: S[3:], 93: S[3:],
-          94: S[3:], 95: S[3:], 530: S[3:], 645: S[3:], 630: S[4:], 100: S[4:], 145: S[4:], 450: S[4:],
-          640: S[5:], 651: S[5:], 160: S[5:], 155: S[5:], 135: S[5:], 101: S[5:], 130: S[5:], 150: S[5:], 165: S[5:],
-          670: S[5:], 660: S[5:], 652: S[5:], 663: S[5:], 712: S[5:], 360: S[5:], 355: S[5:], 310: [], 375: []}
+# Bloc of each controller on each date (simplified; neutral otherwise), by date so that a date can be added
+# anywhere in the list; colonies follow their sovereign (the controller).
+#   Britain, France, the Dominions, Poland, China and the governments in exile from 1939 (France again
+#   from 1944); the Soviet Union, the United States, Yugoslavia and Greece from 1941; Latin America and
+#   others as they declared war; Italy (here the Italian Social Republic in 1944) with the Axis until its
+#   surrender, Romania and Bulgaria with the Allies in 1945
+_AXIS39 = {255, 325, 740, 317, -10}
+_ALLIED39 = {200, 20, 900, 920, 560, 750, 290, 210, 211, 212, 385, 710, -1, -2, -4}
+_AXIS41 = _AXIS39 | {-12, 310, 360, 355, 375}
+_ALLIED41 = _ALLIED39 | {2, 365, 345, 350}
+_LATAM42 = {40, 41, 42, 70, 90, 91, 92, 93, 94, 95, 140, 530, 645}
+_ALLIED44 = _ALLIED41 | _LATAM42 | {220, 100, 145, 450, 630}
+WW2_BLOCS = {
+    "1939-09-01": dict(allied=_ALLIED39 | {220}, axis=_AXIS39),
+    "1940-07-01": dict(allied=_ALLIED39, axis=_AXIS39 | {-12}),
+    "1941-12-07": dict(allied=_ALLIED41, axis=_AXIS41),
+    "1942-11-01": dict(allied=_ALLIED41 | _LATAM42, axis=_AXIS41 | {800}),
+    "1944-06-06": dict(allied=_ALLIED44, axis=_AXIS41 | {800}),
+    "1945-09-02": dict(allied=_ALLIED44 | {101, 130, 135, 150, 155, 160, 165, 355, 360, 390, 640, 651, 652, 660, 663,
+                                           670, 712},
+                       axis={255, 740, -10}),
+}
 CONTESTED = {-20}
 
 # ---- 1900-1934 (WW2_SET=early). Controllers without a state of their own on the date:
@@ -202,13 +214,8 @@ def bloc(gw, snap, detail):
         return "contested"
     if detail and "Vichy" in detail:
         return "neutral"
-    if snap in AXIS.get(gw, ()):
-        return "axis"
-    if snap in ALLIED.get(gw, ()):
-        return "allied"
-    if gw == 325 and snap == S[4]:
-        return "axis"
-    return "neutral"
+    b = WW2_BLOCS[snap]
+    return "axis" if gw in b["axis"] else "allied" if gw in b["allied"] else "neutral"
 
 
 def load_units():

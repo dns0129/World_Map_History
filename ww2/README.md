@@ -97,7 +97,7 @@ scripts/ww2_*.py                   全部构建脚本；scripts/pipeline.py 按�
 
 ### 1915–1917 三个一战事件日
 
-三个新增断面由 `scripts/ww1_maps.py` 生成，写入同一个 `db/divisions_1900_1934.sqlite`，所有原有表及 `snapshot_full` 视图的结构一致。地图复用同一份 `template.html`、MapLibre、地形、水系和字形；每个断面有自己的 `snap-<日期>.json` 和 `geo-<日期>.bin`，新增的区划和块接在 `admin.bin` 末尾，其他断面的序号不变。可切换阵营、法理国家、实际控制国、人口密度和区划资料，点击国家后继续进入省份。
+三个新增断面由 `scripts/add_snapshots.py` 按 `scripts/added_dates.py` 中的 `WW1` 一组生成（以 1914-08-04 的区划为基准），写入同一个 `db/divisions_1900_1934.sqlite`，所有原有表及 `snapshot_full` 视图的结构一致。地图复用同一份 `template.html`、MapLibre、地形、水系和字形；每个断面有自己的 `snap-<日期>.json` 和 `geo-<日期>.bin`，新增的区划和块接在 `admin.bin` 末尾，其他断面的序号不变。可切换阵营、法理国家、实际控制国、人口密度和区划资料，点击国家后继续进入省份。
 
 - **日期口径：** 1915 年选择意大利宣战日（5 月 23 日，战争状态次日生效），1916 年选择罗马尼亚宣战日（8 月 27 日），1917 年选择美国宣战日（4 月 6 日）。阵营表示已加入战争的一方，不表示当日已与对方每个成员交战。中国、巴西、暹罗在 1917 年 4 月尚未对德宣战；俄国仍在协约国一方，政权名称为俄国临时政府。
 - **国界及历史区划：** 当日政治单元及有效期来自既有逐年数据库的 CShapes 2.0。优先复用 1914 年的历史省级区划，在有效日期范围内加入已收录的替代区划和 1897 年俄国省界。省被当日国界或控制区切开；没有区划资料的区域保留整个政治单元，标明资料层级。省界几何沿用已简化的 SQLite 数据，未补造未收录的历史行政改革。
@@ -107,15 +107,15 @@ scripts/ww2_*.py                   全部构建脚本；scripts/pipeline.py 按�
 
 事件日期可对照 [意大利 1915 年 5 月 23 日宣战声明](https://www.gwpda.org/1915/italydec.html)、[罗马尼亚国防部的参战日期说明](https://verdun.mapn.ro/pages/intrarea-rom%C3%A2niei-in-marele-razboi)、[美国国家档案馆的参战记录](https://www.archives.gov/publications/prologue/2017/spring/wwi-america-enters)。控制规则的来源链接随每行保存在 CSV 和数据库中。
 
-在 `scripts/pipeline.py` 中是 `ww1` 任务：排在 1900–1934 年数据库和网页地图之后、`ww2_html.py` 之前；这两者任一重建，`ww1` 也随之重跑（它读取这两个任务的完成记录）。只重建这三个断面：
+在 `scripts/pipeline.py` 中是 `added` 任务：排在所追加时期的数据库和网页地图之后、`ww2_html.py` 之前；这两者任一重建，`added` 也随之重跑（它读取这些任务的完成记录）。同一方法可以给任一时期追加日期：每个日期的标题、阵营、图例文字、城市代码和核对项都写在 `added_dates.py`，控制规则写在该组自己的整理表中，脚本本身不用改（步骤见 [断面生产 SOP](../docs/snapshot-sop.md)）。只重建追加的断面：
 
 ```sh
-python3 scripts/ww1_maps.py
+python3 scripts/add_snapshots.py
 python3 scripts/ww2_html.py
-python3 scripts/verify_ww1_maps.py
+python3 scripts/verify_added_snapshots.py
 ```
 
-`data/ww1-build.json` 记下 `ww2_webmap.py` 写出的 `admin.bin` 原有的长度和校验值，重复运行时先去掉上次追加的部分再重写；如果 `admin.bin` 的原有部分已被其他操作改变，脚本会停下，应先重建网页地图（`ww2_webmap.py`），不可自行修改该记录的校验值。1915–1917 的导出文件与其他断面的 `snap-<日期>.json` 字段相同。
+`data/added-build.json` 记下 `ww2_webmap.py` 写出的 `admin.bin` 原有的长度和校验值，重复运行时先去掉上次追加的部分再重写；如果 `admin.bin` 的原有部分已被其他操作改变，脚本会停下，应先重建网页地图（`ww2_webmap.py`），不可自行修改该记录的校验值。1915–1917 的导出文件与其他断面的 `snap-<日期>.json` 字段相同。
 
 ### 区划
 

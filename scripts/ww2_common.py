@@ -46,25 +46,20 @@ SNAPSHOTS_POSTWAR = [
     ("1953-07-27", "朝鲜停战协定签署", "Korean Armistice Agreement"),
     ("1991-12-26", "苏联解体", "Dissolution of the Soviet Union"),
 ]
-# Supplemental WWI dates are built from the shipped SQLite databases by ww1_maps.py.
-# Keep the original raw-data pipeline's four dates separate so a full rebuild retains
-# the same historical reference divisions before adding these snapshots.
-SNAPSHOTS_WWI = [
-    ("1915-05-23", "意大利对奥匈帝国宣战，加入协约国", "Italy declares war on Austria-Hungary"),
-    ("1916-08-27", "罗马尼亚对奥匈帝国宣战，加入协约国", "Romania declares war on Austria-Hungary"),
-    ("1917-04-06", "美国对德国宣战，加入第一次世界大战", "The United States declares war on Germany"),
-]
+# Dates added to a set's database afterwards, from one of its dates (such as 1915-1917 from 1914), are listed
+# in added_dates.py and built by add_snapshots.py, not by the scripts of the sets.
 SNAPSHOTS = {"early": SNAPSHOTS_EARLY, "postwar": SNAPSHOTS_POSTWAR}.get(SET, SNAPSHOTS_WW2)
 SNAP_DATES = [s[0] for s in SNAPSHOTS]
 
+DATABASES = {"ww2": DB_DIR / "ww2_divisions_1939_1945.sqlite", "early": DB_DIR / "divisions_1900_1934.sqlite",
+             "postwar": DB_DIR / "divisions_1946_1991.sqlite"}
+COVERAGE_SUFFIX = {"ww2": "", "early": "_1900_1934", "postwar": "_1946_1991"}  # ww2/coverage<suffix>.csv
+WW2_DB = DATABASES[SET]
 if SET == "early":
-    WW2_DB = DB_DIR / "divisions_1900_1934.sqlite"
     RULES = ROOT / "curated" / "region_control_1900_1934.csv"
 elif SET == "postwar":
-    WW2_DB = DB_DIR / "divisions_1946_1991.sqlite"
     RULES = ROOT / "curated" / "region_control_1946_1991.csv"
 else:
-    WW2_DB = DB_DIR / "ww2_divisions_1939_1945.sqlite"
     RULES = ROOT / "curated" / "ww2_region_control.csv"
 
 # Land CShapes leaves blank on a date counts as part of this unit: on 11 November 1918, Latvia,

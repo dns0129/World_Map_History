@@ -147,7 +147,7 @@ pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas p
 首次全流程约 2 小时，需要下载约 4 GB：
 
 - 1900–2000 部分约 30 分钟；
-- 1900–1991 部分需要 OpenHistoricalMap 全球数据约 1.3 GB。三个时期、2026 年图层、网页地图和 1915–1917 年三个断面共 68 个任务，由 `scripts/pipeline.py` 调度，首次构建约 80 分钟（16 GB 内存的机器上）。
+- 1900–1991 部分需要 OpenHistoricalMap 全球数据约 1.3 GB。三个时期、2026 年图层、网页地图和追加的断面（目前为 1915–1917 年三个）共 68 个任务，由 `scripts/pipeline.py` 调度，首次构建约 80 分钟（16 GB 内存的机器上）。
 
 `pipeline.py` 为每个任务记下输入的指纹，再次运行时只重算输入变了的部分：
 
@@ -159,15 +159,15 @@ pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas p
 
 各步骤见 `build_all.sh` 和 `scripts/pipeline.py` 开头的说明。
 
-仅重建 1915、1916、1917 三个交互断面时，可以直接使用仓库内已有的两个数据库和地图数据，无需下载原始资料：
+仅重建 1915、1916、1917 三个交互断面（以及 `scripts/added_dates.py` 中以后追加的其他日期）时，可以直接使用仓库内已有的数据库和地图数据，无需下载原始资料：
 
 ```sh
 pip install shapely pyproj numpy pandas pyshp rasterio
-python3 scripts/ww1_maps.py
+python3 scripts/add_snapshots.py
 python3 scripts/ww2_html.py
 ```
 
-三个断面写入原有的 `db/divisions_1900_1934.sqlite`，复用原地图的界面、数据格式、地形和水系。省级人口沿用既有历史区划的空间分布，缩放到同一逐年数据库的人口估计；前线和部分占领区为明确标注的近似，详见 [一战断面说明](ww2/README.md#19151917-三个一战事件日)。
+新增断面的规则和流程见 [docs/snapshot-sop.md](docs/snapshot-sop.md)。1915–1917 三个断面写入原有的 `db/divisions_1900_1934.sqlite`，复用原地图的界面、数据格式、地形和水系。省级人口沿用既有历史区划的空间分布，缩放到同一逐年数据库的人口估计；前线和部分占领区为明确标注的近似，详见 [一战断面说明](ww2/README.md#19151917-三个一战事件日)。
 
 ## 来源与许可
 
