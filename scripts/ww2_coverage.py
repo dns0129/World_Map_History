@@ -4,7 +4,7 @@ per snapshot and per political unit. Writes ww2/coverage.csv and ww2/coverage_by
 WW2_SET=postwar)."""
 import pandas as pd
 
-from ww2_common import SET, SNAPSHOTS, WW2_OUT, WW2_WORK
+from ww2_common import COVERAGE_SUFFIX, SET, SNAPSHOTS, WW2_OUT, WW2_WORK
 
 TIER_ZH = {3: "省级", 4: "大区级", 5: "整个国家/殖民地", 6: "岛屿属地"}
 
@@ -32,7 +32,7 @@ def main():
         u.insert(0, "snapshot", snap)
         by_unit.append(u.sort_values("population_est", ascending=False))
     out = pd.DataFrame(rows)
-    sfx = {"ww2": "", "early": "_1900_1934", "postwar": "_1946_1991"}[SET]
+    sfx = COVERAGE_SUFFIX[SET]
     out.to_csv(WW2_OUT / f"coverage{sfx}.csv", index=False)
     pd.concat(by_unit).to_csv(WW2_OUT / f"coverage_by_unit{sfx}.csv", index=False)
     print(out.to_string(index=False))

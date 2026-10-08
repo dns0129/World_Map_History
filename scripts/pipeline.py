@@ -12,8 +12,9 @@ Every step of every set (and every date of the per-date steps) is a job run as a
   <set>:coverage          ww2/coverage*.csv                        ww2_coverage.py
   relief, modern          relief sheets, the 2026 tab              ww2_relief.py, modern_2026.py
   webmap, html            ww2/maps                                 ww2_webmap.py, ww2_html.py
-  ww1                     1915-1917 dates, added to the early database   ww1_maps.py
-                          and the map data (from the databases; rerun when they or the map data are rebuilt)
+  added                   dates added to the sets' databases and the     add_snapshots.py
+                          map data afterwards (added_dates.py: 1915-1917; built from the databases, rerun
+                          when they or the map data are rebuilt)
 
 for the sets ww2 (1939-45), early (1900-34) and postwar (1946-91).
 
@@ -50,6 +51,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from common import RAW, ROOT, WORK
+from added_dates import GROUPS
 from ww2_common import SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, SNAPSHOTS_WW2, memory_free_gb, memory_limit_gb
 
 SCRIPTS = ROOT / "scripts"
@@ -58,10 +60,10 @@ SETS = {"ww2": SNAPSHOTS_WW2, "early": SNAPSHOTS_EARLY, "postwar": SNAPSHOTS_POS
 RESERVE_GB = 1.0          # kept free for this process, the shell and the page cache
 TIMEOUT_S = 4 * 3600      # a job running longer than this is taken to hang
 STAGES = ["prepare", "part", "relief", "modern", "merge", "snapshot", "province", "provinces", "database", "coverage",
-          "webmap", "ww1", "html"]
+          "webmap", "added", "html"]
 # expected peak memory (GB) of a step before it has been measured here
 DEFAULT_GB = {"prepare": 4, "part": 4, "merge": 4, "snapshot": 5, "province": 8, "provinces": 3, "database": 3,
-              "coverage": 2, "relief": 2, "modern": 6, "webmap": 0, "ww1": 3, "html": 1}
+              "coverage": 2, "relief": 2, "modern": 6, "webmap": 0, "added": 3, "html": 1}
 
 # sources: compared by size and time (some are gigabytes); work files: by content
 SOURCES = [RAW / "ww2", RAW / "geoboundaries", RAW / "ohm" / "areas_1900_91.jsonl", RAW / "cshapes_2_gw.topojson",
@@ -70,13 +72,13 @@ CURATED = ROOT / "curated"
 RULES = {"ww2": "ww2_region_control.csv", "early": "region_control_1900_1934.csv",
          "postwar": "region_control_1946_1991.csv"}
 CITIES = {"ww2_cities.csv", "cities_1900_1934.csv", "cities_1946_1991.csv", "cities_2026.csv"}
-WW1_RULES = "ww1_region_control.csv"  # read by ww1_maps.py only
+ADDED_RULES = {g.rules for g in GROUPS}  # read by add_snapshots.py only
 
 
 def curated(s=None):
     """The curated tables a step reads: the city lists only for the web map; control rules only for the steps
     of their own set that apply them (curated(set)), none for the units (curated())."""
-    skip = CITIES | {WW1_RULES} | {f for k, f in RULES.items() if k != s}
+    skip = CITIES | ADDED_RULES | {f for k, f in RULES.items() if k != s}
     return [p for p in sorted(CURATED.rglob("*")) if p.is_file() and p.name not in skip]
 BASE_WORK = [WORK / "unit_year.csv", WORK / "admin1_targets.csv", WORK / "years.csv", WORK / "ww2" / "ref_units.csv",
              WORK / "ww2" / "ref_units.wkb", WORK / "ww2" / "ref_units.geojson"]
@@ -193,17 +195,19 @@ def jobs_for(sets):
     jobs.append(Job("webmap", py("ww2_webmap.py"), step="webmap", exclusive=True,
                     deps=[j.name for j in jobs if j.step in ("provinces", "relief", "modern")],
                     reads=SOURCES + [CURATED / c for c in sorted(CITIES)] + maps + [WORK / "modern"]))
-    # the 1915-1917 dates are built from the early database and appended to the map data, so they are built
-    # again whenever either is (the stamps of those jobs change with every run); with every --sets, since the
-    # web map always has the early dates
-    w = WORK / "early"
-    early_dates = [d for d, _, _ in SETS["early"]]
-    jobs.append(Job("ww1", py("ww1_maps.py"), step="ww1", deps=["early:database", "early:coverage", "webmap"],
-                    reads=[CURATED / WW1_RULES, CURATED / "cities_1900_1934.csv",
-                           ROOT / "db" / "world_history_1900_2000.sqlite", w / "prov_units.csv", w / "prov_units.wkb"]
-                    + [w / f"prov_snapshot_{d}.csv" for d in early_dates]
-                    + [STATE / "stamps" / f"{n}.json" for n in ("early_database", "early_coverage", "webmap")]))
-    jobs.append(Job("html", py("ww2_html.py"), step="html", deps=["webmap", "ww1"],
+    # the added dates (added_dates.py) are built from the databases of their sets and appended to the map data,
+    # so they are built again whenever either is (the stamps of those jobs change with every run); with every
+    # --sets, since the web map always has all the sets
+    added_sets = sorted({g.set for g in GROUPS})
+    jobs.append(Job("added", py("add_snapshots.py"), step="added",
+                    deps=[f"{s}:{j}" for s in added_sets for j in ("database", "coverage")] + ["webmap"],
+                    reads=[CURATED / g.rules for g in GROUPS] + [CURATED / c for c in sorted({g.cities for g in GROUPS})]
+                    + [ROOT / "db" / "world_history_1900_2000.sqlite"]
+                    + [WORK / s / f for s in added_sets for f in ("prov_units.csv", "prov_units.wkb")]
+                    + [WORK / s / f"prov_snapshot_{d}.csv" for s in added_sets for d, _, _ in SETS[s]]
+                    + [STATE / "stamps" / f"{s}_{j}.json" for s in added_sets for j in ("database", "coverage")]
+                    + [STATE / "stamps" / "webmap.json"]))
+    jobs.append(Job("html", py("ww2_html.py"), step="html", deps=["webmap", "added"],
                     reads=[ROOT / "ww2" / "maps" / "template.html", ROOT / "ww2" / "maps" / "data" / "index.json"]))
     return jobs
 

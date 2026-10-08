@@ -1,15 +1,28 @@
-"""Add the 1915-1917 event-day maps to the early SQLite database and the map data.
+"""Add dates to a set's SQLite database and to the map data, without rebuilding the set.
 
-Run as the ww1 job of pipeline.py (after the early database and ww2_webmap.py), or python3 scripts/ww1_maps.py
-from a checkout. No raw downloads are required. Dated CShapes geometry and annual population come from
-world_history_1900_2000.sqlite; historical divisions and their population pattern come from
-divisions_1900_1934.sqlite. Modern reference regions are used only as explicitly approximate control masks,
+The dates, and everything particular to them, are in added_dates.py: groups of dates, each added to the
+database of one set (ww2 1939-45, early 1900-34, postwar 1946-91) from the divisions of one of its dates (the
+base date). Run as the `added` job of pipeline.py (after the sets' databases and ww2_webmap.py), or
+python3 scripts/add_snapshots.py from a checkout. No raw downloads are required. Dated CShapes geometry and
+annual population come from world_history_1900_2000.sqlite; historical divisions and their population pattern
+come from the set's database. Modern reference regions are used only as explicitly approximate control masks,
 never as the displayed historical administrative divisions.
 
 Each date gets its own snap-<date>.json and geo-<date>.bin, in the layout ww2_webmap.py writes; the divisions
-and pieces they add are appended to admin.bin, after those of the other dates. ww1-build.json records where
+and pieces they add are appended to admin.bin, after those of the other dates. added-build.json records where
 the appended part begins, so that a repeat run replaces it instead of adding it again. Database changes are
-made in a transaction.
+made in a transaction, one per database.
+
+Control rules (curated/<group.rules>), applied in file order, a later match overriding an earlier one:
+  snapshots       dates the rule applies to, "|"-separated
+  unit_match      CShapes name of the political unit ("*" wildcards, "|"-separated)
+  admin_match     admin_id of the historical division ("*" wildcards, "|"-separated)
+  reference       optional: ISO 3166-2 codes or present-day country names of reference regions (admin1_pieces of
+                  the yearly database); only the part of a division inside them is assigned (an approximate
+                  mask, never shown as a division)
+  controller_name, controller_name_zh, controller_gwcode, control_type, confidence (whole / approximate), note,
+  source_url
+A rule that matches nothing on one of its dates stops the build.
 """
 import csv
 import fnmatch
@@ -28,39 +41,22 @@ from shapely.errors import GEOSException
 from shapely.geometry import MultiPolygon, Polygon, shape
 
 import cities
+from added_dates import GROUPS
 from build_database import Namer
 from common import DB_DIR, ROOT
-from ww2_common import SNAPSHOTS_WWI, WW2_OUT
+from ww2_common import COVERAGE_SUFFIX, DATABASES, SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, SNAPSHOTS_WW2, WW2_OUT
 from ww2_database import gj
 from ww2_geo import diff, eq_area_km2, inter, polys, union
 from ww2_webmap import (BLOCS, CONF, LABEL_MIN_KM2, TOL_CTRL, TOL_PROV, TOL_UNIT,
                         color_of, dissolve, encode, label_anchor, nation_of, packed, table)
 
-DATES = {d for d, _, _ in SNAPSHOTS_WWI}
+DATES = {s.date for g in GROUPS for s in g.snapshots}
 DATA = WW2_OUT / "maps" / "data"
-DATABASE = DB_DIR / "divisions_1900_1934.sqlite"
-RULES = ROOT / "curated" / "ww1_region_control.csv"
-MARKER = DATA / "ww1-build.json"
-BASE_DATE = "1914-08-04"
-POP_METHOD = ("1914 historical province population density (original GHS-POP-derived estimates), "
-              "or the existing 1918 estimate where no 1914 province exists; "
-              "area-adjusted for new pieces and scaled to the same political unit's annual "
-              "population in world_history_1900_2000.sqlite; rounded with conserved unit totals")
-ALLIED_1915 = {200, 220, 365, 340, 345, 341, 211, 20, 900, 920, 560, 740, 325, -1}
-ALLIED = {"1915-05-23": ALLIED_1915,
-          "1916-08-27": ALLIED_1915 | {235, 360, -70},
-          "1917-04-06": ALLIED_1915 | {235, 360, 2, -70, -76}}
-AXIS = {"1915-05-23": {255, 300, 640},
-        "1916-08-27": {255, 300, 640, 355},
-        "1917-04-06": {255, 300, 640, 355}}
-NOTES = {
-    "1915-05-23": "意大利当日对奥匈宣战（战争状态次日生效），尚未对德国宣战；日本、黑山和奥斯曼已经参战，保加利亚、罗马尼亚、葡萄牙、美国、中国、希腊仍中立。东线在戈尔利采攻势期间，不能套用 1915 年秋的占领范围。",
-    "1916-08-27": "罗马尼亚当日对奥匈宣战；意大利当日另对德国宣战。葡萄牙已于 3 月参战，保加利亚属同盟国。美国、中国、希腊仍未正式参战。罗马尼亚尚未遭到同盟国的冬季占领。",
-    "1917-04-06": "美国当日对德国宣战（对奥匈宣战在 12 月）；俄国临时政府继续参加协约国战争。中国、巴西、暹罗尚未对德宣战，希腊尚未统一参战；萨洛尼卡临时政府及协约国驻军另作近似处理。俄国此时尚未发生十月革命，也未签订布列斯特和约。",
-}
-CONTROL_NOTE = ("控制区沿用原地图的省级近似方法。西线、加利西亚、非洲战场等没有精确战线资料的省份标为交战区；"
-                "部分占领范围借用同一数据库的现代地区轮廓作近似裁切，并加斜线，不代表精确战线。"
-                "人口为该年估计，并非事件日普查。历史区划缺失处保留整个政治单元。")
+MARKER = DATA / "added-build.json"
+# the dates ww2_webmap.py writes; any other date in index.json was added here
+WEBMAP_DATES = {d for d, _, _ in SNAPSHOTS_EARLY + SNAPSHOTS_WW2 + SNAPSHOTS_POSTWAR} | {"2026"}
+# how ww2_webmap.py prefixes the ids of each set's divisions in admin.bin
+PREFIX = {"ww2": "", "early": "E:", "postwar": "P:"}
 
 
 def read_json(path):
@@ -132,22 +128,21 @@ def matches(pattern, value):
     return any(fnmatch.fnmatchcase(str(value or ""), p) for p in pattern.split("|"))
 
 
-def bloc(gw, snap):
+def bloc(gw, s):
     if gw == -20:
         return "contested"
-    return "allied" if gw in ALLIED[snap] else "axis" if gw in AXIS[snap] else "neutral"
+    return "allied" if gw in s.allied else "axis" if gw in s.axis else "neutral"
 
 
-def names(units, snap):
+def names(units, group, s):
+    """Controller names on the date: the group's own codes, the independent states as the period called them
+    (unit_names.csv), then the date's own names."""
     namer = Namer()
-    out = {-1: ("Allied forces", "协约国联军"), -20: ("Contested front", "交战区（双方争夺）"),
-           -70: ("Kingdom of Hejaz", "汉志王国"), -73: ("Outer Mongolia (Bogd Khanate)", "外蒙古（博克多汗国）"),
-           -76: ("Greek Provisional Government of National Defence", "希腊国民防卫临时政府")}
+    out = dict(group.names)
     for u in units:
         if u["status"] == "independent":
-            out[u["gwcode"]] = namer(u["cshapes_name"], "independent", int(snap[:4]))
-    if snap == "1917-04-06":
-        out[365] = ("Russia (Provisional Government)", "俄国（临时政府）")
+            out[u["gwcode"]] = namer(u["cshapes_name"], "independent", int(s.date[:4]))
+    out.update(s.names)
     return out
 
 
@@ -158,12 +153,13 @@ def controller(gw, state_names, typ="independent", source="cshapes", confidence=
                 control_type=typ, control_source=source, control_confidence=confidence)
 
 
-def load_rules(world):
-    rules = list(csv.DictReader(RULES.open()))
+def load_rules(world, group):
+    rules = list(csv.DictReader((ROOT / "curated" / group.rules).open()))
     references = [dict(r) for r in world.execute("SELECT iso_3166_2, modern_country, geometry FROM admin1_pieces")]
     mask_cache = {}
     for row, rule in enumerate(rules, 2):
         rule["row"] = row
+        rule["source"] = f"{group.key}_rule:{row}"
         pattern = rule["reference"]
         if pattern and pattern not in mask_cache:
             selected = [shape(json.loads(r["geometry"])) for r in references
@@ -187,7 +183,7 @@ def control_parts(geom, admin, unit, snap, base, rules, state_names, rule_hits):
         if rule["mask"] is not None and not geom.intersects(rule["mask"]):
             continue
         ctrl = controller(int(rule["controller_gwcode"]), state_names, rule["control_type"],
-                          rule.get("source", f"ww1_rule:{rule['row']}"), rule["confidence"], rule["controller_name"], rule["controller_name_zh"])
+                          rule["source"], rule["confidence"], rule["controller_name"], rule["controller_name_zh"])
         new_parts = []
         for g, previous in parts:
             inside = polys(inter(g, rule["mask"])) if rule["mask"] is not None else g
@@ -231,9 +227,9 @@ def allocate_population(rows, total):
         r["population_est"] = int(pop)
 
 
-def new_admin(unit, geom, snap):
+def new_admin(unit, geom, snap, group):
     pt = geom.representative_point()
-    return dict(admin_id=f"WW1-CSH-{unit['unit_id']}", name=unit["unit_name_en"], name_zh=unit["unit_name_zh"],
+    return dict(admin_id=f"{group.key.upper()}-CSH-{unit['unit_id']}", name=unit["unit_name_en"], name_zh=unit["unit_name_zh"],
                 name_en=unit["unit_name_en"], tier=5, tier_zh="整个政治单元", tier_en="whole political unit",
                 kind="historical political unit (remainder)", basis="historical_unit", source="CShapes 2.0",
                 note="历史省级资料缺失的剩余区域；采用当日政治单元边界，不表示省级区划。", start_date=unit["start_date"],
@@ -242,29 +238,38 @@ def new_admin(unit, geom, snap):
                 label_lat=pt.y, geometry=gj(geom))
 
 
-def build_snapshot(con, world, snap, rules, rule_hits):
+def build_snapshot(con, world, group, s, rules, rule_hits):
+    snap, base_date = s.date, group.base
     year = int(snap[:4])
     active = [dict(r) for r in world.execute("SELECT * FROM units WHERE start_date<=? AND end_date>=? ORDER BY unit_id", (snap, snap))]
-    state_names = names(active, snap)
+    state_names = names(active, group, s)
     namer = Namer()
-    admins = [dict(r) for r in con.execute("SELECT * FROM admin_units WHERE snapshots LIKE '%1914-08-04%' ORDER BY tier, admin_id")
+    admins = [dict(r) for r in con.execute("SELECT * FROM admin_units WHERE snapshots LIKE ? ORDER BY tier, admin_id",
+                                           (f"%{base_date}%",))
               if (not r["start_date"] or r["start_date"] <= snap) and (not r["end_date"] or r["end_date"] >= snap)]
-    # Only explicitly dated replacements can add divisions absent in the 1914 reference.
-    replacements = [dict(r) for r in con.execute("SELECT * FROM admin_units WHERE tier<=4 AND "
-                                               "((start_date>? AND start_date<=?) OR basis='historical_1897') "
-                                               "AND (end_date IS NULL OR end_date>=?) AND admin_id NOT LIKE 'WW1-%' ORDER BY admin_id",
-                                               (BASE_DATE, snap, snap))]
+    # Only explicitly dated replacements can add divisions absent on the base date: those set up between the
+    # base date and this date (or, for a date before the base date, those that ended between them), and the
+    # 1897 Russian provinces, which fill the gaps last
+    between = "(start_date>? AND start_date<=?)" if snap >= base_date else "(end_date>=? AND end_date<?)"
+    bounds = (base_date, snap) if snap >= base_date else (snap, base_date)
+    replacements = [dict(r) for r in con.execute(f"SELECT * FROM admin_units WHERE tier<=4 AND "
+                                                 f"({between} OR basis='historical_1897') "
+                                                 "AND (end_date IS NULL OR end_date>=?) AND (start_date IS NULL OR start_date<=?) "
+                                                 "AND admin_id NOT LIKE ? ORDER BY admin_id",
+                                                 (*bounds, snap, snap, f"{group.key.upper()}-%"))]
     candidate_ids = {a["admin_id"] for a in admins}
     admins = [a for a in replacements if a["admin_id"] not in candidate_ids and a["basis"] != 'historical_1897'] + admins + [
         a for a in replacements if a["admin_id"] not in candidate_ids and a["basis"] == 'historical_1897']
     geoms = [outline(a["geometry"]) for a in admins]
     tree = STRtree(geoms)
-    density = {r[0]: r[1] / max(r[2], 1) for r in con.execute(
-        "SELECT admin_id,SUM(population_est),SUM(area_km2) FROM snapshot_full WHERE snapshot='1918-11-11' GROUP BY admin_id")}
-    density.update({r[0]: r[1] / max(r[2], 1) for r in con.execute(
-        "SELECT admin_id,SUM(population_est),SUM(area_km2) FROM snapshot_full WHERE snapshot=? GROUP BY admin_id", (BASE_DATE,))})
+    # people per km² of each division: on the base date, else on the first of density_from that has it
+    density = {}
+    for d in (*reversed(group.density_from), base_date):
+        density.update({r[0]: r[1] / max(r[2], 1) for r in con.execute(
+            "SELECT admin_id,SUM(population_est),SUM(area_km2) FROM snapshot_full WHERE snapshot=? GROUP BY admin_id", (d,))})
     base_controls = {r["admin_id"]: dict(r) for r in con.execute(
-        "SELECT * FROM snapshot_full WHERE snapshot=? AND control_source LIKE 'overlay:%'", (BASE_DATE,))}
+        f"SELECT * FROM snapshot_full WHERE snapshot=? AND control_source IN ({','.join('?' * len(group.keep_whole))})",
+        (base_date, *group.keep_whole))} if group.keep_whole else {}
     events = [dict(r) for r in con.execute("SELECT * FROM control_events WHERE start_date<=? AND end_date>=?", (snap, snap))]
     output, used_admins, unit_geoms = [], {}, {}
     for u in active:
@@ -274,8 +279,8 @@ def build_snapshot(con, world, snap, rules, rule_hits):
         uid = u["unit_id"]
         unit_geoms[uid] = ug
         u["unit_name_en"], u["unit_name_zh"] = namer(u["cshapes_name"], u["status"], year)
-        if u["gwcode"] == 365 and snap == "1917-04-06":
-            u["unit_name_en"], u["unit_name_zh"] = state_names[365]
+        if u["gwcode"] in s.names:
+            u["unit_name_en"], u["unit_name_zh"] = state_names[u["gwcode"]]
         owner = int(str(u["owner_gwcode"]).split(";")[0])
         sov_en, sov_zh = state_names.get(owner, (str(owner), str(owner)))
         unit_fields = dict(snapshot=snap, unit_id=uid, unit_gwcode=u["gwcode"], unit_name_en=u["unit_name_en"],
@@ -295,17 +300,17 @@ def build_snapshot(con, world, snap, rules, rule_hits):
             used_admins[a["admin_id"]] = a
             ctrl = base
             inherited = base_controls.get(a["admin_id"])
-            if inherited and inherited["control_source"] == "overlay:kwantung":
+            if inherited:
                 ctrl = {k: inherited[k] for k in base}
             for part, control in control_parts(g, a, u, snap, ctrl, rules, state_names, rule_hits):
                 area = eq_area_km2(part)
                 if area < 0.01:
                     continue
                 row = dict(unit_fields, admin_id=a["admin_id"], area_km2=area, geom=part, **control)
-                row["bloc"] = bloc(control["controller_gwcode"], snap)
+                row["bloc"] = bloc(control["controller_gwcode"], s)
                 row["weight"] = area * density.get(a["admin_id"], 1)
                 row["control_split"] = int(control != base)
-                row["piece_id"] = f"WW1:{snap}:{uid}:{a['admin_id']}:{len(unit_rows)}"
+                row["piece_id"] = f"{group.key.upper()}:{snap}:{uid}:{a['admin_id']}:{len(unit_rows)}"
                 unit_rows.append(row)
 
         for i in sorted(tree.query(ug, predicate="intersects")):
@@ -318,9 +323,9 @@ def build_snapshot(con, world, snap, rules, rule_hits):
             add(a, cut)
             remaining = polys(diff(remaining, geoms[i]))
         if remaining is not None and eq_area_km2(remaining) >= 0.01:
-            aid = f"WW1-CSH-{uid}"
+            aid = f"{group.key.upper()}-CSH-{uid}"
             existing = con.execute("SELECT * FROM admin_units WHERE admin_id=?", (aid,)).fetchone()
-            a = dict(existing) if existing else new_admin(u, remaining, snap)
+            a = dict(existing) if existing else new_admin(u, remaining, snap, group)
             add(a, remaining)
         if not unit_rows:
             raise ValueError(f"Empty political unit: {uid}")
@@ -328,15 +333,15 @@ def build_snapshot(con, world, snap, rules, rule_hits):
         output.extend(unit_rows)
     # Small island territories absent from CShapes retain the original database's records.
     for r in con.execute("SELECT s.*,p.geometry AS piece_geometry,a.geometry AS admin_geometry FROM snapshot_full s "
-                         "JOIN pieces p USING(piece_id) JOIN admin_units a USING(admin_id) WHERE s.snapshot=? AND s.unit_id<0", (BASE_DATE,)):
+                         "JOIN pieces p USING(piece_id) JOIN admin_units a USING(admin_id) WHERE s.snapshot=? AND s.unit_id<0", (base_date,)):
         row = dict(r)
         a = dict(con.execute("SELECT * FROM admin_units WHERE admin_id=?", (row["admin_id"],)).fetchone())
         if (a["start_date"] and a["start_date"] > snap) or (a["end_date"] and a["end_date"] < snap):
             continue
         used_admins[a["admin_id"]] = a
-        row.update(snapshot=snap, piece_id=f"WW1:{snap}:{row['piece_id']}",
+        row.update(snapshot=snap, piece_id=f"{group.key.upper()}:{snap}:{row['piece_id']}",
                    geom=outline(row["piece_geometry"] or row["admin_geometry"]),
-                   bloc=bloc(row["controller_gwcode"], snap))
+                   bloc=bloc(row["controller_gwcode"], s))
         output.append(row)
     piece_counts = Counter(r["admin_id"] for r in output)
     for r in output:
@@ -344,8 +349,8 @@ def build_snapshot(con, world, snap, rules, rule_hits):
     return output, used_admins, unit_geoms
 
 
-def store_snapshot(con, rows, admins, snapshot):
-    snap, zh, en = snapshot
+def store_snapshot(con, rows, admins, s, pop_method):
+    snap, zh, en = s.date, s.title_zh, s.title_en
     for aid, a in admins.items():
         existing = con.execute("SELECT admin_key,snapshots FROM admin_units WHERE admin_id=?", (aid,)).fetchone()
         if existing:
@@ -359,8 +364,8 @@ def store_snapshot(con, rows, admins, snapshot):
     ccols = [r[1] for r in con.execute("PRAGMA table_info(controls)") if r[1] != "control_id"]
     controls = {tuple(r[k] for k in ccols): r["control_id"] for r in con.execute("SELECT * FROM controls")}
     con.execute("INSERT OR IGNORE INTO pop_methods(pop_method) SELECT ? WHERE NOT EXISTS "
-                "(SELECT 1 FROM pop_methods WHERE pop_method=?)", (POP_METHOD, POP_METHOD))
-    method = con.execute("SELECT pop_method_id FROM pop_methods WHERE pop_method=?", (POP_METHOD,)).fetchone()[0]
+                "(SELECT 1 FROM pop_methods WHERE pop_method=?)", (pop_method, pop_method))
+    method = con.execute("SELECT pop_method_id FROM pop_methods WHERE pop_method=?", (pop_method,)).fetchone()[0]
     unit_seen = set()
     for r in rows:
         if r["unit_id"] not in unit_seen:
@@ -387,11 +392,12 @@ def static_hash(static):
 
 
 def base_assets():
-    """admin.bin and index.json as ww2_webmap.py wrote them. When this script has run on them before, what it
-    appended (divisions, pieces, look-up values, the three dates) is taken off again, back to the lengths
-    ww1-build.json recorded; the checksum there makes sure nothing else changed since."""
+    """admin.bin and index.json as ww2_webmap.py wrote them. When this script has run on them before (index.json
+    has dates ww2_webmap.py does not write), what it appended (divisions, pieces, look-up values, the dates) is
+    taken off again, back to the lengths added-build.json recorded; the checksum there makes sure nothing else
+    changed since."""
     static, index = json.loads(unpack(DATA / "admin.bin")), read_json(DATA / "index.json")
-    if any(s["snapshot"] in DATES for s in index["snapshots"]):
+    if any(s["snapshot"] not in WEBMAP_DATES for s in index["snapshots"]):
         old = read_json(MARKER)
         n = static["n"] = old["admins"]
         for col in ("admin_id", "tier", "partial", "merged", "area", "label"):
@@ -401,15 +407,17 @@ def base_assets():
             col["lut"] = col["lut"][:old["luts"][key]]
         static["feature_admin"] = static["feature_admin"][:old["features"]]
         if static_hash(static) != old["sha256"]:
-            raise ValueError("admin.bin changed since ww1_maps.py last ran; run ww2_webmap.py before ww1_maps.py")
-        index["snapshots"] = [s for s in index["snapshots"] if s["snapshot"] not in DATES]
+            raise ValueError("admin.bin changed since add_snapshots.py last ran; run ww2_webmap.py before add_snapshots.py")
+        index["snapshots"] = [s for s in index["snapshots"] if s["snapshot"] in WEBMAP_DATES]
     marker = {"admins": static["n"], "features": len(static["feature_admin"]),
               "luts": {k: len(c["lut"]) for k, c in static["cols"].items()}, "sha256": static_hash(static)}
     return static, index, marker
 
 
-def append_admin(static, a):
-    aid = "E:" + a["admin_id"]
+def append_admin(static, a, prefix):
+    """The index of a division in admin.bin (prefix: its set's, as ww2_webmap.py writes the ids), appended when
+    it is not there yet."""
+    aid = prefix + a["admin_id"]
     if aid in static["admin_id"]:
         return static["admin_id"].index(aid)
     i = static["n"]
@@ -435,15 +443,15 @@ def anchors(g):
                 yield a + [round(km2)]
 
 
-def export_snapshot(rows, admins, ug, snapshot, static, unit_indices, new_unit):
+def export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit):
     """The date's snap-<date>.json and its summary for index.json; writes its geo-<date>.bin."""
-    snap, zh, en = snapshot
+    snap, zh, en = s.date, s.title_zh, s.title_en
     d = pd.DataFrame(rows)
     features, admin_indices, admin_rec, piece_rec = [], {}, {}, {}
     for r in rows:
         a = admins[r["admin_id"]]
         if r["admin_id"] not in admin_indices:
-            ai = admin_indices[r["admin_id"]] = append_admin(static, a)
+            ai = admin_indices[r["admin_id"]] = append_admin(static, a, PREFIX[group.set])
             admin_rec[ai] = encode([shape(json.loads(a["geometry"]))], TOL_PROV)
         fi = len(static["feature_admin"])
         static["feature_admin"].append(admin_indices[r["admin_id"]])
@@ -496,9 +504,11 @@ def export_snapshot(rows, admins, ug, snapshot, static, unit_indices, new_unit):
                units_active=[unit_indices[u] for u in unit_list],
                admin_active=sorted(admin_indices.values()), unit_labels=unit_labels, geo_feature=sorted(piece_rec),
                countries=countries,
-               country_labels=country_labels, cities=cities.ww2(snap, use_curated_coordinates=True),
-               bloc_names={"allied": "协约国及其盟国（已参战）", "axis": "同盟国（已参战）", "neutral": "中立国 / 尚未参战", "contested": "交战区"},
-               notes=dict(bloc_title="参战国 · 人口", bloc=NOTES[snap], control=CONTROL_NOTE),
+               country_labels=country_labels,
+               cities=cities.ww2(snap, use_curated_coordinates=True, table=group.cities, code=s.city_code),
+               bloc_names=s.bloc_names or group.bloc_names,
+               notes=dict(bloc_title=s.bloc_title or group.bloc_title, bloc=s.bloc_note,
+                          control=s.control_note or group.control_note),
                bloc_pop={b: sum(r["population_est"] for r in rows if r["bloc"] == b) for b in BLOCS},
                tier_count={str(t): n for t, n in sorted(Counter(a["tier"] for a in admins.values()).items())})
     summary = dict(snapshot=snap, title_zh=zh, title_en=en, pieces=len(rows), admin_units=len(admins), countries=len(countries),
@@ -529,7 +539,69 @@ def coverage(con):
     return pd.DataFrame(rows), pd.DataFrame(units)
 
 
+def inherited_rules(con, group):
+    """Control of the base date carried over to the group's dates piece by piece (group.inherit): each piece
+    with one of those sources becomes a rule whose mask is the piece."""
+    if not group.inherit:
+        return []
+    out = []
+    for r in con.execute("SELECT s.*,p.geometry AS pg,a.geometry AS ag FROM snapshot_full s JOIN pieces p USING(piece_id) "
+                         f"JOIN admin_units a USING(admin_id) WHERE s.snapshot=? AND s.control_source IN "
+                         f"({','.join('?' * len(group.inherit))})", (group.base, *group.inherit)):
+        out.append(dict(snapshots="|".join(sorted(s.date for s in group.snapshots)), unit_match="*", admin_match="*",
+                        row=-len(out)-1, controller_gwcode=r["controller_gwcode"],
+                        controller_name=r["controller_detail_en"] or r["controller_name_en"],
+                        controller_name_zh=r["controller_detail_zh"] or r["controller_name_zh"],
+                        control_type=r["control_type"], confidence=r["control_confidence"],
+                        source=f"baseline:{group.base}:{r['control_source']}", mask=outline(r["pg"] or r["ag"])))
+    return out
+
+
+def add_group(con, world, group, static, index, unit_indices, new_unit, documents):
+    """Build the group's dates into its set's database (an open transaction) and into the map data."""
+    key, dates = group.key, [s.date for s in group.snapshots]
+    rules = load_rules(world, group)
+    rule_hits = set()
+    for snap in dates:
+        con.execute("DELETE FROM piece_snapshot WHERE snapshot=?", (snap,))
+        con.execute("DELETE FROM unit_snapshot WHERE snapshot=?", (snap,))
+        con.execute("DELETE FROM snapshots WHERE snapshot=?", (snap,))
+    con.execute("DELETE FROM pieces WHERE piece_id LIKE ?", (f"{key.upper()}:%",))
+    inherited = inherited_rules(con, group)
+    for s in group.snapshots:
+        rows, admins, ug = build_snapshot(con, world, group, s, inherited + rules, rule_hits)
+        store_snapshot(con, rows, admins, s, group.pop_method)
+        doc, summary = export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit)
+        documents[s.date] = doc
+        index["snapshots"].append(summary)
+        print(s.date, len(rows), "pieces;", len(admins), "historical divisions;", len(doc["countries"]), "controllers",
+              flush=True)
+    missing = [(snap, r["row"]) for r in rules for snap in r["snapshots"].split("|") if (snap, r["row"]) not in rule_hits]
+    if missing:
+        raise ValueError(f"Unmatched control rules in {group.rules} (date, row): {missing}")
+    con.execute("DELETE FROM control_rules WHERE field LIKE ?", (f"{key}:%",))
+    next_row = con.execute("SELECT COALESCE(MAX(row),1)+1 FROM control_rules").fetchone()[0]
+    for offset, rule in enumerate(rules):
+        con.execute("INSERT INTO control_rules VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                    (next_row+offset, rule["snapshots"], "*", f"{key}:{rule['row']}",
+                     f"unit={rule['unit_match']};admin={rule['admin_match']};reference={rule['reference']}",
+                     rule["controller_name"], rule["controller_name_zh"], int(rule["controller_gwcode"]),
+                     rule["control_type"], rule["confidence"], rule["note"] + " Source: " + rule["source_url"]))
+    mk = group.meta_key or key
+    con.executemany("INSERT OR REPLACE INTO meta VALUES (?,?)",
+                    [(f"{mk}_method", group.pop_method),
+                     (f"{mk}_control", f"curated/{group.rules}; approximate reference masks flagged in controls")])
+    for i, url in enumerate(sorted({r["source_url"] for r in rules}), 1):
+        con.execute("INSERT OR REPLACE INTO sources VALUES (?,?,?,?,?,?)", (f"{key}-control-{i}", f"{group.label or key} control reference",
+                     f"Historical facts underlying curated/{group.rules}; see each rule's note", url,
+                     "Reference text: respective publisher; curated rules: CC0",
+                     f"{group.period} event-day control facts; no source text or source map reproduced".strip()))
+
+
 def main():
+    dates = [s.date for g in GROUPS for s in g.snapshots]
+    if len(set(dates)) != len(dates) or DATES & WEBMAP_DATES:
+        raise ValueError("A date is in two groups of added_dates.py, or is built by a set already")
     static, index, marker = base_assets()
     # Existing unit indices are recoverable from each snapshot's parallel nation/unit arrays; new units are
     # numbered after all of them
@@ -544,56 +616,24 @@ def main():
                 if s["snapshot"] != "2026":
                     unit_indices[uid] = ui
     new_unit = count(top + 1)
-    con = sqlite3.connect(DATABASE)
-    con.row_factory = sqlite3.Row
     world = sqlite3.connect(f"file:{DB_DIR / 'world_history_1900_2000.sqlite'}?mode=ro", uri=True)
     world.row_factory = sqlite3.Row
-    rules = load_rules(world)
-    # Retain dated enclaves already curated in the original 1914 map. Use each
-    # original piece as a mask rather than assigning its whole parent province.
-    inherited_rules = []
-    for r in con.execute("SELECT s.*,p.geometry AS pg,a.geometry AS ag FROM snapshot_full s JOIN pieces p USING(piece_id) "
-                         "JOIN admin_units a USING(admin_id) WHERE s.snapshot=? AND s.control_source IN ('rule:8','rule:9','rule:69','overlay:kwantung')", (BASE_DATE,)):
-        inherited_rules.append(dict(snapshots="|".join(sorted(DATES)), unit_match="*", admin_match="*", row=-len(inherited_rules)-1,
-                                    controller_gwcode=r["controller_gwcode"], controller_name=r["controller_detail_en"] or r["controller_name_en"],
-                                    controller_name_zh=r["controller_detail_zh"] or r["controller_name_zh"], control_type=r["control_type"],
-                                    confidence=r["control_confidence"], source=f"baseline:{BASE_DATE}:{r['control_source']}",
-                                    mask=outline(r["pg"] or r["ag"])))
-    documents, rule_hits = {}, set()
-    with con:
-        for snap in DATES:
-            con.execute("DELETE FROM piece_snapshot WHERE snapshot=?", (snap,))
-            con.execute("DELETE FROM unit_snapshot WHERE snapshot=?", (snap,))
-            con.execute("DELETE FROM snapshots WHERE snapshot=?", (snap,))
-        con.execute("DELETE FROM pieces WHERE piece_id LIKE 'WW1:%'")
-        for snapshot in SNAPSHOTS_WWI:
-            rows, admins, ug = build_snapshot(con, world, snapshot[0], inherited_rules + rules, rule_hits)
-            store_snapshot(con, rows, admins, snapshot)
-            doc, summary = export_snapshot(rows, admins, ug, snapshot, static, unit_indices, new_unit)
-            documents[snapshot[0]] = doc
-            index["snapshots"].append(summary)
-            print(snapshot[0], len(rows), "pieces;", len(admins), "historical divisions;", len(doc["countries"]), "controllers", flush=True)
-        missing = [(snap, r["row"]) for r in rules for snap in r["snapshots"].split("|") if (snap, r["row"]) not in rule_hits]
-        if missing:
-            raise ValueError(f"Unmatched control rules: {missing}")
-        con.execute("DELETE FROM control_rules WHERE field LIKE 'ww1:%'")
-        next_row = con.execute("SELECT COALESCE(MAX(row),1)+1 FROM control_rules").fetchone()[0]
-        for offset, rule in enumerate(rules):
-            con.execute("INSERT INTO control_rules VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                        (next_row+offset, rule["snapshots"], "*", f"ww1:{rule['row']}",
-                         f"unit={rule['unit_match']};admin={rule['admin_match']};reference={rule['reference']}",
-                         rule["controller_name"], rule["controller_name_zh"], int(rule["controller_gwcode"]),
-                         rule["control_type"], rule["confidence"], rule["note"] + " Source: " + rule["source_url"]))
-        meta = dict(snapshots=";".join(r[0] for r in con.execute("SELECT snapshot FROM snapshots ORDER BY snapshot")),
-                    wwi_method=POP_METHOD, wwi_control="curated/ww1_region_control.csv; approximate reference masks flagged in controls")
-        con.executemany("INSERT OR REPLACE INTO meta VALUES (?,?)", meta.items())
-        for i, url in enumerate(sorted({r["source_url"] for r in rules}), 1):
-            con.execute("INSERT OR REPLACE INTO sources VALUES (?,?,?,?,?,?)", (f"ww1-control-{i}", "WWI control reference",
-                         "Historical facts underlying curated/ww1_region_control.csv; see each rule's note", url,
-                         "Reference text: respective publisher; curated rules: CC0", "1915-1917 event-day control facts; no source text or source map reproduced"))
-        cov, cov_units = coverage(con)
-    con.execute("VACUUM")
-    con.close()
+    documents = {}
+    for set_name in dict.fromkeys(g.set for g in GROUPS):  # each database once, in the order of the groups
+        con = sqlite3.connect(DATABASES[set_name])
+        con.row_factory = sqlite3.Row
+        with con:
+            for group in GROUPS:
+                if group.set == set_name:
+                    add_group(con, world, group, static, index, unit_indices, new_unit, documents)
+            con.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("snapshots", ";".join(
+                r[0] for r in con.execute("SELECT snapshot FROM snapshots ORDER BY snapshot"))))
+            cov, cov_units = coverage(con)
+        con.execute("VACUUM")
+        con.close()
+        cov.to_csv(WW2_OUT / f"coverage{COVERAGE_SUFFIX[set_name]}.csv", index=False)
+        cov_units.to_csv(WW2_OUT / f"coverage_by_unit{COVERAGE_SUFFIX[set_name]}.csv", index=False)
+        print("Updated", DATABASES[set_name])
     world.close()
     for snap, doc in documents.items():
         write_json(DATA / f"snap-{snap}.json", doc)
@@ -601,9 +641,7 @@ def main():
     packed(DATA / "admin.bin", json.dumps(static, ensure_ascii=False, separators=(",", ":")).encode())
     write_json(DATA / "index.json", index)
     write_json(MARKER, marker)
-    cov.to_csv(WW2_OUT / "coverage_1900_1934.csv", index=False)
-    cov_units.to_csv(WW2_OUT / "coverage_by_unit_1900_1934.csv", index=False)
-    print("Updated", DATABASE, "and", DATA)
+    print("Updated", DATA)
 
 
 if __name__ == "__main__":
