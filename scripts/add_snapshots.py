@@ -62,6 +62,9 @@ WEBMAP_DATES = {d for d, _, _ in SNAPSHOTS_EARLY + SNAPSHOTS_WW2 + SNAPSHOTS_POS
 PREFIX = {"ww2": "", "early": "E:", "postwar": "P:"}
 
 
+SHARED = "ADD"  # piece_id prefix of the pieces the added dates store (one outline per division and cut)
+
+
 def read_json(path):
     return json.loads(path.read_text())
 
@@ -368,7 +371,12 @@ def build_snapshot(con, world, group, s, rules, rule_hits):
             inherited = base_controls.get(a["admin_id"])
             if inherited:
                 ctrl = {k: inherited[k] for k in base}
-            for part, control in control_parts(g, a, u, snap, ctrl, rules, state_names, rule_hits):
+            parts = control_parts(g, a, u, snap, ctrl, rules, state_names, rule_hits)
+            if a["admin_id"].endswith(f"-CSH-{uid}") and len(parts) > 1:
+                # land without provinces (islands, lakes, slivers between divisions all over the unit) is not cut:
+                # it takes the controller of its largest part, so that no outline is stored for it on every date
+                parts = [(g, max(parts, key=lambda p: eq_area_km2(p[0]))[1])]
+            for part, control in parts:
                 area = eq_area_km2(part)
                 if area < 0.01:
                     continue
@@ -429,7 +437,7 @@ def build_snapshot(con, world, group, s, rules, rule_hits):
 def store_snapshot(con, rows, admins, s, pop_method, group, stored):
     """The date's rows in the database. A piece that is its whole division keeps no outline of its own (as in the
     sets' databases); one cut from it does, and is stored once for all the group's dates it is the same on
-    (stored: (division, outline) -> piece key)."""
+    (stored: (division, outline) -> piece key), and by the dates of the other groups too (piece_id SHARED:...)."""
     snap, zh, en = s.date, s.title_zh, s.title_en
     for aid, a in admins.items():
         existing = con.execute("SELECT admin_key,snapshots FROM admin_units WHERE admin_id=?", (aid,)).fetchone()
@@ -458,11 +466,13 @@ def store_snapshot(con, rows, admins, s, pop_method, group, stored):
             controls[key] = cur.lastrowid
         geometry = gj(r["geom"]) if r["control_split"] else None
         piece = (r["admin_id"], geometry)
-        if piece not in stored:
+        if piece not in stored:  # shared by all the added dates (of every group) it is the same on
             digest = hashlib.md5((geometry or "").encode()).hexdigest()[:12]
-            stored[piece] = con.execute("INSERT INTO pieces(piece_id,admin_key,area_km2,geometry) VALUES (?,?,?,?)",
-                                      (f"{group.key.upper()}:{r['admin_id']}" + (f"~{digest}" if geometry else ""),
-                                       admin_keys[r["admin_id"]], r["area_km2"], geometry)).lastrowid
+            piece_id = f"{SHARED}:{r['admin_id']}" + (f"~{digest}" if geometry else "")
+            found = con.execute("SELECT piece_key FROM pieces WHERE piece_id=?", (piece_id,)).fetchone()
+            stored[piece] = found[0] if found else con.execute(
+                "INSERT INTO pieces(piece_id,admin_key,area_km2,geometry) VALUES (?,?,?,?)",
+                (piece_id, admin_keys[r["admin_id"]], r["area_km2"], geometry)).lastrowid
         con.execute("INSERT INTO piece_snapshot VALUES (?,?,?,?,?,?,?,?)", (snap, stored[piece], r["unit_id"],
                     controls[key], r["control_split"], r["area_km2"], r["population_est"], method))
     pops = Counter()
@@ -678,7 +688,6 @@ def add_group(con, world, group, static, index, unit_indices, new_unit, document
         con.execute("DELETE FROM piece_snapshot WHERE snapshot=?", (snap,))
         con.execute("DELETE FROM unit_snapshot WHERE snapshot=?", (snap,))
         con.execute("DELETE FROM snapshots WHERE snapshot=?", (snap,))
-    con.execute("DELETE FROM pieces WHERE piece_id LIKE ?", (f"{key.upper()}:%",))
     inherited = inherited_rules(con, group)
     stored = {}
     for s in group.snapshots:
@@ -739,6 +748,10 @@ def main():
             for group in GROUPS:
                 if group.set == set_name:
                     add_group(con, world, group, static, index, unit_indices, new_unit, documents)
+            # pieces no date uses any more (of an earlier build, or with the group prefix of older builds)
+            prefixes = [SHARED] + [g.key.upper() for g in GROUPS]
+            con.execute("DELETE FROM pieces WHERE (" + " OR ".join("piece_id LIKE ?" for _ in prefixes) + ") "
+                        "AND piece_key NOT IN (SELECT piece_key FROM piece_snapshot)", [p + ":%" for p in prefixes])
             con.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("snapshots", ";".join(
                 r[0] for r in con.execute("SELECT snapshot FROM snapshots ORDER BY snapshot"))))
             cov, cov_units = coverage(con)
