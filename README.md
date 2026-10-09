@@ -48,6 +48,7 @@ npx --yes http-server -p 8000        # 已安装 Node.js 时也可以用这个
 | http://localhost:8000/1940-07-01.html | 法国停战后 |
 | http://localhost:8000/1941-12-07.html | 珍珠港事件当日 |
 | http://localhost:8000/1942-11-01.html | 轴心国最大范围 |
+| http://localhost:8000/1941-06-22.html … 1941-12-01.html | 1941 年 6–12 月断面（苏德战争开始与每月 1 日，见 [说明](ww2/README.md#1941-年-612-月断面)） |
 | http://localhost:8000/1942-01-01.html … 1942-12-01.html | 1942 年逐月断面（每月 1 日，见 [说明](ww2/README.md#1942-年逐月断面)） |
 | http://localhost:8000/1944-06-06.html | 诺曼底登陆日 |
 | http://localhost:8000/1945-09-02.html | 日本签署投降书 |

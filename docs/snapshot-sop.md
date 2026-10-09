@@ -266,13 +266,14 @@ CShapes 修补（UNIT_FIX / UNCOVERED / unit_names）：
 7. **禁止**手改 `added-build.json` 的校验值。若脚本报 “admin.bin changed since add_snapshots.py last ran”，先重跑 `ww2_webmap.py` 再跑 A。
 8. 路径 A 的局限：只会用到数据库里**已有**的区划（基准断面的，加上带施行日期的替代区划）；基准日期与新日期之间若有未收录的行政改革，不会出现，应在图例或提交说明中注明，或改走 B。
 
-#### 8.1.1 按历史态势图描战线（东线 1942 的做法）
+#### 8.1.1 按历史态势图描战线（东线 1941–1942 的做法）
 
-1. 每个日期取一张态势图（德俄项目 CAMO 500/12457 的 Lage Ost，取断面前一晚或最近一天），在 `curated/lagekarten_1942.json` 中登记 `map_date`、`akte`、`url`。
+1. 每个日期取一张态势图（德俄项目 CAMO 500/12457 的 Lage Ost，取断面前一晚或最近一天），在 `curated/lagekarten_<年份>.json` 中登记 `map_date`、`akte`、`url`。
 2. 在预览图（1966 像素宽）上读 10–20 个控制点（城镇、海岸），二次多项式拟合；残差超过约 20 km 的区域补本地控制点，必要时同一张图分段各用一组控制点。先核对已有控制点的位置（斯大林格勒点曾整体错位 40 像素）。
 3. 先把上月战线叠到新图上（`overlay`），只重读变化的段落；未变的段落以 `{"lonlat": …, "note": …}` 沿用并注明。
 4. 包围圈、突出部、城内残留阵地写成 `pockets`（`side` 为 `axis` / `soviet`）；线穿过城镇等需要挪动的点写进 `adjustments`。尾段 `tail` 要把线带进海里，并让对岸（如塔曼半岛）落在正确一侧。
-5. 运行 `python3 scripts/lagekarten.py` 生成 `curated/frontlines_1942/<日期>.geojson`，再用一组关键城镇检查两侧归属（勒热夫、沃罗涅日、斯大林格勒、莫兹多克等），然后在规则表中按 `axis`、`soviet`、`axis_pocket`、`soviet_pocket` 的顺序写 `file:` 规则。
+5. 图上没有连续战线时（1941 年夏秋的运动战），沿德军最前沿的师、军位置以经纬度连线，把校准过的图页以 `front: []` 登记在该日期下，只用于叠图核对；同一印版的各期图用 SIFT 转移控制点后，要逐点看一遍（折页拼接处常常错位）。
+6. 运行 `python3 scripts/lagekarten.py [年份]` 生成 `curated/frontlines_<年份>/<日期>.geojson`，再用一组关键城镇检查两侧归属（勒热夫、沃罗涅日、斯大林格勒、莫兹多克等），然后在规则表中按 `axis`、（基准日期上其他轴心国的块，如 `base:rule:18|rule:21` 罗马尼亚）、`soviet`、`axis_pocket`、`soviet_pocket` 的顺序写 `file:` 规则。
 
 ### 8.2 路径 B：完整流水线
 
