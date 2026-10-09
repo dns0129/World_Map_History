@@ -44,9 +44,13 @@ def check_map(static, index):
         assert sorted(v[8] for v in doc["countries"]) == list(range(len(doc["countries"])))
         assert all(0 <= v < static["n"] for v in doc["admin_active"])
         assert {static["feature_admin"][f] for f in doc["feature"]} <= set(doc["admin_active"])
-        # the date's outlines: its divisions, cut pieces, units and control areas, in that order
+        # the date's outlines: its divisions (those its base date's file lacks), cut pieces, units and control areas
         n_geo = len(decode_geo(unpack(DATA / f"geo-{snap}.bin"))[0])
-        assert n_geo == len(doc["admin_active"]) + len(doc["geo_feature"]) + len(doc["units_active"]) + len(doc["countries"]), snap
+        own = doc.get("admin_geo", doc["admin_active"])
+        assert n_geo == len(own) + len(doc["geo_feature"]) + len(doc["units_active"]) + len(doc["countries"]), snap
+        if "admin_base" in doc:  # the rest of the outlines come from the base date's file
+            base = json.loads((DATA / f"snap-{doc['admin_base']}.json").read_text())
+            assert set(doc["admin_active"]) <= set(own) | set(base["admin_active"]), snap
         assert sum(doc["pop"]) == sum(doc["bloc_pop"].values()) == s["population"]
         assert sum(c[5] for c in doc["countries"]) == sum(n[6] for n in doc["nations"]) == sum(doc["pop"])
         for col, vals in doc["rows"].items():

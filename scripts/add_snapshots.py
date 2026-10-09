@@ -42,7 +42,7 @@ import numpy as np
 import pandas as pd
 from shapely import STRtree, make_valid, prepare
 from shapely.errors import GEOSException
-from shapely.geometry import MultiPolygon, Polygon, shape
+from shapely.geometry import MultiPolygon, Polygon, box, shape
 
 import cities
 from added_dates import GROUPS
@@ -63,16 +63,17 @@ WEBMAP_DATES = {d for d, _, _ in SNAPSHOTS_EARLY + SNAPSHOTS_WW2 + SNAPSHOTS_POS
 PREFIX = {"ww2": "", "early": "E:", "postwar": "P:"}
 
 
+TILE_DEG = 10  # land without provinces is divided into tiles of this size (degrees)
 SHARED = "ADD"  # piece_id prefix of the pieces the added dates store (one outline per division and cut)
 
 
 def own_outline(r, a):
     """Whether a row's piece keeps an outline of its own: cut from its division, or the land without provinces of
-    a group (KEY-CSH-<unit>) where it differs from the outline its division was built with on its first date by more
+    a group (KEY-CSH-<unit>-<tile>) where it differs from the outline its division was built with on its first date by more
     than 1% of its area (the divisions around it end and begin)."""
     if r["control_split"]:
         return True
-    if re.fullmatch(r"[A-Z0-9]+-CSH-\d+", r["admin_id"]) is None:
+    if re.fullmatch(r"[A-Z0-9]+-CSH-\d+-\d+_\d+", r["admin_id"]) is None:
         return False
     # slivers under min_piece_km2 merged into it are left out (they would store the whole outline again)
     return abs(r["area_km2"] - (a.get("area_km2") or 0)) > 0.01 * max(r["area_km2"], 1)
@@ -309,9 +310,9 @@ def allocate_population(rows, total):
         r["population_est"] = int(pop)
 
 
-def new_admin(unit, geom, snap, group):
+def new_admin(unit, geom, snap, group, aid):
     pt = geom.representative_point()
-    return dict(admin_id=f"{group.key.upper()}-CSH-{unit['unit_id']}", name=unit["unit_name_en"], name_zh=unit["unit_name_zh"],
+    return dict(admin_id=aid, name=unit["unit_name_en"], name_zh=unit["unit_name_zh"],
                 name_en=unit["unit_name_en"], tier=5, tier_zh="整个政治单元", tier_en="whole political unit",
                 kind="historical political unit (remainder)", basis="historical_unit", source="CShapes 2.0",
                 note="历史省级资料缺失的剩余区域；采用当日政治单元边界，不表示省级区划。", start_date=unit["start_date"],
@@ -384,12 +385,7 @@ def build_snapshot(con, world, group, s, rules, rule_hits):
             inherited = base_controls.get(a["admin_id"])
             if inherited:
                 ctrl = {k: inherited[k] for k in base}
-            parts = control_parts(g, a, u, snap, ctrl, rules, state_names, rule_hits)
-            if a["admin_id"].endswith(f"-CSH-{uid}") and len(parts) > 1:
-                # land without provinces (islands, lakes, slivers between divisions all over the unit) is not cut:
-                # it takes the controller of its largest part, so that no outline is stored for it on every date
-                parts = [(g, max(parts, key=lambda p: eq_area_km2(p[0]))[1])]
-            for part, control in parts:
+            for part, control in control_parts(g, a, u, snap, ctrl, rules, state_names, rule_hits):
                 area = eq_area_km2(part)
                 if area < 0.01:
                     continue
@@ -410,10 +406,18 @@ def build_snapshot(con, world, group, s, rules, rule_hits):
             add(a, cut)
             remaining = polys(diff(remaining, geoms[i]))
         if remaining is not None and eq_area_km2(remaining) >= 0.01:
-            aid = f"{group.key.upper()}-CSH-{uid}"
-            existing = con.execute("SELECT * FROM admin_units WHERE admin_id=?", (aid,)).fetchone()
-            a = dict(existing) if existing else new_admin(u, remaining, snap, group)
-            add(a, remaining)
+            # land without provinces (islands, lakes, slivers between divisions all over the unit) in tiles of
+            # TILE_DEG degrees, each a division of its own: a front cuts only the tiles it crosses
+            x0, y0, x1, y1 = remaining.bounds
+            for ix in range(math.floor(x0 / TILE_DEG), math.floor(x1 / TILE_DEG) + 1):
+                for iy in range(math.floor(y0 / TILE_DEG), math.floor(y1 / TILE_DEG) + 1):
+                    tile = polys(inter(remaining, box(ix * TILE_DEG, iy * TILE_DEG, (ix + 1) * TILE_DEG,
+                                                      (iy + 1) * TILE_DEG)))
+                    if tile is None or eq_area_km2(tile) < 0.01:
+                        continue
+                    aid = f"{group.key.upper()}-CSH-{uid}-{ix + 180 // TILE_DEG}_{iy + 90 // TILE_DEG}"  # >= 0
+                    existing = con.execute("SELECT * FROM admin_units WHERE admin_id=?", (aid,)).fetchone()
+                    add(dict(existing) if existing else new_admin(u, tile, snap, group, aid), tile)
         if not unit_rows:
             raise ValueError(f"Empty political unit: {uid}")
         if group.min_piece_km2:
@@ -571,6 +575,16 @@ def country_of(r, group):
     return str(int(gw))
 
 
+_BASE_ADMINS = {}
+
+
+def base_admins(base):
+    """The divisions whose outlines a base date's geo file carries (its snapshot's admin_active)."""
+    if base not in _BASE_ADMINS:
+        _BASE_ADMINS[base] = set(read_json(DATA / f"snap-{base}.json")["admin_active"])
+    return _BASE_ADMINS[base]
+
+
 def export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit):
     """The date's snap-<date>.json and its summary for index.json; writes its geo-<date>.bin."""
     snap, zh, en = s.date, s.title_zh, s.title_en
@@ -635,6 +649,9 @@ def export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit):
                pop=[r["population_est"] for r in rows], luts=luts, rows=lut_rows,
                units_active=[unit_indices[u] for u in unit_list],
                admin_active=sorted(admin_indices.values()), unit_labels=unit_labels, geo_feature=sorted(piece_rec),
+               # outlines of divisions the base date's file already carries are not repeated: the page loads the base
+               # date first (admin_base) and reads from this file only the outlines listed in admin_geo
+               admin_base=group.base, admin_geo=sorted(set(admin_indices.values()) - base_admins(group.base)),
                countries=countries,
                country_labels=country_labels,
                cities=cities.ww2(snap, use_curated_coordinates=True, table=group.cities, code=s.city_code),
@@ -646,7 +663,7 @@ def export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit):
     summary = dict(snapshot=snap, title_zh=zh, title_en=en, pieces=len(rows), admin_units=len(admins), countries=len(countries),
                    population=sum(doc["pop"]), bloc_pop=doc["bloc_pop"], tier_count=doc["tier_count"])
     # in the order the page reads them: divisions, cut pieces, units, control areas (see ww2_webmap.py)
-    packed(DATA / f"geo-{snap}.bin", b"".join([admin_rec[a] for a in doc["admin_active"]]
+    packed(DATA / f"geo-{snap}.bin", b"".join([admin_rec[a] for a in doc["admin_geo"]]
                                               + [piece_rec[f] for f in doc["geo_feature"]]
                                               + [encode([ug[u]], TOL_UNIT) for u in unit_list])
            + encode(ctrl_geoms, TOL_CTRL))
