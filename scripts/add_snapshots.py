@@ -33,6 +33,7 @@ import gzip
 import hashlib
 import json
 import math
+import re
 import sqlite3
 from collections import Counter
 from itertools import count
@@ -63,6 +64,13 @@ PREFIX = {"ww2": "", "early": "E:", "postwar": "P:"}
 
 
 SHARED = "ADD"  # piece_id prefix of the pieces the added dates store (one outline per division and cut)
+
+
+def own_outline(r):
+    """Whether a row's piece keeps an outline of its own: cut from its division, or the land without provinces of
+    a group (KEY-CSH-<unit>), whose division keeps the outline of the first date it was built on although the
+    divisions around it end and begin."""
+    return bool(r["control_split"]) or re.fullmatch(r"[A-Z0-9]+-CSH-\d+", r["admin_id"]) is not None
 
 
 def read_json(path):
@@ -464,7 +472,7 @@ def store_snapshot(con, rows, admins, s, pop_method, group, stored):
         if key not in controls:
             cur = con.execute(f"INSERT INTO controls({','.join(ccols)}) VALUES ({','.join('?' for _ in ccols)})", key)
             controls[key] = cur.lastrowid
-        geometry = gj(r["geom"]) if r["control_split"] else None
+        geometry = gj(r["geom"]) if own_outline(r) else None
         piece = (r["admin_id"], geometry)
         if piece not in stored:  # shared by all the added dates (of every group) it is the same on
             digest = hashlib.md5((geometry or "").encode()).hexdigest()[:12]
@@ -571,7 +579,7 @@ def export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit):
         fi = len(static["feature_admin"])
         static["feature_admin"].append(admin_indices[r["admin_id"]])
         features.append(fi)
-        if r["control_split"]:  # cut from its division: an outline of its own
+        if own_outline(r):  # cut from its division, or land without provinces: an outline of its own
             piece_rec[fi] = encode([r["geom"]], TOL_PROV)
     # the date's units with an outline (territories CShapes does not draw have none), in index order
     for uid in ug:
