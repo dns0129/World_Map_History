@@ -1,0 +1,6379 @@
+{
+ "dates": {
+  "1944-01-01": {
+   "map_date": "1944-01-01",
+   "akte": "923",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23444-akte-923-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-01-01-1944",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       30.21,
+       59.81
+      ],
+      [
+       30.37,
+       59.76
+      ],
+      [
+       30.74,
+       59.72
+      ],
+      [
+       31.0,
+       59.8
+      ],
+      [
+       31.05,
+       59.84
+      ],
+      [
+       31.2,
+       59.86
+      ],
+      [
+       31.4,
+       59.84
+      ],
+      [
+       31.55,
+       59.8
+      ],
+      [
+       31.75,
+       59.6
+      ],
+      [
+       32.0,
+       59.45
+      ],
+      [
+       31.85,
+       59.2
+      ],
+      [
+       31.75,
+       59.05
+      ],
+      [
+       31.65,
+       58.85
+      ],
+      [
+       31.55,
+       58.7
+      ],
+      [
+       31.55,
+       58.55
+      ],
+      [
+       31.4,
+       58.45
+      ],
+      [
+       31.45,
+       58.25
+      ],
+      [
+       31.5,
+       58.05
+      ],
+      [
+       31.45,
+       57.8
+      ],
+      [
+       31.3,
+       57.5
+      ],
+      [
+       31.6,
+       57.25
+      ],
+      [
+       31.8,
+       57.0
+      ],
+      [
+       31.4,
+       56.9
+      ],
+      [
+       30.75,
+       56.6
+      ],
+      [
+       30.35,
+       56.55
+      ],
+      [
+       30.05,
+       56.15
+      ]
+     ],
+     "note": "Leningrad, the Volkhov, Lake Ilmen, the Lovat, Pustoshka: before the Leningrad–Novgorod offensive (14 January 1944)"
+    },
+    {
+     "lonlat": [
+      [
+       29.95,
+       55.95
+      ],
+      [
+       30.15,
+       55.7
+      ],
+      [
+       30.6,
+       55.5
+      ],
+      [
+       30.9,
+       55.3
+      ],
+      [
+       31.0,
+       55.05
+      ],
+      [
+       31.2,
+       54.75
+      ],
+      [
+       31.4,
+       54.45
+      ],
+      [
+       31.5,
+       54.0
+      ],
+      [
+       30.9,
+       53.6
+      ],
+      [
+       30.4,
+       53.25
+      ],
+      [
+       30.2,
+       52.8
+      ],
+      [
+       29.6,
+       52.4
+      ],
+      [
+       28.6,
+       52.1
+      ],
+      [
+       28.3,
+       51.6
+      ],
+      [
+       28.2,
+       51.1
+      ],
+      [
+       28.0,
+       50.8
+      ],
+      [
+       28.4,
+       50.4
+      ],
+      [
+       28.7,
+       50.1
+      ],
+      [
+       29.2,
+       49.75
+      ],
+      [
+       29.8,
+       49.6
+      ],
+      [
+       30.4,
+       49.55
+      ],
+      [
+       31.0,
+       49.45
+      ],
+      [
+       31.5,
+       49.4
+      ],
+      [
+       32.0,
+       49.3
+      ],
+      [
+       32.4,
+       48.95
+      ],
+      [
+       32.9,
+       48.65
+      ],
+      [
+       33.4,
+       48.3
+      ],
+      [
+       33.6,
+       48.0
+      ],
+      [
+       34.2,
+       47.85
+      ],
+      [
+       34.6,
+       47.75
+      ],
+      [
+       34.3,
+       47.55
+      ],
+      [
+       33.7,
+       47.3
+      ],
+      [
+       33.3,
+       46.9
+      ],
+      [
+       33.0,
+       46.7
+      ],
+      [
+       32.6,
+       46.6
+      ]
+     ],
+     "note": "Vitebsk, the Dnieper at Orsha and Rogachev, Mozyr, Korosten and the Zhitomir–Berdichev offensive (Zhitomir retaken by the Red Army on 31 December), the Kanev–Korsun salient, Kirovograd, Krivoy Rog, the Nikopol bridgehead and the lower Dnieper"
+    },
+    {
+     "page": 1557390,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Moskau",
+       "x": 1718,
+       "y": 831,
+       "lon": 37.62,
+       "lat": 55.75
+      },
+      {
+       "name": "Leningrad",
+       "x": 1194,
+       "y": 132,
+       "lon": 30.32,
+       "lat": 59.94
+      },
+      {
+       "name": "Riga",
+       "x": 592,
+       "y": 468,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Smolensk",
+       "x": 1210,
+       "y": 942,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kalinin",
+       "x": 1583,
+       "y": 643,
+       "lon": 35.9,
+       "lat": 56.86
+      },
+      {
+       "name": "Tschernigow",
+       "x": 1068,
+       "y": 1441,
+       "lon": 31.29,
+       "lat": 51.49
+      },
+      {
+       "name": "Borissow",
+       "x": 882,
+       "y": 976,
+       "lon": 28.5,
+       "lat": 54.23
+      },
+      {
+       "name": "Minsk",
+       "x": 785,
+       "y": 1009,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Kiew",
+       "x": 972,
+       "y": 1586,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Nowgorod",
+       "x": 1236,
+       "y": 351,
+       "lon": 31.27,
+       "lat": 58.52
+      },
+      {
+       "name": "Brjansk",
+       "x": 1391,
+       "y": 1191,
+       "lon": 34.36,
+       "lat": 53.24
+      },
+      {
+       "name": "Gomel",
+       "x": 1063,
+       "y": 1287,
+       "lon": 31.0,
+       "lat": 52.43
+      },
+      {
+       "name": "Kauen",
+       "x": 485,
+       "y": 780,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Tula",
+       "x": 1705,
+       "y": 1078,
+       "lon": 37.62,
+       "lat": 54.19
+      },
+      {
+       "name": "Witebsk",
+       "x": 1068,
+       "y": 854,
+       "lon": 30.2,
+       "lat": 55.19
+      },
+      {
+       "name": "Orel",
+       "x": 1548,
+       "y": 1257,
+       "lon": 36.08,
+       "lat": 52.97
+      },
+      {
+       "name": "Kursk",
+       "x": 1542,
+       "y": 1449,
+       "lon": 36.19,
+       "lat": 51.73
+      },
+      {
+       "name": "Charkow",
+       "x": 1529,
+       "y": 1722,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Shitomir",
+       "x": 784,
+       "y": 1578,
+       "lon": 28.66,
+       "lat": 50.25
+      },
+      {
+       "name": "Reval",
+       "x": 727,
+       "y": 108,
+       "lon": 24.75,
+       "lat": 59.44
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1557391,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Sewastopol",
+       "x": 1159,
+       "y": 1118,
+       "lon": 33.52,
+       "lat": 44.6
+      },
+      {
+       "name": "Kertsch",
+       "x": 1504,
+       "y": 1030,
+       "lon": 36.47,
+       "lat": 45.36
+      },
+      {
+       "name": "Simferopol",
+       "x": 1233,
+       "y": 1071,
+       "lon": 34.1,
+       "lat": 44.95
+      },
+      {
+       "name": "Odessa",
+       "x": 908,
+       "y": 801,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Krementschug",
+       "x": 1235,
+       "y": 422,
+       "lon": 33.42,
+       "lat": 49.07
+      },
+      {
+       "name": "Rostow",
+       "x": 1867,
+       "y": 762,
+       "lon": 39.7,
+       "lat": 47.23
+      },
+      {
+       "name": "Taganrog",
+       "x": 1780,
+       "y": 762,
+       "lon": 38.9,
+       "lat": 47.22
+      },
+      {
+       "name": "Makejewka",
+       "x": 1700,
+       "y": 629,
+       "lon": 37.97,
+       "lat": 48.05
+      },
+      {
+       "name": "Dnjepropetrowsk",
+       "x": 1379,
+       "y": 538,
+       "lon": 35.04,
+       "lat": 48.46
+      },
+      {
+       "name": "Saporoshje",
+       "x": 1386,
+       "y": 638,
+       "lon": 35.14,
+       "lat": 47.84
+      },
+      {
+       "name": "Melitopol",
+       "x": 1390,
+       "y": 797,
+       "lon": 35.37,
+       "lat": 46.85
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1053,
+       "y": 510,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Poltawa",
+       "x": 1360,
+       "y": 357,
+       "lon": 34.55,
+       "lat": 49.59
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1027,
+       "y": 728,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Charkow",
+       "x": 1544,
+       "y": 315,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Uman",
+       "x": 876,
+       "y": 463,
+       "lon": 30.22,
+       "lat": 48.75
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [
+    [
+     32.4,
+     46.5
+    ],
+    [
+     32.0,
+     46.3
+    ]
+   ],
+   "pockets": [
+    {
+     "side": "soviet",
+     "name": "Oranienbaum bridgehead",
+     "note": "Coastal bridgehead west of Leningrad (the starting point of the January 1944 offensive)",
+     "lonlat": [
+      [
+       29.2,
+       59.95
+      ],
+      [
+       29.95,
+       59.92
+      ],
+      [
+       29.95,
+       59.8
+      ],
+      [
+       29.5,
+       59.7
+      ],
+      [
+       29.15,
+       59.78
+      ],
+      [
+       29.2,
+       59.95
+      ]
+     ]
+    },
+    {
+     "side": "axis",
+     "name": "Crimea",
+     "note": "The 17th Army in the Crimea (cut off by land since 1 November 1943; Sevastopol fell on 9 May 1944)",
+     "lonlat": [
+      [
+       33.55,
+       46.15
+      ],
+      [
+       34.1,
+       46.0
+      ],
+      [
+       34.6,
+       45.75
+      ],
+      [
+       35.5,
+       45.45
+      ],
+      [
+       36.3,
+       45.48
+      ],
+      [
+       36.47,
+       45.45
+      ],
+      [
+       36.53,
+       45.38
+      ],
+      [
+       36.68,
+       45.32
+      ],
+      [
+       36.65,
+       45.15
+      ],
+      [
+       35.5,
+       44.95
+      ],
+      [
+       34.4,
+       44.45
+      ],
+      [
+       33.5,
+       44.4
+      ],
+      [
+       33.3,
+       44.6
+      ],
+      [
+       32.5,
+       45.35
+      ],
+      [
+       33.0,
+       45.95
+      ],
+      [
+       33.55,
+       46.15
+      ]
+     ]
+    },
+    {
+     "side": "soviet",
+     "name": "Kerch bridgehead",
+     "note": "Red Army bridgehead north-east of Kerch (November 1943 – April 1944)",
+     "lonlat": [
+      [
+       36.48,
+       45.45
+      ],
+      [
+       36.66,
+       45.45
+      ],
+      [
+       36.66,
+       45.33
+      ],
+      [
+       36.53,
+       45.38
+      ],
+      [
+       36.48,
+       45.45
+      ]
+     ]
+    },
+    {
+     "side": "axis",
+     "name": "Kholm",
+     "note": "German-held town at the tip of a salient on the Lovat, held until 21 February 1944",
+     "lonlat": [
+      [
+       31.5,
+       57.22
+      ],
+      [
+       31.75,
+       57.21
+      ],
+      [
+       31.78,
+       57.1
+      ],
+      [
+       31.6,
+       57.06
+      ],
+      [
+       31.5,
+       57.12
+      ],
+      [
+       31.5,
+       57.22
+      ]
+     ]
+    }
+   ]
+  },
+  "1944-02-01": {
+   "map_date": "1944-02-01",
+   "akte": "954",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23475-akte-954-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-01-02-1944",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       28.25,
+       59.62
+      ],
+      [
+       28.2,
+       59.35
+      ],
+      [
+       28.0,
+       59.12
+      ],
+      [
+       27.75,
+       58.95
+      ],
+      [
+       28.6,
+       58.95
+      ],
+      [
+       29.1,
+       58.75
+      ],
+      [
+       29.6,
+       58.6
+      ],
+      [
+       30.1,
+       58.5
+      ],
+      [
+       30.6,
+       58.3
+      ],
+      [
+       31.0,
+       58.2
+      ],
+      [
+       31.5,
+       58.05
+      ],
+      [
+       31.5,
+       57.8
+      ],
+      [
+       31.3,
+       57.5
+      ],
+      [
+       31.6,
+       57.25
+      ],
+      [
+       31.8,
+       57.0
+      ],
+      [
+       31.4,
+       56.9
+      ],
+      [
+       30.75,
+       56.6
+      ],
+      [
+       30.35,
+       56.55
+      ],
+      [
+       30.05,
+       56.15
+      ],
+      [
+       29.95,
+       55.95
+      ],
+      [
+       30.15,
+       55.7
+      ],
+      [
+       30.6,
+       55.5
+      ],
+      [
+       30.9,
+       55.3
+      ],
+      [
+       31.0,
+       55.05
+      ],
+      [
+       31.2,
+       54.75
+      ],
+      [
+       31.4,
+       54.45
+      ],
+      [
+       31.5,
+       54.0
+      ],
+      [
+       30.9,
+       53.6
+      ],
+      [
+       30.4,
+       53.25
+      ],
+      [
+       30.0,
+       52.9
+      ],
+      [
+       29.7,
+       52.6
+      ],
+      [
+       29.2,
+       52.3
+      ],
+      [
+       28.6,
+       52.1
+      ],
+      [
+       28.0,
+       51.8
+      ],
+      [
+       27.4,
+       51.4
+      ],
+      [
+       27.3,
+       50.9
+      ],
+      [
+       27.6,
+       50.5
+      ],
+      [
+       28.2,
+       50.1
+      ],
+      [
+       28.8,
+       49.8
+      ],
+      [
+       29.4,
+       49.5
+      ],
+      [
+       30.0,
+       49.45
+      ],
+      [
+       30.5,
+       49.3
+      ],
+      [
+       30.9,
+       49.45
+      ],
+      [
+       31.4,
+       49.45
+      ],
+      [
+       31.7,
+       49.35
+      ],
+      [
+       31.6,
+       49.15
+      ],
+      [
+       31.3,
+       49.0
+      ],
+      [
+       31.4,
+       48.8
+      ],
+      [
+       31.8,
+       48.6
+      ],
+      [
+       32.3,
+       48.45
+      ],
+      [
+       33.0,
+       48.15
+      ],
+      [
+       33.5,
+       47.95
+      ],
+      [
+       34.2,
+       47.75
+      ],
+      [
+       34.4,
+       47.6
+      ],
+      [
+       34.0,
+       47.45
+      ],
+      [
+       33.5,
+       47.2
+      ],
+      [
+       33.1,
+       46.9
+      ],
+      [
+       32.8,
+       46.7
+      ],
+      [
+       32.6,
+       46.6
+      ]
+     ],
+     "note": "after the Leningrad–Novgorod offensive (siege lifted 27 January, Novgorod taken 20 January): the Narva, Luga and Shimsk, Staraya Russa, Kholm, Novosokolniki; Vitebsk, the Dnieper and the Pripyat; Sarny, Rovno and Shepetovka, Vinnitsa; the Korsun–Shevchenkovsky pocket (closed 28 January), Kirovograd (taken 8 January), Krivoy Rog, the Nikopol bridgehead and the lower Dnieper"
+    },
+    {
+     "page": 1557452,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Moskau",
+       "x": 1713.3,
+       "y": 843.7,
+       "lon": 37.62,
+       "lat": 55.75
+      },
+      {
+       "name": "Leningrad",
+       "x": 1186.4,
+       "y": 148.9,
+       "lon": 30.32,
+       "lat": 59.94
+      },
+      {
+       "name": "Riga",
+       "x": 587.5,
+       "y": 483.7,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Smolensk",
+       "x": 1204.4,
+       "y": 954.4,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kalinin",
+       "x": 1577.1,
+       "y": 656.3,
+       "lon": 35.9,
+       "lat": 56.86
+      },
+      {
+       "name": "Tschernigow",
+       "x": 1063.5,
+       "y": 1452.1,
+       "lon": 31.29,
+       "lat": 51.49
+      },
+      {
+       "name": "Borissow",
+       "x": 876.8,
+       "y": 988.2,
+       "lon": 28.5,
+       "lat": 54.23
+      },
+      {
+       "name": "Minsk",
+       "x": 780.2,
+       "y": 1021.0,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Kiew",
+       "x": 967.8,
+       "y": 1596.7,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Nowgorod",
+       "x": 1228.9,
+       "y": 366.2,
+       "lon": 31.27,
+       "lat": 58.52
+      },
+      {
+       "name": "Brjansk",
+       "x": 1386.3,
+       "y": 1203.0,
+       "lon": 34.36,
+       "lat": 53.24
+      },
+      {
+       "name": "Gomel",
+       "x": 1058.2,
+       "y": 1298.3,
+       "lon": 31.0,
+       "lat": 52.43
+      },
+      {
+       "name": "Kauen",
+       "x": 481.4,
+       "y": 793.3,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Tula",
+       "x": 1701.2,
+       "y": 1090.5,
+       "lon": 37.62,
+       "lat": 54.19
+      },
+      {
+       "name": "Witebsk",
+       "x": 1062.2,
+       "y": 866.7,
+       "lon": 30.2,
+       "lat": 55.19
+      },
+      {
+       "name": "Orel",
+       "x": 1544.1,
+       "y": 1269.3,
+       "lon": 36.08,
+       "lat": 52.97
+      },
+      {
+       "name": "Kursk",
+       "x": 1538.7,
+       "y": 1461.3,
+       "lon": 36.19,
+       "lat": 51.73
+      },
+      {
+       "name": "Charkow",
+       "x": 1526.6,
+       "y": 1734.7,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Shitomir",
+       "x": 779.9,
+       "y": 1588.1,
+       "lon": 28.66,
+       "lat": 50.25
+      },
+      {
+       "name": "Reval",
+       "x": 721.3,
+       "y": 126.6,
+       "lon": 24.75,
+       "lat": 59.44
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1557453,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Sewastopol",
+       "x": 1154.4,
+       "y": 1109.4,
+       "lon": 33.52,
+       "lat": 44.6
+      },
+      {
+       "name": "Kertsch",
+       "x": 1499.5,
+       "y": 1022.5,
+       "lon": 36.47,
+       "lat": 45.36
+      },
+      {
+       "name": "Simferopol",
+       "x": 1228.3,
+       "y": 1062.6,
+       "lon": 34.1,
+       "lat": 44.95
+      },
+      {
+       "name": "Odessa",
+       "x": 904.1,
+       "y": 791.7,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Krementschug",
+       "x": 1229.9,
+       "y": 413.9,
+       "lon": 33.42,
+       "lat": 49.07
+      },
+      {
+       "name": "Rostow",
+       "x": 1863.2,
+       "y": 754.8,
+       "lon": 39.7,
+       "lat": 47.23
+      },
+      {
+       "name": "Taganrog",
+       "x": 1775.8,
+       "y": 754.6,
+       "lon": 38.9,
+       "lat": 47.22
+      },
+      {
+       "name": "Makejewka",
+       "x": 1695.3,
+       "y": 621.2,
+       "lon": 37.97,
+       "lat": 48.05
+      },
+      {
+       "name": "Dnjepropetrowsk",
+       "x": 1373.8,
+       "y": 529.8,
+       "lon": 35.04,
+       "lat": 48.46
+      },
+      {
+       "name": "Saporoshje",
+       "x": 1380.9,
+       "y": 629.8,
+       "lon": 35.14,
+       "lat": 47.84
+      },
+      {
+       "name": "Melitopol",
+       "x": 1385.1,
+       "y": 788.8,
+       "lon": 35.37,
+       "lat": 46.85
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1048.5,
+       "y": 501.6,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Poltawa",
+       "x": 1354.7,
+       "y": 349.0,
+       "lon": 34.55,
+       "lat": 49.59
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1022.7,
+       "y": 719.1,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Charkow",
+       "x": 1538.6,
+       "y": 307.1,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Uman",
+       "x": 872.4,
+       "y": 454.6,
+       "lon": 30.22,
+       "lat": 48.75
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [
+    [
+     32.4,
+     46.5
+    ],
+    [
+     32.0,
+     46.3
+    ]
+   ],
+   "pockets": [
+    {
+     "side": "axis",
+     "name": "Crimea",
+     "note": "The 17th Army in the Crimea (cut off by land since 1 November 1943; Sevastopol fell on 9 May 1944)",
+     "lonlat": [
+      [
+       33.55,
+       46.15
+      ],
+      [
+       34.1,
+       46.0
+      ],
+      [
+       34.6,
+       45.75
+      ],
+      [
+       35.5,
+       45.45
+      ],
+      [
+       36.3,
+       45.48
+      ],
+      [
+       36.47,
+       45.45
+      ],
+      [
+       36.53,
+       45.38
+      ],
+      [
+       36.68,
+       45.32
+      ],
+      [
+       36.65,
+       45.15
+      ],
+      [
+       35.5,
+       44.95
+      ],
+      [
+       34.4,
+       44.45
+      ],
+      [
+       33.5,
+       44.4
+      ],
+      [
+       33.3,
+       44.6
+      ],
+      [
+       32.5,
+       45.35
+      ],
+      [
+       33.0,
+       45.95
+      ],
+      [
+       33.55,
+       46.15
+      ]
+     ]
+    },
+    {
+     "side": "soviet",
+     "name": "Kerch bridgehead",
+     "note": "Red Army bridgehead north-east of Kerch (November 1943 – April 1944)",
+     "lonlat": [
+      [
+       36.48,
+       45.45
+      ],
+      [
+       36.66,
+       45.45
+      ],
+      [
+       36.66,
+       45.33
+      ],
+      [
+       36.53,
+       45.38
+      ],
+      [
+       36.48,
+       45.45
+      ]
+     ]
+    },
+    {
+     "side": "axis",
+     "name": "Kholm",
+     "note": "German-held town at the tip of a salient on the Lovat, held until 21 February 1944",
+     "lonlat": [
+      [
+       31.5,
+       57.22
+      ],
+      [
+       31.75,
+       57.21
+      ],
+      [
+       31.78,
+       57.1
+      ],
+      [
+       31.6,
+       57.06
+      ],
+      [
+       31.5,
+       57.12
+      ],
+      [
+       31.5,
+       57.22
+      ]
+     ]
+    },
+    {
+     "side": "axis",
+     "name": "Korsun–Shevchenkovsky pocket",
+     "note": "XI and XXXXII Army Corps encircled 28 January 1944; the break-out on 16–17 February",
+     "lonlat": [
+      [
+       30.95,
+       49.6
+      ],
+      [
+       31.4,
+       49.65
+      ],
+      [
+       31.75,
+       49.45
+      ],
+      [
+       31.6,
+       49.2
+      ],
+      [
+       31.2,
+       49.15
+      ],
+      [
+       30.95,
+       49.3
+      ],
+      [
+       30.95,
+       49.6
+      ]
+     ]
+    }
+   ]
+  },
+  "1944-03-01": {
+   "map_date": "1944-03-01",
+   "akte": "983",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23504-akte-983-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-01-03-1944",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       28.25,
+       59.62
+      ],
+      [
+       28.2,
+       59.35
+      ],
+      [
+       28.0,
+       59.12
+      ],
+      [
+       27.75,
+       58.95
+      ],
+      [
+       27.75,
+       58.7
+      ],
+      [
+       27.6,
+       58.3
+      ],
+      [
+       28.0,
+       58.0
+      ],
+      [
+       28.5,
+       57.85
+      ],
+      [
+       28.55,
+       57.6
+      ],
+      [
+       28.7,
+       57.35
+      ],
+      [
+       29.0,
+       57.1
+      ],
+      [
+       29.4,
+       56.85
+      ],
+      [
+       29.7,
+       56.5
+      ],
+      [
+       29.9,
+       56.2
+      ],
+      [
+       29.95,
+       55.95
+      ],
+      [
+       30.15,
+       55.7
+      ],
+      [
+       30.6,
+       55.5
+      ],
+      [
+       30.9,
+       55.3
+      ],
+      [
+       31.0,
+       55.05
+      ],
+      [
+       31.2,
+       54.75
+      ],
+      [
+       31.4,
+       54.45
+      ],
+      [
+       31.5,
+       54.0
+      ],
+      [
+       30.9,
+       53.6
+      ],
+      [
+       30.4,
+       53.25
+      ],
+      [
+       30.0,
+       52.9
+      ],
+      [
+       29.7,
+       52.6
+      ],
+      [
+       29.2,
+       52.3
+      ],
+      [
+       28.6,
+       52.1
+      ],
+      [
+       27.6,
+       51.8
+      ],
+      [
+       26.8,
+       51.5
+      ],
+      [
+       26.0,
+       51.4
+      ],
+      [
+       25.6,
+       51.2
+      ],
+      [
+       25.3,
+       51.0
+      ],
+      [
+       25.9,
+       50.6
+      ],
+      [
+       26.6,
+       50.25
+      ],
+      [
+       27.2,
+       50.1
+      ],
+      [
+       27.8,
+       49.95
+      ],
+      [
+       28.4,
+       49.8
+      ],
+      [
+       29.0,
+       49.5
+      ],
+      [
+       29.6,
+       49.25
+      ],
+      [
+       30.2,
+       49.0
+      ],
+      [
+       30.8,
+       48.8
+      ],
+      [
+       31.4,
+       48.55
+      ],
+      [
+       32.0,
+       48.3
+      ],
+      [
+       32.6,
+       48.0
+      ],
+      [
+       33.1,
+       47.75
+      ],
+      [
+       33.3,
+       47.4
+      ],
+      [
+       33.1,
+       47.0
+      ],
+      [
+       32.8,
+       46.75
+      ],
+      [
+       32.6,
+       46.6
+      ]
+     ],
+     "note": "the Panther position from Narva by Lake Peipus and Pskov to Pustoshka and Novosokolniki; Vitebsk and the Dnieper; Kovel (besieged), Lutsk and Rovno (taken 2 February), Shepetovka, the line west of Zvenigorodka after the Korsun pocket, the Nikopol bridgehead given up (8 February) and Krivoy Rog (22 February), and the Ingulets to the lower Dnieper"
+    },
+    {
+     "page": 1613330,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Moskau",
+       "x": 1710.6,
+       "y": 836.7,
+       "lon": 37.62,
+       "lat": 55.75
+      },
+      {
+       "name": "Leningrad",
+       "x": 1190.1,
+       "y": 146.0,
+       "lon": 30.32,
+       "lat": 59.94
+      },
+      {
+       "name": "Riga",
+       "x": 594.6,
+       "y": 477.1,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Smolensk",
+       "x": 1206.1,
+       "y": 945.7,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kalinin",
+       "x": 1576.2,
+       "y": 650.6,
+       "lon": 35.9,
+       "lat": 56.86
+      },
+      {
+       "name": "Tschernigow",
+       "x": 1065.3,
+       "y": 1439.3,
+       "lon": 31.29,
+       "lat": 51.49
+      },
+      {
+       "name": "Borissow",
+       "x": 881.0,
+       "y": 978.8,
+       "lon": 28.5,
+       "lat": 54.23
+      },
+      {
+       "name": "Minsk",
+       "x": 785.0,
+       "y": 1011.2,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Kiew",
+       "x": 970.0,
+       "y": 1582.7,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Nowgorod",
+       "x": 1231.8,
+       "y": 361.9,
+       "lon": 31.27,
+       "lat": 58.52
+      },
+      {
+       "name": "Brjansk",
+       "x": 1385.9,
+       "y": 1192.6,
+       "lon": 34.36,
+       "lat": 53.24
+      },
+      {
+       "name": "Gomel",
+       "x": 1060.4,
+       "y": 1286.8,
+       "lon": 31.0,
+       "lat": 52.43
+      },
+      {
+       "name": "Kauen",
+       "x": 488.6,
+       "y": 784.5,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Tula",
+       "x": 1698.0,
+       "y": 1081.4,
+       "lon": 37.62,
+       "lat": 54.19
+      },
+      {
+       "name": "Witebsk",
+       "x": 1065.3,
+       "y": 858.5,
+       "lon": 30.2,
+       "lat": 55.19
+      },
+      {
+       "name": "Orel",
+       "x": 1542.0,
+       "y": 1258.5,
+       "lon": 36.08,
+       "lat": 52.97
+      },
+      {
+       "name": "Kursk",
+       "x": 1536.2,
+       "y": 1448.8,
+       "lon": 36.19,
+       "lat": 51.73
+      },
+      {
+       "name": "Charkow",
+       "x": 1523.5,
+       "y": 1719.7,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Shitomir",
+       "x": 783.6,
+       "y": 1574.1,
+       "lon": 28.66,
+       "lat": 50.25
+      },
+      {
+       "name": "Reval",
+       "x": 728.3,
+       "y": 122.4,
+       "lon": 24.75,
+       "lat": 59.44
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1613331,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Sewastopol",
+       "x": 1150.0,
+       "y": 1103.9,
+       "lon": 33.52,
+       "lat": 44.6
+      },
+      {
+       "name": "Kertsch",
+       "x": 1494.2,
+       "y": 1018.8,
+       "lon": 36.47,
+       "lat": 45.36
+      },
+      {
+       "name": "Simferopol",
+       "x": 1223.8,
+       "y": 1057.5,
+       "lon": 34.1,
+       "lat": 44.95
+      },
+      {
+       "name": "Odessa",
+       "x": 902.0,
+       "y": 786.1,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Krementschug",
+       "x": 1228.5,
+       "y": 411.2,
+       "lon": 33.42,
+       "lat": 49.07
+      },
+      {
+       "name": "Rostow",
+       "x": 1857.4,
+       "y": 753.8,
+       "lon": 39.7,
+       "lat": 47.23
+      },
+      {
+       "name": "Taganrog",
+       "x": 1770.5,
+       "y": 753.2,
+       "lon": 38.9,
+       "lat": 47.22
+      },
+      {
+       "name": "Makejewka",
+       "x": 1690.9,
+       "y": 620.0,
+       "lon": 37.97,
+       "lat": 48.05
+      },
+      {
+       "name": "Dnjepropetrowsk",
+       "x": 1371.3,
+       "y": 527.3,
+       "lon": 35.04,
+       "lat": 48.46
+      },
+      {
+       "name": "Saporoshje",
+       "x": 1377.9,
+       "y": 627.0,
+       "lon": 35.14,
+       "lat": 47.84
+      },
+      {
+       "name": "Melitopol",
+       "x": 1381.3,
+       "y": 785.4,
+       "lon": 35.37,
+       "lat": 46.85
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1047.3,
+       "y": 497.6,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Poltawa",
+       "x": 1353.1,
+       "y": 347.1,
+       "lon": 34.55,
+       "lat": 49.59
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1020.6,
+       "y": 714.3,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Charkow",
+       "x": 1536.4,
+       "y": 306.4,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Uman",
+       "x": 872.1,
+       "y": 449.9,
+       "lon": 30.22,
+       "lat": 48.75
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [
+    [
+     32.4,
+     46.5
+    ],
+    [
+     32.0,
+     46.3
+    ]
+   ],
+   "pockets": [
+    {
+     "side": "axis",
+     "name": "Crimea",
+     "note": "The 17th Army in the Crimea (cut off by land since 1 November 1943; Sevastopol fell on 9 May 1944)",
+     "lonlat": [
+      [
+       33.55,
+       46.15
+      ],
+      [
+       34.1,
+       46.0
+      ],
+      [
+       34.6,
+       45.75
+      ],
+      [
+       35.5,
+       45.45
+      ],
+      [
+       36.3,
+       45.48
+      ],
+      [
+       36.47,
+       45.45
+      ],
+      [
+       36.53,
+       45.38
+      ],
+      [
+       36.68,
+       45.32
+      ],
+      [
+       36.65,
+       45.15
+      ],
+      [
+       35.5,
+       44.95
+      ],
+      [
+       34.4,
+       44.45
+      ],
+      [
+       33.5,
+       44.4
+      ],
+      [
+       33.3,
+       44.6
+      ],
+      [
+       32.5,
+       45.35
+      ],
+      [
+       33.0,
+       45.95
+      ],
+      [
+       33.55,
+       46.15
+      ]
+     ]
+    },
+    {
+     "side": "soviet",
+     "name": "Kerch bridgehead",
+     "note": "Red Army bridgehead north-east of Kerch (November 1943 – April 1944)",
+     "lonlat": [
+      [
+       36.48,
+       45.45
+      ],
+      [
+       36.66,
+       45.45
+      ],
+      [
+       36.66,
+       45.33
+      ],
+      [
+       36.53,
+       45.38
+      ],
+      [
+       36.48,
+       45.45
+      ]
+     ]
+    }
+   ]
+  },
+  "1944-04-01": {
+   "map_date": "1944-04-01",
+   "akte": "1011",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23532-akte-1011-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-01-04-1944",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       28.25,
+       59.62
+      ],
+      [
+       28.2,
+       59.35
+      ],
+      [
+       28.0,
+       59.12
+      ],
+      [
+       27.75,
+       58.95
+      ],
+      [
+       27.75,
+       58.7
+      ],
+      [
+       27.6,
+       58.3
+      ],
+      [
+       28.0,
+       58.0
+      ],
+      [
+       28.5,
+       57.85
+      ],
+      [
+       28.55,
+       57.6
+      ],
+      [
+       28.7,
+       57.35
+      ],
+      [
+       29.0,
+       57.1
+      ],
+      [
+       29.95,
+       55.95
+      ],
+      [
+       30.15,
+       55.7
+      ],
+      [
+       30.6,
+       55.5
+      ],
+      [
+       30.9,
+       55.3
+      ],
+      [
+       31.0,
+       55.05
+      ],
+      [
+       31.2,
+       54.75
+      ],
+      [
+       31.4,
+       54.45
+      ],
+      [
+       31.5,
+       54.0
+      ],
+      [
+       30.9,
+       53.6
+      ],
+      [
+       30.4,
+       53.25
+      ],
+      [
+       30.0,
+       52.9
+      ],
+      [
+       29.7,
+       52.6
+      ],
+      [
+       29.2,
+       52.3
+      ],
+      [
+       28.6,
+       52.1
+      ],
+      [
+       27.6,
+       51.8
+      ],
+      [
+       26.6,
+       51.6
+      ],
+      [
+       25.5,
+       51.6
+      ],
+      [
+       25.1,
+       51.35
+      ],
+      [
+       24.8,
+       51.0
+      ],
+      [
+       25.0,
+       50.4
+      ],
+      [
+       25.2,
+       50.0
+      ],
+      [
+       25.0,
+       49.6
+      ],
+      [
+       25.5,
+       49.2
+      ],
+      [
+       26.0,
+       48.6
+      ],
+      [
+       26.6,
+       48.1
+      ],
+      [
+       27.2,
+       47.75
+      ],
+      [
+       27.7,
+       47.45
+      ],
+      [
+       28.3,
+       47.25
+      ],
+      [
+       29.0,
+       47.0
+      ],
+      [
+       29.6,
+       46.75
+      ],
+      [
+       30.2,
+       46.55
+      ],
+      [
+       30.6,
+       46.6
+      ],
+      [
+       31.0,
+       46.8
+      ],
+      [
+       31.6,
+       46.95
+      ],
+      [
+       32.0,
+       46.97
+      ]
+     ],
+     "note": "after the Proskurov–Chernovtsy, Uman–Botoshany and Bereznegovatoye offensives: the Panther position in the north; Vitebsk and the Dnieper; Kovel (relieved 5 April), Brody and Tarnopol (encircled), the 1st Panzer Army cut off between Kamenets-Podolsky and the Dniester, the Red Army over the Dniester and the Prut into Romania towards Jassy, the Southern Bug to Nikolaev (taken 28 March)"
+    },
+    {
+     "page": 1613386,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Moskau",
+       "x": 1726.3,
+       "y": 835.5,
+       "lon": 37.62,
+       "lat": 55.75
+      },
+      {
+       "name": "Leningrad",
+       "x": 1191.5,
+       "y": 131.5,
+       "lon": 30.32,
+       "lat": 59.94
+      },
+      {
+       "name": "Riga",
+       "x": 588.0,
+       "y": 473.4,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Smolensk",
+       "x": 1213.5,
+       "y": 949.8,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kalinin",
+       "x": 1588.1,
+       "y": 645.7,
+       "lon": 35.9,
+       "lat": 56.86
+      },
+      {
+       "name": "Tschernigow",
+       "x": 1073.7,
+       "y": 1456.3,
+       "lon": 31.29,
+       "lat": 51.49
+      },
+      {
+       "name": "Borissow",
+       "x": 882.8,
+       "y": 985.4,
+       "lon": 28.5,
+       "lat": 54.23
+      },
+      {
+       "name": "Minsk",
+       "x": 785.3,
+       "y": 1019.1,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Kiew",
+       "x": 977.6,
+       "y": 1603.7,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Nowgorod",
+       "x": 1235.5,
+       "y": 352.1,
+       "lon": 31.27,
+       "lat": 58.52
+      },
+      {
+       "name": "Brjansk",
+       "x": 1398.4,
+       "y": 1201.8,
+       "lon": 34.36,
+       "lat": 53.24
+      },
+      {
+       "name": "Gomel",
+       "x": 1067.6,
+       "y": 1300.0,
+       "lon": 31.0,
+       "lat": 52.43
+      },
+      {
+       "name": "Kauen",
+       "x": 482.2,
+       "y": 788.6,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Tula",
+       "x": 1715.4,
+       "y": 1086.2,
+       "lon": 37.62,
+       "lat": 54.19
+      },
+      {
+       "name": "Witebsk",
+       "x": 1069.6,
+       "y": 861.3,
+       "lon": 30.2,
+       "lat": 55.19
+      },
+      {
+       "name": "Orel",
+       "x": 1557.8,
+       "y": 1268.5,
+       "lon": 36.08,
+       "lat": 52.97
+      },
+      {
+       "name": "Kursk",
+       "x": 1553.4,
+       "y": 1463.6,
+       "lon": 36.19,
+       "lat": 51.73
+      },
+      {
+       "name": "Charkow",
+       "x": 1542.4,
+       "y": 1741.4,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Shitomir",
+       "x": 787.7,
+       "y": 1595.9,
+       "lon": 28.66,
+       "lat": 50.25
+      },
+      {
+       "name": "Reval",
+       "x": 721.6,
+       "y": 109.9,
+       "lon": 24.75,
+       "lat": 59.44
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1613387,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Sewastopol",
+       "x": 1160.0,
+       "y": 1114.5,
+       "lon": 33.52,
+       "lat": 44.6
+      },
+      {
+       "name": "Kertsch",
+       "x": 1504.0,
+       "y": 1029.1,
+       "lon": 36.47,
+       "lat": 45.36
+      },
+      {
+       "name": "Simferopol",
+       "x": 1233.7,
+       "y": 1067.9,
+       "lon": 34.1,
+       "lat": 44.95
+      },
+      {
+       "name": "Odessa",
+       "x": 909.5,
+       "y": 795.1,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Krementschug",
+       "x": 1234.9,
+       "y": 418.9,
+       "lon": 33.42,
+       "lat": 49.07
+      },
+      {
+       "name": "Rostow",
+       "x": 1865.2,
+       "y": 763.7,
+       "lon": 39.7,
+       "lat": 47.23
+      },
+      {
+       "name": "Taganrog",
+       "x": 1778.6,
+       "y": 763.0,
+       "lon": 38.9,
+       "lat": 47.22
+      },
+      {
+       "name": "Makejewka",
+       "x": 1698.5,
+       "y": 629.4,
+       "lon": 37.97,
+       "lat": 48.05
+      },
+      {
+       "name": "Dnjepropetrowsk",
+       "x": 1378.5,
+       "y": 535.8,
+       "lon": 35.04,
+       "lat": 48.46
+      },
+      {
+       "name": "Saporoshje",
+       "x": 1385.7,
+       "y": 635.9,
+       "lon": 35.14,
+       "lat": 47.84
+      },
+      {
+       "name": "Melitopol",
+       "x": 1389.9,
+       "y": 794.9,
+       "lon": 35.37,
+       "lat": 46.85
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1053.7,
+       "y": 505.3,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Poltawa",
+       "x": 1359.4,
+       "y": 354.8,
+       "lon": 34.55,
+       "lat": 49.59
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1028.1,
+       "y": 723.1,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Charkow",
+       "x": 1542.5,
+       "y": 314.5,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Uman",
+       "x": 877.5,
+       "y": 456.9,
+       "lon": 30.22,
+       "lat": 48.75
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [
+    [
+     32.0,
+     46.6
+    ],
+    [
+     31.5,
+     46.4
+    ]
+   ],
+   "pockets": [
+    {
+     "side": "axis",
+     "name": "Crimea",
+     "note": "The 17th Army in the Crimea (cut off by land since 1 November 1943; Sevastopol fell on 9 May 1944)",
+     "lonlat": [
+      [
+       33.55,
+       46.15
+      ],
+      [
+       34.1,
+       46.0
+      ],
+      [
+       34.6,
+       45.75
+      ],
+      [
+       35.5,
+       45.45
+      ],
+      [
+       36.3,
+       45.48
+      ],
+      [
+       36.47,
+       45.45
+      ],
+      [
+       36.53,
+       45.38
+      ],
+      [
+       36.68,
+       45.32
+      ],
+      [
+       36.65,
+       45.15
+      ],
+      [
+       35.5,
+       44.95
+      ],
+      [
+       34.4,
+       44.45
+      ],
+      [
+       33.5,
+       44.4
+      ],
+      [
+       33.3,
+       44.6
+      ],
+      [
+       32.5,
+       45.35
+      ],
+      [
+       33.0,
+       45.95
+      ],
+      [
+       33.55,
+       46.15
+      ]
+     ]
+    },
+    {
+     "side": "soviet",
+     "name": "Kerch bridgehead",
+     "note": "Red Army bridgehead north-east of Kerch (November 1943 – April 1944)",
+     "lonlat": [
+      [
+       36.48,
+       45.45
+      ],
+      [
+       36.66,
+       45.45
+      ],
+      [
+       36.66,
+       45.33
+      ],
+      [
+       36.53,
+       45.38
+      ],
+      [
+       36.48,
+       45.45
+      ]
+     ]
+    },
+    {
+     "side": "axis",
+     "name": "Tarnopol",
+     "note": "Fortress Tarnopol, encircled 23 March, fell 15 April 1944",
+     "lonlat": [
+      [
+       25.5,
+       49.6
+      ],
+      [
+       25.7,
+       49.6
+      ],
+      [
+       25.72,
+       49.5
+      ],
+      [
+       25.52,
+       49.48
+      ],
+      [
+       25.5,
+       49.6
+      ]
+     ]
+    },
+    {
+     "side": "axis",
+     "name": "1st Panzer Army (Hube pocket)",
+     "note": "The 1st Panzer Army encircled at Kamenets-Podolsky (25 March); it broke out westward and reached the 4th Panzer Army at Buchach on 6 April 1944",
+     "lonlat": [
+      [
+       26.2,
+       49.1
+      ],
+      [
+       27.0,
+       49.2
+      ],
+      [
+       27.3,
+       48.9
+      ],
+      [
+       27.0,
+       48.55
+      ],
+      [
+       26.4,
+       48.55
+      ],
+      [
+       26.1,
+       48.8
+      ],
+      [
+       26.2,
+       49.1
+      ]
+     ]
+    }
+   ]
+  },
+  "1944-05-01": {
+   "map_date": "1944-05-01",
+   "akte": "1041",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23562-akte-1041-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-01-05-1944",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       28.25,
+       59.62
+      ],
+      [
+       28.2,
+       59.35
+      ],
+      [
+       28.0,
+       59.12
+      ],
+      [
+       27.75,
+       58.95
+      ],
+      [
+       27.75,
+       58.7
+      ],
+      [
+       27.6,
+       58.3
+      ],
+      [
+       28.0,
+       58.0
+      ],
+      [
+       28.5,
+       57.85
+      ],
+      [
+       28.55,
+       57.6
+      ],
+      [
+       28.7,
+       57.35
+      ],
+      [
+       29.0,
+       57.1
+      ],
+      [
+       29.95,
+       55.95
+      ],
+      [
+       30.15,
+       55.7
+      ],
+      [
+       30.6,
+       55.5
+      ],
+      [
+       30.9,
+       55.3
+      ],
+      [
+       31.0,
+       55.05
+      ],
+      [
+       31.2,
+       54.75
+      ],
+      [
+       31.4,
+       54.45
+      ],
+      [
+       31.5,
+       54.0
+      ],
+      [
+       30.9,
+       53.6
+      ],
+      [
+       30.4,
+       53.25
+      ],
+      [
+       30.0,
+       52.9
+      ],
+      [
+       29.7,
+       52.6
+      ],
+      [
+       29.2,
+       52.3
+      ],
+      [
+       28.6,
+       52.1
+      ],
+      [
+       27.6,
+       51.8
+      ],
+      [
+       26.6,
+       51.7
+      ],
+      [
+       25.5,
+       51.8
+      ],
+      [
+       25.1,
+       51.5
+      ],
+      [
+       24.8,
+       51.15
+      ],
+      [
+       25.0,
+       50.4
+      ],
+      [
+       25.2,
+       50.0
+      ],
+      [
+       25.0,
+       49.6
+      ],
+      [
+       25.2,
+       49.1
+      ],
+      [
+       24.9,
+       48.7
+      ],
+      [
+       25.1,
+       48.3
+      ],
+      [
+       25.8,
+       47.95
+      ],
+      [
+       26.3,
+       47.75
+      ],
+      [
+       26.8,
+       47.45
+      ],
+      [
+       27.3,
+       47.3
+      ],
+      [
+       27.75,
+       47.2
+      ],
+      [
+       28.1,
+       47.05
+      ],
+      [
+       28.7,
+       46.9
+      ],
+      [
+       29.3,
+       46.75
+      ],
+      [
+       29.6,
+       46.5
+      ],
+      [
+       29.75,
+       46.2
+      ],
+      [
+       29.95,
+       45.8
+      ],
+      [
+       30.2,
+       45.75
+      ]
+     ],
+     "note": "the Panther position; Vitebsk and the Dnieper (the Belorussian balcony); Kovel, Brody, the Carpathian foreland at Stanislav and Kolomea, northern Romania before Jassy and Tirgu Frumos, and the Dniester from Dubossary to its estuary (Odessa taken 10 April 1944)"
+    },
+    {
+     "page": 1613446,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Moskau",
+       "x": 1741.2,
+       "y": 669.8,
+       "lon": 37.62,
+       "lat": 55.75
+      },
+      {
+       "name": "Leningrad",
+       "x": 1022.0,
+       "y": 181.8,
+       "lon": 30.32,
+       "lat": 59.94
+      },
+      {
+       "name": "Riga",
+       "x": 567.8,
+       "y": 691.2,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Smolensk",
+       "x": 1296.9,
+       "y": 938.6,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kalinin",
+       "x": 1552.3,
+       "y": 536.0,
+       "lon": 35.9,
+       "lat": 56.86
+      },
+      {
+       "name": "Tschernigow",
+       "x": 1324.1,
+       "y": 1455.7,
+       "lon": 31.29,
+       "lat": 51.49
+      },
+      {
+       "name": "Borissow",
+       "x": 999.8,
+       "y": 1075.6,
+       "lon": 28.5,
+       "lat": 54.23
+      },
+      {
+       "name": "Minsk",
+       "x": 919.7,
+       "y": 1137.5,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Kiew",
+       "x": 1280.3,
+       "y": 1623.4,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Nowgorod",
+       "x": 1131.5,
+       "y": 373.6,
+       "lon": 31.27,
+       "lat": 58.52
+      },
+      {
+       "name": "Brjansk",
+       "x": 1548.3,
+       "y": 1116.2,
+       "lon": 34.36,
+       "lat": 53.24
+      },
+      {
+       "name": "Gomel",
+       "x": 1269.7,
+       "y": 1311.6,
+       "lon": 31.0,
+       "lat": 52.43
+      },
+      {
+       "name": "Kauen",
+       "x": 567.3,
+       "y": 1017.6,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Tula",
+       "x": 1809.4,
+       "y": 908.1,
+       "lon": 37.62,
+       "lat": 54.19
+      },
+      {
+       "name": "Witebsk",
+       "x": 1135.2,
+       "y": 901.2,
+       "lon": 30.2,
+       "lat": 55.19
+      },
+      {
+       "name": "Orel",
+       "x": 1718.5,
+       "y": 1128.6,
+       "lon": 36.08,
+       "lat": 52.97
+      },
+      {
+       "name": "Kursk",
+       "x": 1775.3,
+       "y": 1312.8,
+       "lon": 36.19,
+       "lat": 51.73
+      },
+      {
+       "name": "Charkow",
+       "x": 1851.9,
+       "y": 1576.6,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Shitomir",
+       "x": 1100.9,
+       "y": 1675.0,
+       "lon": 28.66,
+       "lat": 50.25
+      },
+      {
+       "name": "Reval",
+       "x": 579.1,
+       "y": 310.9,
+       "lon": 24.75,
+       "lat": 59.44
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1613447,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Debrecen",
+       "x": 425.7,
+       "y": 788.3,
+       "lon": 21.63,
+       "lat": 47.53
+      },
+      {
+       "name": "Bukarest",
+       "x": 931.4,
+       "y": 1249.7,
+       "lon": 26.1,
+       "lat": 44.43
+      },
+      {
+       "name": "Odessa",
+       "x": 1409.1,
+       "y": 860.2,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Czernowitz",
+       "x": 871.1,
+       "y": 630.6,
+       "lon": 25.94,
+       "lat": 48.29
+      },
+      {
+       "name": "Kronstadt",
+       "x": 895.8,
+       "y": 1047.6,
+       "lon": 25.6,
+       "lat": 45.65
+      },
+      {
+       "name": "Jassy",
+       "x": 1068.0,
+       "y": 796.1,
+       "lon": 27.59,
+       "lat": 47.16
+      },
+      {
+       "name": "Galatz",
+       "x": 1174.7,
+       "y": 1040.3,
+       "lon": 28.05,
+       "lat": 45.44
+      },
+      {
+       "name": "Szeged",
+       "x": 262.1,
+       "y": 999.5,
+       "lon": 20.15,
+       "lat": 46.25
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1478.6,
+       "y": 531.3,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1507.3,
+       "y": 767.2,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Uman",
+       "x": 1292.5,
+       "y": 540.1,
+       "lon": 30.22,
+       "lat": 48.75
+      },
+      {
+       "name": "Komorn",
+       "x": 61.8,
+       "y": 755.8,
+       "lon": 18.13,
+       "lat": 47.75
+      },
+      {
+       "name": "Przemysl",
+       "x": 496.5,
+       "y": 430.6,
+       "lon": 22.77,
+       "lat": 49.78
+      },
+      {
+       "name": "Kischinew",
+       "x": 1204.2,
+       "y": 801.5,
+       "lon": 28.86,
+       "lat": 47.0
+      },
+      {
+       "name": "Temeschburg",
+       "x": 383.6,
+       "y": 1080.7,
+       "lon": 21.23,
+       "lat": 45.75
+      },
+      {
+       "name": "Budapest",
+       "x": 174.9,
+       "y": 808.1,
+       "lon": 19.04,
+       "lat": 47.5
+      },
+      {
+       "name": "Belgrad",
+       "x": 317.9,
+       "y": 1231.6,
+       "lon": 20.46,
+       "lat": 44.82
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [
+    [
+     30.4,
+     45.6
+    ]
+   ],
+   "pockets": [
+    {
+     "side": "axis",
+     "name": "Sevastopol bridgehead",
+     "note": "The 17th Army fell back to Sevastopol after the Soviet offensive of 8 April (Simferopol 13 April); the city fell on 9 May 1944",
+     "lonlat": [
+      [
+       33.4,
+       44.56
+      ],
+      [
+       33.45,
+       44.75
+      ],
+      [
+       33.75,
+       44.8
+      ],
+      [
+       33.95,
+       44.6
+      ],
+      [
+       33.8,
+       44.42
+      ],
+      [
+       33.5,
+       44.42
+      ],
+      [
+       33.4,
+       44.56
+      ]
+     ]
+    }
+   ]
+  },
+  "1944-06-01": {
+   "map_date": "1944-06-01",
+   "akte": "1072",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23593-akte-1072-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-01-06-1944",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       28.25,
+       59.62
+      ],
+      [
+       28.2,
+       59.35
+      ],
+      [
+       28.0,
+       59.12
+      ],
+      [
+       27.75,
+       58.95
+      ],
+      [
+       27.75,
+       58.7
+      ],
+      [
+       27.6,
+       58.3
+      ],
+      [
+       28.0,
+       58.0
+      ],
+      [
+       28.5,
+       57.85
+      ],
+      [
+       28.55,
+       57.6
+      ],
+      [
+       28.7,
+       57.35
+      ],
+      [
+       29.0,
+       57.1
+      ],
+      [
+       29.95,
+       55.95
+      ],
+      [
+       30.15,
+       55.7
+      ],
+      [
+       30.6,
+       55.5
+      ],
+      [
+       30.9,
+       55.3
+      ],
+      [
+       31.0,
+       55.05
+      ],
+      [
+       31.2,
+       54.75
+      ],
+      [
+       31.4,
+       54.45
+      ],
+      [
+       31.5,
+       54.0
+      ],
+      [
+       30.9,
+       53.6
+      ],
+      [
+       30.4,
+       53.25
+      ],
+      [
+       30.0,
+       52.9
+      ],
+      [
+       29.7,
+       52.6
+      ],
+      [
+       29.2,
+       52.3
+      ],
+      [
+       28.6,
+       52.1
+      ],
+      [
+       27.6,
+       51.8
+      ],
+      [
+       26.6,
+       51.7
+      ],
+      [
+       25.5,
+       51.8
+      ],
+      [
+       25.1,
+       51.5
+      ],
+      [
+       24.8,
+       51.15
+      ],
+      [
+       25.0,
+       50.4
+      ],
+      [
+       25.2,
+       50.0
+      ],
+      [
+       25.0,
+       49.6
+      ],
+      [
+       25.2,
+       49.1
+      ],
+      [
+       24.9,
+       48.7
+      ],
+      [
+       25.1,
+       48.3
+      ],
+      [
+       25.8,
+       47.95
+      ],
+      [
+       26.3,
+       47.75
+      ],
+      [
+       26.8,
+       47.45
+      ],
+      [
+       27.3,
+       47.3
+      ],
+      [
+       27.75,
+       47.2
+      ],
+      [
+       28.1,
+       47.05
+      ],
+      [
+       28.7,
+       46.9
+      ],
+      [
+       29.3,
+       46.75
+      ],
+      [
+       29.6,
+       46.5
+      ],
+      [
+       29.75,
+       46.2
+      ],
+      [
+       29.95,
+       45.8
+      ],
+      [
+       30.2,
+       45.75
+      ]
+     ],
+     "note": "the Panther position; Vitebsk and the Dnieper (the Belorussian balcony); Kovel, Brody, the Carpathian foreland at Stanislav and Kolomea, northern Romania before Jassy and Tirgu Frumos, and the Dniester from Dubossary to its estuary (Odessa taken 10 April 1944)"
+    },
+    {
+     "page": 1613508,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Moskau",
+       "x": 1754.8,
+       "y": 712.9,
+       "lon": 37.62,
+       "lat": 55.75
+      },
+      {
+       "name": "Leningrad",
+       "x": 1023.3,
+       "y": 221.1,
+       "lon": 30.32,
+       "lat": 59.94
+      },
+      {
+       "name": "Riga",
+       "x": 565.9,
+       "y": 734.0,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Smolensk",
+       "x": 1306.0,
+       "y": 983.6,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kalinin",
+       "x": 1562.5,
+       "y": 578.0,
+       "lon": 35.9,
+       "lat": 56.86
+      },
+      {
+       "name": "Tschernigow",
+       "x": 1336.4,
+       "y": 1505.0,
+       "lon": 31.29,
+       "lat": 51.49
+      },
+      {
+       "name": "Borissow",
+       "x": 1005.6,
+       "y": 1121.6,
+       "lon": 28.5,
+       "lat": 54.23
+      },
+      {
+       "name": "Minsk",
+       "x": 924.8,
+       "y": 1183.9,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Kiew",
+       "x": 1292.9,
+       "y": 1674.1,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Nowgorod",
+       "x": 1135.2,
+       "y": 414.3,
+       "lon": 31.27,
+       "lat": 58.52
+      },
+      {
+       "name": "Brjansk",
+       "x": 1561.8,
+       "y": 1162.8,
+       "lon": 34.36,
+       "lat": 53.24
+      },
+      {
+       "name": "Gomel",
+       "x": 1280.5,
+       "y": 1359.6,
+       "lon": 31.0,
+       "lat": 52.43
+      },
+      {
+       "name": "Kauen",
+       "x": 567.1,
+       "y": 1062.9,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Tula",
+       "x": 1825.3,
+       "y": 953.1,
+       "lon": 37.62,
+       "lat": 54.19
+      },
+      {
+       "name": "Witebsk",
+       "x": 1141.9,
+       "y": 945.9,
+       "lon": 30.2,
+       "lat": 55.19
+      },
+      {
+       "name": "Orel",
+       "x": 1734.4,
+       "y": 1175.4,
+       "lon": 36.08,
+       "lat": 52.97
+      },
+      {
+       "name": "Kursk",
+       "x": 1793.1,
+       "y": 1361.2,
+       "lon": 36.19,
+       "lat": 51.73
+      },
+      {
+       "name": "Charkow",
+       "x": 1872.3,
+       "y": 1627.3,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Shitomir",
+       "x": 1111.4,
+       "y": 1726.0,
+       "lon": 28.66,
+       "lat": 50.25
+      },
+      {
+       "name": "Reval",
+       "x": 575.4,
+       "y": 351.0,
+       "lon": 24.75,
+       "lat": 59.44
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1613509,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Debrecen",
+       "x": 431.9,
+       "y": 786.9,
+       "lon": 21.63,
+       "lat": 47.53
+      },
+      {
+       "name": "Bukarest",
+       "x": 942.1,
+       "y": 1249.2,
+       "lon": 26.1,
+       "lat": 44.43
+      },
+      {
+       "name": "Odessa",
+       "x": 1414.9,
+       "y": 859.7,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Czernowitz",
+       "x": 876.6,
+       "y": 629.2,
+       "lon": 25.94,
+       "lat": 48.29
+      },
+      {
+       "name": "Kronstadt",
+       "x": 904.8,
+       "y": 1047.0,
+       "lon": 25.6,
+       "lat": 45.65
+      },
+      {
+       "name": "Jassy",
+       "x": 1074.6,
+       "y": 795.3,
+       "lon": 27.59,
+       "lat": 47.16
+      },
+      {
+       "name": "Galatz",
+       "x": 1182.9,
+       "y": 1039.7,
+       "lon": 28.05,
+       "lat": 45.44
+      },
+      {
+       "name": "Szeged",
+       "x": 269.8,
+       "y": 998.9,
+       "lon": 20.15,
+       "lat": 46.25
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1481.7,
+       "y": 530.7,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1511.9,
+       "y": 766.8,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Uman",
+       "x": 1296.5,
+       "y": 539.2,
+       "lon": 30.22,
+       "lat": 48.75
+      },
+      {
+       "name": "Komorn",
+       "x": 65.9,
+       "y": 753.9,
+       "lon": 18.13,
+       "lat": 47.75
+      },
+      {
+       "name": "Przemysl",
+       "x": 499.5,
+       "y": 427.5,
+       "lon": 22.77,
+       "lat": 49.78
+      },
+      {
+       "name": "Kischinew",
+       "x": 1210.5,
+       "y": 800.8,
+       "lon": 28.86,
+       "lat": 47.0
+      },
+      {
+       "name": "Temeschburg",
+       "x": 392.5,
+       "y": 1080.4,
+       "lon": 21.23,
+       "lat": 45.75
+      },
+      {
+       "name": "Budapest",
+       "x": 180.2,
+       "y": 806.6,
+       "lon": 19.04,
+       "lat": 47.5
+      },
+      {
+       "name": "Belgrad",
+       "x": 328.1,
+       "y": 1231.8,
+       "lon": 20.46,
+       "lat": 44.82
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [
+    [
+     30.4,
+     45.6
+    ]
+   ],
+   "pockets": []
+  },
+  "1944-07-01": {
+   "map_date": "1944-07-01",
+   "akte": "1102",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23623-akte-1102-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-01-07-1944",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       28.25,
+       59.62
+      ],
+      [
+       28.2,
+       59.35
+      ],
+      [
+       28.0,
+       59.12
+      ],
+      [
+       27.75,
+       58.95
+      ],
+      [
+       27.75,
+       58.7
+      ],
+      [
+       27.6,
+       58.3
+      ],
+      [
+       28.0,
+       58.0
+      ],
+      [
+       28.5,
+       57.85
+      ],
+      [
+       28.55,
+       57.6
+      ],
+      [
+       28.7,
+       57.35
+      ],
+      [
+       29.0,
+       57.1
+      ],
+      [
+       29.4,
+       56.85
+      ],
+      [
+       29.4,
+       56.3
+      ],
+      [
+       28.7,
+       55.9
+      ],
+      [
+       28.4,
+       55.6
+      ],
+      [
+       28.6,
+       55.2
+      ],
+      [
+       29.0,
+       54.8
+      ],
+      [
+       28.9,
+       54.4
+      ],
+      [
+       28.6,
+       54.0
+      ],
+      [
+       28.3,
+       53.6
+      ],
+      [
+       28.4,
+       53.1
+      ],
+      [
+       28.0,
+       52.6
+      ],
+      [
+       27.6,
+       52.1
+      ],
+      [
+       26.6,
+       51.8
+      ],
+      [
+       25.5,
+       51.8
+      ],
+      [
+       25.1,
+       51.5
+      ],
+      [
+       24.8,
+       51.15
+      ],
+      [
+       25.0,
+       50.4
+      ],
+      [
+       25.2,
+       50.0
+      ],
+      [
+       25.0,
+       49.6
+      ],
+      [
+       25.2,
+       49.1
+      ],
+      [
+       24.9,
+       48.7
+      ],
+      [
+       25.1,
+       48.3
+      ],
+      [
+       25.8,
+       47.95
+      ],
+      [
+       26.3,
+       47.75
+      ],
+      [
+       26.8,
+       47.45
+      ],
+      [
+       27.3,
+       47.3
+      ],
+      [
+       27.75,
+       47.2
+      ],
+      [
+       28.1,
+       47.05
+      ],
+      [
+       28.7,
+       46.9
+      ],
+      [
+       29.3,
+       46.75
+      ],
+      [
+       29.6,
+       46.5
+      ],
+      [
+       29.75,
+       46.2
+      ],
+      [
+       29.95,
+       45.8
+      ],
+      [
+       30.2,
+       45.75
+      ]
+     ],
+     "note": "Operation Bagration a week old: Polotsk, the Berezina at Borisov, Bobruisk taken (29 June), Slutsk; Army Group Centre broken; the line drawn after the remaining German units; the south as on 1 June"
+    },
+    {
+     "page": 1613568,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Moskau",
+       "x": 1767.3,
+       "y": 701.2,
+       "lon": 37.62,
+       "lat": 55.75
+      },
+      {
+       "name": "Leningrad",
+       "x": 1023.3,
+       "y": 207.1,
+       "lon": 30.32,
+       "lat": 59.94
+      },
+      {
+       "name": "Riga",
+       "x": 562.9,
+       "y": 729.4,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Smolensk",
+       "x": 1312.4,
+       "y": 978.0,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kalinin",
+       "x": 1571.4,
+       "y": 565.4,
+       "lon": 35.9,
+       "lat": 56.86
+      },
+      {
+       "name": "Tschernigow",
+       "x": 1344.9,
+       "y": 1505.5,
+       "lon": 31.29,
+       "lat": 51.49
+      },
+      {
+       "name": "Borissow",
+       "x": 1008.7,
+       "y": 1119.1,
+       "lon": 28.5,
+       "lat": 54.23
+      },
+      {
+       "name": "Minsk",
+       "x": 927.3,
+       "y": 1182.4,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Kiew",
+       "x": 1301.4,
+       "y": 1676.6,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Nowgorod",
+       "x": 1137.4,
+       "y": 402.2,
+       "lon": 31.27,
+       "lat": 58.52
+      },
+      {
+       "name": "Brjansk",
+       "x": 1572.4,
+       "y": 1158.3,
+       "lon": 34.36,
+       "lat": 53.24
+      },
+      {
+       "name": "Gomel",
+       "x": 1287.8,
+       "y": 1358.7,
+       "lon": 31.0,
+       "lat": 52.43
+      },
+      {
+       "name": "Kauen",
+       "x": 565.6,
+       "y": 1061.7,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Tula",
+       "x": 1839.6,
+       "y": 944.5,
+       "lon": 37.62,
+       "lat": 54.19
+      },
+      {
+       "name": "Witebsk",
+       "x": 1146.0,
+       "y": 940.7,
+       "lon": 30.2,
+       "lat": 55.19
+      },
+      {
+       "name": "Orel",
+       "x": 1747.8,
+       "y": 1170.3,
+       "lon": 36.08,
+       "lat": 52.97
+      },
+      {
+       "name": "Kursk",
+       "x": 1807.9,
+       "y": 1358.4,
+       "lon": 36.19,
+       "lat": 51.73
+      },
+      {
+       "name": "Charkow",
+       "x": 1889.0,
+       "y": 1627.6,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Shitomir",
+       "x": 1117.9,
+       "y": 1729.5,
+       "lon": 28.66,
+       "lat": 50.25
+      },
+      {
+       "name": "Reval",
+       "x": 570.9,
+       "y": 341.9,
+       "lon": 24.75,
+       "lat": 59.44
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1613569,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Debrecen",
+       "x": 425.6,
+       "y": 805.1,
+       "lon": 21.63,
+       "lat": 47.53
+      },
+      {
+       "name": "Bukarest",
+       "x": 943.3,
+       "y": 1273.5,
+       "lon": 26.1,
+       "lat": 44.43
+      },
+      {
+       "name": "Odessa",
+       "x": 1423.7,
+       "y": 879.3,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Czernowitz",
+       "x": 876.1,
+       "y": 644.8,
+       "lon": 25.94,
+       "lat": 48.29
+      },
+      {
+       "name": "Kronstadt",
+       "x": 905.2,
+       "y": 1069.0,
+       "lon": 25.6,
+       "lat": 45.65
+      },
+      {
+       "name": "Jassy",
+       "x": 1077.4,
+       "y": 813.7,
+       "lon": 27.59,
+       "lat": 47.16
+      },
+      {
+       "name": "Galatz",
+       "x": 1187.4,
+       "y": 1061.9,
+       "lon": 28.05,
+       "lat": 45.44
+      },
+      {
+       "name": "Szeged",
+       "x": 262.8,
+       "y": 1019.7,
+       "lon": 20.15,
+       "lat": 46.25
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1492.6,
+       "y": 544.0,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1522.8,
+       "y": 784.8,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Uman",
+       "x": 1303.6,
+       "y": 552.8,
+       "lon": 30.22,
+       "lat": 48.75
+      },
+      {
+       "name": "Komorn",
+       "x": 55.5,
+       "y": 771.6,
+       "lon": 18.13,
+       "lat": 47.75
+      },
+      {
+       "name": "Przemysl",
+       "x": 492.6,
+       "y": 439.6,
+       "lon": 22.77,
+       "lat": 49.78
+      },
+      {
+       "name": "Kischinew",
+       "x": 1215.7,
+       "y": 819.4,
+       "lon": 28.86,
+       "lat": 47.0
+      },
+      {
+       "name": "Temeschburg",
+       "x": 387.1,
+       "y": 1102.1,
+       "lon": 21.23,
+       "lat": 45.75
+      },
+      {
+       "name": "Budapest",
+       "x": 171.2,
+       "y": 825.0,
+       "lon": 19.04,
+       "lat": 47.5
+      },
+      {
+       "name": "Belgrad",
+       "x": 322.8,
+       "y": 1254.8,
+       "lon": 20.46,
+       "lat": 44.82
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [
+    [
+     30.4,
+     45.6
+    ]
+   ],
+   "pockets": []
+  },
+  "1944-08-01": {
+   "map_date": "1944-08-01",
+   "akte": "1133",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23654-akte-1133-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-01-08-1944",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       28.0,
+       59.35
+      ],
+      [
+       27.6,
+       58.95
+      ],
+      [
+       27.3,
+       58.45
+      ],
+      [
+       26.9,
+       57.9
+      ],
+      [
+       26.4,
+       57.5
+      ],
+      [
+       25.7,
+       57.2
+      ],
+      [
+       25.0,
+       56.9
+      ],
+      [
+       24.4,
+       56.72
+      ],
+      [
+       23.9,
+       56.6
+      ],
+      [
+       23.5,
+       56.75
+      ],
+      [
+       23.25,
+       57.0
+      ],
+      [
+       23.0,
+       56.75
+      ],
+      [
+       22.8,
+       56.4
+      ],
+      [
+       22.8,
+       55.9
+      ],
+      [
+       23.0,
+       55.45
+      ],
+      [
+       23.5,
+       55.1
+      ],
+      [
+       23.9,
+       54.9
+      ],
+      [
+       23.4,
+       54.6
+      ],
+      [
+       23.1,
+       54.1
+      ],
+      [
+       22.9,
+       53.6
+      ],
+      [
+       22.3,
+       53.2
+      ],
+      [
+       21.8,
+       52.75
+      ],
+      [
+       21.2,
+       52.35
+      ],
+      [
+       21.4,
+       51.8
+      ],
+      [
+       21.8,
+       51.4
+      ],
+      [
+       21.7,
+       51.0
+      ],
+      [
+       21.4,
+       50.6
+      ],
+      [
+       21.6,
+       50.2
+      ],
+      [
+       22.3,
+       49.9
+      ],
+      [
+       22.8,
+       49.6
+      ],
+      [
+       23.5,
+       49.3
+      ],
+      [
+       24.3,
+       48.95
+      ],
+      [
+       24.8,
+       48.65
+      ],
+      [
+       25.1,
+       48.3
+      ],
+      [
+       25.8,
+       47.95
+      ],
+      [
+       26.3,
+       47.75
+      ],
+      [
+       26.8,
+       47.45
+      ],
+      [
+       27.3,
+       47.3
+      ],
+      [
+       27.75,
+       47.2
+      ],
+      [
+       28.1,
+       47.05
+      ],
+      [
+       28.7,
+       46.9
+      ],
+      [
+       29.3,
+       46.75
+      ],
+      [
+       29.6,
+       46.5
+      ],
+      [
+       29.75,
+       46.2
+      ],
+      [
+       29.95,
+       45.8
+      ],
+      [
+       30.2,
+       45.75
+      ]
+     ],
+     "note": "after Bagration and the Lvov–Sandomierz offensive: Narva, Tartu, the Soviet thrust to the Gulf of Riga at Tukums (31 July) cutting off Army Group North, Kaunas (taken 1 August), Suwalki, Bialystok, the Vistula at Warsaw-Praga, the Magnuszew and Baranow bridgeheads, Lvov (taken 27 July), Stanislav, and the unchanged Romanian front"
+    },
+    {
+     "page": 1613630,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Moskau",
+       "x": 1750.2,
+       "y": 676.1,
+       "lon": 37.62,
+       "lat": 55.75
+      },
+      {
+       "name": "Leningrad",
+       "x": 1019.0,
+       "y": 196.0,
+       "lon": 30.32,
+       "lat": 59.94
+      },
+      {
+       "name": "Riga",
+       "x": 558.9,
+       "y": 698.9,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Smolensk",
+       "x": 1300.2,
+       "y": 943.5,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kalinin",
+       "x": 1557.3,
+       "y": 543.9,
+       "lon": 35.9,
+       "lat": 56.86
+      },
+      {
+       "name": "Tschernigow",
+       "x": 1330.3,
+       "y": 1460.5,
+       "lon": 31.29,
+       "lat": 51.49
+      },
+      {
+       "name": "Borissow",
+       "x": 998.0,
+       "y": 1080.4,
+       "lon": 28.5,
+       "lat": 54.23
+      },
+      {
+       "name": "Minsk",
+       "x": 916.6,
+       "y": 1142.2,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Kiew",
+       "x": 1286.2,
+       "y": 1629.3,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Nowgorod",
+       "x": 1130.2,
+       "y": 384.4,
+       "lon": 31.27,
+       "lat": 58.52
+      },
+      {
+       "name": "Brjansk",
+       "x": 1557.3,
+       "y": 1120.2,
+       "lon": 34.36,
+       "lat": 53.24
+      },
+      {
+       "name": "Gomel",
+       "x": 1274.1,
+       "y": 1316.0,
+       "lon": 31.0,
+       "lat": 52.43
+      },
+      {
+       "name": "Kauen",
+       "x": 557.7,
+       "y": 1023.1,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Tula",
+       "x": 1821.7,
+       "y": 912.5,
+       "lon": 37.62,
+       "lat": 54.19
+      },
+      {
+       "name": "Witebsk",
+       "x": 1135.5,
+       "y": 906.6,
+       "lon": 30.2,
+       "lat": 55.19
+      },
+      {
+       "name": "Orel",
+       "x": 1731.0,
+       "y": 1132.4,
+       "lon": 36.08,
+       "lat": 52.97
+      },
+      {
+       "name": "Kursk",
+       "x": 1790.6,
+       "y": 1316.7,
+       "lon": 36.19,
+       "lat": 51.73
+      },
+      {
+       "name": "Charkow",
+       "x": 1871.4,
+       "y": 1581.5,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Shitomir",
+       "x": 1102.7,
+       "y": 1681.5,
+       "lon": 28.66,
+       "lat": 50.25
+      },
+      {
+       "name": "Reval",
+       "x": 571.3,
+       "y": 323.5,
+       "lon": 24.75,
+       "lat": 59.44
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1613631,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Debrecen",
+       "x": 427.8,
+       "y": 795.2,
+       "lon": 21.63,
+       "lat": 47.53
+      },
+      {
+       "name": "Bukarest",
+       "x": 941.4,
+       "y": 1254.3,
+       "lon": 26.1,
+       "lat": 44.43
+      },
+      {
+       "name": "Odessa",
+       "x": 1415.9,
+       "y": 859.8,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Czernowitz",
+       "x": 873.8,
+       "y": 634.3,
+       "lon": 25.94,
+       "lat": 48.29
+      },
+      {
+       "name": "Kronstadt",
+       "x": 903.1,
+       "y": 1051.6,
+       "lon": 25.6,
+       "lat": 45.65
+      },
+      {
+       "name": "Jassy",
+       "x": 1073.1,
+       "y": 798.2,
+       "lon": 27.59,
+       "lat": 47.16
+      },
+      {
+       "name": "Galatz",
+       "x": 1183.2,
+       "y": 1042.1,
+       "lon": 28.05,
+       "lat": 45.44
+      },
+      {
+       "name": "Szeged",
+       "x": 264.8,
+       "y": 1008.4,
+       "lon": 20.15,
+       "lat": 46.25
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1480.8,
+       "y": 530.9,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1512.9,
+       "y": 766.1,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Uman",
+       "x": 1294.8,
+       "y": 541.0,
+       "lon": 30.22,
+       "lat": 48.75
+      },
+      {
+       "name": "Komorn",
+       "x": 61.1,
+       "y": 765.4,
+       "lon": 18.13,
+       "lat": 47.75
+      },
+      {
+       "name": "Przemysl",
+       "x": 495.7,
+       "y": 437.0,
+       "lon": 22.77,
+       "lat": 49.78
+      },
+      {
+       "name": "Kischinew",
+       "x": 1209.9,
+       "y": 802.7,
+       "lon": 28.86,
+       "lat": 47.0
+      },
+      {
+       "name": "Temeschburg",
+       "x": 387.9,
+       "y": 1089.0,
+       "lon": 21.23,
+       "lat": 45.75
+      },
+      {
+       "name": "Budapest",
+       "x": 175.4,
+       "y": 817.0,
+       "lon": 19.04,
+       "lat": 47.5
+      },
+      {
+       "name": "Belgrad",
+       "x": 322.9,
+       "y": 1241.5,
+       "lon": 20.46,
+       "lat": 44.82
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [
+    [
+     30.4,
+     45.6
+    ]
+   ],
+   "pockets": [],
+   "adjustments": "Army Group North cut off by the Soviet thrust to Tukums (31 July – 20 August 1944) is not drawn as a pocket: the line runs to the coast west of Riga, and the Courland–Riga side is left on the German side."
+  },
+  "1944-09-01": {
+   "map_date": "1944-09-01",
+   "akte": "1164",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23685-akte-1164-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-01-09-1944",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       28.0,
+       59.35
+      ],
+      [
+       27.6,
+       58.95
+      ],
+      [
+       27.3,
+       58.45
+      ],
+      [
+       26.9,
+       57.9
+      ],
+      [
+       26.4,
+       57.5
+      ],
+      [
+       25.7,
+       57.2
+      ],
+      [
+       25.0,
+       56.9
+      ],
+      [
+       24.4,
+       56.72
+      ],
+      [
+       23.9,
+       56.6
+      ],
+      [
+       23.4,
+       56.55
+      ],
+      [
+       23.0,
+       56.4
+      ],
+      [
+       22.6,
+       55.9
+      ],
+      [
+       22.9,
+       55.4
+      ],
+      [
+       23.0,
+       55.0
+      ],
+      [
+       22.7,
+       54.6
+      ],
+      [
+       22.6,
+       54.2
+      ],
+      [
+       22.4,
+       53.7
+      ],
+      [
+       21.8,
+       53.3
+      ],
+      [
+       21.2,
+       52.85
+      ],
+      [
+       21.0,
+       52.35
+      ],
+      [
+       21.4,
+       51.8
+      ],
+      [
+       21.8,
+       51.4
+      ],
+      [
+       21.7,
+       51.0
+      ],
+      [
+       21.4,
+       50.6
+      ],
+      [
+       21.6,
+       50.2
+      ],
+      [
+       22.3,
+       49.8
+      ],
+      [
+       22.4,
+       49.4
+      ],
+      [
+       23.0,
+       49.1
+      ],
+      [
+       23.7,
+       48.75
+      ],
+      [
+       24.3,
+       48.35
+      ],
+      [
+       24.6,
+       47.95
+      ],
+      [
+       25.0,
+       47.6
+      ],
+      [
+       25.5,
+       47.3
+      ],
+      [
+       25.9,
+       47.0
+      ],
+      [
+       26.0,
+       46.5
+      ],
+      [
+       26.2,
+       46.0
+      ],
+      [
+       26.4,
+       45.6
+      ],
+      [
+       26.0,
+       45.3
+      ],
+      [
+       25.3,
+       45.25
+      ],
+      [
+       24.4,
+       45.25
+      ],
+      [
+       23.5,
+       45.3
+      ],
+      [
+       22.9,
+       45.1
+      ],
+      [
+       22.5,
+       44.7
+      ]
+     ],
+     "note": "after the Jassy–Kishinev operation and Romania’s change of sides (23 August): Narva and Tartu, the Baltic coast, East Prussia’s border, the Narew and the Vistula with the bridgeheads, the Carpathians, and in Romania the Carpathian passes (Romanian and Soviet forces against the German–Hungarian front in Transylvania) and the Danube to the Iron Gates"
+    },
+    {
+     "page": 1613693,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Moskau",
+       "x": 1750.0,
+       "y": 689.2,
+       "lon": 37.62,
+       "lat": 55.75
+      },
+      {
+       "name": "Leningrad",
+       "x": 1018.1,
+       "y": 212.8,
+       "lon": 30.32,
+       "lat": 59.94
+      },
+      {
+       "name": "Riga",
+       "x": 564.8,
+       "y": 718.7,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Smolensk",
+       "x": 1302.5,
+       "y": 961.3,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kalinin",
+       "x": 1555.7,
+       "y": 557.2,
+       "lon": 35.9,
+       "lat": 56.86
+      },
+      {
+       "name": "Tschernigow",
+       "x": 1336.7,
+       "y": 1486.0,
+       "lon": 31.29,
+       "lat": 51.49
+      },
+      {
+       "name": "Borissow",
+       "x": 1002.0,
+       "y": 1100.8,
+       "lon": 28.5,
+       "lat": 54.23
+      },
+      {
+       "name": "Minsk",
+       "x": 921.2,
+       "y": 1163.6,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Kiew",
+       "x": 1293.8,
+       "y": 1658.2,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Nowgorod",
+       "x": 1129.4,
+       "y": 400.1,
+       "lon": 31.27,
+       "lat": 58.52
+      },
+      {
+       "name": "Brjansk",
+       "x": 1561.4,
+       "y": 1139.4,
+       "lon": 34.36,
+       "lat": 53.24
+      },
+      {
+       "name": "Gomel",
+       "x": 1279.3,
+       "y": 1339.0,
+       "lon": 31.0,
+       "lat": 52.43
+      },
+      {
+       "name": "Kauen",
+       "x": 564.2,
+       "y": 1044.5,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Tula",
+       "x": 1824.5,
+       "y": 927.8,
+       "lon": 37.62,
+       "lat": 54.19
+      },
+      {
+       "name": "Witebsk",
+       "x": 1138.0,
+       "y": 924.8,
+       "lon": 30.2,
+       "lat": 55.19
+      },
+      {
+       "name": "Orel",
+       "x": 1735.9,
+       "y": 1151.2,
+       "lon": 36.08,
+       "lat": 52.97
+      },
+      {
+       "name": "Kursk",
+       "x": 1798.0,
+       "y": 1338.7,
+       "lon": 36.19,
+       "lat": 51.73
+      },
+      {
+       "name": "Charkow",
+       "x": 1882.8,
+       "y": 1609.2,
+       "lon": 36.23,
+       "lat": 49.99
+      },
+      {
+       "name": "Shitomir",
+       "x": 1110.1,
+       "y": 1711.6,
+       "lon": 28.66,
+       "lat": 50.25
+      },
+      {
+       "name": "Reval",
+       "x": 576.4,
+       "y": 343.4,
+       "lon": 24.75,
+       "lat": 59.44
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1613694,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Debrecen",
+       "x": 431.0,
+       "y": 797.2,
+       "lon": 21.63,
+       "lat": 47.53
+      },
+      {
+       "name": "Bukarest",
+       "x": 948.5,
+       "y": 1263.4,
+       "lon": 26.1,
+       "lat": 44.43
+      },
+      {
+       "name": "Odessa",
+       "x": 1427.1,
+       "y": 864.2,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Czernowitz",
+       "x": 880.1,
+       "y": 634.8,
+       "lon": 25.94,
+       "lat": 48.29
+      },
+      {
+       "name": "Kronstadt",
+       "x": 909.8,
+       "y": 1057.8,
+       "lon": 25.6,
+       "lat": 45.65
+      },
+      {
+       "name": "Jassy",
+       "x": 1081.1,
+       "y": 801.2,
+       "lon": 27.59,
+       "lat": 47.16
+      },
+      {
+       "name": "Galatz",
+       "x": 1192.3,
+       "y": 1048.7,
+       "lon": 28.05,
+       "lat": 45.44
+      },
+      {
+       "name": "Szeged",
+       "x": 267.1,
+       "y": 1012.8,
+       "lon": 20.15,
+       "lat": 46.25
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1492.5,
+       "y": 530.5,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1525.0,
+       "y": 769.2,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Uman",
+       "x": 1304.7,
+       "y": 540.6,
+       "lon": 30.22,
+       "lat": 48.75
+      },
+      {
+       "name": "Komorn",
+       "x": 62.2,
+       "y": 766.5,
+       "lon": 18.13,
+       "lat": 47.75
+      },
+      {
+       "name": "Przemysl",
+       "x": 499.1,
+       "y": 434.5,
+       "lon": 22.77,
+       "lat": 49.78
+      },
+      {
+       "name": "Kischinew",
+       "x": 1219.1,
+       "y": 805.9,
+       "lon": 28.86,
+       "lat": 47.0
+      },
+      {
+       "name": "Temeschburg",
+       "x": 390.9,
+       "y": 1094.7,
+       "lon": 21.23,
+       "lat": 45.75
+      },
+      {
+       "name": "Budapest",
+       "x": 177.1,
+       "y": 818.9,
+       "lon": 19.04,
+       "lat": 47.5
+      },
+      {
+       "name": "Belgrad",
+       "x": 325.6,
+       "y": 1249.0,
+       "lon": 20.46,
+       "lat": 44.82
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [],
+   "pockets": []
+  },
+  "1944-10-01": {
+   "map_date": "1944-10-01",
+   "akte": "1194",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23715-akte-1194-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-01-10-1944",
+   "north": [
+    [
+     24.35,
+     57.9
+    ],
+    [
+     23.6,
+     58.05
+    ],
+    [
+     23.45,
+     58.5
+    ],
+    [
+     23.2,
+     59.3
+    ],
+    [
+     22.0,
+     59.6
+    ],
+    [
+     22.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       24.35,
+       57.87
+      ],
+      [
+       24.75,
+       57.5
+      ],
+      [
+       24.6,
+       57.15
+      ],
+      [
+       24.4,
+       56.85
+      ],
+      [
+       23.9,
+       56.6
+      ],
+      [
+       23.3,
+       56.55
+      ],
+      [
+       22.6,
+       56.3
+      ],
+      [
+       22.0,
+       56.0
+      ],
+      [
+       21.5,
+       55.6
+      ],
+      [
+       22.0,
+       55.2
+      ],
+      [
+       22.6,
+       54.9
+      ],
+      [
+       22.7,
+       54.4
+      ],
+      [
+       22.4,
+       53.9
+      ],
+      [
+       21.8,
+       53.3
+      ],
+      [
+       21.2,
+       52.85
+      ],
+      [
+       21.0,
+       52.25
+      ],
+      [
+       21.4,
+       51.8
+      ],
+      [
+       21.8,
+       51.4
+      ],
+      [
+       21.7,
+       51.0
+      ],
+      [
+       21.4,
+       50.6
+      ],
+      [
+       21.6,
+       50.2
+      ],
+      [
+       21.9,
+       49.6
+      ],
+      [
+       22.4,
+       49.15
+      ],
+      [
+       22.9,
+       48.7
+      ],
+      [
+       23.6,
+       48.3
+      ],
+      [
+       24.5,
+       47.9
+      ],
+      [
+       25.0,
+       47.5
+      ],
+      [
+       24.6,
+       47.0
+      ],
+      [
+       23.9,
+       46.6
+      ],
+      [
+       23.0,
+       46.35
+      ],
+      [
+       22.3,
+       46.0
+      ],
+      [
+       21.9,
+       45.6
+      ],
+      [
+       21.6,
+       45.1
+      ],
+      [
+       22.3,
+       44.65
+      ],
+      [
+       22.6,
+       44.3
+      ]
+     ],
+     "note": "Tallinn (taken 22 September) and the Estonian mainland lost, the line before Riga, the Memel–Lithuanian front, the East Prussian border, the Narew and the Vistula (Warsaw rising), the Dukla pass and the Carpathians, Transylvania (Cluj and the Mures), and the Soviet advance into the Banat towards the Iron Gates"
+    },
+    {
+     "page": 1613753,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Riga",
+       "x": 1026,
+       "y": 680,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Minsk",
+       "x": 1336,
+       "y": 1151,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Warschau",
+       "x": 710,
+       "y": 1422,
+       "lon": 21.0,
+       "lat": 52.23
+      },
+      {
+       "name": "Königsberg",
+       "x": 715,
+       "y": 1031,
+       "lon": 20.5,
+       "lat": 54.71
+      },
+      {
+       "name": "Kauen",
+       "x": 992,
+       "y": 996,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Krakau",
+       "x": 598,
+       "y": 1764,
+       "lon": 19.94,
+       "lat": 50.06
+      },
+      {
+       "name": "Reval",
+       "x": 1052,
+       "y": 288,
+       "lon": 24.75,
+       "lat": 59.44
+      },
+      {
+       "name": "Smolensk",
+       "x": 1741,
+       "y": 972,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kiew",
+       "x": 1670,
+       "y": 1665,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Danzig",
+       "x": 515,
+       "y": 1087,
+       "lon": 18.65,
+       "lat": 54.35
+      },
+      {
+       "name": "Memel",
+       "x": 742,
+       "y": 878,
+       "lon": 21.13,
+       "lat": 55.71
+      },
+      {
+       "name": "Pleskau",
+       "x": 1363,
+       "y": 525,
+       "lon": 28.33,
+       "lat": 57.82
+      },
+      {
+       "name": "Lublin",
+       "x": 868,
+       "y": 1581,
+       "lon": 22.57,
+       "lat": 51.25
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1613754,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Debrecen",
+       "x": 774,
+       "y": 739,
+       "lon": 21.63,
+       "lat": 47.53
+      },
+      {
+       "name": "Bukarest",
+       "x": 1260,
+       "y": 1232,
+       "lon": 26.1,
+       "lat": 44.43
+      },
+      {
+       "name": "Odessa",
+       "x": 1760,
+       "y": 866,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Czernowitz",
+       "x": 1236,
+       "y": 605,
+       "lon": 25.94,
+       "lat": 48.29
+      },
+      {
+       "name": "Kronstadt",
+       "x": 1236,
+       "y": 1027,
+       "lon": 25.6,
+       "lat": 45.65
+      },
+      {
+       "name": "Jassy",
+       "x": 1424,
+       "y": 783,
+       "lon": 27.59,
+       "lat": 47.16
+      },
+      {
+       "name": "Galatz",
+       "x": 1516,
+       "y": 1034,
+       "lon": 28.05,
+       "lat": 45.44
+      },
+      {
+       "name": "Szeged",
+       "x": 594,
+       "y": 945,
+       "lon": 20.15,
+       "lat": 46.25
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1849,
+       "y": 540.6,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1862.8,
+       "y": 778.3,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Uman",
+       "x": 1663.8,
+       "y": 538.5,
+       "lon": 30.22,
+       "lat": 48.75
+      },
+      {
+       "name": "Komorn",
+       "x": 401,
+       "y": 685,
+       "lon": 18.13,
+       "lat": 47.75
+      },
+      {
+       "name": "Przemysl",
+       "x": 867,
+       "y": 379,
+       "lon": 22.77,
+       "lat": 49.78
+      },
+      {
+       "name": "Kischinew",
+       "x": 1560,
+       "y": 796,
+       "lon": 28.86,
+       "lat": 47.0
+      },
+      {
+       "name": "Temeschburg",
+       "x": 714,
+       "y": 1034,
+       "lon": 21.23,
+       "lat": 45.75
+      },
+      {
+       "name": "Oppeln",
+       "x": 395,
+       "y": 217,
+       "lon": 17.93,
+       "lat": 50.67
+      },
+      {
+       "name": "Budapest",
+       "x": 515,
+       "y": 745,
+       "lon": 19.04,
+       "lat": 47.5
+      },
+      {
+       "name": "Belgrad",
+       "x": 638,
+       "y": 1184,
+       "lon": 20.46,
+       "lat": 44.82
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [],
+   "pockets": [],
+   "adjustments": "The line begins on the coast at the Latvian–Estonian border; the Moonsund islands (Saaremaa and Hiiumaa, German until October–November 1944) are kept on the German side by closing the Soviet side along the sea east of them."
+  },
+  "1944-11-01": {
+   "map_date": "1944-10-31",
+   "akte": "1224",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23745-akte-1224-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-31-10-1944",
+   "north": [
+    [
+     21.0,
+     57.75
+    ],
+    [
+     21.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       21.0,
+       57.7
+      ],
+      [
+       22.2,
+       57.2
+      ],
+      [
+       22.9,
+       56.95
+      ],
+      [
+       23.2,
+       56.6
+      ],
+      [
+       22.6,
+       56.3
+      ],
+      [
+       22.0,
+       56.0
+      ],
+      [
+       21.3,
+       55.75
+      ],
+      [
+       21.4,
+       55.3
+      ],
+      [
+       22.0,
+       54.95
+      ],
+      [
+       22.4,
+       54.6
+      ],
+      [
+       22.6,
+       54.2
+      ],
+      [
+       22.4,
+       53.9
+      ],
+      [
+       21.8,
+       53.3
+      ],
+      [
+       21.2,
+       52.85
+      ],
+      [
+       21.0,
+       52.25
+      ],
+      [
+       21.4,
+       51.8
+      ],
+      [
+       21.8,
+       51.4
+      ],
+      [
+       21.7,
+       51.0
+      ],
+      [
+       21.4,
+       50.6
+      ],
+      [
+       21.6,
+       50.2
+      ],
+      [
+       21.7,
+       49.5
+      ],
+      [
+       22.0,
+       49.1
+      ],
+      [
+       22.3,
+       48.7
+      ],
+      [
+       21.7,
+       48.3
+      ],
+      [
+       21.3,
+       47.8
+      ],
+      [
+       20.8,
+       47.4
+      ],
+      [
+       20.3,
+       47.0
+      ],
+      [
+       20.1,
+       46.5
+      ],
+      [
+       20.3,
+       46.0
+      ],
+      [
+       20.5,
+       45.5
+      ],
+      [
+       20.4,
+       45.0
+      ],
+      [
+       20.2,
+       44.7
+      ],
+      [
+       20.4,
+       44.3
+      ],
+      [
+       21.0,
+       43.9
+      ]
+     ],
+     "note": "Riga lost (13 October) and the Courland bridgehead, Memel encircled, the Gumbinnen–Goldap operation inside East Prussia, the Narew and the Vistula, the Carpathians and eastern Slovakia (Dukla), the Tisza from Chop to Szeged after the Debrecen battle, and Belgrade (taken 20 October): the map of 31 October (Akte 1224)"
+    },
+    {
+     "page": 1613272,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Riga",
+       "x": 1025.7,
+       "y": 638.9,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Minsk",
+       "x": 1326.7,
+       "y": 1107.4,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Warschau",
+       "x": 705.6,
+       "y": 1366.3,
+       "lon": 21.0,
+       "lat": 52.23
+      },
+      {
+       "name": "Königsberg",
+       "x": 715.1,
+       "y": 981.0,
+       "lon": 20.5,
+       "lat": 54.71
+      },
+      {
+       "name": "Kauen",
+       "x": 988.6,
+       "y": 950.0,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Krakau",
+       "x": 591.3,
+       "y": 1701.9,
+       "lon": 19.94,
+       "lat": 50.06
+      },
+      {
+       "name": "Reval",
+       "x": 1055.9,
+       "y": 252.9,
+       "lon": 24.75,
+       "lat": 59.44
+      },
+      {
+       "name": "Smolensk",
+       "x": 1729.9,
+       "y": 935.7,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kiew",
+       "x": 1652.0,
+       "y": 1620.3,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Danzig",
+       "x": 517.6,
+       "y": 1033.6,
+       "lon": 18.65,
+       "lat": 54.35
+      },
+      {
+       "name": "Memel",
+       "x": 743.5,
+       "y": 830.6,
+       "lon": 21.13,
+       "lat": 55.71
+      },
+      {
+       "name": "Pleskau",
+       "x": 1360.4,
+       "y": 489.8,
+       "lon": 28.33,
+       "lat": 57.82
+      },
+      {
+       "name": "Lublin",
+       "x": 859.5,
+       "y": 1525.4,
+       "lon": 22.57,
+       "lat": 51.25
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1613273,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Debrecen",
+       "x": 773.3,
+       "y": 735.3,
+       "lon": 21.63,
+       "lat": 47.53
+      },
+      {
+       "name": "Bukarest",
+       "x": 1269.9,
+       "y": 1230.3,
+       "lon": 26.1,
+       "lat": 44.43
+      },
+      {
+       "name": "Odessa",
+       "x": 1768.8,
+       "y": 855.3,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Czernowitz",
+       "x": 1237.5,
+       "y": 596.3,
+       "lon": 25.94,
+       "lat": 48.29
+      },
+      {
+       "name": "Kronstadt",
+       "x": 1243.0,
+       "y": 1022.7,
+       "lon": 25.6,
+       "lat": 45.65
+      },
+      {
+       "name": "Jassy",
+       "x": 1429.2,
+       "y": 774.3,
+       "lon": 27.59,
+       "lat": 47.16
+      },
+      {
+       "name": "Galatz",
+       "x": 1525.6,
+       "y": 1027.3,
+       "lon": 28.05,
+       "lat": 45.44
+      },
+      {
+       "name": "Szeged",
+       "x": 593.5,
+       "y": 945.3,
+       "lon": 20.15,
+       "lat": 46.25
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1853.0,
+       "y": 526.5,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1870.8,
+       "y": 765.9,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Uman",
+       "x": 1666.9,
+       "y": 525.9,
+       "lon": 30.22,
+       "lat": 48.75
+      },
+      {
+       "name": "Komorn",
+       "x": 396.1,
+       "y": 683.8,
+       "lon": 18.13,
+       "lat": 47.75
+      },
+      {
+       "name": "Przemysl",
+       "x": 863.1,
+       "y": 371.6,
+       "lon": 22.77,
+       "lat": 49.78
+      },
+      {
+       "name": "Kischinew",
+       "x": 1566.4,
+       "y": 786.3,
+       "lon": 28.86,
+       "lat": 47.0
+      },
+      {
+       "name": "Temeschburg",
+       "x": 715.7,
+       "y": 1034.4,
+       "lon": 21.23,
+       "lat": 45.75
+      },
+      {
+       "name": "Oppeln",
+       "x": 386.1,
+       "y": 212.3,
+       "lon": 17.93,
+       "lat": 50.67
+      },
+      {
+       "name": "Budapest",
+       "x": 511.8,
+       "y": 743.5,
+       "lon": 19.04,
+       "lat": 47.5
+      },
+      {
+       "name": "Belgrad",
+       "x": 640.3,
+       "y": 1187.3,
+       "lon": 20.46,
+       "lat": 44.82
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [],
+   "pockets": [
+    {
+     "side": "axis",
+     "name": "Memel",
+     "note": "Memel encircled from 10 October 1944 (until 28 January 1945)",
+     "lonlat": [
+      [
+       21.05,
+       55.85
+      ],
+      [
+       21.35,
+       55.85
+      ],
+      [
+       21.4,
+       55.6
+      ],
+      [
+       21.1,
+       55.55
+      ],
+      [
+       21.05,
+       55.85
+      ]
+     ]
+    },
+    {
+     "side": "axis",
+     "name": "Saaremaa (Sworbe)",
+     "note": "The Sworbe peninsula held until 24 November 1944",
+     "lonlat": [
+      [
+       21.85,
+       57.95
+      ],
+      [
+       22.25,
+       58.15
+      ],
+      [
+       22.4,
+       57.95
+      ],
+      [
+       22.1,
+       57.85
+      ],
+      [
+       21.85,
+       57.95
+      ]
+     ]
+    }
+   ]
+  },
+  "1944-12-01": {
+   "map_date": "1944-11-13",
+   "akte": "1232",
+   "url": "https://wwii.germandocsinrussia.org/de/nodes/23753-akte-1232-unterlagen-der-operationsabteilung-iiib-des-generalstabs-des-heeres-im-okh-karte-lage-ost-karte-zur-lage-der-truppen-der-wehrmacht-an-der-deutsch-sowjetischen-front-einschlie-lich-der-lage-der-verb-nde-der-roten-armee-stand-13-11-1944",
+   "north": [
+    [
+     21.0,
+     57.75
+    ],
+    [
+     21.0,
+     90
+    ]
+   ],
+   "sheets": [
+    {
+     "lonlat": [
+      [
+       21.0,
+       57.7
+      ],
+      [
+       22.2,
+       57.2
+      ],
+      [
+       22.9,
+       56.95
+      ],
+      [
+       23.2,
+       56.6
+      ],
+      [
+       22.6,
+       56.3
+      ],
+      [
+       22.0,
+       56.0
+      ],
+      [
+       21.3,
+       55.75
+      ],
+      [
+       21.4,
+       55.3
+      ],
+      [
+       22.0,
+       54.95
+      ],
+      [
+       22.4,
+       54.6
+      ],
+      [
+       22.6,
+       54.2
+      ],
+      [
+       22.4,
+       53.9
+      ],
+      [
+       21.8,
+       53.3
+      ],
+      [
+       21.2,
+       52.85
+      ],
+      [
+       21.0,
+       52.25
+      ],
+      [
+       21.4,
+       51.8
+      ],
+      [
+       21.6,
+       50.2
+      ],
+      [
+       21.7,
+       49.5
+      ],
+      [
+       21.9,
+       49.0
+      ],
+      [
+       21.6,
+       48.6
+      ],
+      [
+       21.0,
+       48.2
+      ],
+      [
+       20.4,
+       47.8
+      ],
+      [
+       19.6,
+       47.4
+      ],
+      [
+       19.2,
+       47.0
+      ],
+      [
+       19.0,
+       46.5
+      ],
+      [
+       18.9,
+       46.0
+      ],
+      [
+       19.2,
+       45.6
+      ],
+      [
+       19.8,
+       45.2
+      ],
+      [
+       20.4,
+       44.8
+      ],
+      [
+       21.0,
+       43.9
+      ]
+     ],
+     "note": "Courland and Memel, East Prussia, the Narew and the Vistula, the Carpathians, the Soviet advance between the Tisza and the Danube towards Budapest (the outskirts reached 4 November), and the Danube to Belgrade: the latest map before December in the series (13 November, Akte 1232)"
+    },
+    {
+     "page": 1613244,
+     "sheet": "Nord",
+     "gcps": [
+      {
+       "name": "Riga",
+       "x": 1027.0,
+       "y": 668.1,
+       "lon": 24.11,
+       "lat": 56.95
+      },
+      {
+       "name": "Minsk",
+       "x": 1335.5,
+       "y": 1136.2,
+       "lon": 27.56,
+       "lat": 53.9
+      },
+      {
+       "name": "Warschau",
+       "x": 706.8,
+       "y": 1406.3,
+       "lon": 21.0,
+       "lat": 52.23
+      },
+      {
+       "name": "Königsberg",
+       "x": 713.8,
+       "y": 1017.6,
+       "lon": 20.5,
+       "lat": 54.71
+      },
+      {
+       "name": "Kauen",
+       "x": 991.4,
+       "y": 982.4,
+       "lon": 23.9,
+       "lat": 54.9
+      },
+      {
+       "name": "Krakau",
+       "x": 593.0,
+       "y": 1746.4,
+       "lon": 19.94,
+       "lat": 50.06
+      },
+      {
+       "name": "Reval",
+       "x": 1055.1,
+       "y": 278.2,
+       "lon": 24.75,
+       "lat": 59.44
+      },
+      {
+       "name": "Smolensk",
+       "x": 1743.1,
+       "y": 957.5,
+       "lon": 32.05,
+       "lat": 54.78
+      },
+      {
+       "name": "Kiew",
+       "x": 1668.5,
+       "y": 1648.0,
+       "lon": 30.52,
+       "lat": 50.45
+      },
+      {
+       "name": "Danzig",
+       "x": 513.5,
+       "y": 1073.5,
+       "lon": 18.65,
+       "lat": 54.35
+      },
+      {
+       "name": "Memel",
+       "x": 741.6,
+       "y": 865.4,
+       "lon": 21.13,
+       "lat": 55.71
+      },
+      {
+       "name": "Pleskau",
+       "x": 1365.7,
+       "y": 513.1,
+       "lon": 28.33,
+       "lat": 57.82
+      },
+      {
+       "name": "Lublin",
+       "x": 864.2,
+       "y": 1564.4,
+       "lon": 22.57,
+       "lat": 51.25
+      }
+     ],
+     "front": []
+    },
+    {
+     "page": 1613245,
+     "sheet": "Süd",
+     "gcps": [
+      {
+       "name": "Debrecen",
+       "x": 770.2,
+       "y": 763.6,
+       "lon": 21.63,
+       "lat": 47.53
+      },
+      {
+       "name": "Bukarest",
+       "x": 1267.2,
+       "y": 1254.1,
+       "lon": 26.1,
+       "lat": 44.43
+      },
+      {
+       "name": "Odessa",
+       "x": 1769.5,
+       "y": 885.3,
+       "lon": 30.73,
+       "lat": 46.48
+      },
+      {
+       "name": "Czernowitz",
+       "x": 1233.4,
+       "y": 626.3,
+       "lon": 25.94,
+       "lat": 48.29
+      },
+      {
+       "name": "Kronstadt",
+       "x": 1239.9,
+       "y": 1049.3,
+       "lon": 25.6,
+       "lat": 45.65
+      },
+      {
+       "name": "Jassy",
+       "x": 1426.5,
+       "y": 803.7,
+       "lon": 27.59,
+       "lat": 47.16
+      },
+      {
+       "name": "Galatz",
+       "x": 1523.5,
+       "y": 1055.2,
+       "lon": 28.05,
+       "lat": 45.44
+      },
+      {
+       "name": "Szeged",
+       "x": 593.7,
+       "y": 970.1,
+       "lon": 20.15,
+       "lat": 46.25
+      },
+      {
+       "name": "Kirowograd",
+       "x": 1856.2,
+       "y": 556.5,
+       "lon": 32.26,
+       "lat": 48.51
+      },
+      {
+       "name": "Nikolajew",
+       "x": 1873.3,
+       "y": 796.4,
+       "lon": 32.0,
+       "lat": 46.97
+      },
+      {
+       "name": "Uman",
+       "x": 1667.0,
+       "y": 556.0,
+       "lon": 30.22,
+       "lat": 48.75
+      },
+      {
+       "name": "Komorn",
+       "x": 396.4,
+       "y": 712.2,
+       "lon": 18.13,
+       "lat": 47.75
+      },
+      {
+       "name": "Przemysl",
+       "x": 857.4,
+       "y": 402.6,
+       "lon": 22.77,
+       "lat": 49.78
+      },
+      {
+       "name": "Kischinew",
+       "x": 1564.9,
+       "y": 816.0,
+       "lon": 28.86,
+       "lat": 47.0
+      },
+      {
+       "name": "Temeschburg",
+       "x": 715.2,
+       "y": 1058.2,
+       "lon": 21.23,
+       "lat": 45.75
+      },
+      {
+       "name": "Oppeln",
+       "x": 381.6,
+       "y": 245.3,
+       "lon": 17.93,
+       "lat": 50.67
+      },
+      {
+       "name": "Budapest",
+       "x": 511.2,
+       "y": 771.2,
+       "lon": 19.04,
+       "lat": 47.5
+      },
+      {
+       "name": "Belgrad",
+       "x": 641.9,
+       "y": 1207.6,
+       "lon": 20.46,
+       "lat": 44.82
+      }
+     ],
+     "front": []
+    }
+   ],
+   "tail": [],
+   "pockets": [
+    {
+     "side": "axis",
+     "name": "Memel",
+     "note": "Memel encircled from 10 October 1944",
+     "lonlat": [
+      [
+       21.05,
+       55.85
+      ],
+      [
+       21.35,
+       55.85
+      ],
+      [
+       21.4,
+       55.6
+      ],
+      [
+       21.1,
+       55.55
+      ],
+      [
+       21.05,
+       55.85
+      ]
+     ]
+    }
+   ],
+   "adjustments": "The series breaks off with the map of 13 November 1944; the 1 December snapshot uses it, so the Soviet crossing of the Danube at Batina (late November) is not shown."
+  }
+ }
+}
