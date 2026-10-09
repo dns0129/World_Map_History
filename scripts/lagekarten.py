@@ -13,13 +13,15 @@ map where pixels could not be read along it (a complicated salient, a fold of th
 A shown by its units only), or taken over unchanged from the month before after an overlay check. The same page may
 appear in several entries, each fitted to its own control points (a large sheet fitted in parts). Per date `head` and `tail`
 (lon/lat points taking the line's ends into the sea, so that the far shore falls on the right side), `adjustments` (any
-point moved, and why) and the pockets that a single line cannot express (encircled forces, bridgeheads), as lon/lat
+point moved, and why), `north` (lon/lat points from the line's north end to the top edge of the world that close
+the Soviet side; along the Gulf of Finland for a line beginning at Leningrad, so that the Karelian Isthmus is not
+cut) and the pockets that a single line cannot express (encircled forces, bridgeheads), as lon/lat
 polygons drawn after the map. A second-order polynomial fitted to the control points (least squares) turns
 pixels into lon/lat; its residuals are written out with the result.
 
 Writes curated/frontlines_<year>/<date>.geojson (python3 scripts/lagekarten.py [year ...], both years by default) with the front line and the polygons the control rules use:
-  soviet   east of the line (closed far to the east and south, and north along the Leningrad front)
-  axis     west of the line, up to AXIS_DEG behind it
+  soviet   east of the line (open to the east and south; `north` closes it from the line's north end)
+  axis     west of the line
   soviet_pocket, axis_pocket   the pockets
 """
 import json
@@ -32,10 +34,10 @@ from shapely.geometry import LineString, Polygon, box, mapping
 
 ROOT = Path(__file__).resolve().parent.parent
 YEARS = ("1941", "1942")
-AXIS_DEG = 2.5          # the axis side reaches this far behind the line (degrees), not to the rear areas
-EAST, SOUTH = 60.0, 40.0
-NORTH_WEST = 60.0       # north edge west of Lake Ladoga: the Karelian Isthmus beyond belongs to the Finnish front
-NORTH_EAST = 60.6       # north edge east of the lake (Svir front)
+# The two sides are open polygons: nothing inside the Soviet Union may be cut by an edge of them other than the line
+# itself (fixed edges at 40N, 60N or 60E cut whole provinces along straight lines). Behind the line everything is
+# taken as German; the control rules hand the Romanian and Finnish zones of the base date back afterwards.
+WORLD = box(-30, 0, 180, 90)
 
 
 def terms(u, v):
@@ -62,16 +64,14 @@ class Georef:
         return math.hypot((lon1 - lon2) * 111.32 * math.cos(math.radians(lat2)), (lat1 - lat2) * 110.57)
 
 
-def sides(line):
-    """The Soviet side (east of the line, closed far to the east and south and north around Leningrad) and the
-    axis side (the rest of the front zone up to AXIS_DEG west of the line)."""
-    lon_n, lon_s = line[0][0], line[-1][0]
-    ring = list(line) + [(lon_s, SOUTH), (EAST, SOUTH), (EAST, NORTH_EAST), (33.0, NORTH_EAST), (32.6, NORTH_WEST),
-                         (lon_n, NORTH_WEST)]
+def sides(line, north):
+    """The Soviet side: east of the line, closed through the south, the east and the top of the world, and back to
+    the line's north end by `north` (points from the line's north end up to the top edge; by default straight
+    north). The axis side: the rest of the world west of it."""
+    lon_s = line[-1][0]
+    ring = list(line) + [(lon_s, 0), (180, 0), (180, 90)] + [tuple(p) for p in reversed(north)]
     soviet = Polygon(ring).buffer(0)
-    zone = LineString(line).buffer(AXIS_DEG)
-    axis = zone.intersection(box(20, SOUTH, EAST, NORTH_WEST)).difference(soviet)
-    return soviet, axis
+    return soviet, WORLD.difference(soviet)
 
 
 def main(year):
@@ -91,7 +91,7 @@ def main(year):
             lon, lat = g.lonlat([p[0] for p in sheet["front"]], [p[1] for p in sheet["front"]])
             line += [(round(float(a), 4), round(float(b), 4)) for a, b in zip(lon, lat)]
         line += [tuple(p) for p in d.get("tail", [])]  # the line taken on to the coast, lon/lat
-        soviet, axis = sides(line)
+        soviet, axis = sides(line, d.get("north", [(line[0][0], 90)]))
         feats = [dict(type="Feature", properties=dict(side="front"), geometry=mapping(LineString(line))),
                  dict(type="Feature", properties=dict(side="soviet"), geometry=mapping(soviet)),
                  dict(type="Feature", properties=dict(side="axis"), geometry=mapping(axis))]

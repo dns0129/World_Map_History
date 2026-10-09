@@ -772,7 +772,17 @@
      44.3
     ]
    ],
-   "adjustments": "Kaluga (retaken 30 December 1941) put on the Soviet side: two points moved about 8 km west, within the georeferencing error; the line is taken on to the Mius estuary east of Taganrog."
+   "adjustments": "Kaluga (retaken 30 December 1941) put on the Soviet side: two points moved about 8 km west, within the georeferencing error; the line is taken on to the Mius estuary east of Taganrog.",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ]
   },
   "1942-02-01": {
    "map_date": "1942-02-01",
@@ -1897,6 +1907,16 @@
       ]
      ]
     }
+   ],
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
    ]
   },
   "1942-03-01": {
@@ -2934,6 +2954,16 @@
       ]
      ]
     }
+   ],
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
    ]
   },
   "1942-04-01": {
@@ -4022,7 +4052,17 @@
      ]
     }
    ],
-   "adjustments": "Between Gzhatsk and Kirov the blue line read first ran east of Yukhnov; it is the edge of the Vyazma pocket, and the main line is taken west of Yukhnov along the Ugra."
+   "adjustments": "Between Gzhatsk and Kirov the blue line read first ran east of Yukhnov; it is the edge of the Vyazma pocket, and the main line is taken west of Yukhnov along the Ugra.",
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
+   ]
   },
   "1942-05-01": {
    "map_date": "1942-05-01",
@@ -4815,6 +4855,16 @@
       ]
      ]
     }
+   ],
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
    ]
   },
   "1942-05-31": {
@@ -5743,6 +5793,16 @@
       ]
      ]
     }
+   ],
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
    ]
   },
   "1942-06-30": {
@@ -6572,6 +6632,16 @@
       ]
      ]
     }
+   ],
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
    ]
   },
   "1942-08-01": {
@@ -7521,6 +7591,16 @@
       ]
      ]
     }
+   ],
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
    ]
   },
   "1942-09-01": {
@@ -8676,6 +8756,16 @@
       ]
      ]
     }
+   ],
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
    ]
   },
   "1942-10-01": {
@@ -10050,6 +10140,16 @@
       ]
      ]
     }
+   ],
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
    ]
   },
   "1942-12-01": {
@@ -11272,6 +11372,16 @@
       ]
      ]
     }
+   ],
+   "north": [
+    [
+     27.0,
+     59.95
+    ],
+    [
+     27.0,
+     90
+    ]
    ]
   }
  }
