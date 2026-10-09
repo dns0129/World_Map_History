@@ -2162,31 +2162,8 @@
      45.0
     ]
    ],
-   "pockets": [
-    {
-     "side": "soviet",
-     "name": "Brest fortress",
-     "note": "The citadel held out until 29 June, the last defenders until late July 1941",
-     "lonlat": [
-      [
-       23.62,
-       52.06
-      ],
-      [
-       23.7,
-       52.1
-      ],
-      [
-       23.69,
-       52.06
-      ],
-      [
-       23.62,
-       52.06
-      ]
-     ]
-    }
-   ]
+   "pockets": [],
+   "adjustments": "Brest fortress, which held out until 29 June (the last defenders until late July), is too small for a piece of its own (under 30 km²) and is left out."
   },
   "1941-07-31": {
    "map_date": "1941-07-31",
