@@ -68,9 +68,9 @@ SHARED = "ADD"  # piece_id prefix of the pieces the added dates store (one outli
 
 
 def own_outline(r, a):
-    """Whether a row's piece keeps an outline of its own: cut from its division, or the land without provinces of
-    a group (KEY-CSH-<unit>-<tile>) where it differs from the outline its division was built with on its first date by more
-    than 1% of its area (the divisions around it end and begin)."""
+    """Whether a row's piece keeps an outline of its own: cut from its division, or the land without provinces
+    (ADD-CSH-<unit>-<tile>) where it differs from the outline its division was built with on the first date it was
+    needed by more than 1% of its area (the divisions around it end and begin)."""
     if r["control_split"]:
         return True
     if re.fullmatch(r"[A-Z0-9]+-CSH-\d+-\d+_\d+", r["admin_id"]) is None:
@@ -339,7 +339,7 @@ def build_snapshot(con, world, group, s, rules, rule_hits):
                                                  f"({between} OR basis='historical_1897') "
                                                  "AND (end_date IS NULL OR end_date>=?) AND (start_date IS NULL OR start_date<=?) "
                                                  "AND admin_id NOT LIKE ? ORDER BY admin_id",
-                                                 (*bounds, snap, snap, f"{group.key.upper()}-%"))]
+                                                 (*bounds, snap, snap, f"{SHARED}-CSH-%"))]
     candidate_ids = {a["admin_id"] for a in admins}
     admins = [a for a in replacements if a["admin_id"] not in candidate_ids and a["basis"] != 'historical_1897'] + admins + [
         a for a in replacements if a["admin_id"] not in candidate_ids and a["basis"] == 'historical_1897']
@@ -415,7 +415,8 @@ def build_snapshot(con, world, group, s, rules, rule_hits):
                                                       (iy + 1) * TILE_DEG)))
                     if tile is None or eq_area_km2(tile) < 0.01:
                         continue
-                    aid = f"{group.key.upper()}-CSH-{uid}-{ix + 180 // TILE_DEG}_{iy + 90 // TILE_DEG}"  # >= 0
+                    # one division for all groups' dates (>= 0)
+                    aid = f"{SHARED}-CSH-{uid}-{ix + 180 // TILE_DEG}_{iy + 90 // TILE_DEG}"
                     existing = con.execute("SELECT * FROM admin_units WHERE admin_id=?", (aid,)).fetchone()
                     add(dict(existing) if existing else new_admin(u, tile, snap, group, aid), tile)
         if not unit_rows:
@@ -750,6 +751,12 @@ def add_group(con, world, group, static, index, unit_indices, new_unit, document
                      f"{group.period} event-day control facts; no source text or source map reproduced".strip()))
 
 
+def drop_orphan_pieces(con, prefixes):
+    """Pieces of the added dates no date uses any more (of an earlier build, or with the prefixes of older builds)."""
+    con.execute("DELETE FROM pieces WHERE (" + " OR ".join("piece_id LIKE ?" for _ in prefixes) + ") "
+                "AND piece_key NOT IN (SELECT piece_key FROM piece_snapshot)", [p + ":%" for p in prefixes])
+
+
 def main():
     dates = [s.date for g in GROUPS for s in g.snapshots]
     if len(set(dates)) != len(dates) or DATES & WEBMAP_DATES:
@@ -775,13 +782,19 @@ def main():
         con = sqlite3.connect(DATABASES[set_name])
         con.row_factory = sqlite3.Row
         with con:
+            # every added date is rebuilt: drop their rows, the pieces only they used and the divisions of land
+            # without provinces (of this build's and older builds' naming), so none is reused with an older outline
+            added = [s.date for g in GROUPS if g.set == set_name for s in g.snapshots]
+            for table in ("piece_snapshot", "unit_snapshot", "snapshots"):
+                con.executemany(f"DELETE FROM {table} WHERE snapshot=?", [(d,) for d in added])
+            prefixes = [SHARED] + [g.key.upper() for g in GROUPS]
+            drop_orphan_pieces(con, prefixes)
+            con.execute("DELETE FROM admin_units WHERE (" + " OR ".join("admin_id LIKE ?" for _ in prefixes) + ") "
+                        "AND admin_key NOT IN (SELECT admin_key FROM pieces)", [p + "-CSH-%" for p in prefixes])
             for group in GROUPS:
                 if group.set == set_name:
                     add_group(con, world, group, static, index, unit_indices, new_unit, documents)
-            # pieces no date uses any more (of an earlier build, or with the group prefix of older builds)
-            prefixes = [SHARED] + [g.key.upper() for g in GROUPS]
-            con.execute("DELETE FROM pieces WHERE (" + " OR ".join("piece_id LIKE ?" for _ in prefixes) + ") "
-                        "AND piece_key NOT IN (SELECT piece_key FROM piece_snapshot)", [p + ":%" for p in prefixes])
+            drop_orphan_pieces(con, prefixes)
             con.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("snapshots", ";".join(
                 r[0] for r in con.execute("SELECT snapshot FROM snapshots ORDER BY snapshot"))))
             cov, cov_units = coverage(con)
