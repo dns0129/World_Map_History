@@ -68,13 +68,14 @@ SHARED = "ADD"  # piece_id prefix of the pieces the added dates store (one outli
 
 def own_outline(r, a):
     """Whether a row's piece keeps an outline of its own: cut from its division, or the land without provinces of
-    a group (KEY-CSH-<unit>) where it differs from the outline its division was built with on its first date (the
-    divisions around it end and begin, and slivers are merged into it)."""
+    a group (KEY-CSH-<unit>) where it differs from the outline its division was built with on its first date by more
+    than 1% of its area (the divisions around it end and begin)."""
     if r["control_split"]:
         return True
     if re.fullmatch(r"[A-Z0-9]+-CSH-\d+", r["admin_id"]) is None:
         return False
-    return abs(r["area_km2"] - (a.get("area_km2") or 0)) > 1e-4 * max(r["area_km2"], 1)
+    # slivers under min_piece_km2 merged into it are left out (they would store the whole outline again)
+    return abs(r["area_km2"] - (a.get("area_km2") or 0)) > 0.01 * max(r["area_km2"], 1)
 
 
 def read_json(path):
