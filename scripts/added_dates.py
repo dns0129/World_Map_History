@@ -319,6 +319,139 @@ WW2_1941 = Group(
     ],
 )
 
-GROUPS = [WW1, WW2_1941, WW2_1942]
+# 1943 month by month, from the divisions and control of 1942-11-01 like the 1942 dates, and 1944 month by month
+# from those of 1944-06-06. The Eastern Front follows the OKH situation maps (curated/frontlines_1943 and _1944);
+# the other theatres are approximated by whole regions in curated/ww2_1943_region_control.csv and _1944_.
+_NOTE43 = ("东线按德国陆军总司令部态势图“Lage Ost”描出的德军前沿；其他战场（北非、意大利、太平洋等）按整省、整区近似（斜线）；"
+           "中国战场沿用 1942 年日占区与中共根据地范围。")
+_NOTE44 = ("东线按德国陆军总司令部态势图“Lage Ost”描出的德军前沿（1944 年 11 月 13 日以后无图）；西欧、意大利、巴尔干、"
+           "缅甸、中国（一号作战）与太平洋按整省、整区近似（斜线）。")
+_ALLIED43 = _ALLIED42 | {70, 140}
+_AXIS43 = _AXIS42 | {800}
+_BLOC43 = "同盟国一方含英联邦、苏联、美国、中华民国、自由法国（法兰西民族解放委员会）、各流亡政府与拉丁美洲参战国；轴心国一方含德、意、日、泰与东欧仆从国。"
+_N43 = dict(WW2_1942.names)
+_N43.update({-4: ("Free France (French Committee of National Liberation)", "自由法国（法兰西民族解放委员会）"),
+             -5: ("French North and West Africa (Giraud)", "法属北非与西非（吉罗）"),
+             -1: ("Allied powers / Kingdom of Italy", "同盟国（意大利王国）")})
+def _m43(day, zh, en, code, control, allied=_ALLIED43, axis=_AXIS43, bloc=_BLOC43, checks=None):
+    return Snapshot(day, zh, en, allied=allied, axis=axis, bloc_note=bloc, city_code=code,
+                    control_note=control + _NOTE43, checks=checks or {})
+WW2_1943 = Group(
+    key="m43", set="ww2", base="1942-11-01", rules="ww2_1943_region_control.csv", cities="ww2_cities.csv",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1943 monthly", period="1943",
+    inherit=WW2_1942.inherit,
+    pop_method=WW2_1942.pop_method.replace("1942 population", "1943 population"),
+    control_note="控制沿用 1942-11-01 的分区规则与东亚图层，再按各月战局改写。" + _NOTE43,
+    bloc_names=WW2_1942.bloc_names, bloc_title=WW2_1942.bloc_title, names=_N43,
+    snapshots=[
+        _m43("1943-01-01", "斯大林格勒包围圈，“小土星”行动之后", "The Stalingrad pocket after Operation Little Saturn", "4301",
+             "第 6 集团军被围于斯大林格勒，顿河中游意大利第 8 集团军溃败，A 集团军群开始撤出高加索；大卢基德军被围。"
+             "突尼斯桥头堡交战，布纳—戈纳之战进入尾声。", allied=_ALLIED43 | {-5}),
+        _m43("1943-02-01", "斯大林格勒战役结束", "The end of the Battle of Stalingrad", "4302",
+             "1 月 31 日第 6 集团军投降（北部包围圈 2 月 2 日）；列宁格勒陆上通道打开（1 月 18 日）；苏军逼近库尔斯克、"
+             "哈尔科夫与罗斯托夫，第 17 集团军退入库班。的黎波里 1 月 23 日失守，瓜达尔卡纳尔岛日军撤离。", allied=_ALLIED43 | {-5}),
+        _m43("1943-03-01", "曼施坦因的反击", "Manstein's counterstroke", "4303",
+             "苏军 2 月 16 日攻占哈尔科夫，德军反击收复顿巴斯西部；德军撤出杰米扬斯克，“水牛”行动撤出勒热夫突出部；米乌斯河防线、"
+             "库班桥头堡。突尼斯凯塞林山口之战之后。", allied=_ALLIED43 | {-5}),
+        _m43("1943-04-01", "库尔斯克突出部形成", "The Kursk bulge", "4304",
+             "德军 3 月 15 日重夺哈尔科夫、18 日别尔哥罗德，前线稳定在库尔斯克突出部与奥廖尔突出部；勒热夫突出部已放弃。"
+             "突尼斯马雷特防线与阿卡里特河之战。", allied=_ALLIED43 | {-5}),
+        _m43("1943-05-01", "突尼斯战役的最后阶段", "The last weeks in Tunisia", "4305",
+             "盟军逼近突尼斯与比塞大（5 月 7 日攻占，13 日轴心国投降）；东线春季对峙，库班桥头堡。", allied=_ALLIED43 | {-5}),
+        _m43("1943-06-01", "北非轴心国投降之后", "After the Axis surrender in Africa", "4306",
+             "突尼斯 5 月 13 日轴心国投降；6 月 3 日法兰西民族解放委员会在阿尔及尔成立；东线库尔斯克战前对峙，"
+             "苏军 5 月攻占克雷姆斯卡亚。", allied=_ALLIED43 | {145}),
+        _m43("1943-07-01", "“堡垒”行动前夕", "On the eve of Operation Citadel", "4307",
+             "库尔斯克会战（7 月 5 日）前夕的东线；盟军即将登陆西西里（7 月 10 日），新乔治亚战役开始（6 月 30 日）。",
+             allied=_ALLIED43 | {145}),
+        _m43("1943-08-01", "库尔斯克之后，盟军登陆西西里", "After Kursk; the Allies in Sicily", "4308",
+             "“堡垒”行动失败，苏军“库图佐夫”行动攻向奥廖尔（8 月 5 日收复）；西西里西部已被盟军占领，墨索里尼 7 月 25 日倒台。",
+             allied=_ALLIED43 | {145}),
+        _m43("1943-09-01", "哈尔科夫解放，意大利停战前夕", "Kharkov liberated; Italy on the eve of the armistice", "4309",
+             "苏军攻占哈尔科夫（8 月 23 日）、塔甘罗格（8 月 30 日）与叶利尼亚，向第聂伯河推进；西西里全岛被盟军占领（8 月 17 日）。",
+             allied=_ALLIED43 | {145}),
+        _m43("1943-10-01", "德军退守第聂伯河，盟军登陆意大利", "Back to the Dnieper; the Allies in Italy", "4310",
+             "德军退到“豹—沃坦”防线（第聂伯河），苏军在柳捷日、布克林建立桥头堡，收复斯摩棱斯克；意大利 9 月 8 日停战，德军占领北部"
+             "（意大利社会共和国），盟军占领南部与撒丁岛，那不勒斯 10 月 1 日解放；科西嘉 10 月 4 日解放。",
+             allied=_ALLIED43 | {145, 630}, axis=_AXIS43 - {325}),
+        _m43("1943-11-01", "克里木被切断", "The Crimea cut off", "4311",
+             "苏军突破梅利托波尔，11 月 1 日抵达彼列科普，克里木第 17 集团军被切断；涅韦尔、第聂伯罗彼得罗夫斯克失守；"
+             "意大利南部前线在加里利亚诺河与桑格罗河；美军登陆布干维尔岛（11 月 1 日）。",
+             allied=_ALLIED43 | {145, 630, 325}, axis=_AXIS43 - {325}),
+        _m43("1943-12-01", "基辅解放之后", "After the liberation of Kiev", "4312",
+             "苏军 11 月 6 日解放基辅，德军反击重夺日托米尔；戈梅利 11 月 26 日解放；刻赤附近苏军桥头堡；塔拉瓦战役（11 月 20 日）。",
+             allied=_ALLIED43 | {145, 630, 325, 100}, axis=_AXIS43 - {325}),
+    ],
+)
+
+_ALLIED44M = _ALLIED42 | {70, 140, 145, 630, 100, 325, 450, 220}
+_AXIS44M = _AXIS42 - {325} | {800}
+_BLOC44 = "同盟国一方含英联邦、苏联、美国、中华民国、法国（民族解放委员会 / 临时政府）、意大利王国（共同交战国）与各流亡政府；"
+_N44 = dict(_N43)
+_N44.update({220: ("France", "法国"), 339: ("Albania", "阿尔巴尼亚"), 345: ("Yugoslavia (Partisans)", "南斯拉夫（游击队）"),
+             350: ("Greece", "希腊"), 211: ("Belgium", "比利时"), 210: ("Netherlands", "荷兰"), 212: ("Luxembourg", "卢森堡")})
+def _m44(day, zh, en, code, control, allied=_ALLIED44M, axis=_AXIS44M, bloc=None, checks=None):
+    return Snapshot(day, zh, en, allied=allied, axis=axis, bloc_note=_BLOC44 + (bloc or "轴心国一方含德、日、泰与匈牙利、罗马尼亚、保加利亚、芬兰、斯洛伐克、克罗地亚。"),
+                    city_code=code, control_note=control + _NOTE44, checks=checks or {})
+WW2_1944 = Group(
+    key="m44", set="ww2", base="1944-06-06", rules="ww2_1944_region_control.csv", cities="ww2_cities.csv",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1944 monthly", period="1944",
+    inherit=("overlay:ccp_bases_1941_42", "overlay:indochina_ceded", "overlay:kwantung", "overlay:manchukuo",
+             "overlay:mengjiang", "overlay:occupied_zone_1942", "rule:2", "rule:5", "rule:12", "rule:13", "rule:14",
+             "rule:17", "rule:22", "rule:29", "rule:30", "rule:37", "rule:38", "rule:39", "rule:40", "rule:41",
+             "rule:42", "rule:43", "rule:44", "rule:45", "rule:46", "rule:50", "rule:53", "rule:54", "rule:55",
+             "rule:56", "rule:57", "rule:58", "rule:59", "rule:60", "rule:63", "rule:67", "rule:68", "rule:70",
+             "rule:73", "rule:74", "rule:77", "rule:78", "rule:79", "rule:92", "rule:97", "rule:98", "rule:102",
+             "rule:104"),
+    pop_method=("Province population pattern of 1944-06-06 (GHS-POP 1975 shares of the 1939-45 database), "
+                "area-adjusted for new pieces and scaled to each political unit's 1944 population in "
+                "world_history_1900_2000.sqlite; rounded with conserved unit totals"),
+    control_note="控制沿用 1944-06-06 的分区规则与东亚图层，再按各月战局改写。" + _NOTE44,
+    bloc_names=WW2_1942.bloc_names, bloc_title=WW2_1942.bloc_title, names=_N44,
+    snapshots=[
+        _m44("1944-01-01", "第聂伯河右岸战役", "The battles west of the Dnieper", "4401",
+             "苏军收复日托米尔、科罗斯坚，逼近别尔季切夫；列宁格勒—诺夫哥罗德战役前夕；意大利古斯塔夫防线；克里木被围。"),
+        _m44("1944-02-01", "列宁格勒解围与科尔孙包围圈", "Leningrad relieved; the Korsun pocket", "4402",
+             "列宁格勒 1 月 27 日完全解围，诺夫哥罗德 1 月 20 日解放；科尔孙—舍甫琴科夫斯基包围圈（1 月 28 日合拢）；安齐奥登陆（1 月 22 日）。"),
+        _m44("1944-03-01", "“豹”防线与乌克兰西部", "The Panther line and western Ukraine", "4403",
+             "北方德军退守纳尔瓦—普斯科夫的“豹”防线；罗夫诺、卢茨克失守，尼科波尔桥头堡与克里沃罗格放弃；马绍尔群岛登陆。"),
+        _m44("1944-04-01", "苏军进入罗马尼亚", "The Red Army enters Romania", "4404",
+             "苏军渡过德涅斯特河与普鲁特河进入罗马尼亚东北，德军第 1 装甲集团军在卡缅涅茨—波多利斯基被围后突围，塔尔诺波尔被围；"
+             "德军 3 月 19 日占领匈牙利；日军进攻英帕尔（3 月 8 日）。",
+             bloc="匈牙利 3 月 19 日被德军占领，仍属轴心国一方。"),
+        _m44("1944-05-01", "敖德萨与克里木", "Odessa and the Crimea", "4405",
+             "敖德萨 4 月 10 日解放，克里木德军退守塞瓦斯托波尔（5 月 9 日攻占）；英帕尔与科希马之战；一号作战开始（4 月）。"),
+        _m44("1944-06-01", "“巴格拉季昂”与诺曼底前夕", "On the eve of Bagration and Normandy", "4406",
+             "东线“白俄罗斯阳台”对峙；意大利盟军突破古斯塔夫防线与安齐奥（罗马 6 月 4 日解放）；中国战场一号作战进攻长沙。"),
+        _m44("1944-07-01", "“巴格拉季昂”行动", "Operation Bagration", "4407",
+             "苏军 6 月 22 日发起“巴格拉季昂”行动，维捷布斯克、博布鲁伊斯克失守，中央集团军群崩溃；诺曼底滩头（瑟堡 6 月 26 日）；"
+             "维堡 6 月 20 日失守；塞班岛战役。"),
+        _m44("1944-08-01", "华沙城下", "Before Warsaw", "4408",
+             "苏军解放明斯克、维尔纽斯、利沃夫、卢布林，推进到维斯瓦河与里加湾（图库姆斯）；华沙起义（8 月 1 日）前夕；"
+             "盟军在诺曼底突破（阿夫朗什 7 月 31 日）；佛罗伦萨战斗；密支那围攻。"),
+        _m44("1944-09-01", "罗马尼亚倒戈，巴黎解放", "Romania changes sides; Paris liberated", "4409",
+             "罗马尼亚 8 月 23 日倒戈，苏军占领布加勒斯特（8 月 31 日）；巴黎 8 月 25 日解放，“龙骑兵”行动后法国南部解放；"
+             "斯洛伐克民族起义；保加利亚 9 月 9 日政变前夕。",
+             allied=_ALLIED44M | {360}, axis=_AXIS44M - {360},
+             bloc="罗马尼亚 8 月 23 日倒戈，计入同盟国一方；保加利亚 9 月 8 日才对德宣战。"),
+        _m44("1944-10-01", "波罗的海与巴尔干", "The Baltic and the Balkans", "4410",
+             "塔林 9 月 22 日解放，芬兰 9 月 19 日停战；保加利亚倒戈后苏军进入南斯拉夫；德军撤出希腊；比利时、卢森堡解放，"
+             "“市场花园”行动失败；华沙起义被镇压（10 月 2 日）。",
+             allied=_ALLIED44M | {360, 355}, axis=_AXIS44M - {360, 355, 375},
+             bloc="罗马尼亚、保加利亚计入同盟国一方；芬兰停战后按中立计。"),
+        _m44("1944-11-01", "贝尔格莱德与德布勒森", "Belgrade and Debrecen", "4411",
+             "里加 10 月 13 日解放，库尔兰被围，苏军首次攻入东普鲁士（贡宾嫩—戈尔达普）；贝尔格莱德 10 月 20 日解放，"
+             "德布勒森坦克战后苏军抵蒂萨河；希腊解放；莱特岛登陆（10 月 20 日）。",
+             allied=_ALLIED44M | {360, 355}, axis=_AXIS44M - {360, 355, 375},
+             bloc="罗马尼亚、保加利亚计入同盟国一方；芬兰停战后按中立计。"),
+        _m44("1944-12-01", "布达佩斯城下", "Before Budapest", "4412",
+             "苏军逼近布达佩斯（11 月 13 日态势图为本系列最后一张）；斯特拉斯堡、梅斯解放，科尔马包围圈；阿尔巴尼亚解放；"
+             "一号作战攻占桂林、柳州。",
+             allied=_ALLIED44M | {360, 355}, axis=_AXIS44M - {360, 355, 375},
+             bloc="罗马尼亚、保加利亚计入同盟国一方；芬兰停战后按中立计。"),
+    ],
+)
+
+GROUPS = [WW1, WW2_1941, WW2_1942, WW2_1943, WW2_1944]
 
 SNAPSHOTS_ADDED = sorted((s.date, s.title_zh, s.title_en) for g in GROUPS for s in g.snapshots)

@@ -20,7 +20,8 @@ Control rules (curated/<group.rules>), applied in file order, a later match over
   reference       optional: ISO 3166-2 codes or present-day country names of reference regions (admin1_pieces of
                   the yearly database), or base:<source>|<source> for the pieces those control sources (rule:35,
                   overlay:mengjiang, ...) held on the base date, or file:<path under curated/>#<side>|<side> for the
-                  polygons of a GeoJSON file with those `side` properties; only the part of a division inside them is
+                  polygons of a GeoJSON file with those `side` properties, or several of these joined by "&" for
+                  the part of the first inside all the others; only the part of a division inside them is
                   assigned (a mask, never shown as a division)
   controller_name, controller_name_zh, controller_gwcode, control_type, confidence (whole / approximate), note,
   source_url
@@ -173,6 +174,39 @@ def controller(gw, state_names, typ="independent", source="cshapes", confidence=
                 control_type=typ, control_source=source, control_confidence=confidence)
 
 
+def mask(con, group, pattern, references, land, row):
+    """The reference geometry of one pattern (see the module docstring)."""
+    def regions(p):
+        return [r["shape"] for r in references if matches(p, r["iso_3166_2"]) or matches(p, r["modern_country"])]
+    if pattern.startswith("file:"):  # polygons of a GeoJSON file under curated/ whose `side` is listed
+        path, _, wanted = pattern[5:].partition("#")
+        feats = json.loads((ROOT / "curated" / path).read_text())["features"]
+        selected = [shape(f["geometry"]) for f in feats
+                    if not wanted or f["properties"].get("side") in wanted.split("|")]
+    elif pattern.startswith("base:"):  # the pieces these control sources held on the base date, or of those
+        sources, _, within = pattern[5:].partition("@")  # the ones lying in these regions
+        sources = sources.split("|")
+        selected = [outline(r[0] or r[1]) for r in con.execute(
+            "SELECT p.geometry,a.geometry FROM snapshot_full s JOIN pieces p USING(piece_id) JOIN admin_units a "
+            f"USING(admin_id) WHERE s.snapshot=? AND s.control_source IN ({','.join('?' * len(sources))})",
+            (group.base, *sources))]
+        if within:
+            area = polys(union(regions(within)))
+            selected = [g for g in selected if area.covers(g.representative_point())]
+    else:
+        selected = regions(pattern)
+        if selected and group.coast_deg:  # out to sea, not into other regions: coasts drawn further out
+            grown = union(selected).buffer(group.coast_deg)
+            others = [references[i]["shape"] for i in land.query(grown, predicate="intersects")
+                      if not any(references[i]["shape"] is g for g in selected)]
+            sea = polys(diff(grown, union(others))) if others else grown
+            if sea is not None:
+                selected = selected + [sea]
+    if not selected:
+        raise ValueError(f"Control rule {row} has no reference geometry: {pattern}")
+    return polys(union(selected))
+
+
 def load_rules(con, world, group):
     rules = list(csv.DictReader((ROOT / "curated" / group.rules).open()))
     references = [dict(r) for r in world.execute("SELECT iso_3166_2, modern_country, geometry FROM admin1_pieces")]
@@ -185,35 +219,13 @@ def load_rules(con, world, group):
         rule["source"] = f"{group.key}_rule:{row}"
         pattern = rule["reference"]
         if pattern and pattern not in mask_cache:
-            def regions(p):
-                return [r["shape"] for r in references if matches(p, r["iso_3166_2"]) or matches(p, r["modern_country"])]
-            if pattern.startswith("file:"):  # polygons of a GeoJSON file under curated/ whose `side` is listed
-                path, _, wanted = pattern[5:].partition("#")
-                feats = json.loads((ROOT / "curated" / path).read_text())["features"]
-                selected = [shape(f["geometry"]) for f in feats
-                            if not wanted or f["properties"].get("side") in wanted.split("|")]
-            elif pattern.startswith("base:"):  # the pieces these control sources held on the base date, or of those
-                sources, _, within = pattern[5:].partition("@")  # the ones lying in these regions
-                sources = sources.split("|")
-                selected = [outline(r[0] or r[1]) for r in con.execute(
-                    "SELECT p.geometry,a.geometry FROM snapshot_full s JOIN pieces p USING(piece_id) JOIN admin_units a "
-                    f"USING(admin_id) WHERE s.snapshot=? AND s.control_source IN ({','.join('?' * len(sources))})",
-                    (group.base, *sources))]
-                if within:
-                    area = polys(union(regions(within)))
-                    selected = [g for g in selected if area.covers(g.representative_point())]
-            else:
-                selected = regions(pattern)
-                if selected and group.coast_deg:  # out to sea, not into other regions: coasts drawn further out
-                    grown = union(selected).buffer(group.coast_deg)
-                    others = [references[i]["shape"] for i in land.query(grown, predicate="intersects")
-                              if not any(references[i]["shape"] is g for g in selected)]
-                    sea = polys(diff(grown, union(others))) if others else grown
-                    if sea is not None:
-                        selected = selected + [sea]
-            if not selected:
+            parts = [mask(con, group, part, references, land, row) for part in pattern.split("&")]
+            m = parts[0]
+            for other in parts[1:]:  # "a&b": the part of a inside b
+                m = polys(m.intersection(other))
+            if m is None or m.is_empty:
                 raise ValueError(f"Control rule {row} has no reference geometry: {pattern}")
-            mask_cache[pattern] = polys(union(selected))
+            mask_cache[pattern] = m
             prepare(mask_cache[pattern])
         rule["mask"] = mask_cache.get(pattern)
         rule["bounds"] = rule["mask"].bounds if rule["mask"] is not None else None
