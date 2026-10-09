@@ -35,7 +35,7 @@ class Snapshot:
 @dataclass
 class Group:
     key: str                        # prefix of what the group adds: divisions for land without provinces
-                                    # "KEY-CSH-<unit>-<tile>" (in tiles of add_snapshots.TILE_DEG), control_rules rows "key:<row>",
+                                    # "ADD-CSH-<unit>-<tile>" (in tiles of add_snapshots.TILE_DEG), control_rules rows "key:<row>",
                                     # sources "key-control-<n>"; must not change once built
     set: str                        # ww2 / early / postwar
     base: str                       # the date whose divisions are reused
