@@ -19,7 +19,8 @@ Control rules (curated/<group.rules>), applied in file order, a later match over
   admin_match     admin_id of the historical division ("*" wildcards, "|"-separated)
   reference       optional: ISO 3166-2 codes or present-day country names of reference regions (admin1_pieces of
                   the yearly database), or base:<source>|<source> for the pieces those control sources (rule:35,
-                  overlay:mengjiang, ...) held on the base date; only the part of a division inside them is
+                  overlay:mengjiang, ...) held on the base date, or file:<path under curated/>#<side>|<side> for the
+                  polygons of a GeoJSON file with those `side` properties; only the part of a division inside them is
                   assigned (a mask, never shown as a division)
   controller_name, controller_name_zh, controller_gwcode, control_type, confidence (whole / approximate), note,
   source_url
@@ -186,7 +187,12 @@ def load_rules(con, world, group):
         if pattern and pattern not in mask_cache:
             def regions(p):
                 return [r["shape"] for r in references if matches(p, r["iso_3166_2"]) or matches(p, r["modern_country"])]
-            if pattern.startswith("base:"):  # the pieces these control sources held on the base date, or of those
+            if pattern.startswith("file:"):  # polygons of a GeoJSON file under curated/ whose `side` is listed
+                path, _, wanted = pattern[5:].partition("#")
+                feats = json.loads((ROOT / "curated" / path).read_text())["features"]
+                selected = [shape(f["geometry"]) for f in feats
+                            if not wanted or f["properties"].get("side") in wanted.split("|")]
+            elif pattern.startswith("base:"):  # the pieces these control sources held on the base date, or of those
                 sources, _, within = pattern[5:].partition("@")  # the ones lying in these regions
                 sources = sources.split("|")
                 selected = [outline(r[0] or r[1]) for r in con.execute(

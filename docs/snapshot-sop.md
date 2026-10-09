@@ -250,7 +250,7 @@ CShapes 修补（UNIT_FIX / UNCOVERED / unit_names）：
    ```
    - `unit_match`：CShapes 政治单元名，支持 `*` 通配，`|` 分隔；
    - `admin_match`：历史区划的 `admin_id`（如 `FR1939-ardennes`、`OHM-r2945069`），支持 `*`；
-   - `reference`：可选，今日一级政区的 ISO 3166-2 码或今日国名，用作近似裁切的范围（只裁切，不作区划）；也可写 `base:rule:35` （基准日期上由这些来源控制的块，用来精确撤销沿用的控制），或 `base:rule:35@RU-ROS`（其中落在这些今日政区里的块）；
+   - `reference`：可选，今日一级政区的 ISO 3166-2 码或今日国名，用作近似裁切的范围（只裁切，不作区划）；也可写 `base:rule:35` （基准日期上由这些来源控制的块，用来精确撤销沿用的控制），或 `base:rule:35@RU-ROS`（其中落在这些今日政区里的块），或 `file:frontlines_1942/1942-08-01.geojson#axis|axis_pocket`（`curated/` 下 GeoJSON 中 `side` 属性为所列值的多边形，用于按真实战线切块，见 8.1.1）；
    - 岛屿属地（CShapes 未画的小属地，如瑙鲁）也按 `unit_match` 匹配其名称，整块改写；
    - `source_url`：**必填**，每条规则都要能查到来源；
    - 按文件顺序执行，后面的覆盖前面的；
@@ -265,6 +265,14 @@ CShapes 修补（UNIT_FIX / UNCOVERED / unit_names）：
 6. 产物：数据库中新增的断面行、`ww2/maps/data/snap-<日期>.json`、`geo-<日期>.bin`、追加后的 `admin.bin`、`index.json`、`added-build.json`、`ww2/maps/<日期>.html`、对应时期的 `coverage*.csv`。
 7. **禁止**手改 `added-build.json` 的校验值。若脚本报 “admin.bin changed since add_snapshots.py last ran”，先重跑 `ww2_webmap.py` 再跑 A。
 8. 路径 A 的局限：只会用到数据库里**已有**的区划（基准断面的，加上带施行日期的替代区划）；基准日期与新日期之间若有未收录的行政改革，不会出现，应在图例或提交说明中注明，或改走 B。
+
+#### 8.1.1 按历史态势图描战线（东线 1942 的做法）
+
+1. 每个日期取一张态势图（德俄项目 CAMO 500/12457 的 Lage Ost，取断面前一晚或最近一天），在 `curated/lagekarten_1942.json` 中登记 `map_date`、`akte`、`url`。
+2. 在预览图（1966 像素宽）上读 10–20 个控制点（城镇、海岸），二次多项式拟合；残差超过约 20 km 的区域补本地控制点，必要时同一张图分段各用一组控制点。先核对已有控制点的位置（斯大林格勒点曾整体错位 40 像素）。
+3. 先把上月战线叠到新图上（`overlay`），只重读变化的段落；未变的段落以 `{"lonlat": …, "note": …}` 沿用并注明。
+4. 包围圈、突出部、城内残留阵地写成 `pockets`（`side` 为 `axis` / `soviet`）；线穿过城镇等需要挪动的点写进 `adjustments`。尾段 `tail` 要把线带进海里，并让对岸（如塔曼半岛）落在正确一侧。
+5. 运行 `python3 scripts/lagekarten.py` 生成 `curated/frontlines_1942/<日期>.geojson`，再用一组关键城镇检查两侧归属（勒热夫、沃罗涅日、斯大林格勒、莫兹多克等），然后在规则表中按 `axis`、`soviet`、`axis_pocket`、`soviet_pocket` 的顺序写 `file:` 规则。
 
 ### 8.2 路径 B：完整流水线
 
@@ -317,7 +325,8 @@ python3 scripts/pipeline.py --sets <集合>             # 生成；中断后重�
 10. **近似必须标出**：凡按整省、整区、`geo` 范围、沿用临近年份判定的控制，一律 `approximate`，否则地图不画斜线，读者会当成精确战线。
 11. **今日政区代码的坑**：`admin1_pieces` 中 `RU-MOS` 是莫斯科市、`RU-MOW` 是莫斯科州（与 ISO 相反）；克里米亚 `UA-43`、塞瓦斯托波尔 `UA-40` 的 `modern_country` 记为 Russia。写掩膜前先查一下代码对应的名称。
 12. **沿用的基准块不一定按今日政区划分**：例如 1942-11-01 的 `rule:35` 中斯塔夫罗波尔、卡拉恰伊-切尔克斯、卡巴尔达-巴尔卡尔是同一大块。用 `base:…@今日政区` 选块时，按块的代表点判断，选不到会报错。
-13. **受限网络**：1897 年俄国省界来自 `heidata.uni-heidelberg.de`，构建 B 时该域名需在允许列表中。
+13. **态势图的控制点**：沿用或转移来的控制点要在图上复核；一张图的多项式在控制点稀少的边缘外推，误差可达 100 像素以上（8 月南图的沃罗涅日）。
+14. **受限网络**：1897 年俄国省界来自 `heidata.uni-heidelberg.de`，构建 B 时该域名需在允许列表中。
 
 ---
 
