@@ -774,8 +774,10 @@ function setHash() { try { history.replaceState(null, "", "#" + state.snap + (st
 async function fetchSnap(snap) {
   // the snapshot's rows and its outlines, in the order ww2_webmap.py wrote them
   const [sd, buf] = await Promise.all([getJSON(`data/snap-${snap}.json`), getBin(`data/geo-${snap}.bin`)]);
+  // an added date ships only the division outlines its base date's file lacks: the base date comes first
+  if (sd.admin_base && sd.admin_base !== snap) await fetchOnce(sd.admin_base);
   const recs = decodeGeo(buf); let i = 0;
-  for (const a of sd.admin_active) state.adminGeo[a] = recs[i++];
+  for (const a of (sd.admin_geo || sd.admin_active)) state.adminGeo[a] = recs[i++];
   for (const f of sd.geo_feature) state.geo[f] = recs[i++];
   for (const u of sd.units_active) state.units[u] = recs[i++];
   sd.ctrlGeo = recs.slice(i);
