@@ -34,8 +34,8 @@ class Snapshot:
 
 @dataclass
 class Group:
-    key: str                        # prefix of what the group adds: pieces "KEY:date:...", divisions for land
-                                    # without provinces "KEY-CSH-<unit>", control_rules rows "key:<row>",
+    key: str                        # prefix of what the group adds: divisions for land without provinces
+                                    # "KEY-CSH-<unit>" (never cut: one controller per date), control_rules rows "key:<row>",
                                     # sources "key-control-<n>"; must not change once built
     set: str                        # ww2 / early / postwar
     base: str                       # the date whose divisions are reused
