@@ -241,6 +241,84 @@ WW2_1942 = Group(
     ],
 )
 
-GROUPS = [WW1, WW2_1942]
+# 1941 from the invasion of the Soviet Union to December, from the divisions and control of 1941-12-07 (Pearl
+# Harbor). The Eastern Front follows the OKH situation maps (curated/frontlines_1941, scripts/lagekarten.py);
+# curated/ww2_1941_region_control.csv also undoes what came after each date elsewhere (Syria, Iran, Indochina).
+_ALLIED_41 = {200, 20, 900, 920, 560, 750, 290, 210, 211, 212, 385, 710, -1, -2, -4, 365, 345, 350}  # no US yet
+_AXIS_41 = {255, 325, 740, 317, -10, -12, 310, 360, 355, 375}
+_NOTE41 = "东线按德国陆军总司令部的每日态势图“Lage Ost”描出的德军前沿（线后 2.5° 以内为德方，其余沿用 1941-12-07 的分区控制）；其他战场按整省、整区近似（斜线）。"
+_CHECKS41 = dict(places=[("Berlin", 13.4, 52.52, 255), ("Moscow", 37.62, 55.75, 365), ("Chongqing", 106.55, 29.56, 710)])
+_BLOC41 = ("同盟国一方为英联邦、苏联、中华民国、自由法国与各流亡政府（南斯拉夫、希腊 4 月起）；美国尚未参战（12 月 8 日对日宣战），"
+           "按中立计。轴心国一方含罗马尼亚、匈牙利、斯洛伐克、克罗地亚、保加利亚与芬兰。")
+WW2_1941 = Group(
+    key="m41", set="ww2", base="1941-12-07", rules="ww2_1941_region_control.csv", cities="ww2_cities.csv",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1941 monthly", period="1941",
+    inherit=("overlay:ccp_bases_1941_42", "overlay:indochina_ceded", "overlay:kwantung", "overlay:manchukuo",
+             "overlay:mengjiang", "overlay:occupied_zone_1942", "rule:2", "rule:5", "rule:8", "rule:9", "rule:10",
+             "rule:11", "rule:12", "rule:14", "rule:15", "rule:16", "rule:17", "rule:18", "rule:19", "rule:20",
+             "rule:21", "rule:22", "rule:23", "rule:24", "rule:25", "rule:26", "rule:27", "rule:29", "rule:30",
+             "rule:43", "rule:44", "rule:45", "rule:46", "rule:48", "rule:50", "rule:52", "rule:54", "rule:55",
+             "rule:59", "rule:60", "rule:62", "rule:79", "rule:97", "rule:98", "rule:99", "rule:100", "rule:101",
+             "rule:102"),
+    pop_method=("Province population pattern of 1941-12-07 (GHS-POP 1975 shares of the 1939-45 database), "
+                "area-adjusted for new pieces and scaled to each political unit's 1941 population in "
+                "world_history_1900_2000.sqlite; rounded with conserved unit totals"),
+    control_note="控制沿用 1941-12-07 的分区规则与东亚图层，东线按各月态势图改写。" + _NOTE41,
+    bloc_names=WW2_1942.bloc_names, bloc_title=WW2_1942.bloc_title,
+    names={k: v for k, v in WW2_1942.names.items() if k != -5},
+    snapshots=[
+        Snapshot(
+            "1941-06-22", "德国入侵苏联（“巴巴罗萨”行动）", "Germany invades the Soviet Union (Operation Barbarossa)",
+            allied=_ALLIED_41, axis=_AXIS_41 - {375}, city_code="4106",
+            bloc_note="苏联当日遭到进攻，与英国并肩作战（7 月 12 日签订英苏协定）。芬兰 6 月 25 日、匈牙利 6 月 27 日才对苏开战，"
+                      "芬兰此日按中立计；匈牙利已是《三国同盟条约》成员，计入轴心国。" + _BLOC41,
+            control_note="战线取 6 月 22 日晚的态势图：德军第一天在立陶宛推进到杜比萨河与涅曼河，围住布列斯特要塞；罗马尼亚、"
+                         "匈牙利边境尚未开打。叙利亚—黎巴嫩战役进行中（交战）；伊朗中立；法属印度支那仍由维希政府管辖。" + _NOTE41,
+            checks=dict(blocs={375: "neutral", 2: "neutral", 365: "allied"}, places=_CHECKS41["places"])),
+        Snapshot(
+            "1941-07-01", "明斯克合围，德军抵达西德维纳河", "The Minsk pocket; the Germans on the Dvina",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4107",
+            bloc_note="芬兰（6 月 25 日）、匈牙利（6 月 27 日）已对苏开战。" + _BLOC41,
+            control_note="6 月 30 日的态势图：比亚韦斯托克—明斯克包围圈（6 月 28 日合拢）、德军在道加瓦皮尔斯与叶卡布皮尔斯渡过西德维纳河，"
+                         "进抵里加、博布鲁伊斯克、罗夫诺与利沃夫。叙利亚—黎巴嫩战役仍在进行。" + _NOTE41),
+        Snapshot(
+            "1941-08-01", "斯摩棱斯克战役与乌曼合围", "The Battle of Smolensk and the Uman encirclement",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4108",
+            bloc_note=_BLOC41,
+            control_note="7 月 31 日的态势图：斯摩棱斯克包围圈与叶利尼亚突出部，大卢基已被苏军收复；北方在卢加河一线与爱沙尼亚中部；"
+                         "南方逼近基辅筑垒地域，乌曼一带合围在即，罗马尼亚军收复比萨拉比亚。叙利亚、黎巴嫩 7 月 14 日由自由法国接管；"
+                         "日军 7 月下旬进驻印度支那南部。" + _NOTE41),
+        Snapshot(
+            "1941-09-01", "德军逼近列宁格勒，敖德萨被围", "The Germans before Leningrad; Odessa besieged",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4109",
+            bloc_note=_BLOC41,
+            control_note="8 月 31 日的态势图：德军占领诺夫哥罗德、姆加，逼近列宁格勒；托罗佩茨、大卢基失守；古德里安装甲集群南下；"
+                         "第聂伯河沿岸从基辅到扎波罗热，德军在第聂伯罗彼得罗夫斯克建立桥头堡；敖德萨被罗马尼亚军包围，塔林 8 月 28 日撤出。"
+                         "英苏 8 月 25 日进入伊朗（29 日停火）；芬兰 8 月 29 日收复维堡。" + _NOTE41),
+        Snapshot(
+            "1941-10-01", "列宁格勒被围，“台风”行动开始", "Leningrad besieged; Operation Typhoon begins",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4110",
+            bloc_note=_BLOC41,
+            control_note="9 月 30 日的态势图：施吕瑟尔堡 9 月 8 日失守，列宁格勒被围；基辅包围战 9 月 26 日结束，德军占领波尔塔瓦，"
+                         "进抵彼列科普；古德里安当日向奥廖尔发起“台风”行动。敖德萨与穆胡、萨列马等岛仍由苏军坚守。" + _NOTE41),
+        Snapshot(
+            "1941-11-01", "德军逼近莫斯科，克里木失守", "The Germans before Moscow; the Crimea overrun",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4111",
+            bloc_note=_BLOC41 + "苏联政府机关 10 月中旬疏散到古比雪夫。",
+            control_note="10 月 31 日的态势图：维亚济马—布良斯克合围之后，前线到加里宁、沃洛科拉姆斯克、莫扎伊斯克防线与图拉城下；"
+                         "哈尔科夫（10 月 24 日）、塔甘罗格失守；德军突破伊顺阵地进入克里木（克里木南部、刻赤与塞瓦斯托波尔仍在苏军手中）；"
+                         "敖德萨 10 月 16 日撤出。" + _NOTE41),
+        Snapshot(
+            "1941-12-01", "莫斯科城下，苏军收复罗斯托夫", "At the gates of Moscow; Rostov retaken",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4112",
+            bloc_note=_BLOC41 + "苏联政府机关在古比雪夫。",
+            control_note="11 月 30 日的态势图：德军在莫斯科—伏尔加运河的亚赫罗马桥头堡、克拉斯纳亚波利亚纳与纳拉河一线，图拉被三面包围；"
+                         "季赫温 11 月 8 日失守；苏军 11 月 29 日收复罗斯托夫，德军退到米乌斯河。北非“十字军”行动进行中（托布鲁克一带交战）。"
+                         + _NOTE41,
+            checks=dict(places=_CHECKS41["places"] + [("Kiev", 30.52, 50.45, 255), ("Leningrad", 30.32, 59.94, 365)])),
+    ],
+)
+
+GROUPS = [WW1, WW2_1941, WW2_1942]
 
 SNAPSHOTS_ADDED = sorted((s.date, s.title_zh, s.title_en) for g in GROUPS for s in g.snapshots)

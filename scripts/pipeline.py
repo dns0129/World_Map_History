@@ -73,7 +73,7 @@ RULES = {"ww2": "ww2_region_control.csv", "early": "region_control_1900_1934.csv
          "postwar": "region_control_1946_1991.csv"}
 CITIES = {"ww2_cities.csv", "cities_1900_1934.csv", "cities_1946_1991.csv", "cities_2026.csv"}
 ADDED_RULES = {g.rules for g in GROUPS}  # read by add_snapshots.py only
-FRONT_LINES = CURATED / "frontlines_1942"  # front lines the 1942 rules refer to (lagekarten.py), add_snapshots.py only
+FRONT_LINES = sorted(CURATED.glob("frontlines_*"))  # front lines the added rules refer to (lagekarten.py), add_snapshots.py only
 
 
 def curated(s=None):
@@ -81,7 +81,7 @@ def curated(s=None):
     of their own set that apply them (curated(set)), none for the units (curated())."""
     skip = CITIES | ADDED_RULES | {f for k, f in RULES.items() if k != s}
     return [p for p in sorted(CURATED.rglob("*")) if p.is_file() and p.name not in skip
-            and FRONT_LINES not in p.parents and p.name != "lagekarten_1942.json"]
+            and not set(FRONT_LINES) & set(p.parents) and not p.name.startswith("lagekarten_")]
 BASE_WORK = [WORK / "unit_year.csv", WORK / "admin1_targets.csv", WORK / "years.csv", WORK / "ww2" / "ref_units.csv",
              WORK / "ww2" / "ref_units.wkb", WORK / "ww2" / "ref_units.geojson"]
 
@@ -203,7 +203,7 @@ def jobs_for(sets):
     added_sets = sorted({g.set for g in GROUPS})
     jobs.append(Job("added", py("add_snapshots.py"), step="added",
                     deps=[f"{s}:{j}" for s in added_sets for j in ("database", "coverage")] + ["webmap"],
-                    reads=[CURATED / g.rules for g in GROUPS] + [FRONT_LINES] + [CURATED / c for c in sorted({g.cities for g in GROUPS})]
+                    reads=[CURATED / g.rules for g in GROUPS] + FRONT_LINES + [CURATED / c for c in sorted({g.cities for g in GROUPS})]
                     + [ROOT / "db" / "world_history_1900_2000.sqlite"]
                     + [WORK / s / f for s in added_sets for f in ("prov_units.csv", "prov_units.wkb")]
                     + [WORK / s / f"prov_snapshot_{d}.csv" for s in added_sets for d, _, _ in SETS[s]]
