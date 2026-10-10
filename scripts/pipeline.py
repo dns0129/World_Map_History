@@ -73,8 +73,8 @@ RULES = {"ww2": "ww2_region_control.csv", "early": "region_control_1900_1934.csv
          "postwar": "region_control_1946_1991.csv"}
 CITIES = {"ww2_cities.csv", "cities_1900_1934.csv", "cities_1946_1991.csv", "cities_2026.csv"}
 ADDED_RULES = {g.rules for g in GROUPS}  # read by add_snapshots.py only
-FRONT_LINES = sorted(CURATED.glob("frontlines_*"))  # front lines the added rules refer to (lagekarten.py, frontlines_west.py), add_snapshots.py only
-FRONT_SOURCES = ("lagekarten_", "loc_west_")  # their readings, used by those scripts only
+FRONT_LINES = sorted(CURATED.glob("frontlines_*"))  # front lines the added rules refer to (lagekarten.py, frontlines_west.py, frontlines_china.py), add_snapshots.py only
+FRONT_SOURCES = ("lagekarten_", "loc_west_", "china_front_")  # their readings, used by those scripts only
 
 
 def curated(s=None):
