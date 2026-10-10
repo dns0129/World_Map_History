@@ -249,7 +249,7 @@ CShapes 修补（UNIT_FIX / UNCOVERED / unit_names）：
    ```
    snapshots,unit_match,admin_match,reference,controller_name,controller_name_zh,controller_gwcode,control_type,confidence,note,source_url
    ```
-   - `unit_match`：CShapes 政治单元名，支持 `*` 通配，`|` 分隔；
+   - `unit_match`：CShapes 政治单元名，支持 `*` 通配，`|` 分隔；必须写 CShapes 原名（中国写 `China`，不是显示名 “Republic of China”），否则构建报 “Unmatched control rules”；预检脚本须按 gw 码核对，曾因接受显示名而漏报。
    - `admin_match`：历史区划的 `admin_id`（如 `FR1939-ardennes`、`OHM-r2945069`），支持 `*`；
    - `reference`：可选，今日一级政区的 ISO 3166-2 码或今日国名，用作近似裁切的范围（只裁切，不作区划）；也可写 `base:rule:35` （基准日期上由这些来源控制的块，用来精确撤销沿用的控制），或 `base:rule:35@RU-ROS`（其中落在这些今日政区里的块），或 `file:frontlines_1942/1942-08-01.geojson#axis|axis_pocket`（`curated/` 下 GeoJSON 中 `side` 属性为所列值的多边形，用于按真实战线切块，见 8.1.1）；几种参照可用 `&` 连接取交集，如 `file:frontlines_1944/1944-03-01.geojson#axis&base:rule:38|rule:40`（战线以西、基准日期上的这些块）；
    - 岛屿属地（CShapes 未画的小属地，如瑙鲁）也按 `unit_match` 匹配其名称，整块改写；
