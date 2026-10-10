@@ -1,12 +1,14 @@
 """Check the map data of every date, and for the dates of added_dates.py the database joins, date validity and
-the historical facts each date lists in its checks."""
+the historical facts each date lists in its checks; that the sets' databases hold only their own dates and that
+each added file (db/<group.db>) is complete by itself."""
 import json
 import sqlite3
 
 from shapely.geometry import Point, shape
 
-from add_snapshots import DATA, MARKER, decode_geo, static_hash, unpack
+from add_snapshots import DATA, MARKER, PIPELINE_DATES, decode_geo, static_hash, unpack
 from added_dates import GROUPS
+from common import DB_DIR
 from ww2_common import DATABASES
 
 
@@ -94,12 +96,24 @@ def main():
     static = json.loads(unpack(DATA / "admin.bin"))
     index = json.loads((DATA / "index.json").read_text())
     docs = check_map(static, index)
-    for set_name in dict.fromkeys(g.set for g in GROUPS):
+    for set_name in dict.fromkeys(g.set for g in GROUPS):  # the sets' databases hold their own dates only
         con = sqlite3.connect(f"file:{DATABASES[set_name]}?mode=ro", uri=True)
+        assert {d for d, in con.execute("SELECT snapshot FROM snapshots")} == {d for d, _, _ in PIPELINE_DATES[set_name]}
+        con.close()
+    for db in dict.fromkeys(g.db for g in GROUPS):  # each added file complete by itself
+        con = sqlite3.connect(f"file:{DB_DIR / db}?mode=ro", uri=True)
         con.row_factory = sqlite3.Row
         assert con.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+        assert con.execute("PRAGMA foreign_key_check").fetchall() == []
+        dates = [s.date for g in GROUPS if g.db == db for s in g.snapshots]
+        assert sorted(d for d, in con.execute("SELECT snapshot FROM snapshots")) == sorted(dates), db
+        for missing in ("SELECT COUNT(*) FROM piece_snapshot WHERE piece_key NOT IN (SELECT piece_key FROM pieces)",
+                        "SELECT COUNT(*) FROM pieces WHERE admin_key NOT IN (SELECT admin_key FROM admin_units)",
+                        "SELECT COUNT(*) FROM piece_snapshot WHERE control_id NOT IN (SELECT control_id FROM controls)",
+                        "SELECT COUNT(*) FROM piece_snapshot WHERE pop_method_id NOT IN (SELECT pop_method_id FROM pop_methods)"):
+            assert con.execute(missing).fetchone()[0] == 0, (db, missing)
         for group in GROUPS:
-            if group.set == set_name:
+            if group.db == db:
                 for s in group.snapshots:
                     assert s.date in docs, (s.date, "not in index.json")
                     check_date(con, s, docs[s.date])

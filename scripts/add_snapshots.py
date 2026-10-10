@@ -1,8 +1,12 @@
-"""Add dates to a set's SQLite database and to the map data, without rebuilding the set.
+"""Add dates to the SQLite databases and to the map data, without rebuilding the sets.
 
-The dates, and everything particular to them, are in added_dates.py: groups of dates, each added to the
-database of one set (ww2 1939-45, early 1900-34, postwar 1946-91) from the divisions of one of its dates (the
-base date). Run as the `added` job of pipeline.py (after the sets' databases and ww2_webmap.py), or
+The dates, and everything particular to them, are in added_dates.py: groups of dates, each built from the
+divisions of one date (the base date) of one set (ww2 1939-45, early 1900-34, postwar 1946-91), and written to a
+database of its own (db/<group.db>; groups may share one), with the tables and views of the set's database and a
+copy of every division, control and rule its dates use, so that each file is complete by itself. The set's
+database is left as its pipeline wrote it (rows that builds before the split added to it are taken out again
+once). The build runs in a working copy of the set's database under work/added/, from which the added files are
+written. Run as the `added` job of pipeline.py (after the sets' databases and ww2_webmap.py), or
 python3 scripts/add_snapshots.py from a checkout. No raw downloads are required. Dated CShapes geometry and
 annual population come from world_history_1900_2000.sqlite; historical divisions and their population pattern
 come from the set's database. Modern reference regions are used only as explicitly approximate control masks,
@@ -10,8 +14,7 @@ never as the displayed historical administrative divisions.
 
 Each date gets its own snap-<date>.json and geo-<date>.bin, in the layout ww2_webmap.py writes; the divisions
 and pieces they add are appended to admin.bin, after those of the other dates. added-build.json records where
-the appended part begins, so that a repeat run replaces it instead of adding it again. Database changes are
-made in a transaction, one per database.
+the appended part begins, so that a repeat run replaces it instead of adding it again.
 
 Control rules (curated/<group.rules>), applied in file order, a later match overriding an earlier one:
   snapshots       dates the rule applies to, "|"-separated
@@ -34,6 +37,7 @@ import hashlib
 import json
 import math
 import re
+import shutil
 import sqlite3
 from collections import Counter
 from itertools import count
@@ -47,7 +51,7 @@ from shapely.geometry import MultiPolygon, Polygon, box, shape
 import cities
 from added_dates import GROUPS
 from build_database import Namer
-from common import DB_DIR, ROOT
+from common import DB_DIR, ROOT, WORK
 from ww2_common import COVERAGE_SUFFIX, DATABASES, SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, SNAPSHOTS_WW2, WW2_OUT
 from ww2_database import gj
 from ww2_geo import diff, eq_area_km2, inter, polys, union
@@ -751,6 +755,90 @@ def add_group(con, world, group, static, index, unit_indices, new_unit, document
                      f"{group.period} event-day control facts; no source text or source map reproduced".strip()))
 
 
+PIPELINE_DATES = {"ww2": SNAPSHOTS_WW2, "early": SNAPSHOTS_EARLY, "postwar": SNAPSHOTS_POSTWAR}
+
+
+def keep_memberships(con, dates):
+    """admin_units.snapshots limited to the given dates."""
+    keep = set(dates)
+    con.executemany("UPDATE admin_units SET snapshots=? WHERE admin_key=?",
+                    [("|".join(d for d in (m or "").split("|") if d in keep), k)
+                     for k, m in con.execute("SELECT admin_key,snapshots FROM admin_units").fetchall()])
+
+
+def other_groups(groups):
+    """Rows of the groups not given: control_rules fields, sources ids and meta keys they own."""
+    others = [g for g in GROUPS if g not in groups]
+    return ([f"{g.key}:%" for g in others], [f"{g.key}-control-%" for g in others],
+            [f"{g.meta_key or g.key}_{k}" for g in others for k in ("method", "control")])
+
+
+def strip_added(con, set_name):
+    """The set's database as its pipeline wrote it: the rows builds before the split added to it taken out
+    again. Returns whether anything was."""
+    dates = [d for d, in con.execute("SELECT snapshot FROM snapshots")
+             if d not in {s for s, _, _ in PIPELINE_DATES[set_name]}]
+    if not dates:
+        return False
+    for table in ("piece_snapshot", "unit_snapshot", "snapshots"):
+        con.executemany(f"DELETE FROM {table} WHERE snapshot=?", [(d,) for d in dates])
+    drop_orphan_pieces(con, [SHARED] + [g.key.upper() for g in GROUPS])
+    con.execute("DELETE FROM admin_units WHERE admin_key NOT IN (SELECT admin_key FROM pieces)")
+    keep_memberships(con, [d for d, in con.execute("SELECT snapshot FROM snapshots")])
+    con.execute("DELETE FROM controls WHERE control_id NOT IN (SELECT control_id FROM piece_snapshot)")
+    con.execute("DELETE FROM pop_methods WHERE pop_method_id NOT IN (SELECT pop_method_id FROM piece_snapshot)")
+    fields, sources, keys = other_groups([])
+    con.executemany("DELETE FROM control_rules WHERE field LIKE ?", [(f,) for f in fields])
+    con.executemany("DELETE FROM sources WHERE source_id LIKE ?", [(f,) for f in sources])
+    con.executemany("DELETE FROM meta WHERE key=?", [(k,) for k in keys])
+    con.execute("UPDATE meta SET value=? WHERE key='snapshots'",
+                (";".join(d for d, in con.execute("SELECT snapshot FROM snapshots ORDER BY snapshot")),))
+    return True
+
+
+def write_added(work, path, groups, set_name):
+    """db/<group.db>: the dates of these groups from the working copy, with the divisions, pieces, controls,
+    population methods, rules, events and sources they use, under the set database's schema."""
+    dates = [s.date for g in groups for s in g.snapshots]
+    if path.exists():
+        path.unlink()
+    out = sqlite3.connect(path)
+    src = sqlite3.connect(f"file:{work}?mode=ro", uri=True)
+    schema = src.execute("SELECT type,sql FROM sqlite_master WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%'").fetchall()
+    src.close()
+    order = {"table": 0, "index": 1, "view": 2}
+    for _, sql in sorted(schema, key=lambda t: order[t[0]]):
+        out.execute(sql)
+    out.execute("ATTACH DATABASE ? AS src", (str(work),))
+    q = ",".join("?" for _ in dates)
+    fields, sources, keys = other_groups(groups)
+    with out:
+        for table in ("snapshots", "piece_snapshot", "unit_snapshot"):
+            out.execute(f"INSERT INTO {table} SELECT * FROM src.{table} WHERE snapshot IN ({q})", dates)
+        out.execute("INSERT INTO pieces SELECT * FROM src.pieces WHERE piece_key IN (SELECT piece_key FROM piece_snapshot)")
+        out.execute("INSERT INTO admin_units SELECT * FROM src.admin_units WHERE admin_key IN (SELECT admin_key FROM pieces)")
+        keep_memberships(out, dates)
+        out.execute("INSERT INTO controls SELECT * FROM src.controls WHERE control_id IN (SELECT control_id FROM piece_snapshot)")
+        out.execute("INSERT INTO pop_methods SELECT * FROM src.pop_methods "
+                    "WHERE pop_method_id IN (SELECT pop_method_id FROM piece_snapshot)")
+        out.execute("INSERT INTO control_rules SELECT * FROM src.control_rules WHERE "
+                    + (" AND ".join("field NOT LIKE ?" for _ in fields) or "1"), fields)
+        out.execute("INSERT INTO control_events SELECT * FROM src.control_events")
+        out.execute("INSERT INTO sources SELECT * FROM src.sources WHERE "
+                    + (" AND ".join("source_id NOT LIKE ?" for _ in sources) or "1"), sources)
+        out.execute("INSERT INTO meta SELECT * FROM src.meta WHERE key NOT IN (" + ",".join("?" for _ in keys) + ")", keys)
+        title = out.execute("SELECT value FROM meta WHERE key='title'").fetchone()[0]
+        out.executemany("INSERT OR REPLACE INTO meta VALUES (?,?)", [
+            ("title", f"{title}: added dates {', '.join(g.period for g in groups if g.period)}"),
+            ("snapshots", ";".join(sorted(dates))),
+            ("base_database", f"db/{DATABASES[set_name].name} (the set's own dates; the base dates "
+                              f"{', '.join(sorted({g.base for g in groups}))} of these dates' divisions)")])
+    out.execute("DETACH DATABASE src")
+    out.execute("VACUUM")
+    out.close()
+    print("Wrote", path, f"{path.stat().st_size / 1e6:.1f} MB")
+
+
 def drop_orphan_pieces(con, prefixes):
     """Pieces of the added dates no date uses any more (of an earlier build, or with the prefixes of older builds)."""
     con.execute("DELETE FROM pieces WHERE (" + " OR ".join("piece_id LIKE ?" for _ in prefixes) + ") "
@@ -778,31 +866,33 @@ def main():
     world = sqlite3.connect(f"file:{DB_DIR / 'world_history_1900_2000.sqlite'}?mode=ro", uri=True)
     world.row_factory = sqlite3.Row
     documents = {}
-    for set_name in dict.fromkeys(g.set for g in GROUPS):  # each database once, in the order of the groups
-        con = sqlite3.connect(DATABASES[set_name])
+    for set_name in dict.fromkeys(g.set for g in GROUPS):  # each set once, in the order of the groups
+        base_db = DATABASES[set_name]
+        con = sqlite3.connect(base_db)
+        with con:
+            stripped = strip_added(con, set_name)
+        if stripped:
+            con.execute("VACUUM")
+            print("Restored", base_db, "to the set's own dates")
+        con.close()
+        work = WORK / "added" / f"{base_db.stem}.sqlite"
+        work.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(base_db, work)
+        con = sqlite3.connect(work)
         con.row_factory = sqlite3.Row
         with con:
-            # every added date is rebuilt: drop their rows, the pieces only they used and the divisions of land
-            # without provinces (of this build's and older builds' naming), so none is reused with an older outline
-            added = [s.date for g in GROUPS if g.set == set_name for s in g.snapshots]
-            for table in ("piece_snapshot", "unit_snapshot", "snapshots"):
-                con.executemany(f"DELETE FROM {table} WHERE snapshot=?", [(d,) for d in added])
-            prefixes = [SHARED] + [g.key.upper() for g in GROUPS]
-            drop_orphan_pieces(con, prefixes)
-            con.execute("DELETE FROM admin_units WHERE (" + " OR ".join("admin_id LIKE ?" for _ in prefixes) + ") "
-                        "AND admin_key NOT IN (SELECT admin_key FROM pieces)", [p + "-CSH-%" for p in prefixes])
             for group in GROUPS:
                 if group.set == set_name:
                     add_group(con, world, group, static, index, unit_indices, new_unit, documents)
-            drop_orphan_pieces(con, prefixes)
             con.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("snapshots", ";".join(
                 r[0] for r in con.execute("SELECT snapshot FROM snapshots ORDER BY snapshot"))))
             cov, cov_units = coverage(con)
-        con.execute("VACUUM")
         con.close()
         cov.to_csv(WW2_OUT / f"coverage{COVERAGE_SUFFIX[set_name]}.csv", index=False)
         cov_units.to_csv(WW2_OUT / f"coverage_by_unit{COVERAGE_SUFFIX[set_name]}.csv", index=False)
-        print("Updated", DATABASES[set_name])
+        for db in dict.fromkeys(g.db for g in GROUPS if g.set == set_name):
+            write_added(work, DB_DIR / db, [g for g in GROUPS if g.set == set_name and g.db == db], set_name)
+        work.unlink()
     world.close()
     for snap, doc in documents.items():
         write_json(DATA / f"snap-{snap}.json", doc)

@@ -41,6 +41,9 @@ class Group:
     base: str                       # the date whose divisions are reused
     rules: str                      # curated/<rules>: the group's control rules (see add_snapshots.py)
     cities: str                     # curated/<cities>: city table of the set
+    db: str                         # db/<db>: the database the group's dates are written to (with a copy of the
+                                    # divisions they use; groups may share one); the set's own database keeps
+                                    # only the set's dates
     pop_method: str                 # pop_methods row of the database
     control_note: str               # legend default for its dates
     bloc_names: dict
@@ -65,6 +68,7 @@ class Group:
 
 WW1 = Group(
     key="ww1", set="early", base="1914-08-04", rules="ww1_region_control.csv", cities="cities_1900_1934.csv",
+    db="divisions_1915_1917.sqlite",
     density_from=("1918-11-11",), inherit=("rule:8", "rule:9", "rule:69", "overlay:kwantung"),
     keep_whole=("overlay:kwantung",), meta_key="wwi", label="WWI", period="1915-1917",
     pop_method=("1914 historical province population density (original GHS-POP-derived estimates), "
@@ -134,6 +138,7 @@ _NOTE42 = "前线与占领区按整省、整区近似（斜线）；中国战场
 _CHECKS42 = dict(places=[("Berlin", 13.4, 52.52, 255), ("Moscow", 37.62, 55.75, 365), ("Chongqing", 106.55, 29.56, 710)])
 WW2_1942 = Group(
     key="m42", set="ww2", base="1942-11-01", rules="ww2_1942_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_monthly_1942.sqlite",
     client_states=True, min_piece_km2=30, coast_deg=0.1, label="1942 monthly", period="1942",
     inherit=("overlay:ccp_bases_1941_42", "overlay:indochina_ceded", "overlay:kwantung", "overlay:manchukuo",
              "overlay:mengjiang", "overlay:occupied_zone_1942", "rule:2", "rule:5", "rule:8", "rule:9", "rule:10",
@@ -252,6 +257,7 @@ _BLOC41 = ("同盟国一方为英联邦、苏联、中华民国、自由法国�
            "按中立计。轴心国一方含罗马尼亚、匈牙利、斯洛伐克、克罗地亚、保加利亚与芬兰。")
 WW2_1941 = Group(
     key="m41", set="ww2", base="1941-12-07", rules="ww2_1941_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_monthly_1941.sqlite",
     client_states=True, min_piece_km2=30, coast_deg=0.1, label="1941 monthly", period="1941",
     inherit=("overlay:ccp_bases_1941_42", "overlay:indochina_ceded", "overlay:kwantung", "overlay:manchukuo",
              "overlay:mengjiang", "overlay:occupied_zone_1942", "rule:2", "rule:5", "rule:8", "rule:9", "rule:10",
@@ -339,6 +345,7 @@ def _m43(day, zh, en, code, control, allied=_ALLIED43, axis=_AXIS43, bloc=_BLOC4
                     control_note=control + _NOTE43, checks=checks or {})
 WW2_1943 = Group(
     key="m43", set="ww2", base="1942-11-01", rules="ww2_1943_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_monthly_1943.sqlite",
     client_states=True, min_piece_km2=30, coast_deg=0.1, label="1943 monthly", period="1943",
     inherit=WW2_1942.inherit,
     pop_method=WW2_1942.pop_method.replace("1942 population", "1943 population"),
@@ -396,6 +403,7 @@ def _m44(day, zh, en, code, control, allied=_ALLIED44M, axis=_AXIS44M, bloc=None
                     city_code=code, control_note=control + _NOTE44, checks=checks or {})
 WW2_1944 = Group(
     key="m44", set="ww2", base="1944-06-06", rules="ww2_1944_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_monthly_1944.sqlite",
     client_states=True, min_piece_km2=30, coast_deg=0.1, label="1944 monthly", period="1944",
     inherit=("overlay:ccp_bases_1941_42", "overlay:indochina_ceded", "overlay:kwantung", "overlay:manchukuo",
              "overlay:mengjiang", "overlay:occupied_zone_1942", "rule:2", "rule:5", "rule:12", "rule:13", "rule:14",
