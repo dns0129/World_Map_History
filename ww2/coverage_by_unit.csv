@@ -8032,7 +8032,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1944-10-01,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1944-10-01,沙捞越,Sarawak,624482,1,3,0.022,0.022
 1944-10-01,沙特阿拉伯,Saudi Arabia,2803000,2,3,0.003,0.003
-1944-10-01,法国,France,38879543,100,3,1.0,1.0
+1944-10-01,法国,France,38879543,101,3,1.0,1.0
 1944-10-01,法国委任统治叙利亚,French Mandate Syria,3290476,0,5,0.0,0.0
 1944-10-01,法国委任统治黎巴嫩,French Mandate Lebanon,1196986,0,5,0.0,0.0
 1944-10-01,法属乌班吉沙立,French Ubangi-Shari,1193711,0,5,0.0,0.0
@@ -8110,7 +8110,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1944-10-01,英属马耳他,British Malta,284075,0,5,0.0,0.0
 1944-10-01,英属黄金海岸,Gold Coast,4100118,2,3,0.014,0.343
 1944-10-01,英法管理下的利比亚,Libya (British/French administration),1097399,2,3,0.004,0.004
-1944-10-01,荷兰,Netherlands,9310879,6,3,0.328,1.0
+1944-10-01,荷兰,Netherlands,9310879,6,3,0.327,1.0
 1944-10-01,荷属东印度,Dutch East Indies,63948256,24,3,0.999,0.999
 1944-10-01,荷属苏里南,Dutch Suriname,182504,2,3,0.005,1.0
 1944-10-01,萨尔瓦多,El Salvador,1933350,16,3,1.0,1.0
@@ -8213,7 +8213,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1944-11-01,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1944-11-01,沙捞越,Sarawak,624482,1,3,0.022,0.022
 1944-11-01,沙特阿拉伯,Saudi Arabia,2803000,2,3,0.003,0.003
-1944-11-01,法国,France,38879543,100,3,1.0,1.0
+1944-11-01,法国,France,38879543,101,3,1.0,1.0
 1944-11-01,法国委任统治叙利亚,French Mandate Syria,3290476,0,5,0.0,0.0
 1944-11-01,法国委任统治黎巴嫩,French Mandate Lebanon,1196986,0,5,0.0,0.0
 1944-11-01,法属乌班吉沙立,French Ubangi-Shari,1193711,0,5,0.0,0.0
@@ -8291,7 +8291,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1944-11-01,英属马耳他,British Malta,284075,0,5,0.0,0.0
 1944-11-01,英属黄金海岸,Gold Coast,4100118,2,3,0.014,0.343
 1944-11-01,英法管理下的利比亚,Libya (British/French administration),1097399,2,3,0.004,0.004
-1944-11-01,荷兰,Netherlands,9310879,6,3,0.328,1.0
+1944-11-01,荷兰,Netherlands,9310879,6,3,0.327,1.0
 1944-11-01,荷属东印度,Dutch East Indies,63948256,24,3,0.999,0.999
 1944-11-01,荷属苏里南,Dutch Suriname,182504,2,3,0.005,1.0
 1944-11-01,萨尔瓦多,El Salvador,1933350,16,3,1.0,1.0
@@ -8394,7 +8394,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1944-12-01,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1944-12-01,沙捞越,Sarawak,624482,1,3,0.022,0.022
 1944-12-01,沙特阿拉伯,Saudi Arabia,2803000,2,3,0.003,0.003
-1944-12-01,法国,France,38879543,101,3,1.0,1.0
+1944-12-01,法国,France,38879543,100,3,1.0,1.0
 1944-12-01,法国委任统治叙利亚,French Mandate Syria,3290476,0,5,0.0,0.0
 1944-12-01,法属乌班吉沙立,French Ubangi-Shari,1193711,0,5,0.0,0.0
 1944-12-01,法属乍得,French Chad,2052316,1,3,0.001,0.001
@@ -8436,7 +8436,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1944-12-01,留尼汪,Réunion,380587,0,5,0.0,0.0
 1944-12-01,科威特（英国保护国）,Kuwait (British protectorate),75000,0,6,0.0,0.0
 1944-12-01,秘鲁,Peru,6928034,34,3,0.996,0.996
-1944-12-01,纳粹德国（德意志国）,Nazi Germany (German Reich),69830500,37,3,0.997,0.999
+1944-12-01,纳粹德国（德意志国）,Nazi Germany (German Reich),69830500,36,3,0.997,0.999
 1944-12-01,纽芬兰自治领,Dominion of Newfoundland,276269,1,3,0.021,0.021
 1944-12-01,罗马尼亚,Romania,16334087,16,3,0.212,0.213
 1944-12-01,美国,United States,136691941,56,3,0.999,0.999
@@ -8471,7 +8471,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1944-12-01,英属马耳他,British Malta,284075,0,5,0.0,0.0
 1944-12-01,英属黄金海岸,Gold Coast,4100118,2,3,0.014,0.343
 1944-12-01,英法管理下的利比亚,Libya (British/French administration),1097399,2,3,0.004,0.004
-1944-12-01,荷兰,Netherlands,9310879,6,3,0.328,1.0
+1944-12-01,荷兰,Netherlands,9310879,7,3,0.33,1.0
 1944-12-01,荷属东印度,Dutch East Indies,63948256,24,3,0.999,0.999
 1944-12-01,荷属苏里南,Dutch Suriname,182504,2,3,0.005,1.0
 1944-12-01,萨尔瓦多,El Salvador,1933350,16,3,1.0,1.0

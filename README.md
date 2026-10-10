@@ -86,10 +86,14 @@ npx --yes http-server -p 8000        # 已安装 Node.js 时也可以用这个
 
 | 文件 | 内容 |
 |---|---|
-| `db/ww2_divisions_1939_1945.sqlite` | 1939–1945 历史省级区划与实际控制 |
-| `db/divisions_1900_1934.sqlite` | 1900–1934 七个断面的省级区划与实际控制（表结构相同） |
-| `db/divisions_1946_1991.sqlite` | 1946–1991 六个断面的省级区划与实际控制（表结构相同） |
+| `db/ww2_divisions_1939_1945.sqlite` | 1939–1945 六个事件日的历史省级区划与实际控制（27 MB） |
+| `db/ww2_monthly_1941.sqlite` … `ww2_monthly_1944.sqlite` | 1941、1942、1943、1944 年逐月断面，每年一个文件（31–40 MB，表结构相同） |
+| `db/divisions_1900_1934.sqlite` | 1900–1934 四个事件日（表结构相同） |
+| `db/divisions_1915_1917.sqlite` | 1915–1917 三个一战事件日（表结构相同） |
+| `db/divisions_1946_1991.sqlite` | 1946–1991 六个断面（表结构相同） |
 | `db/world_history_1900_2000.sqlite` | 1900–2000 逐年世界数据 |
+
+每个文件都是完整的：表、视图（`snapshot_full`）、索引相同，并带有它的断面用到的全部区划、切块、控制方、规则和来源，单独打开即可查询，不需要同时打开其他文件。逐月文件中的区划多为事件日数据库里的同一批历史省份（复制了一份），`meta` 表的 `base_database` 写明它们来自哪个事件日。
 
 几何存为 GeoJSON 文本，不需要 GIS 扩展。可以用命令行、Python 或图形界面打开：
 
@@ -101,8 +105,20 @@ sqlite> SELECT snapshot, bloc, SUM(population_est) FROM snapshot_full GROUP BY s
 
 ```python
 import sqlite3, pandas as pd
-con = sqlite3.connect("db/ww2_divisions_1939_1945.sqlite")
-df = pd.read_sql("SELECT * FROM snapshot_full WHERE snapshot = '1942-11-01'", con)
+con = sqlite3.connect("db/ww2_monthly_1943.sqlite")
+df = pd.read_sql("SELECT * FROM snapshot_full WHERE snapshot = '1943-07-01'", con)
+```
+
+需要跨文件查询时（例如 1939–1945 全部断面的阵营人口），用 `ATTACH` 把几个文件挂在一起，再 `UNION ALL`：
+
+```sql
+ATTACH 'db/ww2_monthly_1943.sqlite' AS m43;
+ATTACH 'db/ww2_monthly_1944.sqlite' AS m44;
+SELECT snapshot, bloc, SUM(population_est) FROM (
+  SELECT snapshot, bloc, population_est FROM main.snapshot_full
+  UNION ALL SELECT snapshot, bloc, population_est FROM m43.snapshot_full
+  UNION ALL SELECT snapshot, bloc, population_est FROM m44.snapshot_full)
+GROUP BY snapshot, bloc ORDER BY snapshot;
 ```
 
 图形界面可用 [DB Browser for SQLite](https://sqlitebrowser.org/)（免费）：打开文件后在 “Browse Data” 中选表或视图。
@@ -129,7 +145,7 @@ docs/snapshot-sop.md       新增断面的生产 SOP（规则、录入卡片、�
 ww2/README.md              1900–1991 各断面的说明（区划来源、省级合并、覆盖程度、控制判定、表结构）
 ww2/maps/                  交互地图（index.html、每个断面一页、data/、vendor/）
 ww2/coverage*.csv          各层级、各政治单元的省级区划覆盖程度（*_1900_1934 为早期七个断面，*_1946_1991 为战后六个断面）
-db/                        两个 SQLite 数据库
+db/                        SQLite 数据库（事件日、逐月断面、逐年数据各自成文件）
 exports/                   1900–2000 逐年导出文件
 maps/                      1900–2000 逐年地图
 curated/                   人工整理的控制事件、控制规则、名称对照
