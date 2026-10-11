@@ -44,6 +44,7 @@ npx --yes http-server -p 8000        # 已安装 Node.js 时也可以用这个
 | http://localhost:8000/1917-04-06.html | 美国对德国宣战 |
 | http://localhost:8000/1918-11-11.html | 贡比涅停战协定生效，一战结束 |
 | http://localhost:8000/1934-10-16.html | 中央红军开始长征 |
+| http://localhost:8000/1937-07-07.html … 1939-03-27.html | 中日战争六个关键日：卢沟桥事变、上海与太原失守、南京沦陷、徐州失守、武汉与广州失守后、南昌失守（见 [说明](ww2/README.md#19371939-年中日战争关键日)） |
 | http://localhost:8000/1939-09-01.html | 德国入侵波兰 |
 | http://localhost:8000/1940-07-01.html | 法国停战后 |
 | http://localhost:8000/1941-12-07.html | 珍珠港事件当日 |
@@ -87,6 +88,7 @@ npx --yes http-server -p 8000        # 已安装 Node.js 时也可以用这个
 | 文件 | 内容 |
 |---|---|
 | `db/ww2_divisions_1939_1945.sqlite` | 1939–1945 六个事件日的历史省级区划与实际控制（27 MB） |
+| `db/ww2_china_1937_1939.sqlite` | 1937–1939 中日战争六个关键日（表结构相同） |
 | `db/ww2_monthly_1941.sqlite` … `ww2_monthly_1944.sqlite` | 1941、1942、1943、1944 年逐月断面，每年一个文件（31–40 MB，表结构相同） |
 | `db/divisions_1900_1934.sqlite` | 1900–1934 四个事件日（表结构相同） |
 | `db/divisions_1915_1917.sqlite` | 1915–1917 三个一战事件日（表结构相同） |

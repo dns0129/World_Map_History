@@ -11,10 +11,14 @@ C11110508500); its blue line bounds the area the Japanese army held (我軍占�
            pixels. The lines were taken from the image by colour (the blue ink only) and followed between waypoints
            read by eye; `head`, `tail` and `close` (lon/lat) take the main line out to the Mengjiang border and to
            sea round the occupied side, `closure` does the same for a line that ends on the coast.
-  dates    per date the sheet it starts from and `add` / `cut`: lon/lat areas the date's events add to the occupied
-           area or take from it (the 1942 Zhejiang-Jiangxi campaign after the operation maps of the same volume,
+  dates    per date the sheet it starts from and `reach` / `add` / `cut`: lon/lat areas the occupied area is cut back
+           to (for a date before the sheet's: the ground the Japanese army had reached, after the operations maps of
+           Senshi Sōsho vols. 18 and 89 and the North China Area Army's progress maps, JACAR C11110931600-1800),
+           and areas the date's events add to the occupied area or take from it (the 1942 Zhejiang-Jiangxi campaign after the operation maps of the same volume,
            western Yunnan from May 1942, the third battle of Changsha), each with its note; `whole` marks an addition
-           that is not an approximation of the date's events (the whole of Hainan, held since 1939).
+           that is not an approximation of the date's events (the whole of Hainan, held since 1939); `only` takes the
+           occupied area from `add` alone (7 July 1937, before the war); `sides` are further lon/lat areas written
+           out as sides of their own. A sheet given as a year is read from curated/china_front_<year>.json.
 A line's side: "chinese" lines enclose Chinese-held pockets behind the line (Nationalist armies; the Communist base
 areas are a layer of their own on the base date), "japanese" lines enclose Japanese-held enclaves (Canton,
 Shantou, northern Hainan).
@@ -35,7 +39,7 @@ from shapely.ops import unary_union
 from lagekarten import Georef
 
 ROOT = Path(__file__).resolve().parent.parent
-YEARS = ("1942",)
+YEARS = ("1937", "1942")
 CHINA = box(70, 15, 140, 56)
 
 
@@ -50,6 +54,8 @@ def main(year):
     out.mkdir(exist_ok=True)
     sheets = {}
     for name, sh in data["sheets"].items():
+        if isinstance(sh, str):  # a sheet of another year's file
+            sh = data["sheets"][name] = json.loads((ROOT / "curated" / f"china_front_{sh}.json").read_text())["sheets"][name]
         g = Georef(sh["gcps"])
         m = sh["main"]
         line = [tuple(p) for p in m["head"]] + lonlat(g, m["pixels"]) + [tuple(p) for p in m["tail"]]
@@ -63,6 +69,10 @@ def main(year):
     for date, d in sorted(data["dates"].items()):
         line, occupied, residuals = sheets[d["sheet"]]
         added = unary_union([Polygon(a["lonlat"]).buffer(0) for a in d.get("add", []) if not a.get("whole")])
+        if d.get("only"):
+            occupied = Polygon()
+        if d.get("reach"):
+            occupied = occupied.intersection(unary_union([Polygon(r["lonlat"]).buffer(0) for r in d["reach"]]))
         for a in d.get("add", []):
             occupied = occupied.union(Polygon(a["lonlat"]).buffer(0))
         for c in d.get("cut", []):
@@ -70,14 +80,17 @@ def main(year):
         feats = [dict(type="Feature", properties=dict(side="front"), geometry=mapping(LineString(line))),
                  dict(type="Feature", properties=dict(side="japanese"), geometry=mapping(occupied)),
                  dict(type="Feature", properties=dict(side="chinese"), geometry=mapping(CHINA.difference(occupied)))]
+        for side, ring in d.get("sides", {}).items():
+            feats.append(dict(type="Feature", properties=dict(side=side), geometry=mapping(Polygon(ring).buffer(0))))
         if not added.is_empty:  # what the date's events add, written after the histories (approximate)
             feats.append(dict(type="Feature", properties=dict(side="added"), geometry=mapping(added.intersection(occupied))))
         sh = data["sheets"][d["sheet"]]
         src = dict(map=sh["title"], map_date=sh["map_date"], url=sh["url"], original=sh.get("original"),
-                   residuals_km=residuals, changes=[a["note"] for a in d.get("add", []) + d.get("cut", [])])
+                   residuals_km=residuals, changes=[a["note"] + (f" ({a['source']})" if a.get("source") else "")
+                            for a in d.get("reach", []) + d.get("add", []) + d.get("cut", [])])
         (out / f"{date}.geojson").write_text(json.dumps(dict(type="FeatureCollection", source=src, features=feats),
                                                         ensure_ascii=False, separators=(",", ":")))
-        print(date, len(line), "points;", len(d.get("add", [])), "added,", len(d.get("cut", [])), "cut; residuals up to",
+        print(date, len(line), "points;", len(d.get("reach", [])), "reach,", len(d.get("add", [])), "added,", len(d.get("cut", [])), "cut; residuals up to",
               max(residuals.values()), "km")
 
 
