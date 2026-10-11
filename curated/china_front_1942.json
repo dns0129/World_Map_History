@@ -3191,7 +3191,38 @@
       ]
      ]
     }
-   }
+   },
+   "fix": [
+    {
+     "note": "Yueyang and the Xinqiang River line south of it, held from 11 November 1938 to 1945; on the map the line runs about 25 km north of the town (the edge of the control points)",
+     "lonlat": [
+      [
+       112.95,
+       29.25
+      ],
+      [
+       113.0,
+       29.6
+      ],
+      [
+       113.35,
+       29.75
+      ],
+      [
+       113.5,
+       29.45
+      ],
+      [
+       113.35,
+       29.15
+      ],
+      [
+       113.05,
+       29.12
+      ]
+     ]
+    }
+   ]
   }
  },
  "dates": {
