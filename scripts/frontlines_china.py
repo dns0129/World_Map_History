@@ -10,7 +10,8 @@ C11110508500); its blue line bounds the area the Japanese army held (我軍占�
            to Yichang and back along the south bank of the Yangtze to the coast at Ningbo) and the other lines, in
            pixels. The lines were taken from the image by colour (the blue ink only) and followed between waypoints
            read by eye; `head`, `tail` and `close` (lon/lat) take the main line out to the Mengjiang border and to
-           sea round the occupied side, `closure` does the same for a line that ends on the coast.
+           sea round the occupied side, `closure` does the same for a line that ends on the coast; `fix` are lon/lat areas
+           added where the traced line misses a town the Japanese held (near the edge of the control points).
   dates    per date the sheet it starts from and `reach` / `add` / `cut`: lon/lat areas the occupied area is cut back
            to (for a date before the sheet's: the ground the Japanese army had reached, after the operations maps of
            Senshi Sōsho vols. 18 and 89 and the North China Area Army's progress maps, JACAR C11110931600-1800),
@@ -65,6 +66,8 @@ def main(year):
             ring = lonlat(g, p["pixels"]) + [tuple(q) for q in p.get("closure", [])]
             (chinese if p["side"] == "chinese" else japanese).append(Polygon(ring).buffer(0))
         occupied = occupied.difference(unary_union(chinese)).union(unary_union(japanese))
+        for f in sh.get("fix", []):  # lon/lat corrections where the line misses a town it held (its note says why)
+            occupied = occupied.union(Polygon(f["lonlat"]).buffer(0))
         sheets[name] = (line, occupied, g.residuals)
     for date, d in sorted(data["dates"].items()):
         line, occupied, residuals = sheets[d["sheet"]]
