@@ -468,6 +468,97 @@ WW2_1944 = Group(
         ],
 )
 
-GROUPS = [WW1, WW2_1941, WW2_1942, WW2_1943, WW2_1944]
+# The Sino-Japanese War from the Marco Polo Bridge to the fall of Nanchang: six key dates before the 1939-45 dates,
+# from the divisions of 1939-09-01. The occupied area of China is the one traced from the Japanese general situation
+# map of late August 1941 cut back to the ground reached by each date (curated/china_front_1937.json, after the
+# operations maps of Senshi Sosho vols. 18 and 89 and the North China Area Army's progress maps); the Spanish Civil War
+# by whole provinces. Blocs: the two sides of the war in China; Germany and Italy (Anti-Comintern Pact) not at war.
+_ALLIED37 = {710, -2}
+_AXIS37 = {740}
+_NOTE37 = ("中国战场的日占区按日军《中國軍全般図》（1941 年 8 月下旬）描出的占领区，再按《战史丛书》第 18、89 卷作战经过图与"
+           "北支那方面军作战经过要图（JACAR）所示各日期已到达的地点裁切（斜线，近似）；伪满洲国、蒙疆、关东州沿用 1939 年图层。"
+           "西班牙内战按整省近似（斜线）。")
+_BLOC37 = ("阵营按中日战争划分：中国（含中共军队）一方与日本（含伪满、蒙疆等扶植政权）一方；德、意虽与日本签有《反共产国际协定》，"
+           "欧洲尚未开战，按未参战计。")
+_CHECKS37 = [("Chongqing", 106.55, 29.56, 710), ("Tokyo", 139.69, 35.69, 740), ("Changchun", 125.32, 43.88, 740)]
+WW2_1937 = Group(
+    key="c37", set="ww2", base="1939-09-01", rules="ww2_1937_39_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_china_1937_1939.sqlite",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1937-39 key dates", period="1937-1939",
+    inherit=("overlay:kwantung", "overlay:manchukuo", "overlay:mengjiang", "rule:62", "rule:79"),
+    pop_method=("Province population pattern of 1939-09-01 (GHS-POP 1975 shares of the 1939-45 database), "
+                "area-adjusted for new pieces and scaled to each political unit's population of the year in "
+                "world_history_1900_2000.sqlite; rounded with conserved unit totals"),
+    control_note="政治单元取各日期的 CShapes，控制沿用 1939-09-01 的东亚图层，再按各日期的战局改写。" + _NOTE37,
+    bloc_names={"allied": "中国一方", "axis": "日本一方", "neutral": "未参战", "contested": "前线争夺"},
+    bloc_title="中日战争阵营 · 人口",
+    names={**{k: v for k, v in WW2_1942.names.items() if k not in (-5, -4, -12, -1, -10)},
+           -42: ("Spanish Republic", "西班牙共和国（共和派）"), 230: ("Spain (Nationalists)", "西班牙（国民军）")},
+    snapshots=[
+        Snapshot(
+            "1937-07-07", "卢沟桥事变", "The Marco Polo Bridge Incident",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3707",
+            bloc_note="7 月 7 日夜日军在卢沟桥挑起事变，全面抗战由此开始；7 月 17 日蒋介石发表庐山谈话。" + _BLOC37,
+            control_note="战前态势：日本占有东北（伪满洲国、关东州）与热河；冀东 22 县为日本扶植的冀东防共自治政府；"
+                         "察哈尔北部为德王的蒙古军政府，绥远经 1936 年绥远抗战仍由中国控制；平津有日本驻屯军。"
+                         "西班牙内战：毕尔巴鄂 6 月 19 日失守。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Beiping", 116.4, 39.9, 710), ("Shanghai", 121.47, 31.23, 710),
+                                            ("Tongzhou", 116.66, 39.91, 740), ("Hohhot", 111.65, 40.82, 710),
+                                            ("Vienna", 16.37, 48.21, 305), ("Prague", 14.42, 50.08, 315),
+                                            ("Valencia", -0.38, 39.47, -42), ("Seville", -5.98, 37.39, 230)])),
+        Snapshot(
+            "1937-11-12", "淞沪会战结束，太原失守", "Shanghai falls; Taiyuan lost",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3711",
+            bloc_note="意大利 11 月 6 日加入《反共产国际协定》。" + _BLOC37,
+            control_note="上海 11 月 12 日失守（日军 11 月 5 日在杭州湾金山卫登陆）；华北日军 8 日攻占太原，平汉线推进到漳河，"
+                         "津浦线推进到济南以北的黄河北岸；10 月占领归绥、包头。西班牙北方战线已失（希洪 10 月 21 日）。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Beiping", 116.4, 39.9, 740), ("Taiyuan", 112.55, 37.87, 740),
+                                            ("Jinan", 117.0, 36.65, 710), ("Nanjing", 118.78, 32.06, 710),
+                                            ("Shanghai", 121.47, 31.23, 740), ("Hohhot", 111.65, 40.82, 740)])),
+        Snapshot(
+            "1937-12-13", "南京沦陷", "The fall of Nanjing",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3712",
+            bloc_note="国民政府 11 月 20 日宣布移驻重庆，军政机关集中于武汉。" + _BLOC37,
+            control_note="日军 12 月 13 日攻占南京，随即展开大屠杀；长江三角洲（苏州、无锡、常州、镇江、湖州、广德、芜湖）已失，"
+                         "杭州（12 月 24 日）与济南（12 月 27 日）尚在中国军手中。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Nanjing", 118.78, 32.06, 740), ("Wuxi", 120.3, 31.57, 740),
+                                            ("Hangzhou", 120.15, 30.27, 710), ("Jinan", 117.0, 36.65, 710),
+                                            ("Wuhan", 114.3, 30.6, 710)])),
+        Snapshot(
+            "1938-05-19", "徐州失守", "The fall of Xuzhou",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3805",
+            bloc_note="德国 3 月 13 日吞并奥地利；5 月德国承认伪满洲国并召回在华军事顾问。" + _BLOC37,
+            control_note="台儿庄大捷（4 月）后，日军南北夹击，5 月 19 日攻占徐州，中国军突围西撤；山西大部、山东、豫北已失，"
+                         "合肥 5 月 14 日、厦门 5 月 13 日失守。6 月花园口决堤前。西班牙：国民军 4 月 15 日在维纳罗斯抵达地中海，"
+                         "将共和国一分为二。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Xuzhou", 117.18, 34.26, 740), ("Jinan", 117.0, 36.65, 740),
+                                            ("Kaifeng", 114.31, 34.8, 710), ("Wuhan", 114.3, 30.6, 710),
+                                            ("Vienna", 16.37, 48.21, 255), ("Barcelona", 2.17, 41.39, -42)])),
+        Snapshot(
+            "1938-11-02", "武汉、广州失守后", "After the fall of Wuhan and Canton",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3811",
+            bloc_note="慕尼黑协定（9 月 30 日）后德国并入苏台德地区，11 月 2 日第一次维也纳仲裁把斯洛伐克南部割给匈牙利。" + _BLOC37,
+            control_note="广州 10 月 21 日、武汉三镇 10 月 25—27 日失守；日军沿长江两岸占领安庆、九江、德安、永修、咸宁，"
+                         "大别山北麓经固始、潢川到信阳，经商城、麻城到黄陂；岳阳（11 月 11 日）尚未失守。开封 6 月 6 日失守，"
+                         "黄泛区阻断平汉线以东。西班牙：埃布罗河战役进入尾声。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Wuhan", 114.3, 30.6, 740), ("Canton", 113.26, 23.13, 740),
+                                            ("Kaifeng", 114.31, 34.8, 740), ("Changsha", 112.97, 28.2, 710),
+                                            ("Nanchang", 115.89, 28.68, 710), ("Yueyang", 113.13, 29.37, 710),
+                                            ("Liberec", 15.05, 50.77, 255)])),
+        Snapshot(
+            "1939-03-27", "南昌失守", "The fall of Nanchang",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3903",
+            bloc_note="德国 3 月 15 日占领捷克，斯洛伐克在德国保护下独立，匈牙利占领喀尔巴阡乌克兰；3 月 23 日立陶宛把梅梅尔割给德国。"
+                      + _BLOC37,
+            control_note="日军 3 月 27 日攻占南昌；岳阳（1938 年 11 月 11 日）、海南岛（1939 年 2 月 10 日起）、海州（3 月 1 日）"
+                         "已被占领；汕头（6 月）、随枣（5 月）尚在中国军手中。西班牙：加泰罗尼亚已失，3 月 28 日马德里投降。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Nanchang", 115.89, 28.68, 740), ("Yueyang", 113.13, 29.37, 740),
+                                            ("Haikou", 110.35, 20.02, 740), ("Changsha", 112.97, 28.2, 710),
+                                            ("Prague", 14.42, 50.08, 255), ("Bratislava", 17.11, 48.15, 317),
+                                            ("Madrid", -3.70, 40.42, -42), ("Barcelona", 2.17, 41.39, 230)])),
+    ],
+)
+
+GROUPS = [WW1, WW2_1937, WW2_1941, WW2_1942, WW2_1943, WW2_1944]
 
 SNAPSHOTS_ADDED = sorted((s.date, s.title_zh, s.title_en) for g in GROUPS for s in g.snapshots)
