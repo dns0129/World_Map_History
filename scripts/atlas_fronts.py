@@ -10,7 +10,7 @@ the page by colour (pink and red, small holes such as lakes filled, German pocke
 splits the Allied area into the Soviet side (east) and the Western Allied side (west), which met only on the Elbe on
 25 April 1945; `extra_soviet` adds ground liberated in the east beyond the edge of the sheet, and ground beyond the
 edges of the sheet otherwise falls to the side of the divider it lies on (the Soviet Union east of the sheet, southern
-Italy south of it). Per date `corrections` (each with its note and source) add Soviet-held ground (side "soviet") or
+Italy south of it). Per date `corrections` (each with its note and source) add Soviet-held or Western Allied ground (sides "soviet", "allied") or
 take German fortress pockets out of the Allied area (side "axis"), where the atlas, drawn at about 1:7,000,000, misses
 them or where the OKH map Lage Ost of the end of March 1945 (German-Russian digitisation project) places the front
 otherwise for 1 April.
@@ -56,12 +56,12 @@ def main():
         lon, lat = g.lonlat([0, w / 2, w, w, w, w / 2, 0, 0], [150, 150, 150, 765, 1380, 1380, 1380, 765])
         sheet = Polygon(list(zip(lon, lat)))
         beyond = EUROPE.difference(sheet)
-        corr = {"soviet": [], "axis": []}
+        corr = {"soviet": [], "axis": [], "allied": []}
         for c in d.get("corrections", []):
             shape_ = Point(c["circle"][:2]).buffer(c["circle"][2]) if "circle" in c else Polygon(c["lonlat"])
             corr[c["side"]].append(shape_)
         pockets = unary_union(corr["axis"])
-        allied = allied.union(beyond).union(unary_union(corr["soviet"])).difference(pockets)
+        allied = allied.union(beyond).union(unary_union(corr["soviet"] + corr["allied"])).difference(pockets)
         soviet = allied.intersection(east).union(extra).difference(pockets)
         western = allied.intersection(west)
         uk, fr = western.intersection(UK_ZONE), western.intersection(FR_ZONE)
