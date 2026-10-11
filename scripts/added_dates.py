@@ -561,6 +561,63 @@ WW2_1937 = Group(
     ],
 )
 
-GROUPS = [WW1, WW2_1937, WW2_1941, WW2_1942, WW2_1943, WW2_1944]
+# 1945 from January to May: the divisions of 1944-06-06 (the provinces unchanged), the fronts of the war against Germany
+# from the War Department's atlas of the world battle fronts (curated/frontlines_1945, scripts/atlas_fronts.py), checked
+# for 1 April against the OKH map Lage Ost of the end of March 1945; the war against Japan by whole provinces.
+_NOTE45 = ("欧洲战线按美国陆军部《世界各战线半月态势图集》（1945）各期的“对德战争”图描出（盟军控制区按颜色提取，分苏军一侧与西方盟军一侧，"
+           "后者按英加、美、法军大致分区）；4 月 1 日对照德俄数字化项目的德军“Lage Ost”图（1945 年 3 月底）修正上西里西亚、屈斯特林与科尔贝格，"
+           "并补入图集未画的布达佩斯、波森、格洛高、布雷斯劳要塞包围圈（斜线，近似）；大西洋沿岸德军据点、克里特岛西部仍归德军。"
+           "太平洋、缅甸、中国按整省近似（斜线）；华北中共根据地沿用北支那方面军 1942 年 9 月《治安概况》图的未治安地区。")
+_ALLIED45 = {-4, -2, -1, 2, 20, 40, 41, 42, 70, 90, 91, 92, 93, 94, 95, 100, 140, 145, 200, 210, 211, 212, 220, 290, 325, 345,
+             350, 355, 360, 365, 385, 450, 530, 560, 630, 645, 710, 750, 900, 920}
+_AXIS45 = {-12, -10, 255, 310, 317, 740, 800}
+_FEB45 = {130, 150, 135, 155, 101, 165, 640, 651, 652, 660, 670}   # declared war in February 1945 (Ecuador … Saudi Arabia, 1 March)
+_BLOC45 = ("同盟国一方含英联邦、苏联、美国、中华民国、法国临时政府、意大利王国（共同交战国）、罗马尼亚、保加利亚与各流亡政府；"
+           "轴心国一方含德、日、泰、匈牙利（萨拉希政权）、斯洛伐克、克罗地亚。")
+def _m45(day, zh, en, code, control, allied=_ALLIED45, axis=_AXIS45, bloc="", checks=None):
+    return Snapshot(day, zh, en, allied=allied, axis=axis, bloc_note=_BLOC45 + bloc, city_code=code,
+                    control_note=control + _NOTE45, checks=checks or {})
+_C45 = [("Berlin", 13.4, 52.52, 255), ("Moscow", 37.62, 55.75, 365), ("Paris", 2.35, 48.86, 220), ("Liepaja", 21.0, 56.5, 255)]
+WW2_1945 = Group(
+    key="m45", set="ww2", base="1944-06-06", rules="ww2_1945_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_monthly_1945.sqlite",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1945 monthly", period="1945",
+    inherit=WW2_1944.inherit,
+    pop_method=("Province population pattern of 1944-06-06 (GHS-POP 1975 shares of the 1939-45 database), "
+                "area-adjusted for new pieces and scaled to each political unit's 1945 population in "
+                "world_history_1900_2000.sqlite; rounded with conserved unit totals"),
+    control_note="区划与 1944-06-06 相同（省界不变），控制沿用其分区规则与东亚图层，再按各月战线改写。" + _NOTE45,
+    bloc_names=WW2_1942.bloc_names, bloc_title=WW2_1942.bloc_title, names=_N44,
+    snapshots=[
+        _m45("1945-01-01", "阿登反击与布达佩斯被围", "The Ardennes and the siege of Budapest", "4501",
+             "德军阿登攻势（12 月 16 日起）的突出部仍在，巴斯托涅解围；“北风”行动在阿尔萨斯；苏军 12 月 26 日合围布达佩斯；"
+             "维斯瓦河、纳雷夫河前线尚未发动冬季攻势；莱特岛、民都洛岛已被美军攻占。",
+             checks=dict(places=_C45 + [("Budapest", 19.04, 47.5, 255), ("Warsaw", 21.01, 52.23, 255), ("Bastogne", 5.72, 50.0, 211)])),
+        _m45("1945-02-01", "维斯瓦河—奥得河攻势", "The Vistula–Oder offensive", "4502",
+             "苏军 1 月 12 日起的维斯瓦河—奥得河攻势：华沙 1 月 17 日、克拉科夫 1 月 19 日解放，1 月 31 日抵奥得河屈斯特林；东普鲁士被切断；"
+             "波森要塞、布达的德军仍被围；阿登突出部已被收复；美军在吕宋岛林加延湾登陆（1 月 9 日）。",
+             checks=dict(places=_C45 + [("Warsaw", 21.01, 52.23, 365), ("Krakow", 19.94, 50.06, 365)])),
+        _m45("1945-03-01", "波美拉尼亚与莱茵兰", "Pomerania and the Rhineland", "4503",
+             "苏军清剿东波美拉尼亚与西里西亚，布雷斯劳、格洛高被围；布达佩斯 2 月 13 日陷落；西线盟军推进到鲁尔河、莱茵河左岸；"
+             "马尼拉战役结束在即，硫磺岛战役进行中。",
+             allied=_ALLIED45 | _FEB45,
+             bloc="土耳其（2 月 23 日）、埃及、叙利亚、黎巴嫩、沙特阿拉伯与厄瓜多尔、巴拉圭、秘鲁、智利、委内瑞拉、乌拉圭 2 月对德或对日宣战。",
+             checks=dict(places=_C45 + [("Budapest", 19.04, 47.5, 365), ("Breslau", 17.04, 51.11, 255)])),
+        _m45("1945-04-01", "鲁尔合围与维也纳攻势", "The Ruhr pocket and the Vienna offensive", "4504",
+             "盟军 3 月 7 日在雷马根、3 月 23 日在韦塞尔渡过莱茵河，4 月 1 日合围鲁尔；苏军夺取但泽（3 月 30 日）、屈斯特林（3 月 30 日）、"
+             "上西里西亚，进入奥地利；冲绳登陆（4 月 1 日）；曼德勒 3 月 20 日收复。",
+             allied=_ALLIED45 | _FEB45 | {375, 160},
+             bloc="芬兰 3 月 3 日对德宣战、阿根廷 3 月 27 日对德日宣战，计入同盟国一方。",
+             checks=dict(places=_C45 + [("Danzig", 18.65, 54.35, 365), ("Breslau", 17.04, 51.11, 255), ("Cologne", 6.96, 50.94, 2)])),
+        _m45("1945-05-01", "柏林战役与易北河会师", "The Battle of Berlin; the link-up on the Elbe", "4505",
+             "苏军合围并攻入柏林（希特勒 4 月 30 日自杀），维也纳 4 月 13 日解放；美苏两军 4 月 25 日在托尔高会师；盟军占领德国西部与南部、"
+             "意大利北部（意大利境内德军 5 月 2 日投降）；德军仍据守荷兰西部、丹麦、挪威、库尔兰、波希米亚与奥地利西部；仰光 5 月 3 日收复。",
+             allied=_ALLIED45 | _FEB45 | {375, 160},
+             bloc="芬兰、阿根廷计入同盟国一方。",
+             checks=dict(places=_C45[1:] + [("Vienna", 16.37, 48.21, 365), ("Munich", 11.58, 48.14, 2), ("Hamburg", 10.0, 53.55, 255)])),
+    ],
+)
+
+GROUPS = [WW1, WW2_1937, WW2_1941, WW2_1942, WW2_1943, WW2_1944, WW2_1945]
 
 SNAPSHOTS_ADDED = sorted((s.date, s.title_zh, s.title_en) for g in GROUPS for s in g.snapshots)

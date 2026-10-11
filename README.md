@@ -52,6 +52,7 @@ npx --yes http-server -p 8000        # 已安装 Node.js 时也可以用这个
 | http://localhost:8000/1941-06-22.html … 1941-12-01.html | 1941 年 6–12 月断面（苏德战争开始与每月 1 日，见 [说明](ww2/README.md#1941-年-612-月断面)） |
 | http://localhost:8000/1942-01-01.html … 1942-12-01.html | 1942 年逐月断面（每月 1 日，见 [说明](ww2/README.md#1942-年逐月断面)） |
 | http://localhost:8000/1943-01-01.html … 1944-12-01.html | 1943、1944 年逐月断面（见 [说明](ww2/README.md#19431944-年逐月断面)） |
+| http://localhost:8000/1945-01-01.html … 1945-05-01.html | 1945 年 1–5 月逐月断面（见 [说明](ww2/README.md#1945-年-15-月断面)） |
 | http://localhost:8000/1944-06-06.html | 诺曼底登陆日 |
 | http://localhost:8000/1945-09-02.html | 日本签署投降书 |
 | http://localhost:8000/1946-06-26.html | 国民政府军进攻中原解放区，国共内战全面爆发 |
@@ -89,7 +90,7 @@ npx --yes http-server -p 8000        # 已安装 Node.js 时也可以用这个
 |---|---|
 | `db/ww2_divisions_1939_1945.sqlite` | 1939–1945 六个事件日的历史省级区划与实际控制（27 MB） |
 | `db/ww2_china_1937_1939.sqlite` | 1937–1939 中日战争六个关键日（表结构相同） |
-| `db/ww2_monthly_1941.sqlite` … `ww2_monthly_1944.sqlite` | 1941、1942、1943、1944 年逐月断面，每年一个文件（31–40 MB，表结构相同） |
+| `db/ww2_monthly_1941.sqlite` … `ww2_monthly_1945.sqlite` | 1941–1944 年逐月断面与 1945 年 1–5 月断面，每年一个文件（31–40 MB，表结构相同） |
 | `db/divisions_1900_1934.sqlite` | 1900–1934 四个事件日（表结构相同） |
 | `db/divisions_1915_1917.sqlite` | 1915–1917 三个一战事件日（表结构相同） |
 | `db/divisions_1946_1991.sqlite` | 1946–1991 六个断面（表结构相同） |
