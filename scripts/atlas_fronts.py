@@ -5,7 +5,8 @@ General Staff, 1945; public domain; Combined Arms Research Library digital libra
 each phase: Allied-held ground pink (that taken in the phase dark red), German-held ground light grey, neutral countries
 darker grey. curated/atlas_1945.json holds per date the page used, its control points (city circles read on the 1
 January 1945 page, located by circle detection, carried to the other pages by a homography fitted to feature matches
-between the prints of the same base map; second-order polynomial as in lagekarten.py) and the Allied area taken from
+between the prints of the same base map; second-order polynomial as in lagekarten.py), `sheet` (the map's pixel frame
+on that page, whose width differs from page to page) and the Allied area taken from
 the page by colour (pink and red, small holes such as lakes filled, German pockets kept), in pixels; `divider` (lon/lat)
 splits the Allied area into the Soviet side (east) and the Western Allied side (west), which met only on the Elbe on
 25 April 1945; `extra_soviet` adds ground liberated in the east beyond the edge of the sheet, and ground beyond the
@@ -52,8 +53,9 @@ def main():
             poly = Polygon([(round(float(x), 4), round(float(y), 4)) for x, y in zip(lon, lat)]).buffer(0)
             (holes if r["hole"] else outer).append(poly)
         allied = unary_union(outer).difference(unary_union(holes)) if holes else unary_union(outer)
-        h, w = 1380, 1279   # the sheet: page pixels below the title band, above the text
-        lon, lat = g.lonlat([0, w / 2, w, w, w, w / 2, 0, 0], [150, 150, 150, 765, 1380, 1380, 1380, 765])
+        x0, y0, x1, y1 = d["sheet"]   # the map on the page: below the title band, above the text, a few pixels inside the
+        xm, ym = (x0 + x1) / 2, (y0 + y1) / 2   # page edges so that the ground beyond it overlaps the area traced to them
+        lon, lat = g.lonlat([x0, xm, x1, x1, x1, xm, x0, x0], [y0, y0, y0, ym, y1, y1, y1, ym])
         sheet = Polygon(list(zip(lon, lat)))
         beyond = EUROPE.difference(sheet)
         corr = {"soviet": [], "axis": [], "allied": []}
