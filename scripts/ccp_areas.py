@@ -17,19 +17,24 @@ Writes curated/ccp_areas/<area>.geojson (north_china_1942_09, shaan_gan_ning_194
 jin_cha_ji_1938_01) (python3 scripts/ccp_areas.py), each with side "ccp" (the area) and
 "cover" (the part of China the sheet's classification covers: North China north of the Longhai railway for
 050_332, where the red areas replace any other reading of the Communist areas) and, for 050_332, "jinsui" (north-western
-Shanxi beyond the Japanese line, where the red area is the Jin-Sui base).
+Shanxi beyond the Japanese line, where the red area is the Jin-Sui base: the red areas outside the occupied area of
+March 1942 that reach into a box around it, whole).
 """
 import json
 from pathlib import Path
 
-from shapely.geometry import LineString, Polygon, box, mapping
+from shapely.geometry import LineString, Polygon, box, mapping, shape
 from shapely.ops import unary_union
 
 from lagekarten import Georef
 
 ROOT = Path(__file__).resolve().parent.parent
 COVER = {"north_china_1942_09": box(105, 34.4, 125, 43)}   # 050_332: the North China Area Army's area, north of the Longhai railway
-JINSUI = {"north_china_1942_09": box(110.3, 37.8, 112.5, 39.6)}   # 050_332: north-western Shanxi, the Jin-Sui base
+# 050_332: north-western Shanxi, the Jin-Sui base: the red areas beyond the Japanese line (the occupied area of
+# March 1942, curated/frontlines_china_1942) that reach into this box, taken whole, so that the side follows the red
+# areas and the Japanese line and no edge of the box runs through a province
+JINSUI = {"north_china_1942_09": box(110.3, 37.8, 112.5, 39.6)}
+JAPANESE_LINE = ROOT / "curated" / "frontlines_china_1942" / "1942-03-01.geojson"
 
 
 def main():
@@ -50,7 +55,11 @@ def main():
             if name in COVER:
                 feats.append(dict(type="Feature", properties=dict(side="cover"), geometry=mapping(COVER[name])))
             if name in JINSUI:
-                feats.append(dict(type="Feature", properties=dict(side="jinsui"), geometry=mapping(JINSUI[name])))
+                occupied = unary_union([shape(f["geometry"]).buffer(0) for f in json.loads(JAPANESE_LINE.read_text())["features"]
+                                        if f["properties"]["side"] == "japanese"])
+                beyond = area.difference(occupied)
+                jinsui = unary_union([p for p in getattr(beyond, "geoms", [beyond]) if p.intersects(JINSUI[name])])
+                feats.append(dict(type="Feature", properties=dict(side="jinsui"), geometry=mapping(jinsui)))
             src = dict(map=sh["title"], map_date=sh["map_date"], source=sh["source"], url=sh["url"], note=a["note"],
                        residuals_km=g.residuals)
             fname = name

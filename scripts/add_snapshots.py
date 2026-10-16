@@ -75,7 +75,7 @@ def own_outline(r, a):
     """Whether a row's piece keeps an outline of its own: cut from its division, or the land without provinces
     (ADD-CSH-<unit>-<tile>) where it differs from the outline its division was built with on the first date it was
     needed by more than 1% of its area (the divisions around it end and begin)."""
-    if r["control_split"]:
+    if r["control_split"] or r.get("covers_others"):
         return True
     if re.fullmatch(r"[A-Z0-9]+-CSH-\d+-\d+_\d+", r["admin_id"]) is None:
         return False
@@ -453,7 +453,31 @@ def build_snapshot(con, world, group, s, rules, rule_hits):
     piece_counts = Counter(r["admin_id"] for r in output)
     for r in output:
         r["control_split"] = int(piece_counts[r["admin_id"]] > 1)
+    mark_covering(output, used_admins)
     return output, used_admins, unit_geoms
+
+
+def mark_covering(rows, admins):
+    """Flag the whole-division pieces whose division outline would be drawn over other pieces of another controller.
+
+    A piece that is all of its division on the date is drawn with the division's outline. Where two versions of a
+    division are in force on the same date, or the division reaches beyond its political unit, the piece is only part
+    of that outline (the other version or unit took the rest), and the outline would paint its controller over the
+    others (1944: a 107 km2 remnant of Mykolaiv oblast drawn as the whole oblast over the German-held part)."""
+    cand = [r for r in rows if not r["control_split"] and re.fullmatch(r"[A-Z0-9]+-CSH-\d+-\d+_\d+", r["admin_id"]) is None
+            and r["area_km2"] < 0.97 * (admins[r["admin_id"]].get("area_km2") or 0)]
+    if not cand:
+        return
+    geoms = [r["geom"] for r in rows]
+    tree = STRtree(geoms)
+    for r in cand:
+        extra = diff(shape(json.loads(admins[r["admin_id"]]["geometry"])), r["geom"])
+        if extra is None or extra.is_empty:
+            continue
+        covered = sum(eq_area_km2(inter(extra, geoms[j]) or Polygon()) for j in tree.query(extra, predicate="intersects")
+                      if rows[j] is not r and rows[j]["controller_name_en"] != r["controller_name_en"])
+        if covered > 50:
+            r["covers_others"] = True
 
 
 def store_snapshot(con, rows, admins, s, pop_method, group, stored):

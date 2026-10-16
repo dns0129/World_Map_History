@@ -7,7 +7,9 @@ darker grey. curated/atlas_1945.json holds per date the page used, its control p
 January 1945 page, located by circle detection, carried to the other pages by a homography fitted to feature matches
 between the prints of the same base map; second-order polynomial as in lagekarten.py), `sheet` (the map's pixel frame
 on that page, whose width differs from page to page) and the Allied area taken from
-the page by colour (pink and red, small holes such as lakes filled, German pockets kept), in pixels; `divider` (lon/lat)
+the page by colour (pink and red, small holes such as lakes filled, German pockets kept), in pixels, extended over
+the sea by up to 12 px (never over German or neutral grey land, kept 5 px clear of it) so that it reaches the
+coastline of the provinces; `divider` (lon/lat)
 splits the Allied area into the Soviet side (east) and the Western Allied side (west), which met only on the Elbe on
 25 April 1945; `extra_soviet` adds ground liberated in the east beyond the edge of the sheet, and ground beyond the
 edges of the sheet otherwise falls to the side of the divider it lies on (the Soviet Union east of the sheet, southern
@@ -20,8 +22,8 @@ Writes curated/frontlines_1945/<date>.geojson (python3 scripts/atlas_fronts.py):
   allied    the Allied area of the phase
   axis_pocket   German fortress pockets of the corrections
   soviet    its part east of the divider (with extra_soviet)
-  western   its part west of the divider; western_uk / western_fr / western_us the British-Canadian (north of
-            51.55 N), French (south of 49 N, west of 10.2 E) and American parts of it (approximate army group zones)
+  western   its part west of the divider (the army group zones in Germany are given by whole provinces in the
+            control rules, not here, so that no straight line runs through a province)
 """
 import json
 from pathlib import Path
@@ -33,8 +35,6 @@ from lagekarten import Georef
 
 ROOT = Path(__file__).resolve().parent.parent
 EUROPE = box(-12, 34, 40, 72)
-UK_ZONE = box(-12, 51.55, 40, 72)
-FR_ZONE = box(-12, 34, 10.2, 49.0)
 
 
 def main():
@@ -71,9 +71,7 @@ def main():
         allied = allied.union(beyond).union(unary_union(corr["soviet"] + corr["allied"])).difference(pockets)
         soviet = allied.intersection(east).union(extra).difference(pockets)
         western = allied.intersection(west)
-        uk, fr = western.intersection(UK_ZONE), western.intersection(FR_ZONE)
-        sides = dict(allied=allied.union(extra), axis_pocket=pockets, soviet=soviet, western=western, western_uk=uk, western_fr=fr,
-                     western_us=western.difference(UK_ZONE).difference(FR_ZONE))
+        sides = dict(allied=allied.union(extra), axis_pocket=pockets, soviet=soviet, western=western)
         feats = [dict(type="Feature", properties=dict(side=k), geometry=mapping(v)) for k, v in sides.items() if not v.is_empty]
         src = dict(data["source"], page=int(d["page"]), map_date=date, residuals_km=g.residuals,
                    corrections=[f"{c['name']}: {c['note']} ({c['source']})" for c in d.get("corrections", [])])
