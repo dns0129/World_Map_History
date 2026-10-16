@@ -20,7 +20,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1937-07-07,北罗得西亚,Northern Rhodesia,1621094,1,3,0.0,0.0
 1937-07-07,南斯拉夫,Yugoslavia,15172000,6,3,0.06,0.06
 1937-07-07,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1937-07-07,南罗得西亚,Southern Rhodesia,2530675,1,3,0.001,0.002
+1937-07-07,南罗得西亚,Southern Rhodesia,2530675,1,3,0.001,0.001
 1937-07-07,南非联邦,Union of South Africa,9865174,5,3,1.0,1.0
 1937-07-07,卡塔尔（英国保护国）,Qatar (British protectorate),28426,0,5,0.0,0.0
 1937-07-07,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4110228,2,3,1.0,1.0
@@ -44,7 +44,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1937-07-07,大日本帝国,Empire of Japan,74382123,47,3,1.0,1.0
 1937-07-07,奥地利,Austria,6726618,2,3,0.065,0.065
 1937-07-07,委内瑞拉,Venezuela,3460000,8,3,0.01,0.01
-1937-07-07,尼亚萨兰,Nyasaland,1873407,0,4,0.0,0.001
+1937-07-07,尼亚萨兰,Nyasaland,1873407,0,5,0.0,0.0
 1937-07-07,尼加拉瓜,Nicaragua,938421,18,3,1.0,1.0
 1937-07-07,尼泊尔,Nepal,7175057,3,3,0.01,0.01
 1937-07-07,巴布亚领地（澳大利亚）,Territory of Papua (Australian),426933,1,3,0.919,0.999
@@ -164,7 +164,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1937-07-07,葡属几内亚,Portuguese Guinea,493364,1,3,0.018,0.018
 1937-07-07,葡属安哥拉,Portuguese Angola,4020572,1,3,0.0,0.0
 1937-07-07,葡属帝汶,Portuguese Timor,436114,0,5,0.0,0.0
-1937-07-07,葡属莫桑比克,Portuguese Mozambique,5233681,1,3,0.001,0.333
+1937-07-07,葡属莫桑比克,Portuguese Mozambique,5233681,1,3,0.001,0.001
 1937-07-07,葡萄牙,Portugal,7416061,4,3,0.054,0.054
 1937-07-07,蒙古,Mongolia,758634,4,3,0.139,0.139
 1937-07-07,西南非洲（南非管理）,South West Africa (South African administration),329598,2,3,0.998,0.998
@@ -205,7 +205,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1937-11-12,北罗得西亚,Northern Rhodesia,1621094,1,3,0.0,0.0
 1937-11-12,南斯拉夫,Yugoslavia,15172000,6,3,0.06,0.06
 1937-11-12,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1937-11-12,南罗得西亚,Southern Rhodesia,2530675,1,3,0.001,0.002
+1937-11-12,南罗得西亚,Southern Rhodesia,2530675,1,3,0.001,0.001
 1937-11-12,南非联邦,Union of South Africa,9865174,5,3,1.0,1.0
 1937-11-12,卡塔尔（英国保护国）,Qatar (British protectorate),28426,0,5,0.0,0.0
 1937-11-12,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4110228,2,3,1.0,1.0
@@ -229,7 +229,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1937-11-12,大日本帝国,Empire of Japan,74382123,47,3,1.0,1.0
 1937-11-12,奥地利,Austria,6726618,2,3,0.065,0.065
 1937-11-12,委内瑞拉,Venezuela,3460000,8,3,0.01,0.01
-1937-11-12,尼亚萨兰,Nyasaland,1873407,0,4,0.0,0.001
+1937-11-12,尼亚萨兰,Nyasaland,1873407,0,5,0.0,0.0
 1937-11-12,尼加拉瓜,Nicaragua,938421,18,3,1.0,1.0
 1937-11-12,尼泊尔,Nepal,7175057,3,3,0.01,0.01
 1937-11-12,巴布亚领地（澳大利亚）,Territory of Papua (Australian),426933,1,3,0.919,0.999
@@ -349,7 +349,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1937-11-12,葡属几内亚,Portuguese Guinea,493364,1,3,0.018,0.018
 1937-11-12,葡属安哥拉,Portuguese Angola,4020572,1,3,0.0,0.0
 1937-11-12,葡属帝汶,Portuguese Timor,436114,0,5,0.0,0.0
-1937-11-12,葡属莫桑比克,Portuguese Mozambique,5233681,1,3,0.001,0.333
+1937-11-12,葡属莫桑比克,Portuguese Mozambique,5233681,1,3,0.001,0.001
 1937-11-12,葡萄牙,Portugal,7416061,4,3,0.054,0.054
 1937-11-12,蒙古,Mongolia,758634,6,3,0.555,0.555
 1937-11-12,西南非洲（南非管理）,South West Africa (South African administration),329598,2,3,0.998,0.998
@@ -390,7 +390,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1937-12-13,北罗得西亚,Northern Rhodesia,1621094,1,3,0.0,0.0
 1937-12-13,南斯拉夫,Yugoslavia,15172000,6,3,0.06,0.06
 1937-12-13,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1937-12-13,南罗得西亚,Southern Rhodesia,2530675,1,3,0.001,0.002
+1937-12-13,南罗得西亚,Southern Rhodesia,2530675,1,3,0.001,0.001
 1937-12-13,南非联邦,Union of South Africa,9865174,5,3,1.0,1.0
 1937-12-13,卡塔尔（英国保护国）,Qatar (British protectorate),28426,0,5,0.0,0.0
 1937-12-13,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4110228,2,3,1.0,1.0
@@ -414,7 +414,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1937-12-13,大日本帝国,Empire of Japan,74382123,47,3,1.0,1.0
 1937-12-13,奥地利,Austria,6726618,2,3,0.065,0.065
 1937-12-13,委内瑞拉,Venezuela,3460000,8,3,0.01,0.01
-1937-12-13,尼亚萨兰,Nyasaland,1873407,0,4,0.0,0.001
+1937-12-13,尼亚萨兰,Nyasaland,1873407,0,5,0.0,0.0
 1937-12-13,尼加拉瓜,Nicaragua,938421,18,3,1.0,1.0
 1937-12-13,尼泊尔,Nepal,7175057,3,3,0.01,0.01
 1937-12-13,巴布亚领地（澳大利亚）,Territory of Papua (Australian),426933,1,3,0.919,0.999
@@ -534,7 +534,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1937-12-13,葡属几内亚,Portuguese Guinea,493364,1,3,0.018,0.018
 1937-12-13,葡属安哥拉,Portuguese Angola,4020572,1,3,0.0,0.0
 1937-12-13,葡属帝汶,Portuguese Timor,436114,0,5,0.0,0.0
-1937-12-13,葡属莫桑比克,Portuguese Mozambique,5233681,1,3,0.001,0.333
+1937-12-13,葡属莫桑比克,Portuguese Mozambique,5233681,1,3,0.001,0.001
 1937-12-13,葡萄牙,Portugal,7416061,4,3,0.054,0.054
 1937-12-13,蒙古,Mongolia,758634,6,3,0.555,0.555
 1937-12-13,西南非洲（南非管理）,South West Africa (South African administration),329598,2,3,0.998,0.998
@@ -575,7 +575,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1938-05-19,北罗得西亚,Northern Rhodesia,1668297,1,3,0.0,0.0
 1938-05-19,南斯拉夫,Yugoslavia,15384000,6,3,0.06,0.06
 1938-05-19,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1938-05-19,南罗得西亚,Southern Rhodesia,2548821,1,3,0.001,0.002
+1938-05-19,南罗得西亚,Southern Rhodesia,2548821,1,3,0.001,0.001
 1938-05-19,南非联邦,Union of South Africa,10080231,5,3,1.0,1.0
 1938-05-19,卡塔尔（英国保护国）,Qatar (British protectorate),28687,0,5,0.0,0.0
 1938-05-19,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4139343,2,3,1.0,1.0
@@ -599,7 +599,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1938-05-19,大日本帝国,Empire of Japan,75146752,47,3,1.0,1.0
 1938-05-19,奥地利,Austria,6692354,2,3,0.065,0.065
 1938-05-19,委内瑞拉,Venezuela,3550000,8,3,0.01,0.01
-1938-05-19,尼亚萨兰,Nyasaland,1906317,0,4,0.0,0.001
+1938-05-19,尼亚萨兰,Nyasaland,1906317,0,5,0.0,0.0
 1938-05-19,尼加拉瓜,Nicaragua,962901,18,3,1.0,1.0
 1938-05-19,尼泊尔,Nepal,7248935,3,3,0.01,0.01
 1938-05-19,巴布亚领地（澳大利亚）,Territory of Papua (Australian),429623,2,3,0.92,1.0
@@ -719,7 +719,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1938-05-19,葡属几内亚,Portuguese Guinea,496659,1,3,0.018,0.018
 1938-05-19,葡属安哥拉,Portuguese Angola,4049897,1,3,0.0,0.0
 1938-05-19,葡属帝汶,Portuguese Timor,434387,1,3,0.073,0.073
-1938-05-19,葡属莫桑比克,Portuguese Mozambique,5279186,1,3,0.001,0.333
+1938-05-19,葡属莫桑比克,Portuguese Mozambique,5279186,1,3,0.001,0.001
 1938-05-19,葡萄牙,Portugal,7508295,4,3,0.054,0.054
 1938-05-19,蒙古,Mongolia,760147,6,3,0.555,0.555
 1938-05-19,西南非洲（南非管理）,South West Africa (South African administration),335691,2,3,0.998,0.998
@@ -759,7 +759,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1938-11-02,北罗得西亚,Northern Rhodesia,1668297,1,3,0.0,0.0
 1938-11-02,南斯拉夫,Yugoslavia,15384000,6,3,0.06,0.06
 1938-11-02,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1938-11-02,南罗得西亚,Southern Rhodesia,2548821,1,3,0.001,0.002
+1938-11-02,南罗得西亚,Southern Rhodesia,2548821,1,3,0.001,0.001
 1938-11-02,南非联邦,Union of South Africa,10080231,5,3,1.0,1.0
 1938-11-02,卡塔尔（英国保护国）,Qatar (British protectorate),28687,0,5,0.0,0.0
 1938-11-02,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4139343,2,3,1.0,1.0
@@ -783,7 +783,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1938-11-02,大日本帝国,Empire of Japan,75146752,47,3,1.0,1.0
 1938-11-02,奥地利,Austria,6692354,2,3,0.065,0.065
 1938-11-02,委内瑞拉,Venezuela,3550000,8,3,0.01,0.01
-1938-11-02,尼亚萨兰,Nyasaland,1906317,0,4,0.0,0.001
+1938-11-02,尼亚萨兰,Nyasaland,1906317,0,5,0.0,0.0
 1938-11-02,尼加拉瓜,Nicaragua,962901,18,3,1.0,1.0
 1938-11-02,尼泊尔,Nepal,7248935,3,3,0.01,0.01
 1938-11-02,巴布亚领地（澳大利亚）,Territory of Papua (Australian),429623,2,3,0.92,1.0
@@ -903,7 +903,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1938-11-02,葡属几内亚,Portuguese Guinea,496659,1,3,0.018,0.018
 1938-11-02,葡属安哥拉,Portuguese Angola,4049897,1,3,0.0,0.0
 1938-11-02,葡属帝汶,Portuguese Timor,434387,1,3,0.073,0.073
-1938-11-02,葡属莫桑比克,Portuguese Mozambique,5279186,1,3,0.001,0.333
+1938-11-02,葡属莫桑比克,Portuguese Mozambique,5279186,1,3,0.001,0.001
 1938-11-02,葡萄牙,Portugal,7508295,4,3,0.054,0.054
 1938-11-02,蒙古,Mongolia,760147,6,3,0.555,0.555
 1938-11-02,西南非洲（南非管理）,South West Africa (South African administration),335691,2,3,0.998,0.998
@@ -943,7 +943,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1939-03-27,北罗得西亚,Northern Rhodesia,1716889,1,3,0.0,0.0
 1939-03-27,南斯拉夫,Yugoslavia,15596000,6,3,0.06,0.06
 1939-03-27,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1939-03-27,南罗得西亚,Southern Rhodesia,2567098,1,3,0.001,0.002
+1939-03-27,南罗得西亚,Southern Rhodesia,2567098,1,3,0.001,0.001
 1939-03-27,南非联邦,Union of South Africa,10299982,5,3,1.0,1.0
 1939-03-27,卡塔尔（英国保护国）,Qatar (British protectorate),28949,0,5,0.0,0.0
 1939-03-27,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4168674,2,3,1.0,1.0
@@ -967,7 +967,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1939-03-27,大日本帝国,Empire of Japan,75735682,47,3,1.0,1.0
 1939-03-27,奥地利,Austria,6676228,2,3,0.065,0.065
 1939-03-27,委内瑞拉,Venezuela,3630000,8,3,0.01,0.01
-1939-03-27,尼亚萨兰,Nyasaland,1939809,0,4,0.0,0.001
+1939-03-27,尼亚萨兰,Nyasaland,1939809,0,5,0.0,0.0
 1939-03-27,尼加拉瓜,Nicaragua,987382,18,3,1.0,1.0
 1939-03-27,尼泊尔,Nepal,7323576,3,3,0.01,0.01
 1939-03-27,巴布亚领地（澳大利亚）,Territory of Papua (Australian),432330,2,3,0.92,1.0
@@ -1087,7 +1087,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1939-03-27,葡属几内亚,Portuguese Guinea,499976,1,3,0.018,0.018
 1939-03-27,葡属安哥拉,Portuguese Angola,4079437,1,3,0.0,0.0
 1939-03-27,葡属帝汶,Portuguese Timor,432668,1,3,0.073,0.073
-1939-03-27,葡属莫桑比克,Portuguese Mozambique,5325087,1,3,0.001,0.333
+1939-03-27,葡属莫桑比克,Portuguese Mozambique,5325087,1,3,0.001,0.001
 1939-03-27,葡萄牙,Portugal,7601531,4,3,0.054,0.054
 1939-03-27,蒙古,Mongolia,761664,6,3,0.555,0.555
 1939-03-27,西南非洲（南非管理）,South West Africa (South African administration),341896,2,3,0.998,0.998
@@ -1148,7 +1148,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1939-09-01,夏威夷（美国领地）,Territory of Hawaii,539870,1,3,1.0,1.0
 1939-09-01,外约旦（英国委任统治）,Transjordan (British mandate),392457,0,5,0.0,0.0
 1939-09-01,多米尼加,Dominican Republic,1669098,0,5,0.0,0.0
-1939-09-01,大日本帝国,Empire of Japan,75735686,47,3,1.0,1.0
+1939-09-01,大日本帝国,Empire of Japan,75735683,47,3,1.0,1.0
 1939-09-01,奥地利,Austria,6676229,6,3,0.589,1.0
 1939-09-01,委内瑞拉,Venezuela,3629999,1,3,0.012,0.03
 1939-09-01,尼亚萨兰,Nyasaland,1939809,0,5,0.0,0.0
@@ -1185,7 +1185,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1939-09-01,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1939-09-01,沙捞越,Sarawak,585918,0,5,0.0,0.0
 1939-09-01,沙特阿拉伯,Saudi Arabia,2508999,2,3,0.006,0.006
-1939-09-01,法国,France,41239529,93,3,1.0,1.0
+1939-09-01,法国,France,41239531,93,3,1.0,1.0
 1939-09-01,法国委任统治叙利亚,French Mandate Syria,3059553,0,5,0.0,0.0
 1939-09-01,法国委任统治黎巴嫩,French Mandate Lebanon,1074217,0,5,0.0,0.0
 1939-09-01,法属乌班吉沙立,French Ubangi-Shari,1012493,0,5,0.0,0.0
@@ -1269,7 +1269,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1939-09-01,葡属几内亚,Portuguese Guinea,499976,0,5,0.0,0.0
 1939-09-01,葡属安哥拉,Portuguese Angola,4079437,0,5,0.0,0.0
 1939-09-01,葡属帝汶,Portuguese Timor,432668,0,5,0.0,0.0
-1939-09-01,葡属莫桑比克,Portuguese Mozambique,5325087,0,4,0.0,0.337
+1939-09-01,葡属莫桑比克,Portuguese Mozambique,5325087,0,5,0.0,0.0
 1939-09-01,葡萄牙,Portugal,7601532,3,3,0.038,0.038
 1939-09-01,蒙古,Mongolia,761665,3,3,0.024,0.024
 1939-09-01,西南非洲（南非管理）,South West Africa (South African administration),341896,1,3,1.0,1.0
@@ -1366,7 +1366,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1940-07-01,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1940-07-01,沙捞越,Sarawak,598648,0,5,0.0,0.0
 1940-07-01,沙特阿拉伯,Saudi Arabia,2565000,2,3,0.006,0.006
-1940-07-01,法国,France,40473584,93,3,1.0,1.0
+1940-07-01,法国,France,40473586,93,3,1.0,1.0
 1940-07-01,法国委任统治叙利亚,French Mandate Syria,3104470,0,5,0.0,0.0
 1940-07-01,法国委任统治黎巴嫩,French Mandate Lebanon,1097752,0,5,0.0,0.0
 1940-07-01,法属乌班吉沙立,French Ubangi-Shari,1046377,0,5,0.0,0.0
@@ -1448,7 +1448,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1940-07-01,葡属几内亚,Portuguese Guinea,503315,0,5,0.0,0.0
 1940-07-01,葡属安哥拉,Portuguese Angola,4113529,0,5,0.0,0.0
 1940-07-01,葡属帝汶,Portuguese Timor,430959,0,5,0.0,0.0
-1940-07-01,葡属莫桑比克,Portuguese Mozambique,5371388,0,4,0.0,0.337
+1940-07-01,葡属莫桑比克,Portuguese Mozambique,5371388,0,5,0.0,0.0
 1940-07-01,葡萄牙,Portugal,7691426,3,3,0.038,0.038
 1940-07-01,蒙古,Mongolia,763184,3,3,0.024,0.024
 1940-07-01,西南非洲（南非管理）,South West Africa (South African administration),348217,1,3,1.0,1.0
@@ -1488,7 +1488,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-06-22,北罗得西亚,Northern Rhodesia,1818413,1,3,0.0,0.0
 1941-06-22,南斯拉夫,Yugoslavia,15724000,8,3,0.127,0.203
 1941-06-22,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1941-06-22,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.002
+1941-06-22,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.001
 1941-06-22,南非联邦,Union of South Africa,10753972,5,3,1.0,1.0
 1941-06-22,卡塔尔（英国保护国）,Qatar (British protectorate),29482,0,5,0.0,0.0
 1941-06-22,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4227988,2,3,1.0,1.0
@@ -1512,7 +1512,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-06-22,大日本帝国,Empire of Japan,77406136,47,3,1.0,1.0
 1941-06-22,奥地利,Austria,6717048,8,3,0.615,1.0
 1941-06-22,委内瑞拉,Venezuela,3800000,8,3,0.01,0.01
-1941-06-22,尼亚萨兰,Nyasaland,2008578,0,4,0.0,0.001
+1941-06-22,尼亚萨兰,Nyasaland,2008578,0,5,0.0,0.0
 1941-06-22,尼加拉瓜,Nicaragua,1032263,18,3,1.0,1.0
 1941-06-22,尼泊尔,Nepal,7475144,3,3,0.01,0.01
 1941-06-22,巴布亚领地（澳大利亚）,Territory of Papua (Australian),437796,2,3,0.92,1.0
@@ -1629,7 +1629,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-06-22,葡属几内亚,Portuguese Guinea,506677,1,3,0.018,0.018
 1941-06-22,葡属安哥拉,Portuguese Angola,4152252,1,3,0.0,0.0
 1941-06-22,葡属帝汶,Portuguese Timor,429260,1,3,0.075,0.075
-1941-06-22,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.333
+1941-06-22,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.001
 1941-06-22,葡萄牙,Portugal,7773302,4,3,0.054,0.054
 1941-06-22,蒙古,Mongolia,764708,9,3,0.572,0.572
 1941-06-22,西南非洲（南非管理）,South West Africa (South African administration),354655,2,3,0.998,0.998
@@ -1669,7 +1669,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-07-01,北罗得西亚,Northern Rhodesia,1818413,1,3,0.0,0.0
 1941-07-01,南斯拉夫,Yugoslavia,15724000,8,3,0.127,0.203
 1941-07-01,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1941-07-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.002
+1941-07-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.001
 1941-07-01,南非联邦,Union of South Africa,10753972,5,3,1.0,1.0
 1941-07-01,卡塔尔（英国保护国）,Qatar (British protectorate),29482,0,5,0.0,0.0
 1941-07-01,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4227988,2,3,1.0,1.0
@@ -1693,7 +1693,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-07-01,大日本帝国,Empire of Japan,77406136,47,3,1.0,1.0
 1941-07-01,奥地利,Austria,6717048,8,3,0.615,1.0
 1941-07-01,委内瑞拉,Venezuela,3800000,8,3,0.01,0.01
-1941-07-01,尼亚萨兰,Nyasaland,2008578,0,4,0.0,0.001
+1941-07-01,尼亚萨兰,Nyasaland,2008578,0,5,0.0,0.0
 1941-07-01,尼加拉瓜,Nicaragua,1032263,18,3,1.0,1.0
 1941-07-01,尼泊尔,Nepal,7475144,3,3,0.01,0.01
 1941-07-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),437796,2,3,0.92,1.0
@@ -1810,7 +1810,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-07-01,葡属几内亚,Portuguese Guinea,506677,1,3,0.018,0.018
 1941-07-01,葡属安哥拉,Portuguese Angola,4152252,1,3,0.0,0.0
 1941-07-01,葡属帝汶,Portuguese Timor,429260,1,3,0.075,0.075
-1941-07-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.333
+1941-07-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.001
 1941-07-01,葡萄牙,Portugal,7773302,4,3,0.054,0.054
 1941-07-01,蒙古,Mongolia,764708,9,3,0.572,0.572
 1941-07-01,西南非洲（南非管理）,South West Africa (South African administration),354655,2,3,0.998,0.998
@@ -1850,7 +1850,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-08-01,北罗得西亚,Northern Rhodesia,1818413,1,3,0.0,0.0
 1941-08-01,南斯拉夫,Yugoslavia,15724000,8,3,0.127,0.203
 1941-08-01,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1941-08-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.002
+1941-08-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.001
 1941-08-01,南非联邦,Union of South Africa,10753972,5,3,1.0,1.0
 1941-08-01,卡塔尔（英国保护国）,Qatar (British protectorate),29482,0,5,0.0,0.0
 1941-08-01,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4227988,2,3,1.0,1.0
@@ -1874,7 +1874,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-08-01,大日本帝国,Empire of Japan,77406136,47,3,1.0,1.0
 1941-08-01,奥地利,Austria,6717048,8,3,0.615,1.0
 1941-08-01,委内瑞拉,Venezuela,3800000,8,3,0.01,0.01
-1941-08-01,尼亚萨兰,Nyasaland,2008578,0,4,0.0,0.001
+1941-08-01,尼亚萨兰,Nyasaland,2008578,0,5,0.0,0.0
 1941-08-01,尼加拉瓜,Nicaragua,1032263,18,3,1.0,1.0
 1941-08-01,尼泊尔,Nepal,7475144,3,3,0.01,0.01
 1941-08-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),437796,2,3,0.92,1.0
@@ -1991,7 +1991,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-08-01,葡属几内亚,Portuguese Guinea,506677,1,3,0.018,0.018
 1941-08-01,葡属安哥拉,Portuguese Angola,4152252,1,3,0.0,0.0
 1941-08-01,葡属帝汶,Portuguese Timor,429260,1,3,0.075,0.075
-1941-08-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.333
+1941-08-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.001
 1941-08-01,葡萄牙,Portugal,7773302,4,3,0.054,0.054
 1941-08-01,蒙古,Mongolia,764708,9,3,0.572,0.572
 1941-08-01,西南非洲（南非管理）,South West Africa (South African administration),354655,2,3,0.998,0.998
@@ -2031,7 +2031,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-09-01,北罗得西亚,Northern Rhodesia,1818413,1,3,0.0,0.0
 1941-09-01,南斯拉夫,Yugoslavia,15724000,8,3,0.127,0.203
 1941-09-01,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1941-09-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.002
+1941-09-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.001
 1941-09-01,南非联邦,Union of South Africa,10753972,5,3,1.0,1.0
 1941-09-01,卡塔尔（英国保护国）,Qatar (British protectorate),29482,0,5,0.0,0.0
 1941-09-01,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4227988,2,3,1.0,1.0
@@ -2055,7 +2055,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-09-01,大日本帝国,Empire of Japan,77406136,47,3,1.0,1.0
 1941-09-01,奥地利,Austria,6717048,8,3,0.615,1.0
 1941-09-01,委内瑞拉,Venezuela,3800000,8,3,0.01,0.01
-1941-09-01,尼亚萨兰,Nyasaland,2008578,0,4,0.0,0.001
+1941-09-01,尼亚萨兰,Nyasaland,2008578,0,5,0.0,0.0
 1941-09-01,尼加拉瓜,Nicaragua,1032263,18,3,1.0,1.0
 1941-09-01,尼泊尔,Nepal,7475144,3,3,0.01,0.01
 1941-09-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),437796,2,3,0.92,1.0
@@ -2172,7 +2172,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-09-01,葡属几内亚,Portuguese Guinea,506677,1,3,0.018,0.018
 1941-09-01,葡属安哥拉,Portuguese Angola,4152252,1,3,0.0,0.0
 1941-09-01,葡属帝汶,Portuguese Timor,429260,1,3,0.075,0.075
-1941-09-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.333
+1941-09-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.001
 1941-09-01,葡萄牙,Portugal,7773302,4,3,0.054,0.054
 1941-09-01,蒙古,Mongolia,764708,9,3,0.572,0.572
 1941-09-01,西南非洲（南非管理）,South West Africa (South African administration),354655,2,3,0.998,0.998
@@ -2212,7 +2212,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-10-01,北罗得西亚,Northern Rhodesia,1818413,1,3,0.0,0.0
 1941-10-01,南斯拉夫,Yugoslavia,15724000,8,3,0.127,0.203
 1941-10-01,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1941-10-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.002
+1941-10-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.001
 1941-10-01,南非联邦,Union of South Africa,10753972,5,3,1.0,1.0
 1941-10-01,卡塔尔（英国保护国）,Qatar (British protectorate),29482,0,5,0.0,0.0
 1941-10-01,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4227988,2,3,1.0,1.0
@@ -2236,7 +2236,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-10-01,大日本帝国,Empire of Japan,77406136,47,3,1.0,1.0
 1941-10-01,奥地利,Austria,6717048,8,3,0.615,1.0
 1941-10-01,委内瑞拉,Venezuela,3800000,8,3,0.01,0.01
-1941-10-01,尼亚萨兰,Nyasaland,2008578,0,4,0.0,0.001
+1941-10-01,尼亚萨兰,Nyasaland,2008578,0,5,0.0,0.0
 1941-10-01,尼加拉瓜,Nicaragua,1032263,18,3,1.0,1.0
 1941-10-01,尼泊尔,Nepal,7475144,3,3,0.01,0.01
 1941-10-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),437796,2,3,0.92,1.0
@@ -2353,7 +2353,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-10-01,葡属几内亚,Portuguese Guinea,506677,1,3,0.018,0.018
 1941-10-01,葡属安哥拉,Portuguese Angola,4152252,1,3,0.0,0.0
 1941-10-01,葡属帝汶,Portuguese Timor,429260,1,3,0.075,0.075
-1941-10-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.333
+1941-10-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.001
 1941-10-01,葡萄牙,Portugal,7773302,4,3,0.054,0.054
 1941-10-01,蒙古,Mongolia,764708,9,3,0.572,0.572
 1941-10-01,西南非洲（南非管理）,South West Africa (South African administration),354655,2,3,0.998,0.998
@@ -2393,7 +2393,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-11-01,北罗得西亚,Northern Rhodesia,1818413,1,3,0.0,0.0
 1941-11-01,南斯拉夫,Yugoslavia,15724000,8,3,0.127,0.203
 1941-11-01,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1941-11-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.002
+1941-11-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.001
 1941-11-01,南非联邦,Union of South Africa,10753972,5,3,1.0,1.0
 1941-11-01,卡塔尔（英国保护国）,Qatar (British protectorate),29482,0,5,0.0,0.0
 1941-11-01,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4227988,2,3,1.0,1.0
@@ -2417,7 +2417,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-11-01,大日本帝国,Empire of Japan,77406136,47,3,1.0,1.0
 1941-11-01,奥地利,Austria,6717048,8,3,0.615,1.0
 1941-11-01,委内瑞拉,Venezuela,3800000,8,3,0.01,0.01
-1941-11-01,尼亚萨兰,Nyasaland,2008578,0,4,0.0,0.001
+1941-11-01,尼亚萨兰,Nyasaland,2008578,0,5,0.0,0.0
 1941-11-01,尼加拉瓜,Nicaragua,1032263,18,3,1.0,1.0
 1941-11-01,尼泊尔,Nepal,7475144,3,3,0.01,0.01
 1941-11-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),437796,2,3,0.92,1.0
@@ -2534,7 +2534,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-11-01,葡属几内亚,Portuguese Guinea,506677,1,3,0.018,0.018
 1941-11-01,葡属安哥拉,Portuguese Angola,4152252,1,3,0.0,0.0
 1941-11-01,葡属帝汶,Portuguese Timor,429260,1,3,0.075,0.075
-1941-11-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.333
+1941-11-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.001
 1941-11-01,葡萄牙,Portugal,7773302,4,3,0.054,0.054
 1941-11-01,蒙古,Mongolia,764708,9,3,0.572,0.572
 1941-11-01,西南非洲（南非管理）,South West Africa (South African administration),354655,2,3,0.998,0.998
@@ -2574,7 +2574,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-12-01,北罗得西亚,Northern Rhodesia,1818413,1,3,0.0,0.0
 1941-12-01,南斯拉夫,Yugoslavia,15724000,8,3,0.127,0.203
 1941-12-01,南洋群岛（日本委任统治地）,South Seas Mandate (Japanese),130000,0,6,0.0,0.0
-1941-12-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.002
+1941-12-01,南罗得西亚,Southern Rhodesia,2604046,1,3,0.001,0.001
 1941-12-01,南非联邦,Union of South Africa,10753972,5,3,1.0,1.0
 1941-12-01,卡塔尔（英国保护国）,Qatar (British protectorate),29482,0,5,0.0,0.0
 1941-12-01,卢旺达-乌隆迪（比利时管理）,Ruanda-Urundi (Belgian),4227988,2,3,1.0,1.0
@@ -2598,7 +2598,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-12-01,大日本帝国,Empire of Japan,77406136,47,3,1.0,1.0
 1941-12-01,奥地利,Austria,6717048,8,3,0.615,1.0
 1941-12-01,委内瑞拉,Venezuela,3800000,8,3,0.01,0.01
-1941-12-01,尼亚萨兰,Nyasaland,2008578,0,4,0.0,0.001
+1941-12-01,尼亚萨兰,Nyasaland,2008578,0,5,0.0,0.0
 1941-12-01,尼加拉瓜,Nicaragua,1032263,18,3,1.0,1.0
 1941-12-01,尼泊尔,Nepal,7475144,3,3,0.01,0.01
 1941-12-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),437796,2,3,0.92,1.0
@@ -2715,7 +2715,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-12-01,葡属几内亚,Portuguese Guinea,506677,1,3,0.018,0.018
 1941-12-01,葡属安哥拉,Portuguese Angola,4152252,1,3,0.0,0.0
 1941-12-01,葡属帝汶,Portuguese Timor,429260,1,3,0.075,0.075
-1941-12-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.333
+1941-12-01,葡属莫桑比克,Portuguese Mozambique,5418092,1,3,0.001,0.001
 1941-12-01,葡萄牙,Portugal,7773302,4,3,0.054,0.054
 1941-12-01,蒙古,Mongolia,764708,9,3,0.572,0.572
 1941-12-01,西南非洲（南非管理）,South West Africa (South African administration),354655,2,3,0.998,0.998
@@ -2776,7 +2776,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-12-07,夏威夷（美国领地）,Territory of Hawaii,549789,1,3,1.0,1.0
 1941-12-07,外约旦（英国委任统治）,Transjordan (British mandate),397926,0,5,0.0,0.0
 1941-12-07,多米尼加,Dominican Republic,1751437,0,5,0.0,0.0
-1941-12-07,大日本帝国,Empire of Japan,77406134,47,3,1.0,1.0
+1941-12-07,大日本帝国,Empire of Japan,77406137,47,3,1.0,1.0
 1941-12-07,奥地利,Austria,6717049,6,3,0.589,1.0
 1941-12-07,委内瑞拉,Venezuela,3800000,1,3,0.012,0.03
 1941-12-07,尼亚萨兰,Nyasaland,2008578,0,5,0.0,0.0
@@ -2894,7 +2894,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1941-12-07,葡属几内亚,Portuguese Guinea,506677,0,5,0.0,0.0
 1941-12-07,葡属安哥拉,Portuguese Angola,4152252,0,5,0.0,0.0
 1941-12-07,葡属帝汶,Portuguese Timor,429260,0,5,0.0,0.0
-1941-12-07,葡属莫桑比克,Portuguese Mozambique,5418092,0,4,0.0,0.337
+1941-12-07,葡属莫桑比克,Portuguese Mozambique,5418092,0,5,0.0,0.0
 1941-12-07,葡萄牙,Portugal,7773302,3,3,0.038,0.038
 1941-12-07,蒙古,Mongolia,764708,3,3,0.024,0.024
 1941-12-07,西南非洲（南非管理）,South West Africa (South African administration),354654,1,3,1.0,1.0
@@ -2961,7 +2961,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-01-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-01-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-01-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-01-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-01-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-01-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-01-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-01-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -3142,7 +3142,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-02-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-02-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-02-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-02-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-02-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-02-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-02-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-02-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -3323,7 +3323,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-03-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-03-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-03-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-03-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-03-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-03-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-03-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-03-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -3504,7 +3504,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-04-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-04-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-04-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-04-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-04-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-04-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-04-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-04-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -3685,7 +3685,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-05-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-05-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-05-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-05-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-05-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-05-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-05-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-05-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -3866,7 +3866,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-06-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-06-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-06-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-06-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-06-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-06-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-06-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-06-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -4047,7 +4047,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-07-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-07-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-07-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-07-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-07-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-07-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-07-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-07-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -4228,7 +4228,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-08-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-08-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-08-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-08-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-08-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-08-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-08-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-08-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -4409,7 +4409,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-09-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-09-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-09-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-09-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-09-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-09-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-09-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-09-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -4590,7 +4590,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-10-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-10-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-10-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-10-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-10-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-10-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-10-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-10-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -4765,7 +4765,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-11-01,夏威夷（美国领地）,Territory of Hawaii,556088,1,3,1.0,1.0
 1942-11-01,外约旦（英国委任统治）,Transjordan (British mandate),400688,0,5,0.0,0.0
 1942-11-01,多米尼加,Dominican Republic,1794307,0,5,0.0,0.0
-1942-11-01,大日本帝国,Empire of Japan,78465343,47,3,1.0,1.0
+1942-11-01,大日本帝国,Empire of Japan,78465347,47,3,1.0,1.0
 1942-11-01,奥地利,Austria,6751173,7,3,0.589,1.0
 1942-11-01,委内瑞拉,Venezuela,3909999,1,3,0.012,0.03
 1942-11-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
@@ -4799,7 +4799,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-11-01,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1942-11-01,沙捞越,Sarawak,615980,0,5,0.0,0.0
 1942-11-01,沙特阿拉伯,Saudi Arabia,2681000,2,3,0.006,0.006
-1942-11-01,法国,France,39011175,93,3,1.0,1.0
+1942-11-01,法国,France,39011176,93,3,1.0,1.0
 1942-11-01,法国委任统治叙利亚,French Mandate Syria,3196107,0,5,0.0,0.0
 1942-11-01,法国委任统治黎巴嫩,French Mandate Lebanon,1146268,0,5,0.0,0.0
 1942-11-01,法属乌班吉沙立,French Ubangi-Shari,1117606,0,5,0.0,0.0
@@ -4950,7 +4950,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1942-12-01,尼亚萨兰,Nyasaland,2043875,0,5,0.0,0.0
 1942-12-01,尼加拉瓜,Nicaragua,1052663,18,3,1.0,1.0
 1942-12-01,尼泊尔,Nepal,7552062,3,3,0.01,0.01
-1942-12-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.92,1.0
+1942-12-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),440554,2,3,0.919,1.0
 1942-12-01,巴拉圭,Paraguay,1203105,13,3,0.873,0.873
 1942-12-01,巴拿马,Panama,764117,13,3,0.997,0.997
 1942-12-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -5131,7 +5131,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-01-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-01-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-01-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-01-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-01-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-01-01,巴拉圭,Paraguay,1231336,13,3,0.873,0.873
 1943-01-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-01-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -5312,7 +5312,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-02-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-02-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-02-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-02-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-02-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-02-01,巴拉圭,Paraguay,1231336,13,3,0.873,0.873
 1943-02-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-02-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -5493,7 +5493,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-03-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-03-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-03-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-03-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-03-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-03-01,巴拉圭,Paraguay,1231336,13,3,0.873,0.873
 1943-03-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-03-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -5674,7 +5674,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-04-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-04-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-04-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-04-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-04-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-04-01,巴拉圭,Paraguay,1231336,13,3,0.873,0.873
 1943-04-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-04-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -5855,7 +5855,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-05-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-05-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-05-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-05-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-05-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-05-01,巴拉圭,Paraguay,1231336,13,3,0.873,0.873
 1943-05-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-05-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -6036,7 +6036,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-06-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-06-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-06-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-06-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-06-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-06-01,巴拉圭,Paraguay,1231336,13,3,0.873,0.873
 1943-06-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-06-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -6217,7 +6217,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-07-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-07-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-07-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-07-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-07-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-07-01,巴拉圭,Paraguay,1231336,13,3,0.873,0.873
 1943-07-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-07-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -6398,7 +6398,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-08-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-08-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-08-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-08-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-08-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-08-01,巴拉圭,Paraguay,1231336,13,3,0.873,0.873
 1943-08-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-08-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -6579,7 +6579,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-09-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-09-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-09-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-09-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-09-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-09-01,巴拉圭,Paraguay,1231336,13,3,0.873,0.873
 1943-09-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-09-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -6760,7 +6760,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-10-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-10-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-10-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-10-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-10-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-10-01,巴拉圭,Paraguay,1231336,14,3,0.873,0.873
 1943-10-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-10-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -6941,7 +6941,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-11-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-11-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-11-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-11-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-11-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-11-01,巴拉圭,Paraguay,1231336,14,3,0.873,0.873
 1943-11-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-11-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -7122,7 +7122,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1943-12-01,尼亚萨兰,Nyasaland,2079797,0,5,0.0,0.0
 1943-12-01,尼加拉瓜,Nicaragua,1077143,18,3,1.0,1.0
 1943-12-01,尼泊尔,Nepal,7629745,3,3,0.01,0.01
-1943-12-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.92,1.0
+1943-12-01,巴布亚领地（澳大利亚）,Territory of Papua (Australian),443331,2,3,0.919,1.0
 1943-12-01,巴拉圭,Paraguay,1231336,14,3,0.873,0.873
 1943-12-01,巴拿马,Panama,785491,13,3,0.997,0.997
 1943-12-01,巴林（英国保护国）,Bahrain (British protectorate),90000,0,6,0.0,0.0
@@ -8383,7 +8383,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1944-06-06,夏威夷（美国领地）,Territory of Hawaii,569818,1,3,1.0,1.0
 1944-06-06,外约旦（英国委任统治）,Transjordan (British mandate),406273,0,5,0.0,0.0
 1944-06-06,多米尼加,Dominican Republic,1883106,0,5,0.0,0.0
-1944-06-06,大日本帝国,Empire of Japan,79988344,47,3,1.0,1.0
+1944-06-06,大日本帝国,Empire of Japan,79988346,47,3,1.0,1.0
 1944-06-06,奥地利,Austria,6785281,7,3,0.589,1.0
 1944-06-06,委内瑞拉,Venezuela,4150000,1,3,0.012,0.03
 1944-06-06,尼亚萨兰,Nyasaland,2116351,0,5,0.0,0.0
@@ -8417,7 +8417,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1944-06-06,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1944-06-06,沙捞越,Sarawak,624482,0,5,0.0,0.0
 1944-06-06,沙特阿拉伯,Saudi Arabia,2803000,2,3,0.006,0.006
-1944-06-06,法国,France,38879543,93,3,1.0,1.0
+1944-06-06,法国,France,38879544,93,3,1.0,1.0
 1944-06-06,法国委任统治叙利亚,French Mandate Syria,3290476,0,5,0.0,0.0
 1944-06-06,法国委任统治黎巴嫩,French Mandate Lebanon,1196986,0,5,0.0,0.0
 1944-06-06,法属乌班吉沙立,French Ubangi-Shari,1193711,0,5,0.0,0.0
@@ -10586,7 +10586,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1945-09-02,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1945-09-02,沙捞越,Sarawak,628788,0,5,0.0,0.0
 1945-09-02,沙特阿拉伯,Saudi Arabia,2865999,2,3,0.006,0.006
-1945-09-02,法国,France,39295192,93,3,1.0,1.0
+1945-09-02,法国,France,39295190,93,3,1.0,1.0
 1945-09-02,法国委任统治叙利亚,French Mandate Syria,3338757,0,5,0.0,0.0
 1945-09-02,法属乌班吉沙立,French Ubangi-Shari,1233697,0,5,0.0,0.0
 1945-09-02,法属乍得,French Chad,2130384,0,5,0.0,0.0
