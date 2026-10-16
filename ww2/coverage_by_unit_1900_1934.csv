@@ -4,7 +4,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1900-08-14,丹麦,Denmark,2429990,18,3,1.0,1.0
 1900-08-14,乌干达保护国,Uganda Protectorate,3971661,1,3,0.025,0.025
 1900-08-14,乌拉圭,Uruguay,916087,20,3,1.0,1.0
-1900-08-14,俄罗斯帝国,Russian Empire,132900006,104,3,0.999,1.0
+1900-08-14,俄罗斯帝国,Russian Empire,132899998,104,3,0.999,1.0
 1900-08-14,保加利亚,Bulgaria,3482654,0,5,0.0,0.0
 1900-08-14,关岛（美国属地）,Guam (US territory),22000,1,3,1.0,1.0
 1900-08-14,冰岛（丹麦属地）,Iceland (Danish dependency),103599,1,3,1.0,1.0
@@ -43,7 +43,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1900-08-14,大清,Qing Empire,395034395,35,3,0.995,0.995
 1900-08-14,大韩帝国,Korean Empire,11290000,14,3,1.0,1.0
 1900-08-14,奥兰治自由邦,Orange Free State,365822,0,5,0.0,0.0
-1900-08-14,奥匈帝国,Austria-Hungary,46797996,84,3,0.999,1.0
+1900-08-14,奥匈帝国,Austria-Hungary,46798002,82,3,0.999,1.0
 1900-08-14,奥斯曼帝国,Ottoman Empire,28052000,5,3,0.125,0.126
 1900-08-14,委内瑞拉,Venezuela,2450000,0,4,0.0,0.018
 1900-08-14,安提瓜（英属背风群岛）,Antigua (British Leeward Islands),40000,2,3,1.0,1.0
@@ -87,7 +87,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1900-08-14,比利时,Belgium,6517806,11,3,1.0,1.0
 1900-08-14,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1900-08-14,沙捞越,Sarawak,244401,0,5,0.0,0.0
-1900-08-14,法国,France,38939997,90,3,1.0,1.0
+1900-08-14,法国,France,38939998,90,3,1.0,1.0
 1900-08-14,法属几内亚,French Guinea,1938462,1,3,1.0,1.0
 1900-08-14,法属刚果,French Congo (Middle Congo),2857918,0,5,0.0,0.0
 1900-08-14,法属加蓬,French Gabon,352384,1,3,1.0,1.0
@@ -122,7 +122,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1900-08-14,纽埃（英国保护地）,Niue (British protectorate),4000,0,6,0.0,0.0
 1900-08-14,纽芬兰自治领,Dominion of Newfoundland,125778,2,3,0.037,0.037
 1900-08-14,维多利亚殖民地,Colony of Victoria,1034583,0,5,0.0,0.0
-1900-08-14,罗马尼亚,Romania,6000001,14,3,0.253,0.253
+1900-08-14,罗马尼亚,Romania,5999999,13,3,0.25,0.25
 1900-08-14,美国,United States,77475493,51,3,1.0,1.0
 1900-08-14,美属菲律宾,US Philippines,6529013,0,5,0.0,0.0
 1900-08-14,美属萨摩亚（美国属地）,American Samoa (US territory),13000,1,3,0.937,0.937
@@ -153,7 +153,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1900-08-14,葡属几内亚,Portuguese Guinea,382979,0,5,0.0,0.0
 1900-08-14,葡属安哥拉,Portuguese Angola,3045131,0,4,0.0,0.096
 1900-08-14,葡属帝汶,Portuguese Timor,316790,0,5,0.0,0.0
-1900-08-14,葡属莫桑比克,Portuguese Mozambique,3951349,0,4,0.0,0.464
+1900-08-14,葡属莫桑比克,Portuguese Mozambique,3951348,0,5,0.0,0.0
 1900-08-14,葡萄牙,Portugal,5425296,3,3,0.038,0.038
 1900-08-14,西北罗得西亚,North-Western Rhodesia,437372,0,5,0.0,0.0
 1900-08-14,西属几内亚,Spanish Guinea,107110,0,5,0.0,0.0
@@ -176,7 +176,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1914-08-04,丹麦,Denmark,2870001,19,3,1.0,1.0
 1914-08-04,乌干达保护国,Uganda Protectorate,3198294,1,3,0.037,0.037
 1914-08-04,乌拉圭,Uruguay,1235606,21,3,1.0,1.0
-1914-08-04,俄罗斯帝国,Russian Empire,175099998,106,3,0.999,1.0
+1914-08-04,俄罗斯帝国,Russian Empire,175100003,106,3,0.999,1.0
 1914-08-04,保加利亚,Bulgaria,4850000,0,5,0.0,0.0
 1914-08-04,关岛（美国属地）,Guam (US territory),22000,1,3,1.0,1.0
 1914-08-04,冰岛（丹麦属地）,Iceland (Danish dependency),113460,1,3,1.0,1.0
@@ -208,7 +208,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1914-08-04,多米尼克（英属）,Dominica (British),47000,1,3,1.0,1.0
 1914-08-04,多米尼加,Dominican Republic,782941,0,5,0.0,0.0
 1914-08-04,大日本帝国,Empire of Japan,54805997,47,3,1.0,1.0
-1914-08-04,奥匈帝国,Austria-Hungary,52593996,84,3,0.937,1.0
+1914-08-04,奥匈帝国,Austria-Hungary,52594004,82,3,0.937,1.0
 1914-08-04,奥斯曼帝国,Ottoman Empire,18519999,4,3,0.104,0.105
 1914-08-04,委内瑞拉,Venezuela,2680000,1,3,0.012,0.03
 1914-08-04,安提瓜（英属背风群岛）,Antigua (British Leeward Islands),40000,2,3,1.0,1.0
@@ -253,7 +253,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1914-08-04,比属刚果,Belgian Congo,9565865,0,4,0.0,0.03
 1914-08-04,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1914-08-04,沙捞越,Sarawak,346814,0,5,0.0,0.0
-1914-08-04,法国,France,33219999,90,3,1.0,1.0
+1914-08-04,法国,France,33220000,90,3,1.0,1.0
 1914-08-04,法属乌班吉沙立,French Ubangi-Shari,543625,1,3,0.209,0.209
 1914-08-04,法属乍得,French Chad,1051805,2,3,1.0,1.0
 1914-08-04,法属几内亚,French Guinea,2191216,1,3,1.0,1.0
@@ -291,7 +291,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1914-08-04,秘鲁,Peru,4364647,26,3,0.975,0.975
 1914-08-04,纽埃（新西兰属地）,Niue (New Zealand),4000,1,3,1.0,1.0
 1914-08-04,纽芬兰自治领,Dominion of Newfoundland,181751,2,3,0.037,0.037
-1914-08-04,罗马尼亚,Romania,7755999,14,3,0.245,0.245
+1914-08-04,罗马尼亚,Romania,7755998,13,3,0.242,0.242
 1914-08-04,美国,United States,99530039,50,3,1.0,1.0
 1914-08-04,美属菲律宾,US Philippines,8452551,0,5,0.0,0.0
 1914-08-04,美属萨摩亚（美国属地）,American Samoa (US territory),13000,1,3,0.994,0.994
@@ -323,7 +323,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1914-08-04,葡属几内亚,Portuguese Guinea,422840,0,5,0.0,0.0
 1914-08-04,葡属安哥拉,Portuguese Angola,3391198,0,4,0.0,0.099
 1914-08-04,葡属帝汶,Portuguese Timor,369095,0,5,0.0,0.0
-1914-08-04,葡属莫桑比克,Portuguese Mozambique,4296491,0,4,0.0,0.475
+1914-08-04,葡属莫桑比克,Portuguese Mozambique,4296492,0,5,0.0,0.0
 1914-08-04,葡萄牙,Portugal,5995280,3,3,0.038,0.038
 1914-08-04,西属几内亚,Spanish Guinea,112446,0,5,0.0,0.0
 1914-08-04,西属摩洛哥,Spanish Morocco,717184,3,3,0.0,0.0
@@ -346,7 +346,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1915-05-23,丹麦,Denmark,2900000,20,3,1.0,1.0
 1915-05-23,乌干达保护国,Uganda Protectorate,3206717,1,3,0.043,0.043
 1915-05-23,乌拉圭,Uruguay,1266768,20,3,0.998,0.998
-1915-05-23,俄罗斯帝国,Russian Empire,178900000,134,3,0.999,1.0
+1915-05-23,俄罗斯帝国,Russian Empire,178900000,140,3,0.999,1.0
 1915-05-23,保加利亚,Bulgaria,4900000,0,5,0.0,0.0
 1915-05-23,关岛（美国属地）,Guam (US territory),22000,1,3,1.0,1.0
 1915-05-23,冰岛（丹麦属地）,Iceland (Danish dependency),114198,1,3,0.984,0.984
@@ -355,7 +355,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1915-05-23,北婆罗洲,North Borneo,407408,0,5,0.0,0.0
 1915-05-23,北罗得西亚,Northern Rhodesia,903289,0,5,0.0,0.0
 1915-05-23,千岛群岛（日本）,Kuril Islands (Japan),17000,0,6,0.0,0.0
-1915-05-23,南罗得西亚,Southern Rhodesia,2162995,2,3,0.0,0.001
+1915-05-23,南罗得西亚,Southern Rhodesia,2162995,2,3,0.0,0.0
 1915-05-23,南非联邦,Union of South Africa,6139113,4,3,1.0,1.0
 1915-05-23,卢森堡,Luxembourg,231328,7,3,1.0,1.0
 1915-05-23,危地马拉,Guatemala,1610512,36,3,0.999,0.999
@@ -370,7 +370,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1915-05-23,圣文森特（英属向风群岛）,St Vincent (British Windward Islands),61000,1,3,1.0,1.0
 1915-05-23,埃及（英国保护国）,Egypt (British protectorate),12298870,1,3,0.0,0.0
 1915-05-23,埃塞俄比亚,Ethiopia,10781633,0,5,0.0,0.0
-1915-05-23,塞尔维亚,Serbia,4043000,4,3,0.084,0.143
+1915-05-23,塞尔维亚,Serbia,4043000,4,3,0.084,0.144
 1915-05-23,塞舌尔（英属）,Seychelles (British),32000,0,6,0.0,0.0
 1915-05-23,墨西哥,Mexico,14860635,40,3,1.0,1.0
 1915-05-23,夏威夷（美国领地）,Territory of Hawaii,414790,1,3,0.999,0.999
@@ -382,7 +382,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1915-05-23,奥斯曼帝国,Ottoman Empire,18614000,4,3,0.452,0.455
 1915-05-23,委内瑞拉,Venezuela,2710000,9,3,0.009,0.009
 1915-05-23,安提瓜（英属背风群岛）,Antigua (British Leeward Islands),40000,2,3,1.0,1.0
-1915-05-23,尼亚萨兰,Nyasaland,1118839,0,4,0.0,0.003
+1915-05-23,尼亚萨兰,Nyasaland,1118839,0,5,0.0,0.0
 1915-05-23,尼加拉瓜,Nicaragua,725644,21,3,1.0,1.0
 1915-05-23,尼泊尔,Nepal,5728650,4,3,0.01,0.01
 1915-05-23,巴布亚领地（澳大利亚）,Territory of Papua (Australian),372036,1,3,0.905,0.905
@@ -394,7 +394,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1915-05-23,布哈拉酋长国,Emirate of Bukhara,1789826,5,3,0.191,1.0
 1915-05-23,希瓦汗国,Khanate of Khiva,722462,3,3,0.27,0.988
 1915-05-23,希腊,Greece,4618000,0,5,0.0,0.0
-1915-05-23,德属东非,German East Africa,7567212,2,3,0.343,0.344
+1915-05-23,德属东非,German East Africa,7567212,2,3,0.343,0.343
 1915-05-23,德属喀麦隆,German Kamerun,3536715,2,3,0.193,0.193
 1915-05-23,德属多哥兰,German Togoland,1200371,1,3,0.246,0.261
 1915-05-23,德属密克罗尼西亚（加罗林、马里亚纳、马绍尔群岛）,"German Micronesia (Caroline, Mariana and Marshall Islands)",70000,0,6,0.0,0.0
@@ -495,7 +495,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1915-05-23,葡属几内亚,Portuguese Guinea,425846,1,3,0.017,0.017
 1915-05-23,葡属安哥拉,Portuguese Angola,3420244,0,5,0.0,0.0
 1915-05-23,葡属帝汶,Portuguese Timor,373158,0,5,0.0,0.0
-1915-05-23,葡属莫桑比克,Portuguese Mozambique,4330660,3,3,0.001,0.47
+1915-05-23,葡属莫桑比克,Portuguese Mozambique,4330660,3,3,0.001,0.001
 1915-05-23,葡萄牙,Portugal,6003578,4,3,0.055,0.055
 1915-05-23,西南非洲（南非管理）,South West Africa (South African administration),245726,1,3,0.003,0.003
 1915-05-23,西属几内亚,Spanish Guinea,112838,1,3,0.02,0.02
@@ -519,7 +519,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1916-08-27,丹麦,Denmark,2940000,20,3,1.0,1.0
 1916-08-27,乌干达保护国,Uganda Protectorate,3215162,1,3,0.043,0.043
 1916-08-27,乌拉圭,Uruguay,1290302,20,3,0.998,0.998
-1916-08-27,俄罗斯帝国,Russian Empire,181500000,134,3,0.999,1.0
+1916-08-27,俄罗斯帝国,Russian Empire,181500000,140,3,0.999,1.0
 1916-08-27,保加利亚,Bulgaria,5000000,0,5,0.0,0.0
 1916-08-27,关岛（美国属地）,Guam (US territory),22000,1,3,1.0,1.0
 1916-08-27,冰岛（丹麦属地）,Iceland (Danish dependency),114941,1,3,0.984,0.984
@@ -528,7 +528,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1916-08-27,北婆罗洲,North Borneo,415509,0,5,0.0,0.0
 1916-08-27,北罗得西亚,Northern Rhodesia,919260,0,5,0.0,0.0
 1916-08-27,千岛群岛（日本）,Kuril Islands (Japan),17000,0,6,0.0,0.0
-1916-08-27,南罗得西亚,Southern Rhodesia,2178246,2,3,0.0,0.001
+1916-08-27,南罗得西亚,Southern Rhodesia,2178246,2,3,0.0,0.0
 1916-08-27,南非联邦,Union of South Africa,6272448,4,3,1.0,1.0
 1916-08-27,卢森堡,Luxembourg,232836,7,3,1.0,1.0
 1916-08-27,危地马拉,Guatemala,1627709,36,3,0.999,0.999
@@ -555,7 +555,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1916-08-27,奥斯曼帝国,Ottoman Empire,18709000,4,3,0.452,0.455
 1916-08-27,委内瑞拉,Venezuela,2730000,9,3,0.009,0.009
 1916-08-27,安提瓜（英属背风群岛）,Antigua (British Leeward Islands),40000,2,3,1.0,1.0
-1916-08-27,尼亚萨兰,Nyasaland,1143343,0,4,0.0,0.003
+1916-08-27,尼亚萨兰,Nyasaland,1143343,0,5,0.0,0.0
 1916-08-27,尼加拉瓜,Nicaragua,739228,21,3,1.0,1.0
 1916-08-27,尼泊尔,Nepal,5789636,4,3,0.01,0.01
 1916-08-27,巴布亚领地（澳大利亚）,Territory of Papua (Australian),374254,1,3,0.905,0.905
@@ -567,7 +567,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1916-08-27,布哈拉酋长国,Emirate of Bukhara,1806006,5,3,0.191,1.0
 1916-08-27,希瓦汗国,Khanate of Khiva,729042,3,3,0.27,0.988
 1916-08-27,希腊,Greece,4632000,0,5,0.0,0.0
-1916-08-27,德属东非,German East Africa,7604784,2,3,0.343,0.344
+1916-08-27,德属东非,German East Africa,7604784,2,3,0.343,0.343
 1916-08-27,德属喀麦隆,German Kamerun,3546056,3,3,0.655,0.655
 1916-08-27,德属多哥兰,German Togoland,1213146,1,3,0.246,0.261
 1916-08-27,德属密克罗尼西亚（加罗林、马里亚纳、马绍尔群岛）,"German Micronesia (Caroline, Mariana and Marshall Islands)",70000,0,6,0.0,0.0
@@ -668,7 +668,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1916-08-27,葡属几内亚,Portuguese Guinea,428874,1,3,0.017,0.017
 1916-08-27,葡属安哥拉,Portuguese Angola,3449533,0,5,0.0,0.0
 1916-08-27,葡属帝汶,Portuguese Timor,377264,0,5,0.0,0.0
-1916-08-27,葡属莫桑比克,Portuguese Mozambique,4365099,3,3,0.001,0.47
+1916-08-27,葡属莫桑比克,Portuguese Mozambique,4365099,3,3,0.001,0.001
 1916-08-27,葡萄牙,Portugal,6012210,4,3,0.055,0.055
 1916-08-27,西南非洲（南非管理）,South West Africa (South African administration),245792,1,3,0.001,0.001
 1916-08-27,西属几内亚,Spanish Guinea,113231,0,5,0.0,0.0
@@ -686,13 +686,13 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1916-08-27,马斯喀特和阿曼,Muscat and Oman,470809,0,4,0.0,0.032
 1916-08-27,马来属邦,Unfederated Malay States,1137139,4,3,0.039,0.039
 1916-08-27,马来联邦,Federated Malay States,1057718,5,3,0.999,0.999
-1916-08-27,黑山,Montenegro,400886,2,3,0.454,0.858
+1916-08-27,黑山,Montenegro,400886,2,3,0.454,0.859
 1917-04-06,不丹,Bhutan,138199,4,3,0.78,0.78
 1917-04-06,中华民国,Republic of China,449036301,48,3,0.995,0.995
 1917-04-06,丹麦,Denmark,2970000,20,3,1.0,1.0
 1917-04-06,乌干达保护国,Uganda Protectorate,3223631,1,3,0.043,0.043
 1917-04-06,乌拉圭,Uruguay,1314181,20,3,0.998,0.998
-1917-04-06,俄国（临时政府）,Russia (Provisional Government),184600000,134,3,0.999,1.0
+1917-04-06,俄国（临时政府）,Russia (Provisional Government),184600000,140,3,0.999,1.0
 1917-04-06,保加利亚,Bulgaria,5050000,0,5,0.0,0.0
 1917-04-06,关岛（美国属地）,Guam (US territory),22000,1,3,1.0,1.0
 1917-04-06,冰岛（丹麦属地）,Iceland (Danish dependency),115687,1,3,0.984,0.984
@@ -701,7 +701,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1917-04-06,北婆罗洲,North Borneo,423775,0,5,0.0,0.0
 1917-04-06,北罗得西亚,Northern Rhodesia,935516,0,5,0.0,0.0
 1917-04-06,千岛群岛（日本）,Kuril Islands (Japan),17000,0,6,0.0,0.0
-1917-04-06,南罗得西亚,Southern Rhodesia,2193604,2,3,0.0,0.001
+1917-04-06,南罗得西亚,Southern Rhodesia,2193604,2,3,0.0,0.0
 1917-04-06,南非联邦,Union of South Africa,6408683,4,3,1.0,1.0
 1917-04-06,卡塔尔（英国保护国）,Qatar (British protectorate),473504,0,5,0.0,0.0
 1917-04-06,卢森堡,Luxembourg,234351,7,3,1.0,1.0
@@ -715,7 +715,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1917-04-06,圣基茨和尼维斯（英属背风群岛）,St Kitts-Nevis (British Leeward Islands),41000,1,3,1.0,1.0
 1917-04-06,圣多美和普林西比（葡属）,São Tomé and Príncipe (Portuguese),60000,0,6,0.0,0.0
 1917-04-06,圣文森特（英属向风群岛）,St Vincent (British Windward Islands),61000,1,3,1.0,1.0
-1917-04-06,坦噶尼喀领地（英国管理）,Tanganyika Territory (British),7642562,2,3,0.733,0.734
+1917-04-06,坦噶尼喀领地（英国管理）,Tanganyika Territory (British),7642562,2,3,0.733,0.733
 1917-04-06,埃及（英国保护国）,Egypt (British protectorate),12668726,1,3,0.0,0.0
 1917-04-06,埃塞俄比亚,Ethiopia,11083611,0,5,0.0,0.0
 1917-04-06,塞尔维亚（奥匈占领）,Serbia (Austro-Hungarian occupation),4634001,4,3,0.508,0.873
@@ -730,7 +730,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1917-04-06,奥斯曼帝国,Ottoman Empire,18805000,4,3,0.452,0.455
 1917-04-06,委内瑞拉,Venezuela,2750000,9,3,0.009,0.009
 1917-04-06,安提瓜（英属背风群岛）,Antigua (British Leeward Islands),40000,2,3,1.0,1.0
-1917-04-06,尼亚萨兰,Nyasaland,1168390,0,4,0.0,0.003
+1917-04-06,尼亚萨兰,Nyasaland,1168390,0,5,0.0,0.0
 1917-04-06,尼加拉瓜,Nicaragua,750370,21,3,1.0,1.0
 1917-04-06,尼泊尔,Nepal,5851272,4,3,0.01,0.01
 1917-04-06,巴布亚领地（澳大利亚）,Territory of Papua (Australian),376486,1,3,0.905,0.905
@@ -842,7 +842,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1917-04-06,葡属几内亚,Portuguese Guinea,431924,1,3,0.017,0.017
 1917-04-06,葡属安哥拉,Portuguese Angola,3479068,0,5,0.0,0.0
 1917-04-06,葡属帝汶,Portuguese Timor,381408,0,5,0.0,0.0
-1917-04-06,葡属莫桑比克,Portuguese Mozambique,4399812,3,3,0.001,0.47
+1917-04-06,葡属莫桑比克,Portuguese Mozambique,4399812,3,3,0.001,0.001
 1917-04-06,葡萄牙,Portugal,6020843,4,3,0.055,0.055
 1917-04-06,西南非洲（南非管理）,South West Africa (South African administration),245856,1,3,0.001,0.001
 1917-04-06,西属几内亚,Spanish Guinea,113626,0,5,0.0,0.0
@@ -860,7 +860,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1917-04-06,马斯喀特和阿曼,Muscat and Oman,471559,0,4,0.0,0.032
 1917-04-06,马来属邦,Unfederated Malay States,1159862,4,3,0.039,0.039
 1917-04-06,马来联邦,Federated Malay States,1078856,5,3,0.999,0.999
-1917-04-06,黑山,Montenegro,403690,2,3,0.454,0.858
+1917-04-06,黑山,Montenegro,403690,2,3,0.454,0.859
 1918-11-11,不丹,Bhutan,138843,1,3,0.008,0.008
 1918-11-11,中华民国,Republic of China,453993447,38,3,0.995,0.995
 1918-11-11,丹麦,Denmark,3010000,19,3,1.0,1.0
@@ -872,7 +872,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1918-11-11,冰岛王国（与丹麦联合）,Kingdom of Iceland (in union with Denmark),116447,1,3,1.0,1.0
 1918-11-11,利比里亚,Liberia,703877,0,5,0.0,0.0
 1918-11-11,加拿大,Canada,8195956,11,3,1.0,1.0
-1918-11-11,匈牙利,Hungary,12554561,57,3,0.857,0.857
+1918-11-11,匈牙利,Hungary,12537102,56,3,0.857,0.857
 1918-11-11,北婆罗洲,North Borneo,432276,0,5,0.0,0.0
 1918-11-11,北罗得西亚,Northern Rhodesia,952273,0,5,0.0,0.0
 1918-11-11,千岛群岛（日本）,Kuril Islands (Japan),17000,0,6,0.0,0.0
@@ -890,7 +890,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1918-11-11,圣基茨和尼维斯（英属背风群岛）,St Kitts-Nevis (British Leeward Islands),41000,1,3,1.0,1.0
 1918-11-11,圣多美和普林西比（葡属）,São Tomé and Príncipe (Portuguese),60000,0,6,0.0,0.0
 1918-11-11,圣文森特（英属向风群岛）,St Vincent (British Windward Islands),61000,1,3,1.0,1.0
-1918-11-11,坦噶尼喀领地（英国管理）,Tanganyika Territory (British),7682226,2,3,0.346,0.346
+1918-11-11,坦噶尼喀领地（英国管理）,Tanganyika Territory (British),7682227,2,3,0.346,0.346
 1918-11-11,埃及（英国保护国）,Egypt (British protectorate),12868602,0,5,0.0,0.0
 1918-11-11,埃塞俄比亚,Ethiopia,11241939,0,5,0.0,0.0
 1918-11-11,塞尔维亚,Serbia,4670465,4,3,0.111,0.111
@@ -901,7 +901,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1918-11-11,多米尼克（英属）,Dominica (British),47000,1,3,1.0,1.0
 1918-11-11,多米尼加,Dominican Republic,857946,0,5,0.0,0.0
 1918-11-11,大日本帝国,Empire of Japan,57384452,47,3,1.0,1.0
-1918-11-11,奥地利,Austria,9457085,22,3,0.973,1.0
+1918-11-11,奥地利,Austria,9457367,21,3,0.973,1.0
 1918-11-11,奥斯曼帝国,Ottoman Empire,18900998,5,3,0.032,0.032
 1918-11-11,委内瑞拉,Venezuela,2770000,1,3,0.012,0.03
 1918-11-11,安提瓜（英属背风群岛）,Antigua (British Leeward Islands),40000,2,3,1.0,1.0
@@ -944,7 +944,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1918-11-11,比属刚果,Belgian Congo,9819773,0,5,0.0,0.0
 1918-11-11,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1918-11-11,沙捞越,Sarawak,375313,0,5,0.0,0.0
-1918-11-11,法国,France,32829998,90,3,1.0,1.0
+1918-11-11,法国,France,32829996,90,3,1.0,1.0
 1918-11-11,法属乌班吉沙立,French Ubangi-Shari,554289,0,5,0.0,0.0
 1918-11-11,法属乍得,French Chad,1053417,2,3,1.0,1.0
 1918-11-11,法属几内亚,French Guinea,2269630,1,3,1.0,1.0
@@ -965,7 +965,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1918-11-11,法属达荷美,French Dahomey,1626233,1,3,1.0,1.0
 1918-11-11,法属阿尔及利亚,French Algeria,6012760,1,3,1.0,1.0
 1918-11-11,法属马达加斯加,French Madagascar,3347419,0,5,0.0,0.0
-1918-11-11,波兰,Poland,5920319,20,3,1.0,1.0
+1918-11-11,波兰,Poland,5920543,18,3,1.0,1.0
 1918-11-11,波多黎各,Puerto Rico,1203030,4,3,1.0,1.0
 1918-11-11,波斯,Persia,11086320,1,3,0.001,0.001
 1918-11-11,洪都拉斯,Honduras,744543,19,3,1.0,1.0
@@ -985,12 +985,12 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1918-11-11,立陶宛,Lithuania,2029002,6,3,1.0,1.0
 1918-11-11,纽埃（新西兰属地）,Niue (New Zealand),4000,1,3,1.0,1.0
 1918-11-11,纽芬兰自治领,Dominion of Newfoundland,189795,2,3,0.037,0.037
-1918-11-11,罗马尼亚,Romania,9469000,14,3,0.253,0.253
+1918-11-11,罗马尼亚,Romania,9468999,13,3,0.25,0.25
 1918-11-11,美国,United States,103631206,50,3,1.0,1.0
 1918-11-11,美属菲律宾,US Philippines,9125422,50,3,1.0,1.0
 1918-11-11,美属萨摩亚（美国属地）,American Samoa (US territory),13000,1,3,0.994,0.994
 1918-11-11,芬兰,Finland,2641000,10,3,1.0,1.0
-1918-11-11,苏维埃俄国,Soviet Russia,143449999,85,3,0.997,0.998
+1918-11-11,苏维埃俄国,Soviet Russia,143449995,85,3,0.995,0.996
 1918-11-11,英国,United Kingdom,43115998,4,3,1.0,1.0
 1918-11-11,英埃苏丹,Anglo-Egyptian Sudan,7471184,0,5,0.0,0.0
 1918-11-11,英属东非,British East Africa,2650316,0,5,0.0,0.0
@@ -1020,7 +1020,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1918-11-11,葡属几内亚,Portuguese Guinea,434746,0,5,0.0,0.0
 1918-11-11,葡属安哥拉,Portuguese Angola,3502857,0,5,0.0,0.0
 1918-11-11,葡属帝汶,Portuguese Timor,385643,0,5,0.0,0.0
-1918-11-11,葡属莫桑比克,Portuguese Mozambique,4439154,0,4,0.0,0.475
+1918-11-11,葡属莫桑比克,Portuguese Mozambique,4439154,0,5,0.0,0.0
 1918-11-11,葡萄牙,Portugal,6029130,3,3,0.038,0.038
 1918-11-11,西南非洲（南非管理）,South West Africa (South African administration),245838,0,5,0.0,0.0
 1918-11-11,西属几内亚,Spanish Guinea,114012,0,5,0.0,0.0
@@ -1085,7 +1085,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1934-10-16,外约旦（英国委任统治）,Transjordan (British mandate),379102,0,5,0.0,0.0
 1934-10-16,多米尼克（英属）,Dominica (British),47000,1,3,1.0,1.0
 1934-10-16,多米尼加,Dominican Republic,1468014,0,5,0.0,0.0
-1934-10-16,大日本帝国,Empire of Japan,71307699,47,3,1.0,1.0
+1934-10-16,大日本帝国,Empire of Japan,71307702,47,3,1.0,1.0
 1934-10-16,奥地利,Austria,6726064,9,3,1.0,1.0
 1934-10-16,委内瑞拉,Venezuela,3259999,1,3,0.012,0.03
 1934-10-16,安提瓜（英属背风群岛）,Antigua (British Leeward Islands),40000,2,3,1.0,1.0
@@ -1125,7 +1125,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1934-10-16,汤加（英国保护国）,Tonga (British protectorate),34000,0,6,0.0,0.0
 1934-10-16,沙捞越,Sarawak,528017,0,5,0.0,0.0
 1934-10-16,沙特阿拉伯,Saudi Arabia,2246000,2,3,0.006,0.006
-1934-10-16,法国,France,41523442,92,3,1.0,1.0
+1934-10-16,法国,France,41523443,92,3,1.0,1.0
 1934-10-16,法国委任统治叙利亚,French Mandate Syria,2844504,0,5,0.0,0.0
 1934-10-16,法国委任统治黎巴嫩,French Mandate Lebanon,963822,0,5,0.0,0.0
 1934-10-16,法属乌班吉沙立,French Ubangi-Shari,908254,0,5,0.0,0.0
@@ -1210,7 +1210,7 @@ snapshot,unit_name_zh,unit_name_en,population_est,provinces,finest_tier,pop_shar
 1934-10-16,葡属几内亚,Portuguese Guinea,483608,0,5,0.0,0.0
 1934-10-16,葡属安哥拉,Portuguese Angola,3933878,0,5,0.0,0.0
 1934-10-16,葡属帝汶,Portuguese Timor,437509,0,5,0.0,0.0
-1934-10-16,葡属莫桑比克,Portuguese Mozambique,5099514,0,4,0.0,0.337
+1934-10-16,葡属莫桑比克,Portuguese Mozambique,5099514,0,5,0.0,0.0
 1934-10-16,葡萄牙,Portugal,7146710,3,3,0.038,0.038
 1934-10-16,蒙古,Mongolia,754111,3,3,0.023,0.023
 1934-10-16,西南非洲（南非管理）,South West Africa (South African administration),311972,1,3,1.0,1.0
