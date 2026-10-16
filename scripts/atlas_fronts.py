@@ -49,13 +49,18 @@ def main():
         g = Georef(d["gcps"])
         outer, holes = [], []
         for r in d["allied"]:
-            lon, lat = g.lonlat([p[0] for p in r["pts"]], [p[1] for p in r["pts"]])
+            ring = LineString(r["pts"] + r["pts"][:1]).segmentize(10).coords   # densified: the polynomial bends long straight edges
+            lon, lat = g.lonlat([p[0] for p in ring], [p[1] for p in ring])
             poly = Polygon([(round(float(x), 4), round(float(y), 4)) for x, y in zip(lon, lat)]).buffer(0)
             (holes if r["hole"] else outer).append(poly)
         allied = unary_union(outer).difference(unary_union(holes)) if holes else unary_union(outer)
         x0, y0, x1, y1 = d["sheet"]   # the map on the page: below the title band, above the text, a few pixels inside the
-        xm, ym = (x0 + x1) / 2, (y0 + y1) / 2   # page edges so that the ground beyond it overlaps the area traced to them
-        lon, lat = g.lonlat([x0, xm, x1, x1, x1, xm, x0, x0], [y0, y0, y0, ym, y1, y1, y1, ym])
+        # page edges so that the ground beyond it overlaps the area traced to them; a point every 10 px, since the
+        # polynomial bends the edges and a chord between corners would leave a sliver along the traced area
+        xs, ys = list(range(x0, x1, 10)), list(range(y0, y1, 10))
+        px = xs + [x1] * len(ys) + [x1 + x0 - x for x in xs] + [x0] * len(ys)
+        py = [y0] * len(xs) + ys + [y1] * len(xs) + [y1 + y0 - y for y in ys]
+        lon, lat = g.lonlat(px, py)
         sheet = Polygon(list(zip(lon, lat)))
         beyond = EUROPE.difference(sheet)
         corr = {"soviet": [], "axis": [], "allied": []}

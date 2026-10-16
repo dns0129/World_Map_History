@@ -628,7 +628,11 @@ def main():
         count = Counter(u for u, _, _ in by_date[date])
         seen = Counter()
         for u, top, pg in by_date[date]:
-            pid = u if count[u] == 1 else f"{u}~{seen[u]}"
+            # a split province's pieces are named after their outline, not their order: the outlines of all dates
+            # share one id space (prov_split_<date> are read into one table), so "~0" of one date must never be
+            # another outline than "~0" of the next
+            tag = hashlib.md5(shapely.to_wkb(pg)).hexdigest()[:10] if pg is not None else str(seen[u])
+            pid = u if count[u] == 1 else f"{u}~{tag}"
             seen[u] += 1
             r = dict(top, snapshot=date, piece_id=pid, admin_id=u, control_split=int(count[u] > 1))
             rows.append(r)
