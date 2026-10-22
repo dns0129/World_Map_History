@@ -1,0 +1,98 @@
+{
+ "note": "Pinned versions of the downloaded sources; the download scripts read them (scripts/sources.py). Update a source deliberately: change it here, download, then python3 scripts/sources.py --record.",
+ "ohm_planet": {
+  "file": "planet-261003_0000.osm.pbf",
+  "url": "https://planet.openhistoricalmap.org/planet/planet-261003_0000.osm.pbf",
+  "note": "OpenHistoricalMap planet of 2026-10-03 (older planets move to the archive of the bucket after some months: s3.amazonaws.com/planet.openhistoricalmap.org)"
+ },
+ "git": {
+  "cran-cshapes": {
+   "url": "https://github.com/cran/cshapes",
+   "commit": "54840534d9a82cfd01caf1021f85933e701e8318",
+   "dest": "cran-cshapes"
+  },
+  "owid-datasets": {
+   "url": "https://github.com/owid/owid-datasets",
+   "commit": "6155d4ca1ea14ef30e753010a25521eeb416e8a2",
+   "dest": "owid-datasets"
+  },
+  "gapminder-gdp": {
+   "url": "https://github.com/open-numbers/ddf--gapminder--gdp_per_capita_cppp",
+   "commit": "8ecc3f3b1b54279041fe5f1441dc7ffc5a504033",
+   "dest": "gapminder-gdp"
+  },
+  "gapminder-pop": {
+   "url": "https://github.com/open-numbers/ddf--gapminder--population",
+   "commit": "f9529b63fd2affa88bca798183ab50c6383e6ebd",
+   "dest": "gapminder-pop"
+  },
+  "peacesciencer": {
+   "url": "https://github.com/cran/peacesciencer",
+   "commit": "8363352dabfb3fdae7ee49c0643dadee6ae83935",
+   "dest": "peacesciencer-src"
+  },
+  "geoboundaries": {
+   "url": "https://github.com/wmgeolab/geoBoundaries",
+   "commit": "5c25134028196d43ce97b5071934fd0cfc92f09f",
+   "dest": "geoboundaries-src"
+  },
+  "lawson": {
+   "url": "https://github.com/kmlawson/japanese-empire-student-map",
+   "commit": "a63e8aef1841a826069b62db2296ce502d142190",
+   "dest": "lawson-src"
+  },
+  "natural-earth": {
+   "url": "https://github.com/nvkelso/natural-earth-vector",
+   "commit": "ca96624a56bd078437bca8184e78163e5039ad19",
+   "dest": "naturalearth-src"
+  },
+  "usaboundaries": {
+   "url": "https://github.com/ropensci/USAboundariesData",
+   "commit": "724169e7aeb17a17b738fe6f60923662f75a28e6",
+   "dest": "usaboundaries-src"
+  },
+  "state-population": {
+   "url": "https://github.com/JoshData/historical-state-population-csv",
+   "commit": "df66a9e39903ff418d1b9671c71181e31a923d3b",
+   "dest": "state-population-src"
+  }
+ },
+ "digests": {
+  "ohm/planet-261003_0000.osm.pbf": {
+   "sha256": "7330125c735c284ea05878023e2bd3ab9538c1483fd4b2762879fbbec1479fde",
+   "files": 1
+  },
+  "cshapes_2_gw.topojson": {
+   "sha256": "48fafe8b1bae28799b3fb5ff07a89c7d67e867a801a15bdf3d8ee79c3883eb53",
+   "files": 1
+  },
+  "ghs_pop": {
+   "sha256": "5aa7ad24f5a42e78226af4b8273823737447777273d6fc8631f19bb071ea4281",
+   "files": 7
+  },
+  "naturalearth": {
+   "sha256": "f509a26337eb2c173b59c75d5b4629c982e91b51baaaac1c5229ca1332988308",
+   "files": 37
+  },
+  "terrarium": {
+   "sha256": "afec94f779145b1e10a5542d165193d25414573ef739a2630ff0fa4560b6fc71",
+   "files": 5120
+  },
+  "geoboundaries": {
+   "sha256": "5dd7be20333670272785ed5fbd8dea73a600d42549304ca7cb7f64634f5000cd",
+   "files": 459
+  },
+  "ww2": {
+   "sha256": "bfbb3ba2185c9ee01601eb792b1521eea20f586c7d8264aafb80f2dfc973c603",
+   "files": 33
+  },
+  "subnational": {
+   "sha256": "18e93bde25f759d402d8af26a75111fc400c8ef1377c9d288f6496c7fbeb49fb",
+   "files": 1
+  },
+  "peacesciencer": {
+   "sha256": "45e65732401929b8479be65d6ceeea77476616e732b444069af70879082c96d9",
+   "files": 3
+  }
+ }
+}

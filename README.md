@@ -162,9 +162,11 @@ checks.json                1900–2000 数据库的核对结果
 所有数据都可以从原始来源重新生成。原始下载放在 `raw/`，中间文件放在 `work/`，这两个目录不提交。
 
 ```sh
-pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas pyreadr osmium
+pip install -r requirements.txt
 ./build_all.sh
 ```
+
+**版本锁定：** `requirements.txt` 写明各 Python 库的版本；`sources.json` 写明每个数据源的版本（git 仓库的提交、OpenHistoricalMap 的 planet 文件），下载脚本按它取数据，不取“最新”，所以重建读到的数据与上次构建相同。`build_all.sh` 下载后运行 `python3 scripts/sources.py --check`，按校验值核对 `raw/` 的各个文件夹，不一致就停下。要更新某个数据源：改 `sources.json` 中它的提交或文件，重新下载，再运行 `python3 scripts/sources.py --record`。
 
 首次全流程约 2 小时，需要下载约 4 GB：
 
@@ -184,7 +186,7 @@ pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas p
 仅重建 1915、1916、1917 三个交互断面（以及 `scripts/added_dates.py` 中以后追加的其他日期）时，可以直接使用仓库内已有的数据库和地图数据，无需下载原始资料：
 
 ```sh
-pip install shapely pyproj numpy pandas pyshp rasterio
+pip install -r requirements.txt
 python3 scripts/add_snapshots.py
 python3 scripts/ww2_html.py
 ```

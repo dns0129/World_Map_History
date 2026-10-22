@@ -15,6 +15,7 @@ import urllib.request
 import zipfile
 
 from common import RAW
+from sources import commit
 
 GB = RAW / "geoboundaries"
 WW2 = RAW / "ww2"
@@ -49,26 +50,29 @@ def get(url, dest, tries=5):
     raise RuntimeError(url)
 
 
-def sparse(url, dest, paths=None):
+def sparse(url, dest, name, paths=None):
+    """A blob-less clone at the commit sources.json pins (name: its key there); the paths checked out."""
     if not dest.exists():
         subprocess.run(["git", "clone", "-q", "--depth", "1", "--filter=blob:none", "--no-checkout", url, str(dest)],
                        check=True)
+    subprocess.run(["git", "-C", str(dest), "fetch", "-q", "--depth", "1", "--filter=blob:none", "origin", commit(name)],
+                   check=True)
     if paths:
-        subprocess.run(["git", "-C", str(dest), "checkout", "-q", "HEAD", "--", *paths], check=True)
+        subprocess.run(["git", "-C", str(dest), "checkout", "-q", commit(name), "--", *paths], check=True)
 
 
 def geoboundaries():
     GB.mkdir(parents=True, exist_ok=True)
     src = RAW / "geoboundaries-src"
-    sparse("https://github.com/wmgeolab/geoBoundaries", src)
-    names = subprocess.run(["git", "-C", str(src), "ls-tree", "-r", "--name-only", "HEAD", "releaseData/gbOpen"],
+    sparse("https://github.com/wmgeolab/geoBoundaries", src, "geoboundaries")
+    names = subprocess.run(["git", "-C", str(src), "ls-tree", "-r", "--name-only", commit("geoboundaries"), "releaseData/gbOpen"],
                            capture_output=True, text=True, check=True).stdout.split()
     files = [n for n in names if re.search(r"/ADM[123]/.*_simplified\.geojson$", n)]
 
     def one(f):
         dest = GB / f.split("gbOpen/")[1].replace("/", "_")
         if not (dest.exists() and dest.stat().st_size > 200):
-            get("https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/main/" + f, dest)
+            get(f"https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/{commit('geoboundaries')}/" + f, dest)
 
     with cf.ThreadPoolExecutor(12) as ex:
         list(ex.map(one, files))
@@ -87,12 +91,12 @@ def main():
     WW2.mkdir(parents=True, exist_ok=True)
     geoboundaries()
     russia_1897()
-    base = "https://raw.githubusercontent.com/ropensci/USAboundariesData/master/data-raw/historical/"
+    base = f"https://raw.githubusercontent.com/ropensci/USAboundariesData/{commit('usaboundaries')}/data-raw/historical/"
     for f in ("histcounties.geojson", "histstates.geojson"):
         if not (WW2 / f"us_{f}").exists():
             get(base + f, WW2 / f"us_{f}")
     src = RAW / "lawson-src"
-    sparse("https://github.com/kmlawson/japanese-empire-student-map", src, LAWSON_FILES)
+    sparse("https://github.com/kmlawson/japanese-empire-student-map", src, "lawson", LAWSON_FILES)
     (WW2 / "lawson").mkdir(exist_ok=True)
     for f in LAWSON_FILES:
         shutil.copy(src / f, WW2 / "lawson" / f.split("/")[-1])
