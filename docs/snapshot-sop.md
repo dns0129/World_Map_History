@@ -263,7 +263,7 @@ CShapes 修补（UNIT_FIX / UNCOVERED / unit_names）：
    python3 scripts/ww2_html.py
    ```
    在流水线中则是 `added` 任务（排在所涉时期的数据库和 `webmap` 之后、`html` 之前）。改 `added_dates.py` 只会让 `added` 和 `html` 两个任务重跑。
-   脚本是增量的：每个日期的构建结果和导出结果缓存在 `work/added/cache/`，键是该日期的指纹（`add_snapshots.py` 及其导入的脚本、该组的配置和该日期的条目、规则文件、规则引用的 `file:` 文件、时期数据库、世界数据库、`control_events.csv`、`unit_names.csv`、该组城市、基准断面的 `snap-<日期>.json`），导出结果另加上前面各日期留下的要素编号状态。只改一组时，其他组的日期直接取缓存（输出逐字节相同），一组约 3 分钟降到几秒；排在改动组之后的组若要素编号整体后移，导出会重做。缓存可以随时删掉。
+   脚本是增量的：每个日期的构建结果和导出结果缓存在 `work/added/cache/`，键是该日期的指纹（`add_snapshots.py` 及其导入的脚本、该组的配置和该日期的条目、规则文件、规则引用的 `file:` 文件、时期数据库、世界数据库、`control_events.csv`、`unit_names.csv`、该组城市、基准断面的 `snap-<日期>.json`），导出结果另加上前面各日期留下的要素编号状态。只改一组时，其他组的日期直接取缓存（输出逐字节相同）：全部 56 个日期从头构建约 120 分钟，全部命中缓存约 3 分钟，重建其中 4 个日期约 11 分钟；排在改动组之后的组若要素编号整体后移，导出会重做。缓存可以随时删掉。
 6. 产物：`db/<group.db>`（该组断面的独立数据库，表结构与所属时期的数据库相同，带有用到的区划副本；时期本身的数据库只保留流水线生成的事件日，不被改动）、`ww2/maps/data/snap-<日期>.json`、`geo-<日期>.bin`、追加后的 `admin.bin`、`index.json`、`added-build.json`、`ww2/maps/<日期>.html`、对应时期的 `coverage*.csv`。
 7. **禁止**手改 `added-build.json` 的校验值。若脚本报 “admin.bin changed since add_snapshots.py last ran”，先重跑 `ww2_webmap.py` 再跑 A。
 8. 路径 A 的局限：只会用到数据库里**已有**的区划（基准断面的，加上带施行日期的替代区划）；基准日期与新日期之间若有未收录的行政改革，不会出现，应在图例或提交说明中注明，或改走 B。

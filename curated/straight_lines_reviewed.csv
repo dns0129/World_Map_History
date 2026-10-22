@@ -482,6 +482,7 @@ segment,length_deg,first_date,between,reason
 "4.20,51.65,4.80,51.70",0.59,1945-01-01,Nederland (Netherlands) | Nederland (Germany),"reviewed: present-day boundary, front line or border of the source layers"
 "4.20,51.65,4.80,51.75",0.62,1945-03-01,Nederland (Germany) | Nederland (Netherlands),"reviewed: present-day boundary, front line or border of the source layers"
 "4.55,51.70,5.10,51.70",0.57,1944-12-01,Nederland (Netherlands) | Nederland (Germany),"reviewed: present-day boundary, front line or border of the source layers"
+"4.55,51.70,5.20,51.75",0.67,1944-12-01,Nederland (Germany) | Nederland (Netherlands),"reviewed: present-day boundary, front line or border of the source layers"
 "4.65,51.70,5.20,51.75",0.56,1944-12-01,Nederland (Germany) | Nederland (Netherlands),"reviewed: present-day boundary, front line or border of the source layers"
 "4.80,51.65,5.40,51.70",0.62,1945-05-01,Nederland (Germany) | Nederland (Netherlands),"reviewed: present-day boundary, front line or border of the source layers"
 "40.05,46.55,40.65,46.50",0.57,1942-08-01,Ростовская область (Soviet Union) | Ростовская область (Germany),"reviewed: present-day boundary, front line or border of the source layers"
