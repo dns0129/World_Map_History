@@ -61,7 +61,7 @@ NE_SHP = f"https://raw.githubusercontent.com/nvkelso/natural-earth-vector/{commi
 NE_SHP_LAYERS = ["ne_10m_rivers_lake_centerlines", "ne_10m_rivers_europe", "ne_10m_rivers_north_america"]
 
 TERRARIUM = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
-TERRAIN_ZOOM = 5
+TERRAIN_ZOOMS = (5, 6)   # 5: build_terrain.py, 6: the relief sheets of the web maps (ww2_relief.py)
 
 GIT_SOURCES = {
     # CShapes 2.0 with status/owner fields, as bundled in the CRAN package.
@@ -130,11 +130,10 @@ def main(what):
             for ext in ("shp", "shx", "dbf", "prj", "cpg"):
                 jobs.append((NE_SHP + f"{layer}.{ext}", RAW / "naturalearth" / "shp" / f"{layer}.{ext}", 1))
     if "terrain" in what:
-        n = 2 ** TERRAIN_ZOOM
-        for x in range(n):
-            for y in range(n):
-                jobs.append((TERRARIUM.format(z=TERRAIN_ZOOM, x=x, y=y),
-                             RAW / "terrarium" / str(TERRAIN_ZOOM) / f"{x}_{y}.png", 100))
+        for z in TERRAIN_ZOOMS:
+            for x in range(2 ** z):
+                for y in range(2 ** z):
+                    jobs.append((TERRARIUM.format(z=z, x=x, y=y), RAW / "terrarium" / str(z) / f"{x}_{y}.png", 100))
     with cf.ThreadPoolExecutor(8) as ex:
         futs = {ex.submit(fetch, u, d, m): u for u, d, m in jobs}
         for i, f in enumerate(cf.as_completed(futs), 1):

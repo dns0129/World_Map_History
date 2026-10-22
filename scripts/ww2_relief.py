@@ -26,7 +26,7 @@ from PIL import Image, ImageDraw
 from scipy import ndimage
 
 from common import RAW
-from fetch_sources import TERRARIUM, fetch
+from fetch_sources import NE_BASE, TERRARIUM, fetch
 from ww2_common import WW2_OUT
 
 OUT = WW2_OUT / "maps" / "data" / "relief"
@@ -81,7 +81,7 @@ def land_mask():
     for layer in ("ne_10m_land", "ne_10m_minor_islands"):
         path = RAW / "naturalearth" / f"{layer}.geojson"
         if not path.exists():
-            fetch(f"https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/{layer}.geojson", path, 1000)
+            fetch(NE_BASE + f"{layer}.geojson", path, 1000)
         for f in json.load(open(path))["features"]:
             g = f["geometry"]
             polys = g["coordinates"] if g["type"] == "MultiPolygon" else [g["coordinates"]]
