@@ -14,7 +14,6 @@
   hydro-detail.bin  the denser European and North American river and lake layers (the same)
 """
 import colorsys
-import gzip
 import hashlib
 import json
 import math
@@ -35,6 +34,7 @@ from common import RAW, WORK
 import cities
 from ww2_common import SNAPSHOTS, SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, WW2_WORK, WW2_OUT, workers
 from ww2_geo import polys, read_outlines, union
+from mapdata import Appended, Q, TOL_CTRL, TOL_PROV, TOL_UNIT, encode, packed, table, varint, zz  # noqa: F401
 
 OUT = WW2_OUT / "maps" / "data"
 MODERN = WORK / "modern"
@@ -130,10 +130,6 @@ POSTWAR_META = {
 }
 META = {**EARLY_META, **POSTWAR_META}
 NE = RAW / "naturalearth"
-Q = 1000  # coordinate units per degree
-TOL_PROV = 0.008
-TOL_UNIT = 0.02
-TOL_CTRL = 0.012
 BLOCS = ["allied", "axis", "neutral", "contested"]
 TIER_ZH = {3: "省级", 4: "大区级", 5: "整个政治单元", 6: "岛屿属地"}
 CONF = ["whole", "approximate"]
@@ -225,78 +221,6 @@ def color_of(key):
     h = int(hashlib.md5(key.encode()).hexdigest()[:8], 16)
     r, g, b = colorsys.hls_to_rgb((h % 360) / 360, 0.55 + ((h >> 9) % 12) / 100, 0.35 + ((h >> 13) % 20) / 100)
     return "#%02x%02x%02x" % (round(r * 255), round(g * 255), round(b * 255))
-
-
-# ---------------------------------------------------------------- encoding
-
-def varint(n, out):
-    while True:
-        b = n & 0x7F
-        n >>= 7
-        if n:
-            out.append(b | 0x80)
-        else:
-            out.append(b)
-            return
-
-
-def zz(n):
-    return (n << 1) ^ (n >> 63)
-
-
-def packed(path, data):
-    """gzip-compressed file (mtime 0, so that the same data gives the same bytes); the page inflates it."""
-    path.write_bytes(gzip.compress(data, compresslevel=9, mtime=0))
-
-
-def encode(geoms, tol):
-    buf = bytearray()
-    for g in geoms:
-        s = g.simplify(tol, preserve_topology=True)
-        ps = [p for p in getattr(s, "geoms", [s]) if p.geom_type == "Polygon" and not p.is_empty]
-        ps = [p for p in ps if p.area > (tol * tol) / 4] or ps[:1]
-        polys_ = []
-        for p in ps:
-            rings = []
-            for r in [p.exterior, *p.interiors]:
-                c = np.round(np.asarray(r.coords)[:-1] * Q).astype(np.int64)
-                c = c[np.r_[True, np.any(np.diff(c, axis=0) != 0, axis=1)]]
-                if len(c) > 1 and (c[0] == c[-1]).all():
-                    c = c[:-1]
-                if len(c) >= 3:
-                    rings.append(c)
-                elif not rings:
-                    break  # exterior collapsed: drop the polygon
-            if rings:
-                polys_.append(rings)
-        if not polys_:  # keep tiny units clickable: a small triangle at the label point
-            pt = g.representative_point()
-            x, y = round(pt.x * Q), round(pt.y * Q)
-            polys_ = [[np.array([[x - 2, y - 2], [x + 2, y - 2], [x, y + 2]], dtype=np.int64)]]
-        varint(len(polys_), buf)
-        px = py = 0
-        for rings in polys_:
-            varint(len(rings), buf)
-            for c in rings:
-                varint(len(c), buf)
-                for x, y in c:
-                    varint(zz(int(x - px)), buf)
-                    varint(zz(int(y - py)), buf)
-                    px, py = int(x), int(y)
-    return bytes(buf)
-
-
-def table(values):
-    """Deduplicate strings into a lookup list and index array."""
-    lut, idx = [], {}
-    out = []
-    for v in values:
-        v = None if (isinstance(v, float) and np.isnan(v)) else v
-        if v not in idx:
-            idx[v] = len(lut)
-            lut.append(v)
-        out.append(idx[v])
-    return lut, out
 
 
 # ---------------------------------------------------------------- country outlines and labels

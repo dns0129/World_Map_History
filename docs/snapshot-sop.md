@@ -263,6 +263,7 @@ CShapes 修补（UNIT_FIX / UNCOVERED / unit_names）：
    python3 scripts/ww2_html.py
    ```
    在流水线中则是 `added` 任务（排在所涉时期的数据库和 `webmap` 之后、`html` 之前）。改 `added_dates.py` 只会让 `added` 和 `html` 两个任务重跑。
+   脚本是增量的：每个日期的构建结果和导出结果缓存在 `work/added/cache/`，键是该日期的指纹（`add_snapshots.py` 及其导入的脚本、该组的配置和该日期的条目、规则文件、规则引用的 `file:` 文件、时期数据库、世界数据库、`control_events.csv`、`unit_names.csv`、该组城市、基准断面的 `snap-<日期>.json`），导出结果另加上前面各日期留下的要素编号状态。只改一组时，其他组的日期直接取缓存（输出逐字节相同），一组约 3 分钟降到几秒；排在改动组之后的组若要素编号整体后移，导出会重做。缓存可以随时删掉。
 6. 产物：`db/<group.db>`（该组断面的独立数据库，表结构与所属时期的数据库相同，带有用到的区划副本；时期本身的数据库只保留流水线生成的事件日，不被改动）、`ww2/maps/data/snap-<日期>.json`、`geo-<日期>.bin`、追加后的 `admin.bin`、`index.json`、`added-build.json`、`ww2/maps/<日期>.html`、对应时期的 `coverage*.csv`。
 7. **禁止**手改 `added-build.json` 的校验值。若脚本报 “admin.bin changed since add_snapshots.py last ran”，先重跑 `ww2_webmap.py` 再跑 A。
 8. 路径 A 的局限：只会用到数据库里**已有**的区划（基准断面的，加上带施行日期的替代区划）；基准日期与新日期之间若有未收录的行政改革，不会出现，应在图例或提交说明中注明，或改走 B。
@@ -392,5 +393,18 @@ python3 scripts/verify_database.py     # 1900–2000 逐年数据库
 4. **图框不留缝**：按图框描出的区域（`curated/atlas_1945.json`）与图框内缘之间没有细长窄条（第 22 条）。
 
 任何一项不通过，脚本以状态 1 退出并逐条列出。
+
+#### 发布到 Claude Artifact
+
+`scripts/publish_artifact.py` 比较这次构建与上次发布时的清单 `ww2/maps/published.json`（每个已发布文件的 sha256），只把变了的文件分批写进 `work/publish/batch-<n>.json`（每批不超过 60 MB，一次发布最多 64 MB；`data/index.json`、`data/added-build.json`、`data/admin.png`、`index.html` 放在最后一批），不再构建的文件写成 `null` 删除；全部文件超过 250 MB（一个版本最多 256 MB）时停止。
+
+```sh
+python3 scripts/ww2_html.py
+python3 scripts/publish_artifact.py            # 写出各批，打印计划
+#  按顺序发布每一批（Artifact 发布，files = 批文件内容，路径相对仓库根目录）
+python3 scripts/publish_artifact.py --record   # 发布完成后把清单更新为这次构建，并提交
+```
+
+`--remote <文件>` 另外读入 artifact 上现有路径的列表（每行一个），把其中不再构建的删掉。
 
 路径 B 的数据库和覆盖率见 `ww2/coverage*.csv`；地图用 `cd ww2/maps && python3 -m http.server 8000` 打开 `http://localhost:8000/#<日期>` 目视检查。

@@ -6,7 +6,8 @@ import sqlite3
 
 from shapely.geometry import Point, shape
 
-from add_snapshots import DATA, MARKER, PIPELINE_DATES, decode_geo, static_hash, unpack
+from add_snapshots import DATA, MARKER, PIPELINE_DATES
+from mapdata import decode_geo, static_hash, unpack
 from added_dates import GROUPS
 from common import DB_DIR
 from ww2_common import DATABASES

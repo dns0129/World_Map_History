@@ -30,17 +30,18 @@ Control rules (curated/<group.rules>), applied in file order, a later match over
   source_url
 A rule that matches nothing on one of its dates stops the build.
 """
+import ast
 import csv
 import fnmatch
-import gzip
 import hashlib
 import json
 import math
+import pickle
 import re
 import shutil
 import sqlite3
 from collections import Counter
-from itertools import count
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -55,8 +56,9 @@ from common import DB_DIR, ROOT, WORK
 from ww2_common import COVERAGE_SUFFIX, DATABASES, SNAPSHOTS_EARLY, SNAPSHOTS_POSTWAR, SNAPSHOTS_WW2, WW2_OUT
 from ww2_database import gj
 from ww2_geo import diff, eq_area_km2, inter, polys, union
-from ww2_webmap import (BLOCS, CONF, LABEL_MIN_KM2, SPECIAL, TOL_CTRL, TOL_PROV, TOL_UNIT,
-                        color_of, dissolve, encode, label_anchor, nation_of, packed, table)
+from mapdata import (TOL_CTRL, TOL_PROV, TOL_UNIT, Appended, append_admin, decode_geo, encode, packed,  # noqa: F401
+                     read_json, static_hash, table, unpack, write_json)
+from ww2_webmap import BLOCS, CONF, LABEL_MIN_KM2, SPECIAL, color_of, dissolve, label_anchor, nation_of
 
 DATES = {s.date for g in GROUPS for s in g.snapshots}
 DATA = WW2_OUT / "maps" / "data"
@@ -81,60 +83,6 @@ def own_outline(r, a):
         return False
     # slivers under min_piece_km2 merged into it are left out (they would store the whole outline again)
     return abs(r["area_km2"] - (a.get("area_km2") or 0)) > 0.01 * max(r["area_km2"], 1)
-
-
-def read_json(path):
-    return json.loads(path.read_text())
-
-
-def write_json(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False, separators=(",", ":")))
-
-
-def unpack(path):
-    """A data file as bytes, gunzipped when it is gzip-compressed."""
-    raw = path.read_bytes()
-    return gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw
-
-
-def decode_geo(raw):
-    """Outlines of a geo-<date>.bin (unpacked), with the byte offset where each ends."""
-    pos = 0
-    boundaries = [0]
-    geoms = []
-
-    def varint():
-        nonlocal pos
-        value = shift = 0
-        while True:
-            if pos >= len(raw):
-                raise ValueError("Truncated map geometry")
-            b = raw[pos]
-            pos += 1
-            value |= (b & 127) << shift
-            if not b & 128:
-                return value
-            shift += 7
-            if shift > 63:
-                raise ValueError("Invalid map geometry varint")
-
-    while pos < len(raw):
-        parts = []
-        x = y = 0
-        for _ in range(varint()):
-            rings = []
-            for _ in range(varint()):
-                points = []
-                for _ in range(varint()):
-                    dx, dy = varint(), varint()
-                    x += (dx >> 1) ^ -(dx & 1)
-                    y += (dy >> 1) ^ -(dy & 1)
-                    points.append((x / 1000, y / 1000))
-                rings.append(points)
-            parts.append(Polygon(rings[0], rings[1:]))
-        geoms.append(MultiPolygon(parts) if len(parts) > 1 else parts[0])
-        boundaries.append(pos)
-    return geoms, boundaries
 
 
 def outline(text):
@@ -228,8 +176,14 @@ def mask(con, group, pattern, references, land, row):
     return polys(union(selected))
 
 
-def load_rules(con, world, group):
+def load_rules(con, world, group, masks=True):
+    """The group's control rules in file order; with their reference geometry (masks) unless masks=False (enough
+    for the rows written to the database when every date of the group comes from the cache)."""
     rules = list(csv.DictReader((ROOT / "curated" / group.rules).open()))
+    if not masks:
+        for row, rule in enumerate(rules, 2):
+            rule["row"], rule["source"] = row, f"{group.key}_rule:{row}"
+        return rules
     references = [dict(r) for r in world.execute("SELECT iso_3166_2, modern_country, geometry FROM admin1_pieces")]
     for r in references:
         r["shape"] = shape(json.loads(r["geometry"]))
@@ -528,10 +482,6 @@ def store_snapshot(con, rows, admins, s, pop_method, group, stored):
                 *[pops[b] for b in BLOCS]))
 
 
-def static_hash(static):
-    return hashlib.sha256(json.dumps(static, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
-
-
 def base_assets():
     """admin.bin and index.json as ww2_webmap.py wrote them. When this script has run on them before (index.json
     has dates ww2_webmap.py does not write), what it appended (divisions, pieces, look-up values, the dates) is
@@ -539,40 +489,9 @@ def base_assets():
     changed since."""
     static, index = json.loads(unpack(DATA / "admin.bin")), read_json(DATA / "index.json")
     if any(s["snapshot"] not in WEBMAP_DATES for s in index["snapshots"]):
-        old = read_json(MARKER)
-        n = static["n"] = old["admins"]
-        for col in ("admin_id", "tier", "partial", "merged", "area", "label"):
-            static[col] = static[col][:n]
-        for key, col in static["cols"].items():
-            col["idx"] = col["idx"][:n]
-            col["lut"] = col["lut"][:old["luts"][key]]
-        static["feature_admin"] = static["feature_admin"][:old["features"]]
-        if static_hash(static) != old["sha256"]:
-            raise ValueError("admin.bin changed since add_snapshots.py last ran; run ww2_webmap.py before add_snapshots.py")
+        Appended.strip(static, read_json(MARKER))
         index["snapshots"] = [s for s in index["snapshots"] if s["snapshot"] in WEBMAP_DATES]
-    marker = {"admins": static["n"], "features": len(static["feature_admin"]),
-              "luts": {k: len(c["lut"]) for k, c in static["cols"].items()}, "sha256": static_hash(static)}
-    return static, index, marker
-
-
-def append_admin(static, a, prefix):
-    """The index of a division in admin.bin (prefix: its set's, as ww2_webmap.py writes the ids), appended when
-    it is not there yet."""
-    aid = prefix + a["admin_id"]
-    if aid in static["admin_id"]:
-        return static["admin_id"].index(aid)
-    i = static["n"]
-    static["n"] += 1
-    static["admin_id"].append(aid)
-    for key, value in dict(tier=a["tier"], partial=a["partial"] or 0, merged=a["merged_units"] or 0,
-                           area=round(a["area_km2"], 1), label=[round(a["label_lon"], 3), round(a["label_lat"], 3)]).items():
-        static[key].append(value)
-    for key, col in static["cols"].items():
-        value = a.get({"start": "start_date", "end": "end_date"}.get(key, key))
-        if value not in col["lut"]:
-            col["lut"].append(value)
-        col["idx"].append(col["lut"].index(value))
-    return i
+    return static, index, Appended.record(static)
 
 
 def anchors(g):
@@ -738,25 +657,127 @@ def inherited_rules(con, group):
     return out
 
 
+class UnitCounter:
+    """The next free index of a political unit in the map data (next(); .value can be read and restored)."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __next__(self):
+        self.value += 1
+        return self.value - 1
+
+
+CACHE = WORK / "added" / "cache"
+_HASHES = {}
+
+
+def file_hash(path):
+    """sha256 of a file (of every file under a folder), cached by size and time."""
+    path = Path(path)
+    files = sorted(p for p in path.rglob("*") if p.is_file()) if path.is_dir() else [path]
+    h = hashlib.sha256()
+    for f in files:
+        st = f.stat()
+        k = (str(f), st.st_size, st.st_mtime_ns)
+        if k not in _HASHES:
+            _HASHES[k] = hashlib.sha256(f.read_bytes()).hexdigest()
+        h.update(f"{f.name}:{_HASHES[k]}".encode())
+    return h.hexdigest()
+
+
+def code_hash():
+    """This script and every local module it imports, transitively."""
+    if "code" not in _HASHES:
+        here = Path(__file__).resolve().parent
+        seen, todo = set(), ["add_snapshots"]
+        while todo:
+            m = todo.pop()
+            if m in seen or not (here / f"{m}.py").exists():
+                continue
+            seen.add(m)
+            for n in ast.walk(ast.parse((here / f"{m}.py").read_text())):
+                if isinstance(n, ast.Import):
+                    todo += [a.name.split(".")[0] for a in n.names]
+                elif isinstance(n, ast.ImportFrom) and n.module and not n.level:
+                    todo.append(n.module.split(".")[0])
+        _HASHES["code"] = hashlib.sha256("".join(file_hash(here / f"{m}.py") for m in sorted(seen)).encode()).hexdigest()
+    return _HASHES["code"]
+
+
+def date_fingerprint(group, s, rules):
+    """Everything one added date is built from: the code, the group (its dates, blocs, names, checks), its rules
+    file (row numbers are part of the control sources), the curated files its rules for this date refer to, the
+    set's and the yearly database, the curated tables, its city table and the map data of its base date."""
+    refs = sorted({part[5:].partition("#")[0] for r in rules if s.date in r["snapshots"].split("|")
+                   for part in r["reference"].split("&") if part.startswith("file:")})
+    parts = dict(code=code_hash(), group=repr(group), date=repr(s), rules=file_hash(ROOT / "curated" / group.rules),
+                 refs={f: file_hash(ROOT / "curated" / f) for f in refs},
+                 db=file_hash(DATABASES[group.set]), world=file_hash(DB_DIR / "world_history_1900_2000.sqlite"),
+                 tables={f: file_hash(ROOT / "curated" / f) for f in ("control_events.csv", "unit_names.csv", group.cities)},
+                 base_map=file_hash(DATA / f"snap-{group.base}.json"))
+    return hashlib.sha256(json.dumps(parts, sort_keys=True).encode()).hexdigest()
+
+
+def cache_get(kind, date, key):
+    """A date's cached result of `kind` ("build": rows, divisions, units, rule hits; "export": the map data and
+    the state of admin.bin after it) when it was made from the same inputs (key), else None."""
+    path = CACHE / f"{kind}-{date}.pkl"
+    if path.exists():
+        with open(path, "rb") as f:
+            k, value = pickle.load(f)
+        if k == key:
+            return value
+    return None
+
+
+def cache_put(kind, date, key, value):
+    CACHE.mkdir(parents=True, exist_ok=True)
+    with open(CACHE / f"{kind}-{date}.pkl", "wb") as f:
+        pickle.dump((key, value), f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
 def add_group(con, world, group, static, index, unit_indices, new_unit, documents):
     """Build the group's dates into its set's database (an open transaction) and into the map data."""
     key, dates = group.key, [s.date for s in group.snapshots]
-    rules = load_rules(con, world, group)
+    rules = load_rules(con, world, group, masks=False)
+    rules_with_masks = inherited = None
     rule_hits = set()
     for snap in dates:
         con.execute("DELETE FROM piece_snapshot WHERE snapshot=?", (snap,))
         con.execute("DELETE FROM unit_snapshot WHERE snapshot=?", (snap,))
         con.execute("DELETE FROM snapshots WHERE snapshot=?", (snap,))
-    inherited = inherited_rules(con, group)
     stored = {}
     for s in group.snapshots:
-        rows, admins, ug = build_snapshot(con, world, group, s, inherited + rules, rule_hits)
+        fp = date_fingerprint(group, s, rules)
+        built = cache_get("build", s.date, fp)
+        if built is None:
+            if rules_with_masks is None:  # the reference geometry, built only when a date of the group is not cached
+                rules_with_masks, inherited = load_rules(con, world, group), inherited_rules(con, group)
+            hits = set()
+            built = build_snapshot(con, world, group, s, inherited + rules_with_masks, hits) + (hits,)
+            cache_put("build", s.date, fp, built)
+        rows, admins, ug, hits = built
+        rule_hits |= hits
         store_snapshot(con, rows, admins, s, group.pop_method, group, stored)
-        doc, summary = export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit)
+        before = (fp, static_hash(static), json.dumps(sorted(unit_indices.items())), new_unit.value)
+        exported = cache_get("export", s.date, before)
+        if exported is None:
+            doc, summary = export_snapshot(rows, admins, ug, group, s, static, unit_indices, new_unit)
+            exported = (doc, summary, (DATA / f"geo-{s.date}.bin").read_bytes(), static, dict(unit_indices), new_unit.value)
+            cache_put("export", s.date, before, exported)
+        else:
+            doc, summary, geo, after, units, value = exported
+            (DATA / f"geo-{s.date}.bin").write_bytes(geo)
+            static.clear()
+            static.update(json.loads(json.dumps(after)))
+            unit_indices.clear()
+            unit_indices.update(units)
+            new_unit.value = value
         documents[s.date] = doc
         index["snapshots"].append(summary)
         print(s.date, len(rows), "pieces;", len(admins), "historical divisions;", len(doc["countries"]), "controllers",
-              flush=True)
+              "(cached)" if rules_with_masks is None else "", flush=True)
     missing = [(snap, r["row"]) for r in rules for snap in r["snapshots"].split("|") if (snap, r["row"]) not in rule_hits]
     if missing:
         raise ValueError(f"Unmatched control rules in {group.rules} (date, row): {missing}")
@@ -886,7 +907,7 @@ def main():
                 # 2026 has a separate id space; it must not alias historical CShapes ids.
                 if s["snapshot"] != "2026":
                     unit_indices[uid] = ui
-    new_unit = count(top + 1)
+    new_unit = UnitCounter(top + 1)
     world = sqlite3.connect(f"file:{DB_DIR / 'world_history_1900_2000.sqlite'}?mode=ro", uri=True)
     world.row_factory = sqlite3.Row
     documents = {}
