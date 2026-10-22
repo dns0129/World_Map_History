@@ -75,14 +75,16 @@ CITIES = {"ww2_cities.csv", "cities_1900_1934.csv", "cities_1946_1991.csv", "cit
 ADDED_RULES = {g.rules for g in GROUPS}  # read by add_snapshots.py only
 FRONT_LINES = sorted(CURATED.glob("frontlines_*")) + [CURATED / "ccp_areas"]  # front lines and areas the added rules refer to (lagekarten.py, frontlines_west.py, frontlines_china.py, ccp_areas.py, atlas_fronts.py), add_snapshots.py only
 FRONT_SOURCES = ("lagekarten_", "loc_west_", "china_front_", "ccp_areas.json", "atlas_")  # their readings, used by those scripts only
+TRACE = CURATED / "trace"  # the starting readings of scripts/trace (not part of any build step)
+CHECKS_ONLY = {"straight_lines_reviewed.csv"}  # read by verify_geometry.py only
 
 
 def curated(s=None):
     """The curated tables a step reads: the city lists only for the web map; control rules only for the steps
     of their own set that apply them (curated(set)), none for the units (curated())."""
-    skip = CITIES | ADDED_RULES | {f for k, f in RULES.items() if k != s}
+    skip = CITIES | ADDED_RULES | CHECKS_ONLY | {f for k, f in RULES.items() if k != s}
     return [p for p in sorted(CURATED.rglob("*")) if p.is_file() and p.name not in skip
-            and not set(FRONT_LINES) & set(p.parents) and not p.name.startswith(FRONT_SOURCES)]
+            and not (set(FRONT_LINES) | {TRACE}) & set(p.parents) and not p.name.startswith(FRONT_SOURCES)]
 BASE_WORK = [WORK / "unit_year.csv", WORK / "admin1_targets.csv", WORK / "years.csv", WORK / "ww2" / "ref_units.csv",
              WORK / "ww2" / "ref_units.wkb", WORK / "ww2" / "ref_units.geojson"]
 
