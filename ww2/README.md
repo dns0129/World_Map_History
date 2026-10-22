@@ -113,6 +113,7 @@ scripts/ww2_*.py                   全部构建脚本；scripts/pipeline.py 按�
 python3 scripts/add_snapshots.py
 python3 scripts/ww2_html.py
 python3 scripts/verify_added_snapshots.py
+python3 scripts/verify_geometry.py      # 几何：块号、轮廓重叠、直线、图框缝隙（见 SOP 第 11 节）
 ```
 
 `data/added-build.json` 记下 `ww2_webmap.py` 写出的 `admin.bin` 原有的长度和校验值，重复运行时先去掉上次追加的部分再重写；如果 `admin.bin` 的原有部分已被其他操作改变，脚本会停下，应先重建网页地图（`ww2_webmap.py`），不可自行修改该记录的校验值。1915–1917 的导出文件与其他断面的 `snap-<日期>.json` 字段相同。

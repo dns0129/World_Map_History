@@ -376,7 +376,17 @@ python3 scripts/pipeline.py --sets <集合>             # 生成；中断后重�
 
 ```sh
 python3 scripts/verify_added_snapshots.py   # 全部断面的地图数据；路径 A 各日期的数据库、施行日期和 checks 中的历史核对项
+python3 scripts/verify_geometry.py     # 全部数据库、全部日期的几何（约 2 分钟；--quick 每四个日期取一个）
 python3 scripts/verify_database.py     # 1900–2000 逐年数据库
 ```
+
+**发布网页前必跑 `verify_geometry.py`**，它检查其他脚本看不到的四类错误（都是本项目实际出过的）：
+
+1. **块号稳定**：有自己轮廓的块，在各日期面积相同（容差 2%），否则同一块号在不同日期是不同形状（第 24 条）。
+2. **轮廓不盖住别的块**：按区划轮廓画的整区划块，盖住其他控制方的块不超过 4,000 km²（来源图层的边界误差最多约 3,300 km²，出过的错误都在 8,900 km² 以上，第 25 条）。
+3. **没有新的直线**：同一政治单位内、两侧控制方不同、0.5° 以上的直线段，必须在 `curated/straight_lines_reviewed.csv` 里（今日行政界线、按经纬度写的战线、来源图层的边界）；方框、经纬线做的掩膜会被报出（第 27 条）。新出现的直线先在地图上逐条看过，确认不是掩膜造成的，再用 `--update-reviewed` 写入清单。
+4. **图框不留缝**：按图框描出的区域（`curated/atlas_1945.json`）与图框内缘之间没有细长窄条（第 22 条）。
+
+任何一项不通过，脚本以状态 1 退出并逐条列出。
 
 路径 B 的数据库和覆盖率见 `ww2/coverage*.csv`；地图用 `cd ww2/maps && python3 -m http.server 8000` 打开 `http://localhost:8000/#<日期>` 目视检查。
