@@ -120,7 +120,8 @@ def main(what):
         for name in HYDE_FILES:
             jobs.append((HYDE_BASE + name, RAW / "hyde35" / name, 1_000_000))
     if "ghs" in what:
-        for y in GHS_EPOCHS:
+        for y in GHS_EPOCHS + [2025]:  # 2025: the 2026 tab (modern_2026.py), downloaded here so that raw/ is
+            # complete before sources.py --check
             jobs.append((GHS_URL.format(y=y), RAW / "ghs_pop" / f"GHS_POP_E{y}_30ss.tif", 100_000_000))
     if "ne" in what:
         for layer in NE_LAYERS:
