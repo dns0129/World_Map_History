@@ -183,6 +183,8 @@ pip install -r requirements.txt
 
 各步骤见 `build_all.sh` 和 `scripts/pipeline.py` 开头的说明。
 
+按历史地图描出的资料（`curated/` 中的战线、根据地、1945 年图集）怎样从原图复现，见 [描图资料的来源与复现](docs/tracing.md)：自动描出的部分由 `scripts/trace/` 的脚本从原图重新生成（`--check` 与仓库逐字节比较），目视读出的部分以读数为原始资料。
+
 仅重建 1915、1916、1917 三个交互断面（以及 `scripts/added_dates.py` 中以后追加的其他日期）时，可以直接使用仓库内已有的数据库和地图数据，无需下载原始资料：
 
 ```sh

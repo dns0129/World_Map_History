@@ -94,5 +94,89 @@
    "sha256": "45e65732401929b8479be65d6ceeea77476616e732b444069af70879082c96d9",
    "files": 3
   }
+ },
+ "files": {
+  "atlas_1945": {
+   "url": "https://cgsc.contentdm.oclc.org/digital/api/collection/p4013coll8/id/3173/download",
+   "mirror": "https://upload.wikimedia.org/wikipedia/commons/4/42/Atlas_of_the_World_Battle_Fronts_in_Semimonthly_Phases_to_August_15%2C_1945.pdf",
+   "dest": "trace/atlas_1945/atlas.pdf",
+   "sha256": "91882fdd6c8f881eae77872ac1c15b678418091fa35ecb8926cf82ef800510b4",
+   "note": "Atlas of the World Battle Fronts in Semimonthly Phases to August 15, 1945 (US War Department, 1945; public domain), 111 pages"
+  },
+  "jacar_C11110931600": {
+   "url": "https://www.jacar.archives.go.jp/das/image/C11110931600",
+   "dest": "trace/jacar/C11110931600.pdf",
+   "sha256": "f13850eea83ae1a73eec687ee3f938bb54deefd8ec7e7bf071771b88e84b13e2",
+   "note": "JACAR: North China Area Army operations maps, September 1937 - May 1938 (china_front_1937)"
+  },
+  "jacar_C11110931700": {
+   "url": "https://www.jacar.archives.go.jp/das/image/C11110931700",
+   "dest": "trace/jacar/C11110931700.pdf",
+   "sha256": "d05ec6a8a69cdb92efa1cfcb906fc059292f626f0d02d5b12cc3a333d011bff6",
+   "note": "JACAR: North China Area Army operations maps, September 1937 - May 1938 (china_front_1937)"
+  },
+  "jacar_C11110931800": {
+   "url": "https://www.jacar.archives.go.jp/das/image/C11110931800",
+   "dest": "trace/jacar/C11110931800.pdf",
+   "sha256": "bf9f769104852efe3b56be073084aef6643bf13af54dba8157ab13031ef6f263",
+   "note": "JACAR: North China Area Army operations maps, September 1937 - May 1938 (china_front_1937)"
+  }
+ },
+ "nids": {
+  "050_332": {
+   "sha256": "bc176b571d103da8da40e4b163c7e0c54be2e98cc3d45f2156c9244a159314a2",
+   "used_for": "ccp_areas: red areas (traced by colour, scripts/trace/ccp_050_332.py)",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=050&f=050_332.jpg"
+  },
+  "050_331": {
+   "sha256": "3e76d7410fca903af1f92665ef5fda3c31455a0975705dd7034ab5530aa61548",
+   "used_for": "ccp_areas: Shaan-Gan-Ning boundary (read by eye)",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=050&f=050_331.jpg"
+  },
+  "018_323": {
+   "sha256": "bcd2a78a0878b522df401c02c099d5593a8e1876e0d6975f82b81a594e252f60",
+   "used_for": "ccp_areas: Jin-Cha-Ji boundaries (read by eye)",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=018&f=018_323.jpg"
+  },
+  "055_294": {
+   "sha256": "44d07b318ed35133e784b6df5e8e613608bc87b94a935a40996f833451d7e61e",
+   "used_for": "china_front_1942: occupied area of August 1941",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=055&f=055_294.jpg"
+  },
+  "018_321": {
+   "sha256": "1dda8a6d11d4c0ce1a62ebc222360672fc6aa1c080d7f4e041e604e22fa2b477",
+   "used_for": "china_front_1937 (checked against)",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=018&f=018_321.jpg"
+  },
+  "018_322": {
+   "sha256": "89c942553e5ae967dde2541543f9460781b84f366faef0495c87f960a2787f1a",
+   "used_for": "china_front_1937",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=018&f=018_322.jpg"
+  },
+  "018_324": {
+   "sha256": "357c3128c02b86e447b6e9397084344bec306ca4936b8a291582a969bc153d26",
+   "used_for": "china_front_1937",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=018&f=018_324.jpg"
+  },
+  "089_252": {
+   "sha256": "f1fd3a14bfe3aa248ce6e427a5a83749de74e6af1257ef8a15174619785949e1",
+   "used_for": "china_front_1937",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=089&f=089_252.jpg"
+  },
+  "089_253": {
+   "sha256": "24400787e1711d9f56f5e18fd5cbf74fffc0ff2e803f80abb867695b0fffb047",
+   "used_for": "china_front_1937",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=089&f=089_253.jpg"
+  },
+  "089_254": {
+   "sha256": "5ac49a5ee6d0d488798a42b8f677c2b54e5f8554dc67b739ba9ea763d5a12a7c",
+   "used_for": "china_front_1937",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=089&f=089_254.jpg"
+  },
+  "090_285": {
+   "sha256": "2b2d00f0b5fcee09f0c00c448c4e7fac45e5911df265e41871d1d526fe60adc2",
+   "used_for": "china_front_1937",
+   "page": "https://www.nids.mod.go.jp/military_history_search/SoshoAppendixView?no=090&f=090_285.jpg"
+  }
  }
 }

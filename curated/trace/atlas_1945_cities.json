@@ -1,0 +1,657 @@
+{
+ "note": "City circles read on the War against Germany base map of the atlas, page 82 (1 January 1945; pixels of the embedded scan, 1279 x 1766), with their lon/lat: the starting point of the control points of every 1945 page (scripts/trace/atlas_1945.py snaps each to the nearest detected circle within 9 px).",
+ "page": 82,
+ "cities": [
+  {
+   "name": "Goteborg",
+   "x": 680,
+   "y": 240,
+   "lon": 11.97,
+   "lat": 57.71
+  },
+  {
+   "name": "Riga",
+   "x": 1172,
+   "y": 272,
+   "lon": 24.1,
+   "lat": 56.95
+  },
+  {
+   "name": "Aalborg",
+   "x": 600,
+   "y": 298,
+   "lon": 9.92,
+   "lat": 57.05
+  },
+  {
+   "name": "Randers",
+   "x": 571,
+   "y": 331,
+   "lon": 10.04,
+   "lat": 56.46
+  },
+  {
+   "name": "Karlskrona",
+   "x": 853,
+   "y": 351,
+   "lon": 15.59,
+   "lat": 56.16
+  },
+  {
+   "name": "Copenhagen",
+   "x": 700,
+   "y": 385,
+   "lon": 12.57,
+   "lat": 55.68
+  },
+  {
+   "name": "Kaunas",
+   "x": 1203,
+   "y": 433,
+   "lon": 23.9,
+   "lat": 54.9
+  },
+  {
+   "name": "Tilsit",
+   "x": 1093,
+   "y": 439,
+   "lon": 21.88,
+   "lat": 55.08
+  },
+  {
+   "name": "Konigsberg",
+   "x": 1040,
+   "y": 464,
+   "lon": 20.51,
+   "lat": 54.71
+  },
+  {
+   "name": "Kiel",
+   "x": 579,
+   "y": 490,
+   "lon": 10.13,
+   "lat": 54.32
+  },
+  {
+   "name": "Danzig",
+   "x": 958,
+   "y": 500,
+   "lon": 18.65,
+   "lat": 54.35
+  },
+  {
+   "name": "Grodno",
+   "x": 1186,
+   "y": 520,
+   "lon": 23.83,
+   "lat": 53.68
+  },
+  {
+   "name": "Hamburg",
+   "x": 575,
+   "y": 541,
+   "lon": 10.0,
+   "lat": 53.55
+  },
+  {
+   "name": "Stettin",
+   "x": 785,
+   "y": 561,
+   "lon": 14.55,
+   "lat": 53.43
+  },
+  {
+   "name": "Bremen",
+   "x": 520,
+   "y": 576,
+   "lon": 8.8,
+   "lat": 53.08
+  },
+  {
+   "name": "Norwich",
+   "x": 205,
+   "y": 563,
+   "lon": 1.3,
+   "lat": 52.63
+  },
+  {
+   "name": "Berlin",
+   "x": 734,
+   "y": 639,
+   "lon": 13.4,
+   "lat": 52.52
+  },
+  {
+   "name": "Posen",
+   "x": 892,
+   "y": 643,
+   "lon": 16.93,
+   "lat": 52.41
+  },
+  {
+   "name": "Warsaw",
+   "x": 1078,
+   "y": 640,
+   "lon": 21.01,
+   "lat": 52.23
+  },
+  {
+   "name": "Lodz",
+   "x": 1007,
+   "y": 685,
+   "lon": 19.46,
+   "lat": 51.76
+  },
+  {
+   "name": "BrestLitovsk",
+   "x": 1201,
+   "y": 657,
+   "lon": 23.7,
+   "lat": 52.1
+  },
+  {
+   "name": "London",
+   "x": 105,
+   "y": 632,
+   "lon": -0.13,
+   "lat": 51.5
+  },
+  {
+   "name": "Amsterdam",
+   "x": 345,
+   "y": 620,
+   "lon": 4.9,
+   "lat": 52.37
+  },
+  {
+   "name": "TheHague",
+   "x": 310,
+   "y": 632,
+   "lon": 4.3,
+   "lat": 52.08
+  },
+  {
+   "name": "Munster",
+   "x": 459,
+   "y": 659,
+   "lon": 7.63,
+   "lat": 51.96
+  },
+  {
+   "name": "Portsmouth",
+   "x": 49,
+   "y": 671,
+   "lon": -1.09,
+   "lat": 50.8
+  },
+  {
+   "name": "Dunkerque",
+   "x": 227,
+   "y": 702,
+   "lon": 2.38,
+   "lat": 51.03
+  },
+  {
+   "name": "Kassel",
+   "x": 533,
+   "y": 712,
+   "lon": 9.5,
+   "lat": 51.31
+  },
+  {
+   "name": "Leipzig",
+   "x": 672,
+   "y": 722,
+   "lon": 12.37,
+   "lat": 51.34
+  },
+  {
+   "name": "Brussels",
+   "x": 299,
+   "y": 722,
+   "lon": 4.35,
+   "lat": 50.85
+  },
+  {
+   "name": "Lille",
+   "x": 240,
+   "y": 733,
+   "lon": 3.06,
+   "lat": 50.63
+  },
+  {
+   "name": "Cologne",
+   "x": 414,
+   "y": 735,
+   "lon": 6.96,
+   "lat": 50.94
+  },
+  {
+   "name": "Liege",
+   "x": 355,
+   "y": 745,
+   "lon": 5.57,
+   "lat": 50.63
+  },
+  {
+   "name": "Namur",
+   "x": 331,
+   "y": 752,
+   "lon": 4.87,
+   "lat": 50.47
+  },
+  {
+   "name": "Dresden",
+   "x": 743,
+   "y": 745,
+   "lon": 13.74,
+   "lat": 51.05
+  },
+  {
+   "name": "Breslau",
+   "x": 903,
+   "y": 745,
+   "lon": 17.04,
+   "lat": 51.11
+  },
+  {
+   "name": "LeHavre",
+   "x": 85,
+   "y": 787,
+   "lon": 0.11,
+   "lat": 49.49
+  },
+  {
+   "name": "Prum",
+   "x": 391,
+   "y": 786,
+   "lon": 6.42,
+   "lat": 50.21
+  },
+  {
+   "name": "Bastogne",
+   "x": 346,
+   "y": 803,
+   "lon": 5.72,
+   "lat": 50.0
+  },
+  {
+   "name": "Reims",
+   "x": 261,
+   "y": 820,
+   "lon": 4.03,
+   "lat": 49.26
+  },
+  {
+   "name": "Echternach",
+   "x": 368,
+   "y": 818,
+   "lon": 6.42,
+   "lat": 49.81
+  },
+  {
+   "name": "Luxembourg",
+   "x": 365,
+   "y": 833,
+   "lon": 6.13,
+   "lat": 49.61
+  },
+  {
+   "name": "Mainz",
+   "x": 488,
+   "y": 818,
+   "lon": 8.27,
+   "lat": 50.0
+  },
+  {
+   "name": "Prague",
+   "x": 776,
+   "y": 822,
+   "lon": 14.42,
+   "lat": 50.08
+  },
+  {
+   "name": "Krakow",
+   "x": 1040,
+   "y": 812,
+   "lon": 19.94,
+   "lat": 50.06
+  },
+  {
+   "name": "Paris",
+   "x": 182,
+   "y": 853,
+   "lon": 2.35,
+   "lat": 48.86
+  },
+  {
+   "name": "Metz",
+   "x": 374,
+   "y": 873,
+   "lon": 6.18,
+   "lat": 49.12
+  },
+  {
+   "name": "Pilsen",
+   "x": 733,
+   "y": 840,
+   "lon": 13.38,
+   "lat": 49.75
+  },
+  {
+   "name": "MoravskaOstrava",
+   "x": 1003,
+   "y": 843,
+   "lon": 18.29,
+   "lat": 49.83
+  },
+  {
+   "name": "Nurnberg",
+   "x": 603,
+   "y": 856,
+   "lon": 11.08,
+   "lat": 49.45
+  },
+  {
+   "name": "Lwow",
+   "x": 1212,
+   "y": 840,
+   "lon": 24.03,
+   "lat": 49.84
+  },
+  {
+   "name": "Brunn",
+   "x": 884,
+   "y": 884,
+   "lon": 16.61,
+   "lat": 49.2
+  },
+  {
+   "name": "LeMans",
+   "x": 63,
+   "y": 903,
+   "lon": 0.2,
+   "lat": 48.0
+  },
+  {
+   "name": "Troyes",
+   "x": 262,
+   "y": 912,
+   "lon": 4.08,
+   "lat": 48.3
+  },
+  {
+   "name": "Strasbourg",
+   "x": 436,
+   "y": 912,
+   "lon": 7.75,
+   "lat": 48.58
+  },
+  {
+   "name": "Orleans",
+   "x": 148,
+   "y": 920,
+   "lon": 1.91,
+   "lat": 47.9
+  },
+  {
+   "name": "Stuttgart",
+   "x": 518,
+   "y": 905,
+   "lon": 9.18,
+   "lat": 48.78
+  },
+  {
+   "name": "Regensburg",
+   "x": 663,
+   "y": 902,
+   "lon": 12.1,
+   "lat": 49.02
+  },
+  {
+   "name": "Ungvar",
+   "x": 1144,
+   "y": 908,
+   "lon": 22.3,
+   "lat": 48.62
+  },
+  {
+   "name": "Colmar",
+   "x": 420,
+   "y": 960,
+   "lon": 7.36,
+   "lat": 48.08
+  },
+  {
+   "name": "Munich",
+   "x": 636,
+   "y": 966,
+   "lon": 11.58,
+   "lat": 48.14
+  },
+  {
+   "name": "Linz",
+   "x": 764,
+   "y": 960,
+   "lon": 14.29,
+   "lat": 48.3
+  },
+  {
+   "name": "Vienna",
+   "x": 883,
+   "y": 966,
+   "lon": 16.37,
+   "lat": 48.21
+  },
+  {
+   "name": "Esztergom",
+   "x": 986,
+   "y": 1003,
+   "lon": 18.74,
+   "lat": 47.79
+  },
+  {
+   "name": "Budapest",
+   "x": 1012,
+   "y": 1006,
+   "lon": 19.04,
+   "lat": 47.5
+  },
+  {
+   "name": "Debrecen",
+   "x": 1138,
+   "y": 1003,
+   "lon": 21.63,
+   "lat": 47.53
+  },
+  {
+   "name": "Dijon",
+   "x": 298,
+   "y": 997,
+   "lon": 5.04,
+   "lat": 47.32
+  },
+  {
+   "name": "Zurich",
+   "x": 474,
+   "y": 1005,
+   "lon": 8.54,
+   "lat": 47.38
+  },
+  {
+   "name": "Bern",
+   "x": 425,
+   "y": 1013,
+   "lon": 7.45,
+   "lat": 46.95
+  },
+  {
+   "name": "Innsbruck",
+   "x": 627,
+   "y": 1033,
+   "lon": 11.39,
+   "lat": 47.27
+  },
+  {
+   "name": "Graz",
+   "x": 828,
+   "y": 1048,
+   "lon": 15.44,
+   "lat": 47.07
+  },
+  {
+   "name": "Limoges",
+   "x": 89,
+   "y": 1080,
+   "lon": 1.26,
+   "lat": 45.83
+  },
+  {
+   "name": "Arad",
+   "x": 1135,
+   "y": 1101,
+   "lon": 21.31,
+   "lat": 46.18
+  },
+  {
+   "name": "Geneva",
+   "x": 350,
+   "y": 1093,
+   "lon": 6.14,
+   "lat": 46.2
+  },
+  {
+   "name": "Bolzano",
+   "x": 622,
+   "y": 1092,
+   "lon": 11.35,
+   "lat": 46.5
+  },
+  {
+   "name": "Lyon",
+   "x": 264,
+   "y": 1107,
+   "lon": 4.84,
+   "lat": 45.76
+  },
+  {
+   "name": "Zagreb",
+   "x": 857,
+   "y": 1150,
+   "lon": 15.98,
+   "lat": 45.81
+  },
+  {
+   "name": "Trieste",
+   "x": 745,
+   "y": 1145,
+   "lon": 13.77,
+   "lat": 45.65
+  },
+  {
+   "name": "Milan",
+   "x": 499,
+   "y": 1163,
+   "lon": 9.19,
+   "lat": 45.46
+  },
+  {
+   "name": "Verona",
+   "x": 604,
+   "y": 1163,
+   "lon": 10.99,
+   "lat": 45.44
+  },
+  {
+   "name": "Venice",
+   "x": 672,
+   "y": 1176,
+   "lon": 12.33,
+   "lat": 45.44
+  },
+  {
+   "name": "Turin",
+   "x": 386,
+   "y": 1177,
+   "lon": 7.69,
+   "lat": 45.07
+  },
+  {
+   "name": "Brod",
+   "x": 964,
+   "y": 1193,
+   "lon": 18.0,
+   "lat": 45.16
+  },
+  {
+   "name": "Belgrade",
+   "x": 1096,
+   "y": 1206,
+   "lon": 20.46,
+   "lat": 44.82
+  },
+  {
+   "name": "Genoa",
+   "x": 484,
+   "y": 1228,
+   "lon": 8.93,
+   "lat": 44.41
+  },
+  {
+   "name": "Bologna",
+   "x": 612,
+   "y": 1237,
+   "lon": 11.34,
+   "lat": 44.49
+  },
+  {
+   "name": "Faenza",
+   "x": 640,
+   "y": 1247,
+   "lon": 11.88,
+   "lat": 44.29
+  },
+  {
+   "name": "Craiova",
+   "x": 1270,
+   "y": 1222,
+   "lon": 23.8,
+   "lat": 44.32
+  },
+  {
+   "name": "Toulouse",
+   "x": 73,
+   "y": 1250,
+   "lon": 1.44,
+   "lat": 43.6
+  },
+  {
+   "name": "Marseille",
+   "x": 277,
+   "y": 1301,
+   "lon": 5.37,
+   "lat": 43.3
+  },
+  {
+   "name": "Sarajevo",
+   "x": 1056,
+   "y": 1274,
+   "lon": 18.41,
+   "lat": 43.86
+  },
+  {
+   "name": "Split",
+   "x": 885,
+   "y": 1297,
+   "lon": 16.44,
+   "lat": 43.51
+  },
+  {
+   "name": "Perugia",
+   "x": 668,
+   "y": 1343,
+   "lon": 12.39,
+   "lat": 43.11
+  }
+ ]
+}
