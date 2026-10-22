@@ -35,7 +35,7 @@ from scipy import ndimage as ndi
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from common import RAW, ROOT  # noqa: E402
-from lagekarten import Georef  # noqa: E402
+from georef import Georef  # noqa: E402
 from sources import load  # noqa: E402
 
 JSON = ROOT / "curated" / "atlas_1945.json"

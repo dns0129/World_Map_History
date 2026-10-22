@@ -31,7 +31,7 @@ from pathlib import Path
 from shapely.geometry import LineString, Point, Polygon, box, mapping
 from shapely.ops import split, unary_union
 
-from lagekarten import Georef
+from georef import Georef, line_lonlat
 
 ROOT = Path(__file__).resolve().parent.parent
 EUROPE = box(-12, 34, 40, 72)
@@ -49,19 +49,12 @@ def main():
         g = Georef(d["gcps"])
         outer, holes = [], []
         for r in d["allied"]:
-            ring = LineString(r["pts"] + r["pts"][:1]).segmentize(10).coords   # densified: the polynomial bends long straight edges
-            lon, lat = g.lonlat([p[0] for p in ring], [p[1] for p in ring])
-            poly = Polygon([(round(float(x), 4), round(float(y), 4)) for x, y in zip(lon, lat)]).buffer(0)
+            poly = Polygon(line_lonlat(g, r["pts"], closed=True)).buffer(0)
             (holes if r["hole"] else outer).append(poly)
         allied = unary_union(outer).difference(unary_union(holes)) if holes else unary_union(outer)
         x0, y0, x1, y1 = d["sheet"]   # the map on the page: below the title band, above the text, a few pixels inside the
-        # page edges so that the ground beyond it overlaps the area traced to them; a point every 10 px, since the
-        # polynomial bends the edges and a chord between corners would leave a sliver along the traced area
-        xs, ys = list(range(x0, x1, 10)), list(range(y0, y1, 10))
-        px = xs + [x1] * len(ys) + [x1 + x0 - x for x in xs] + [x0] * len(ys)
-        py = [y0] * len(xs) + ys + [y1] * len(xs) + [y1 + y0 - y for y in ys]
-        lon, lat = g.lonlat(px, py)
-        sheet = Polygon(list(zip(lon, lat)))
+        # page edges so that the ground beyond it overlaps the area traced to them
+        sheet = Polygon(line_lonlat(g, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], closed=True))
         beyond = EUROPE.difference(sheet)
         corr = {"soviet": [], "axis": [], "allied": []}
         for c in d.get("corrections", []):

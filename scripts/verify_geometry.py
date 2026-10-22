@@ -34,7 +34,7 @@ from shapely import STRtree
 from shapely.geometry import LineString, Point, shape
 
 from common import DB_DIR, ROOT
-from lagekarten import Georef
+from georef import Georef
 
 OVERLAP_KM2 = 4000   # the source layers disagree along borders by up to about 3,300 km2 (British Columbia over
                      # the Alaska panhandle, 1900); the errors found were 8,900-59,000 km2

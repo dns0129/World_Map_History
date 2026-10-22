@@ -37,7 +37,7 @@ from pathlib import Path
 from shapely.geometry import LineString, Polygon, box, mapping
 from shapely.ops import unary_union
 
-from lagekarten import Georef
+from georef import Georef, line_lonlat
 
 ROOT = Path(__file__).resolve().parent.parent
 YEARS = ("1937", "1942")
@@ -45,8 +45,8 @@ CHINA = box(70, 15, 140, 56)
 
 
 def lonlat(georef, pixels):
-    lon, lat = georef.lonlat([p[0] for p in pixels], [p[1] for p in pixels])
-    return [(round(float(a), 4), round(float(b), 4)) for a, b in zip(lon, lat)]
+    """A traced line in lon/lat, densified in pixel space first (georef.line_lonlat)."""
+    return line_lonlat(georef, pixels)
 
 
 def main(year):

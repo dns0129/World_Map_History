@@ -29,8 +29,9 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
 from shapely.geometry import LineString, Polygon, box, mapping
+
+from georef import Georef, line_lonlat  # noqa: F401  (Georef: imported from here by older scripts)
 
 ROOT = Path(__file__).resolve().parent.parent
 YEARS = ("1941", "1942")
@@ -38,30 +39,6 @@ YEARS = ("1941", "1942")
 # itself (fixed edges at 40N, 60N or 60E cut whole provinces along straight lines). Behind the line everything is
 # taken as German; the control rules hand the Romanian and Finnish zones of the base date back afterwards.
 WORLD = box(-30, 0, 180, 90)
-
-
-def terms(u, v):
-    u, v = np.asarray(u, float), np.asarray(v, float)
-    return np.stack([np.ones_like(u), u, v, u * u, u * v, v * v], -1)
-
-
-class Georef:
-    """Preview pixels -> lon/lat by a second-order polynomial fitted to the control points."""
-
-    def __init__(self, gcps):
-        P = np.array([[g["x"], g["y"]] for g in gcps], float)
-        L = np.array([[g["lon"], g["lat"]] for g in gcps], float)
-        self.mean = L.mean(0)
-        self.coef = np.linalg.lstsq(terms(P[:, 0] / 1000, P[:, 1] / 1000), L - self.mean, rcond=None)[0]
-        self.residuals = {g["name"]: round(self.km(*self.lonlat(g["x"], g["y"]), g["lon"], g["lat"]), 1) for g in gcps}
-
-    def lonlat(self, x, y):
-        r = terms(np.asarray(x) / 1000, np.asarray(y) / 1000) @ self.coef + self.mean
-        return r[..., 0], r[..., 1]
-
-    @staticmethod
-    def km(lon1, lat1, lon2, lat2):
-        return math.hypot((lon1 - lon2) * 111.32 * math.cos(math.radians(lat2)), (lat1 - lat2) * 110.57)
 
 
 def sides(line, north):
@@ -88,8 +65,7 @@ def main(year):
             report[str(sheet["page"])] = g.residuals
             if not sheet.get("front"):  # a sheet georeferenced only to check the lon/lat stretches against it
                 continue
-            lon, lat = g.lonlat([p[0] for p in sheet["front"]], [p[1] for p in sheet["front"]])
-            line += [(round(float(a), 4), round(float(b), 4)) for a, b in zip(lon, lat)]
+            line += line_lonlat(g, sheet["front"])
         line += [tuple(p) for p in d.get("tail", [])]  # the line taken on to the coast, lon/lat
         soviet, axis = sides(line, d.get("north", [(line[0][0], 90)]))
         feats = [dict(type="Feature", properties=dict(side="front"), geometry=mapping(LineString(line))),

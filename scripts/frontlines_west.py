@@ -33,77 +33,13 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
 from shapely.geometry import LineString, Polygon, box, mapping
+
+from georef import LambertSheet, line_lonlat
 
 ROOT = Path(__file__).resolve().parent.parent
 YEARS = ("1944",)
 WEST = box(-30, 30, 30, 62)
-
-
-def lcc(lon, lat, n, lon0=5.0):
-    """Lambert conformal conic on the sphere, as complex x + iy (x east, y north), unit scale."""
-    lon, lat = np.radians(np.asarray(lon, float)), np.radians(np.asarray(lat, float))
-    rho = 1 / np.tan(math.pi / 4 + lat / 2) ** n
-    th = n * (lon - math.radians(lon0))
-    return rho * np.sin(th) - 1j * rho * np.cos(th)
-
-
-class Sheet:
-    """lon/lat <-> sheet pixels: pixel = a * lcc(lon, lat; n) + b (complex, pixel y downwards)."""
-
-    def __init__(self, gcps, ticks=()):
-        full = [(g["lon"], g["lat"], g["x"], g["y"]) for g in gcps]
-        self._fit(full)
-        for _ in range(8):  # ticks: the other coordinate from the model, then fit again
-            extra = []
-            for t in ticks:
-                if "lon" in t:
-                    lats = np.linspace(40, 56, 16001)
-                    ys = self.pixel(np.full_like(lats, t["lon"]), lats)[1]
-                    extra.append((t["lon"], float(lats[np.argmin(abs(ys - t["y"]))]), t["x"], t["y"]))
-                else:
-                    lons = np.linspace(-10, 15, 25001)
-                    xs = self.pixel(lons, np.full_like(lons, t["lat"]))[0]
-                    extra.append((float(lons[np.argmin(abs(xs - t["x"]))]), t["lat"], t["x"], t["y"]))
-            self._fit(full + extra)
-        names = [g["name"] for g in gcps] + [t["name"] for t in ticks]
-        self.residuals = {k: round(float(r) * self.km_px, 1) for k, r in zip(names, self.r)}
-
-    def _fit(self, pts):
-        w = np.array([p[2] - 1j * p[3] for p in pts])
-        best = None
-        for n in np.linspace(0.55, 0.95, 401):
-            z = lcc([p[0] for p in pts], [p[1] for p in pts], n)
-            A = np.stack([z, np.ones_like(z)], -1)
-            c = np.linalg.lstsq(A, w, rcond=None)[0]
-            r = np.abs(A @ c - w)
-            if best is None or (r ** 2).sum() < best[0]:
-                best = ((r ** 2).sum(), n, c, r)
-        _, self.n, (self.a, self.b), self.r = best
-        # km per pixel near the sheet centre
-        lo, la = np.mean([p[0] for p in pts]), np.mean([p[1] for p in pts])
-        x0, y0 = self.pixel(lo, la)
-        x1, y1 = self.pixel(lo, la + 0.1)
-        self.km_px = 11.12 / math.hypot(float(x1 - x0), float(y1 - y0))
-
-    def pixel(self, lon, lat):
-        w = self.a * lcc(lon, lat, self.n) + self.b
-        return w.real, -w.imag
-
-    def lonlat(self, px, py):
-        px, py = np.asarray(px, float), np.asarray(py, float)
-        lon, lat = np.full(px.shape, 5.0), np.full(px.shape, 49.5)
-        for _ in range(40):  # Newton on the forward model
-            x, y = self.pixel(lon, lat)
-            e = 1e-4
-            xa, ya = self.pixel(lon + e, lat)
-            xb, yb = self.pixel(lon, lat + e)
-            j11, j12, j21, j22 = (xa - x) / e, (xb - x) / e, (ya - y) / e, (yb - y) / e
-            dx, dy = px - x, py - y
-            det = j11 * j22 - j12 * j21
-            lon, lat = lon + (j22 * dx - j12 * dy) / det, lat + (-j21 * dx + j11 * dy) / det
-        return lon, lat
 
 
 def main(year):
@@ -111,14 +47,13 @@ def main(year):
     out = ROOT / "curated" / f"frontlines_west_{year}"
     out.mkdir(exist_ok=True)
     for date, d in sorted(data["dates"].items()):
-        sheet = Sheet(d["gcps"], d.get("ticks", []))
+        sheet = LambertSheet(d["gcps"], d.get("ticks", []))
         line = [tuple(p) for p in d.get("head", [])]
         for part in d["front"]:
             if "lonlat" in part:
                 line += [tuple(p) for p in part["lonlat"]]
             else:
-                lon, lat = sheet.lonlat([p[0] for p in part["pixels"]], [p[1] for p in part["pixels"]])
-                line += [(round(float(a), 4), round(float(b), 4)) for a, b in zip(lon, lat)]
+                line += line_lonlat(sheet, part["pixels"])
         line += [tuple(p) for p in d.get("tail", [])]
         allied = Polygon(line + [tuple(p) for p in d["close"]]).buffer(0)
         feats = [dict(type="Feature", properties=dict(side="front"), geometry=mapping(LineString(line))),
@@ -127,8 +62,7 @@ def main(year):
         for p in d.get("pockets", []):
             ring = [tuple(q) for q in p.get("lonlat", [])]
             if "pixels" in p:  # a pocket drawn on the sheet, closed along the coast by lon/lat points
-                lon, lat = sheet.lonlat([q[0] for q in p["pixels"]], [q[1] for q in p["pixels"]])
-                ring = [(round(float(a), 4), round(float(b), 4)) for a, b in zip(lon, lat)] + [tuple(q) for q in p["lonlat_close"]]
+                ring = line_lonlat(sheet, p["pixels"]) + [tuple(q) for q in p["lonlat_close"]]
             feats.append(dict(type="Feature", properties=dict(side=p["side"] + "_pocket", name=p["name"], note=p["note"]),
                               geometry=mapping(Polygon(ring).buffer(0))))
         src = dict(archive="Library of Congress, Geography and Map Division, " + d["title"], map_time=d["map_time"],
