@@ -401,12 +401,10 @@ python3 scripts/verify_database.py     # 1900–2000 逐年数据库
 ```sh
 python3 scripts/data_release.py manifest data-<日期>      # 清单 := 这次的数据
 git add data_release.json && git commit -m "Data release data-<日期>" && git push
-git switch -c data-staging/<日期>
-git add -f db/*.sqlite ww2/maps/data exports maps && git commit -m "data" && git push -u origin data-staging/<日期>
-git switch - && git branch -D data-staging/<日期>
+python3 scripts/data_release.py stage                     # 推送 data-staging/data-<日期>
 ```
 
-推送 `data-staging/<日期>` 会触发 `.github/workflows/data-release.yml`：打包、与清单逐文件核对、以前一个提交（不含数据）为标签建立 Release、删除这个分支，数据不会留在历史中。`python3 scripts/data_release.py check` 核对工作区的数据与清单是否一致。
+`stage` 在单独的暂存区里做出“HEAD + 数据”的提交并推送为 `data-staging/<标签>`，不切换分支、不改工作区（不要手工切到含数据的分支再切回来：切回时 git 会把这些数据文件从工作区删掉）。这个分支会触发 `.github/workflows/data-release.yml`：打包、与清单逐文件核对、以前一个提交（不含数据）为标签建立 Release、删除这个分支，数据不会留在历史中。`python3 scripts/data_release.py check` 核对工作区的数据与清单是否一致。
 
 #### 发布到 Claude Artifact
 

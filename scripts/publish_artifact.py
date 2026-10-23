@@ -49,6 +49,30 @@ def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def make_batches(changed, gone, sizes, sources, limit=BATCH_MB * 1e6):
+    """The publish calls: {published path: source, or None to remove}, each under `limit` bytes; the changed paths in
+    order, those of LAST and the removals in the last call."""
+    first = [p for p in changed if p not in LAST]
+    last = [p for p in LAST if p in changed]
+    batches, cur, size = [], {}, 0
+    for p in first:
+        if cur and size + sizes[p] > limit:
+            batches.append(cur)
+            cur, size = {}, 0
+        cur[p] = sources[p]
+        size += sizes[p]
+    if cur:
+        batches.append(cur)
+    tail = {p: sources[p] for p in last}
+    tail.update({p: None for p in sorted(gone)})
+    if tail:
+        if batches and sum(sizes[p] for p in last) + size <= limit:
+            batches[-1].update(tail)
+        else:
+            batches.append(tail)
+    return batches
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--remote", type=Path)
@@ -70,25 +94,9 @@ def main():
     if args.remote:
         gone |= {line.strip() for line in args.remote.read_text().splitlines() if line.strip()} - set(files)
     gone.discard("index.html")
-    first = [p for p in changed if p not in LAST]
-    last = [p for p in LAST if p in changed]
-    batches, cur, size = [], {}, 0
-    for p in first:
-        n = files[p].stat().st_size
-        if cur and size + n > BATCH_MB * 1e6:
-            batches.append(cur)
-            cur, size = {}, 0
-        cur[p] = str(files[p].relative_to(ROOT))
-        size += n
-    if cur:
-        batches.append(cur)
-    tail = {p: str(files[p].relative_to(ROOT)) for p in last}
-    tail.update({p: None for p in sorted(gone)})
-    if tail:
-        if batches and sum(files[p].stat().st_size for p in last) + size <= BATCH_MB * 1e6:
-            batches[-1].update(tail)
-        else:
-            batches.append(tail)
+    sizes = {p: f.stat().st_size for p, f in files.items()}
+    sources = {p: str(f.relative_to(ROOT)) for p, f in files.items()}
+    batches = make_batches(changed, gone, sizes, sources)
     OUT.mkdir(parents=True, exist_ok=True)
     for f in OUT.glob("batch-*.json"):
         f.unlink()

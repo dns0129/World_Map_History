@@ -6,15 +6,18 @@
                                                (an archive whose files are all right already is skipped)
   python3 scripts/data_release.py check        the data in the working tree against data_release.json
   python3 scripts/data_release.py manifest TAG data_release.json := this working tree's data, to be released as TAG
+  python3 scripts/data_release.py stage        push the data as data-staging/<tag> for the release workflow
   python3 scripts/data_release.py pack DIR     the archives of the release (one per entry of DATASETS) in DIR;
                                                stops when the working tree differs from data_release.json
 
 data_release.json holds the release tag, the archives, and the sha256 and size of every file in them; it is the
 only part of the data in git (.gitignore leaves the data paths out). A new release:
   1. rebuild, then python3 scripts/data_release.py manifest data-<date> and commit the manifest
-  2. commit the data on top of that, on a branch data-staging/<date>, and push that branch: the workflow
-     .github/workflows/data-release.yml packs it, checks it against the manifest, makes the release (its tag on the
-     commit before, which has no data) and deletes the branch, so the data never stays in the history
+  2. python3 scripts/data_release.py stage: a commit with the data on top of HEAD, made in a separate index (the
+     working tree and the branch stay as they are; switching to a branch that tracks the data and back would
+     delete the data files), pushed as data-staging/<tag>. The workflow .github/workflows/data-release.yml packs
+     it, checks it against the manifest, makes the release (its tag on HEAD, which has no data) and deletes the
+     branch, so the data never stays in the history
 """
 import argparse
 import gzip
@@ -22,6 +25,7 @@ import hashlib
 import io
 import json
 import os
+import subprocess
 import sys
 import tarfile
 import urllib.request
@@ -118,9 +122,35 @@ def fetch(only=()):
         print(archive, len(files), "files")
 
 
+def stage():
+    """Push HEAD plus the data files as data-staging/<tag> without touching the working tree or the branch."""
+    man = json.loads(MANIFEST.read_text())
+    bad, extra = differences(man)
+    if bad or extra:
+        raise SystemExit(f"the working tree differs from {MANIFEST.name}: {(bad + extra)[:5]} ... ({len(bad + extra)})")
+    def git(*a, **kw):
+        return subprocess.run(["git", *a], cwd=ROOT, check=True, capture_output=True, text=True, **kw).stdout.strip()
+    if git("status", "--porcelain", "--", MANIFEST.name):
+        raise SystemExit(f"commit {MANIFEST.name} first: the release is tagged on HEAD")
+    index = ROOT / ".git" / "data-release-index"
+    env = dict(os.environ, GIT_INDEX_FILE=str(index))
+    try:
+        git("read-tree", "HEAD", env=env)
+        paths = [p for files in man["assets"].values() for p in files]
+        for i in range(0, len(paths), 200):
+            git("add", "-f", "--", *paths[i:i + 200], env=env)
+        tree = git("write-tree", env=env)
+    finally:
+        index.unlink(missing_ok=True)
+    commit = git("commit-tree", tree, "-p", "HEAD", "-m", f"data for the release {man['tag']}")
+    branch = f"data-staging/{man['tag']}"
+    subprocess.run(["git", "push", "origin", f"{commit}:refs/heads/{branch}"], cwd=ROOT, check=True)
+    print(f"pushed {branch} ({commit[:10]}): the workflow makes the release {man['tag']} and deletes the branch")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["fetch", "check", "manifest", "pack"])
+    ap.add_argument("command", choices=["fetch", "check", "manifest", "pack", "stage"])
     ap.add_argument("args", nargs="*")
     args = ap.parse_args()
     if args.command == "fetch":
@@ -141,6 +171,8 @@ def main():
         n = sum(len(f) for f in man["assets"].values())
         size = sum(x["size"] for f in man["assets"].values() for x in f.values())
         print(f"wrote {MANIFEST.name}: {args.args[0]}, {n} files, {size / 1e6:.1f} MB")
+    elif args.command == "stage":
+        stage()
     else:
         pack(Path(args.args[0] if args.args else "dist"))
 
