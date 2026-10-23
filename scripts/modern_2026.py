@@ -143,36 +143,37 @@ def zonal(pieces):
     return out
 
 
-def main():
-    OUT.mkdir(parents=True, exist_ok=True)
-    fetch(GHS_URL.format(y=2025), GHS, 100_000_000)
-    for layer in ("ne_10m_admin_1_states_provinces", "ne_10m_admin_0_countries", "ne_10m_admin_0_disputed_areas",
-                  "ne_10m_populated_places"):
-        fetch(NE_BASE + layer + ".geojson", NE / f"{layer}.geojson", 1000)
-    a0 = {f["properties"]["ADM0_A3"]: f["properties"] for f in load("ne_10m_admin_0_countries")}
-    by_admin = {p["ADMIN"]: a for a, p in a0.items()}
+class Countries:
+    """The countries of Natural Earth: sovereign, Chinese name and status of an ADM0_A3 code."""
 
-    def sovereign(a3):
-        p = a0.get(a3)
+    def __init__(self):
+        self.a0 = {f["properties"]["ADM0_A3"]: f["properties"] for f in load("ne_10m_admin_0_countries")}
+        self.by_admin = {p["ADMIN"]: a for a, p in self.a0.items()}
+
+    def sovereign(self, a3):
+        p = self.a0.get(a3)
         if p is None:
             return a3
-        s = by_admin.get(p["SOVEREIGNT"], a3)
-        return s if s in a0 else a3
+        s = self.by_admin.get(p["SOVEREIGNT"], a3)
+        return s if s in self.a0 else a3
 
-    def zh(a3):
-        return NAME_ZH.get(a3) or (a0[a3]["NAME_ZH"] if a3 in a0 else a3)
+    def zh(self, a3):
+        return NAME_ZH.get(a3) or (self.a0[a3]["NAME_ZH"] if a3 in self.a0 else a3)
 
-    def status(a3):
-        t = a0.get(a3, {}).get("TYPE")
+    def status(self, a3):
+        t = self.a0.get(a3, {}).get("TYPE")
         if a3 in ("HKG", "MAC", "ALD"):
             return "part"
-        if t in ("Sovereign country", "Country", "Sovereignty") and sovereign(a3) == a3:
+        if t in ("Sovereign country", "Country", "Sovereignty") and self.sovereign(a3) == a3:
             return "independent"
         if t in ("Dependency", "Country", "Lease"):
             return "dependency"
         return "disputed"
 
-    # ---- provinces
+
+def provinces():
+    """The admin-1 units of Natural Earth, merged into regions where the country has them (DISSOLVE) and cities
+    with county rights into their county."""
     feats = [f for f in load("ne_10m_admin_1_states_provinces") if f["properties"]["adm0_a3"] != "ATA"]
     rows = []
     for f in feats:
@@ -229,8 +230,12 @@ def main():
             host["merged"] = host.get("merged", 0) + 1
             provs.remove(c)
     print("provinces:", len(provs))
+    return provs
 
-    # ---- carve the breakaway areas, the Golan Heights and the de facto states out of their provinces
+
+def carve_pieces(provs):
+    """The breakaway areas, the Golan Heights and the de facto states cut out of their provinces: the carved areas
+    and the pieces (province index, geometry or None when whole, carved area key or None)."""
     disputed = load("ne_10m_admin_0_disputed_areas")
     carve = {}
     for f in disputed:
@@ -260,8 +265,12 @@ def main():
                 pieces.append((i, rest, None))
         else:
             pieces.append((i, None, None))
+    return carve, pieces
 
-    # ---- de jure units
+
+def dejure_units(provs, carve, C):
+    """The de jure units (Golan Heights Syrian) and their ids."""
+    sovereign, status = C.sovereign, C.status
     units = defaultdict(list)
     for i, pv in enumerate(provs):
         a3 = DEJURE.get(pv["a3"], pv["a3"])
@@ -275,8 +284,12 @@ def main():
         unit_geom["SYR"] = polys(union([unit_geom["SYR"], golan]))
         unit_geom["ISR"] = polys(unit_geom["ISR"].difference(golan)) or unit_geom["ISR"]
     uids = {a3: UNIT_BASE + k for k, a3 in enumerate(sorted(unit_geom))}
+    return unit_geom, uids
 
-    # colours: neighbours differ; dependencies in a lighter shade of their sovereign's colour
+
+def colours(unit_geom, C):
+    """Colours: neighbours differ; dependencies in a lighter shade of their sovereign's colour."""
+    sovereign, status = C.sovereign, C.status
     indep = [a3 for a3 in unit_geom if status(a3) in ("independent", "disputed")]
     tree = STRtree([unit_geom[a] for a in indep])
     colour = dict(FIXED)
@@ -289,43 +302,51 @@ def main():
     for a3 in unit_geom:
         if a3 not in colour:
             colour[a3] = lighten(colour.get(sovereign(a3), "#c9c4b8"), 0.42)
+    return colour
 
-    # ---- pieces with control
-    def control(pv, key):
-        a3 = pv["unit"]
-        name = pv["name"]
-        if key in ("SOS", "TRANSN"):
-            return key, "whole"
-        if key == "GOLAN":
-            return "ISR", "whole"
-        if pv["a3"] == "UKR" and pv.get("ne_a3") == "RUS":
-            return "RUS", "whole"  # Crimea, Sevastopol
-        if a3 == "UKR" and name in ("Luhans'k",):
-            return "RUS", "approximate"
-        if a3 == "UKR" and name in ("Donets'k", "Zaporizhzhya", "Kherson"):
-            return "FRONT", "approximate"
-        if a3 == "GEO" and name == "Abkhazia":
-            return "ABK", "whole"
-        if pv["a3"] in ("CYN", "SOL"):
-            return pv["a3"], "whole"
-        if pv["a3"] == "USG":
-            return "USA", "whole"
-        if pv["a3"] == "KAB":
-            return "RUS", "whole"
-        if a3 == "SAH":
-            return "MAR", "approximate"  # Morocco holds the land west of the berm
-        st = status(a3)
-        return (sovereign(a3) if st in ("dependency", "part") else a3), "whole"
 
+def control(pv, key, C):
+    """The controller and confidence of a province (or of its carved piece `key`)."""
+    sovereign, status = C.sovereign, C.status
+    a3 = pv["unit"]
+    name = pv["name"]
+    if key in ("SOS", "TRANSN"):
+        return key, "whole"
+    if key == "GOLAN":
+        return "ISR", "whole"
+    if pv["a3"] == "UKR" and pv.get("ne_a3") == "RUS":
+        return "RUS", "whole"  # Crimea, Sevastopol
+    if a3 == "UKR" and name in ("Luhans'k",):
+        return "RUS", "approximate"
+    if a3 == "UKR" and name in ("Donets'k", "Zaporizhzhya", "Kherson"):
+        return "FRONT", "approximate"
+    if a3 == "GEO" and name == "Abkhazia":
+        return "ABK", "whole"
+    if pv["a3"] in ("CYN", "SOL"):
+        return pv["a3"], "whole"
+    if pv["a3"] == "USG":
+        return "USA", "whole"
+    if pv["a3"] == "KAB":
+        return "RUS", "whole"
+    if a3 == "SAH":
+        return "MAR", "approximate"  # Morocco holds the land west of the berm
+    st = status(a3)
+    return (sovereign(a3) if st in ("dependency", "part") else a3), "whole"
+
+
+def snapshot_rows(provs, pieces, unit_geom, uids, colour, C):
+    """The pieces of 2026 with their unit, sovereign, controller and bloc, and the outlines of the cut ones."""
+    sovereign, zh, status = C.sovereign, C.zh, C.status
+    a0 = C.a0
     zh_unit = {a3: zh(a3) for a3 in unit_geom}
-    prov_rows, snap_rows, split_geoms = [], [], {}
+    snap_rows, split_geoms = [], {}
     count = Counter(i for i, _, _ in pieces)
     seen = Counter()
     for i, g, key in pieces:
         pv = provs[i]
         pid = f"M26-{re.sub(r'[^A-Za-z0-9]+', '-', pv['code']).strip('-')}"
         pv["pid"] = pid
-        ctrl, conf = control(pv, key)
+        ctrl, conf = control(pv, key, C)
         unit = "SYR" if key == "GOLAN" else pv["unit"]  # the Golan Heights stay Syrian de jure
         piece = pid if count[i] == 1 else f"{pid}~{seen[i]}"
         seen[i] += 1
@@ -362,15 +383,20 @@ def main():
             area_km2=round(eq_area_km2(geom), 2), pop_method="GHS-POP 2025 scaled to the UN 2026 world total",
             country_key=f"M:{ctrl}", country_zh=czh, country_en=cen, country_color=ccol, nation_color=colour[unit],
             _geom=geom))
+    return snap_rows, split_geoms, zh_unit
 
-    # ---- population
+
+def estimate_population(snap_rows):
+    """GHS-POP 2025 per piece, scaled to the UN world total."""
     base = zonal([(r["piece_id"], r["_geom"]) for r in snap_rows])
     total = sum(base.values())
     for r in snap_rows:
         r["population_est"] = int(round(base.get(r["piece_id"], 0) * WORLD_POP / total))
     print(f"GHS 2025 total {total / 1e9:.3f} bn -> {WORLD_POP / 1e9:.2f} bn")
 
-    # ---- write
+
+def write_outputs(provs, snap_rows, split_geoms, unit_geom, uids, zh_unit):
+    prov_rows = []
     for pv in provs:
         lp = shapely.ops.polylabel(max(getattr(pv["geom"], "geoms", [pv["geom"]]), key=lambda q: q.area), tolerance=0.02)
         prov_rows.append(dict(unit_id=pv["pid"], name=pv["name"], name_zh=pv.get("name_zh"), name_en=pv.get("name_en"),
@@ -398,6 +424,22 @@ def main():
     d = pd.DataFrame(snap_rows)
     print("pieces", len(d), "units", len(unit_geom), "population", f"{d.population_est.sum() / 1e9:.2f} bn")
     print(d.groupby("bloc").population_est.sum())
+
+
+def main():
+    OUT.mkdir(parents=True, exist_ok=True)
+    fetch(GHS_URL.format(y=2025), GHS, 100_000_000)
+    for layer in ("ne_10m_admin_1_states_provinces", "ne_10m_admin_0_countries", "ne_10m_admin_0_disputed_areas",
+                  "ne_10m_populated_places"):
+        fetch(NE_BASE + layer + ".geojson", NE / f"{layer}.geojson", 1000)
+    C = Countries()
+    provs = provinces()
+    carve, pieces = carve_pieces(provs)
+    unit_geom, uids = dejure_units(provs, carve, C)
+    colour = colours(unit_geom, C)
+    snap_rows, split_geoms, zh_unit = snapshot_rows(provs, pieces, unit_geom, uids, colour, C)
+    estimate_population(snap_rows)
+    write_outputs(provs, snap_rows, split_geoms, unit_geom, uids, zh_unit)
 
 
 if __name__ == "__main__":

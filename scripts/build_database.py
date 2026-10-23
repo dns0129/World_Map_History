@@ -163,16 +163,8 @@ def pack(a):
     return zlib.compress(np.ascontiguousarray(a).astype(a.dtype.newbyteorder("<")).tobytes(), 9)
 
 
-def main():
-    if DB.exists():
-        DB.unlink()
-    con = sqlite3.connect(DB)
-    con.executescript(SCHEMA)
-    namer = Namer()
-    events = pd.read_csv(ROOT / "curated" / "control_events.csv")
-    ctrl_zh = dict(zip(events.controller_name, events.controller_name_zh))
-
-    years = pd.read_csv(WORK / "years.csv")
+def write_meta(con, years):
+    """meta, sources and years."""
     meta = {
         "title": "World history yearly database (political control, population, GDP, terrain)",
         "years": f"{YEARS[0]}-{YEARS[-1]}",
@@ -190,7 +182,9 @@ def main():
     con.executemany("INSERT INTO sources VALUES (?,?,?,?,?,?)", SOURCES)
     years.to_sql("years", con, if_exists="append", index=False)
 
-    # ---- units
+
+def write_units(con):
+    """The CShapes units with their outlines."""
     ug = unit_geometries()
     units = pd.read_csv(WORK / "units.csv")
     rows = []
@@ -199,8 +193,11 @@ def main():
                      u.cap_lon, u.cap_lat, u.area_km2, u.label_lon, u.label_lat, rnd_geojson(ug[u.unit_id])))
     con.executemany("INSERT INTO units VALUES (" + ",".join("?" * 14) + ")", rows)
 
-    # ---- unit_year with names
-    uy = pd.read_csv(WORK / "unit_year.csv")
+
+def unit_year_named(uy, namer, ctrl_zh):
+    """unit_year with the display names of the units, their sovereigns and controllers (the period's names of
+    independent states, unit_names.csv; the event's name for a controller that is not one state), and the
+    state names per (year, GW code)."""
     # display names of independent states per year, keyed by GW code
     state_name = {}
     for r in uy[uy.cshapes_status == "independent"].itertuples():
@@ -242,8 +239,12 @@ def main():
         "gdp_2011usd": uy.gdp_2011usd.round(-3), "gdp_alt_fariss2022_2011usd": uy.gdp_alt_fariss2022_2011usd.round(-3),
         "area_km2": uy.area_km2, "pop_share_world": uy.pop_share_world, "gdp_share_world": uy.gdp_share_world,
         "gdp_per_capita": uy.gdp_per_capita.round(1), "density_per_km2": uy.density_per_km2.round(3)})
+    return out, state_name
 
-    # ---- sovereign aggregates (de jure = CShapes owner, de facto = after control events)
+
+def sovereign_aggregates(out, years, state_name):
+    """sovereign_year: population, GDP and area per sovereign, de jure (CShapes owner) and de facto (after the
+    control events); adds each unit's share of its sovereign to `out`."""
     world = years.set_index("year")
     sov = []
     for basis, code_col, en_col, zh_col in (("de_jure", "sovereign_gwcode", "sovereign_name_en", "sovereign_name_zh"),
@@ -264,12 +265,11 @@ def main():
         share = out.population / out.groupby(["year", code_col]).population.transform("sum")
         out[f"pop_share_{basis}_sovereign"] = share
     sy = pd.concat(sov)
-    out.to_sql("unit_year", con, if_exists="append", index=False)
-    out.to_csv(WORK / "unit_year_named.csv", index=False)
-    sy.to_sql("sovereign_year", con, if_exists="append", index=False)
-    sy.to_csv(WORK / "sovereign_year_named.csv", index=False)
+    return sy
 
-    # ---- admin-1 pieces
+
+def write_pieces(con):
+    """admin1_pieces (simplified outlines) and admin1_year."""
     pieces = pd.read_csv(WORK / "pieces.csv").sort_values("piece_id").reset_index(drop=True)
     piece_no = {k: i + 1 for i, k in enumerate(pieces.piece_id)}
     pg = {f["properties"]["piece_id"]: shape(f["geometry"])
@@ -286,13 +286,17 @@ def main():
     py = py.round({"population": 0, "gdp_2011usd": -3})
     py.to_sql("admin1_year", con, if_exists="append", index=False)
 
-    # ---- inputs and curated tables
+
+def write_inputs(con, events, namer):
+    """The input series and the curated tables."""
     pd.read_csv(WORK / "country_series.csv").to_sql("country_series", con, if_exists="append", index=False)
     pd.read_csv(WORK / "admin1_targets.csv").to_sql("admin1_targets", con, if_exists="append", index=False)
     events.to_sql("control_events", con, if_exists="append", index=False)
     namer.t.to_sql("unit_names", con, if_exists="append", index=False)
 
-    # ---- grids (aggregated to DB_GRID_RES)
+
+def write_grids(con):
+    """The population and GDP grids of every year, aggregated to DB_GRID_RES."""
     for y in YEARS:
         for var, unit in (("population", "persons per cell"), ("gdp", "2011 international $ per cell")):
             f = int(round(DB_GRID_RES[var] / GRID_RES))
@@ -309,7 +313,9 @@ def main():
             con.execute("INSERT INTO grids VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                         (y, var, unit, DB_GRID_RES[var], -180.0, 90.0, a.shape[1], a.shape[0], dtype, "zlib", pack(a)))
 
-    # ---- rasters
+
+def write_rasters(con):
+    """Elevation and hillshade."""
     z = np.load(WORK / "elevation_5m.npy")
     k = int(round(DB_ELEV_RES / HYDE_RES))
     ze = z.reshape(z.shape[0] // k, k, z.shape[1] // k, k).mean(axis=(1, 3))
@@ -322,7 +328,9 @@ def main():
                 ("hillshade", "Land hillshade for multiply blending (255 = lit/flat, darker = shadow)", "0-255",
                  HYDE_RES, -180.0, 90.0, z.shape[1], z.shape[0], "uint8", "png", hs))
 
-    # ---- physical vector layers
+
+def write_physical(con):
+    """The physical vector layers."""
     for layer in ("land", "rivers", "lakes", "glaciers", "elevation_bands", "regions", "marine",
                   "region_points", "peaks"):
         feats = json.load(open(WORK / "physical" / f"{layer}.geojson"))["features"]
@@ -333,6 +341,30 @@ def main():
                          p.get("scalerank"), p.get("valid_from"), p.get("valid_to"),
                          json.dumps(p, ensure_ascii=False), json.dumps(ft["geometry"], separators=(",", ":"))))
         con.executemany("INSERT INTO physical_features VALUES (?,?,?,?,?,?,?,?,?,?)", rows)
+
+
+def main():
+    if DB.exists():
+        DB.unlink()
+    con = sqlite3.connect(DB)
+    con.executescript(SCHEMA)
+    namer = Namer()
+    events = pd.read_csv(ROOT / "curated" / "control_events.csv")
+    ctrl_zh = dict(zip(events.controller_name, events.controller_name_zh))
+    years = pd.read_csv(WORK / "years.csv")
+    write_meta(con, years)
+    write_units(con)
+    out, state_name = unit_year_named(pd.read_csv(WORK / "unit_year.csv"), namer, ctrl_zh)
+    sy = sovereign_aggregates(out, years, state_name)
+    out.to_sql("unit_year", con, if_exists="append", index=False)
+    out.to_csv(WORK / "unit_year_named.csv", index=False)
+    sy.to_sql("sovereign_year", con, if_exists="append", index=False)
+    sy.to_csv(WORK / "sovereign_year_named.csv", index=False)
+    write_pieces(con)
+    write_inputs(con, events, namer)
+    write_grids(con)
+    write_rasters(con)
+    write_physical(con)
 
     con.commit()
     con.execute("VACUUM")

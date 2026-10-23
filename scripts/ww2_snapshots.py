@@ -22,6 +22,7 @@ differs from their unit).
 import json
 import sys
 from collections import defaultdict
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -236,9 +237,10 @@ def blank_land(g, units, refs, rtree, snap):
     return rest if rest is not None and rest.area >= SPLIT_MIN_SHARE * g.area else None
 
 
-def main(only=None):
+def read_inputs(dates):
+    """What the dates are built from: the historical divisions in force on them, the reference units, CShapes,
+    the control events, rules and East Asian layers, the yearly populations."""
     hist = pd.read_csv(WW2_WORK / "hist_units.csv", low_memory=False)
-    dates = [s[0] for s in SNAPSHOTS if not only or s[0] in only]
     used = set(hist[hist.snapshots.apply(lambda x: any(d in x for d in dates))].unit_id)
     hgeom = read_outlines(WW2_WORK / "hist_units.geojson", "unit_id", only=used)  # the dates' units only
     refs = pd.read_csv(REF_WORK / "ref_units.csv", low_memory=False).to_dict("records")
@@ -256,173 +258,185 @@ def main(only=None):
     uy = pd.read_csv(WORK / "unit_year.csv")
     targets = pd.read_csv(WORK / "admin1_targets.csv")
     years = pd.read_csv(WORK / "years.csv").set_index("year")
+    return SimpleNamespace(hist=hist, hgeom=hgeom, refs=refs, rtree=rtree, island_by_id=island_by_id, units=units, namer=namer, events=events, rules=rules, ov_layers=ov_layers, uy=uy, targets=targets, years=years)
 
-    piece_geom = {}
-    rows = []
-    for snap, title_zh, title_en in SNAPSHOTS:
-        if only and snap not in only:
-            continue
-        year = int(snap[:4])
-        act = [u for u in units if u["start"] <= snap <= u["end"]]
-        fid_index = {u["fid"]: i for i, u in enumerate(act)}
-        ug = [u["geom"] for u in act]
-        tree = STRtree(ug)
-        state_name = {}
-        for u in act:
-            if u["status"] == "independent":
-                state_name[str(u["gwcode"])] = namer(u["country_name"], "independent", year)
-        ev = events[(events.start_date <= snap) & (events.end_date >= snap) & (events.scope == "whole")]
-        whole = {(e.unit_name, e.unit_gwcode): e for e in ev.itertuples()}
-        partial = defaultdict(list)
-        for e in events[(events.start_date <= snap) & (events.end_date >= snap) & (events.scope == "partial")].itertuples():
-            partial[(e.unit_name, e.unit_gwcode)].append(e.event_id)
-        hs = hist[hist.snapshots.str.contains(snap, regex=False)].to_dict("records")
-        cache = {}
-        n_split = 0
-        for h in hs:
-            hid = h["unit_id"]
-            g = hgeom[hid]
-            pt = g.representative_point()
-            # which political unit(s) of the date the historical unit lies in
-            if h["tier"] == 6:
-                iu = island_by_id[int(hid[3:].split("#")[0])]
-                parts = [(("island", iu), None)]
-            elif h["tier"] == 5 and h["cshapes_fid"] == h["cshapes_fid"] and int(h["cshapes_fid"]) in fid_index:
-                parts = [(("cs", fid_index[int(h["cshapes_fid"])]), None)]
+
+def pieces_on(snap, inp):
+    """The pieces of one date (rows with _geom, _parent) and the outlines of those whose shape differs from their
+    division: each division in force cut at the borders of the political units and where the controller
+    changes."""
+    hist, hgeom, refs, rtree, island_by_id, units, namer, events, rules, ov_layers = (
+        inp.hist, inp.hgeom, inp.refs, inp.rtree, inp.island_by_id, inp.units, inp.namer, inp.events, inp.rules,
+        inp.ov_layers)
+    rows, piece_geom = [], {}
+    year = int(snap[:4])
+    act = [u for u in units if u["start"] <= snap <= u["end"]]
+    fid_index = {u["fid"]: i for i, u in enumerate(act)}
+    ug = [u["geom"] for u in act]
+    tree = STRtree(ug)
+    state_name = {}
+    for u in act:
+        if u["status"] == "independent":
+            state_name[str(u["gwcode"])] = namer(u["country_name"], "independent", year)
+    ev = events[(events.start_date <= snap) & (events.end_date >= snap) & (events.scope == "whole")]
+    whole = {(e.unit_name, e.unit_gwcode): e for e in ev.itertuples()}
+    partial = defaultdict(list)
+    for e in events[(events.start_date <= snap) & (events.end_date >= snap) & (events.scope == "partial")].itertuples():
+        partial[(e.unit_name, e.unit_gwcode)].append(e.event_id)
+    hs = hist[hist.snapshots.str.contains(snap, regex=False)].to_dict("records")
+    cache = {}
+    n_split = 0
+    for h in hs:
+        hid = h["unit_id"]
+        g = hgeom[hid]
+        pt = g.representative_point()
+        # which political unit(s) of the date the historical unit lies in
+        if h["tier"] == 6:
+            iu = island_by_id[int(hid[3:].split("#")[0])]
+            parts = [(("island", iu), None)]
+        elif h["tier"] == 5 and h["cshapes_fid"] == h["cshapes_fid"] and int(h["cshapes_fid"]) in fid_index:
+            parts = [(("cs", fid_index[int(h["cshapes_fid"])]), None)]
+        else:
+            cand = list(tree.query(g, predicate="intersects"))
+            shares = [(i, inter(g, ug[i]).area / max(g.area, 1e-12)) for i in cand]
+            blank = 1 - sum(s_ for _, s_ in shares)  # share on land CShapes leaves blank on this date
+            min_share = SPLIT_MIN_SHARE
+            if hid.startswith("RU1897"):  # the 1897 provinces are cut at every later border (Finland in 1918)
+                min_share = min(SPLIT_MIN_SHARE, RU1897_SPLIT_KM2 / max(eq_area_km2(g), 1.0))
+            shares = [(i, s_) for i, s_ in shares if s_ >= min_share]
+            fb = [i for i, u in enumerate(act) if u["country_name"] == UNCOVERED.get(snap)]
+            isl = None
+            if not shares and SET != "ww2":  # land CShapes does not draw: a known territory (Greenland)?
+                isl = next((iu for k in rtree.query(pt) if refs[k]["geom"].contains(pt)
+                            for iu in [island_unit(refs[k], snap)] if iu), None)
+            if isl:
+                parts = [(("island", isl), None)]
+            elif fb and sum(s_ for _, s_ in shares) < 0.5 and ug[fb[0]].distance(g) < 0.5:
+                parts = [(("cs", fb[0]), None)]  # land CShapes leaves blank on this date
+            elif fb and blank >= SPLIT_MIN_SHARE and ug[fb[0]].distance(g) < 0.5 and \
+                    (rest := blank_land(g, [ug[i] for i in cand], refs, rtree, snap)) is not None:
+                # partly on that blank land (Livonia and Courland of 1897 on 11 November 1918): the
+                # blank part counts as that unit, the rest goes to the units it lies in
+                cut = {i: polys(inter(g, ug[i])) for i, _ in shares}
+                cut[fb[0]] = polys(union([cut.get(fb[0]), rest]))
+                parts = [(("cs", i), p) for i, p in cut.items() if p is not None]
+            elif len(shares) <= 1 or max(s_ for _, s_ in shares) >= 1 - min_share:
+                hit = [i for i in cand if ug[i].contains(pt)] or [max(shares, key=lambda t: t[1])[0]] if shares else \
+                    ([i for i in cand if ug[i].contains(pt)] or cand or [tree.nearest(pt)])
+                parts = [(("cs", hit[0]), None)]
             else:
-                cand = list(tree.query(g, predicate="intersects"))
-                shares = [(i, inter(g, ug[i]).area / max(g.area, 1e-12)) for i in cand]
-                blank = 1 - sum(s_ for _, s_ in shares)  # share on land CShapes leaves blank on this date
-                min_share = SPLIT_MIN_SHARE
-                if hid.startswith("RU1897"):  # the 1897 provinces are cut at every later border (Finland in 1918)
-                    min_share = min(SPLIT_MIN_SHARE, RU1897_SPLIT_KM2 / max(eq_area_km2(g), 1.0))
-                shares = [(i, s_) for i, s_ in shares if s_ >= min_share]
-                fb = [i for i, u in enumerate(act) if u["country_name"] == UNCOVERED.get(snap)]
-                isl = None
-                if not shares and SET != "ww2":  # land CShapes does not draw: a known territory (Greenland)?
-                    isl = next((iu for k in rtree.query(pt) if refs[k]["geom"].contains(pt)
-                                for iu in [island_unit(refs[k], snap)] if iu), None)
-                if isl:
-                    parts = [(("island", isl), None)]
-                elif fb and sum(s_ for _, s_ in shares) < 0.5 and ug[fb[0]].distance(g) < 0.5:
-                    parts = [(("cs", fb[0]), None)]  # land CShapes leaves blank on this date
-                elif fb and blank >= SPLIT_MIN_SHARE and ug[fb[0]].distance(g) < 0.5 and \
-                        (rest := blank_land(g, [ug[i] for i in cand], refs, rtree, snap)) is not None:
-                    # partly on that blank land (Livonia and Courland of 1897 on 11 November 1918): the
-                    # blank part counts as that unit, the rest goes to the units it lies in
-                    cut = {i: polys(inter(g, ug[i])) for i, _ in shares}
-                    cut[fb[0]] = polys(union([cut.get(fb[0]), rest]))
-                    parts = [(("cs", i), p) for i, p in cut.items() if p is not None]
-                elif len(shares) <= 1 or max(s_ for _, s_ in shares) >= 1 - min_share:
-                    hit = [i for i in cand if ug[i].contains(pt)] or [max(shares, key=lambda t: t[1])[0]] if shares else \
-                        ([i for i in cand if ug[i].contains(pt)] or cand or [tree.nearest(pt)])
-                    parts = [(("cs", hit[0]), None)]
-                else:
-                    parts = [(("cs", i), polys(inter(g, ug[i]))) for i, _ in shares]
-                    parts = [(k, p) for k, p in parts if p is not None]
-            kind_flag = "manchukuo" if h["kind"] == "省 (Manchukuo)" else "kwantung" if hid.startswith("KW") else \
-                "manchu_roc" if hid.startswith("ROC-") and h["name"] in MANCHU_ROC else ""
-            for (ptype, ref_u), gp in parts:
-                gpart = gp if gp is not None else g
-                if ptype == "island":
-                    iu = ref_u
-                    u = {"fid": iu[0], "gwcode": None, "country_name": iu[1], "status": iu[3]}
-                    status, uen, uzh, sov_gw = iu[3], iu[1], iu[2], iu[4]
-                    if sov_gw is None:  # an island state that became independent: its own sovereign
-                        sov_gw = iu[0]
-                else:
-                    u = act[ref_u]
-                    status = u["status"]
-                    uen, uzh = namer(u["country_name"], status, year)
-                    sov_gw = u["gwcode"] if status == "independent" else int(u["owner"])
-                    fix = UNIT_FIX.get((snap, u["country_name"]))
-                    if fix:
-                        status, sov_gw, uen, uzh = fix
-                sov_en, sov_zh = names_on(snap).get(sov_gw) or state_name.get(str(sov_gw)) or \
-                    ((uen, uzh) if ptype == "island" and sov_gw == ref_u[0] else (None, None))
-
-                def ctrl_of(r, u=u, uen=uen, uzh=uzh, status=status, sov_gw=sov_gw, sov_en=sov_en, sov_zh=sov_zh,
-                            gpart=gpart):
-                    key = (r["ref_id"], u["fid"], hid if SET != "ww2" else (kind_flag and hid))
-                    if key not in cache:
-                        c = dict(r, defacto_parent_kind={"manchukuo": "省 (Manchukuo)", "kwantung": "leased territory",
-                                                         "manchu_roc": "ROC Manchuria"}.get(kind_flag),
-                                 defacto_parent=h["name"], defacto_parent_zh=h["name_zh"],
-                                 hist_names=[h["name"], h.get("parent"), h.get("grandparent")])
-                        p = r["pt"] if gpart.contains(r["pt"]) else inter(r["geom"], gpart).representative_point()
-                        cache[key] = control_for(c, u, uen, uzh, status, sov_gw, sov_en, sov_zh, snap, p, whole, rules,
-                                                 ov_layers, state_name)
-                    return cache[key]
-                refs_here = [refs[k] for k in rtree.query(gpart, predicate="intersects")]
-                if not refs_here:
-                    refs_here = [refs[rtree.nearest(gpart.representative_point())]]
-                cps = control_pieces(gpart, refs_here, ctrl_of)
-                if len(cps) == 1 and cps[0][0] is not None and cps[0][1] is None:
-                    ctrl = dict(zip(CTRL_KEYS, cps[0][0]))
-                    cps = [(ctrl, None)]
-                else:
-                    cps = [(dict(zip(CTRL_KEYS, key)) if key else ctrl_of(refs_here[0]), pg) for key, pg in cps]
-                    n_split += len(cps) > 1
-                for k, (ctrl, pg) in enumerate(cps):
-                    pid = hid + (f"@{u['fid']}" if gp is not None else "") + (f"~{k}" if len(cps) > 1 else "")
-                    geom = pg if pg is not None else gpart
-                    if pid != hid:
-                        piece_geom[pid] = geom
-                    rows.append(dict(
-                        snapshot=snap, piece_id=pid, admin_id=hid, unit_id=u["fid"], unit_gwcode=u["gwcode"],
-                        unit_name_en=uen, unit_name_zh=uzh, unit_status=status, sovereign_gwcode=sov_gw,
-                        sovereign_name_en=sov_en, sovereign_name_zh=sov_zh, controller_gwcode=ctrl["gw"],
-                        controller_name_en=ctrl["en"], controller_name_zh=ctrl["zh"], controller_detail_en=ctrl["detail"],
-                        controller_detail_zh=ctrl["detail_zh"], control_type=ctrl["type"],
-                        control_source=ctrl["source"], control_confidence=ctrl["conf"],
-                        bloc=bloc(ctrl["gw"], snap, ctrl["detail"]), control_split=int(len(cps) > 1),
-                        partial_control_events=";".join(partial.get((u["country_name"], u["gwcode"]), [])),
-                        area_km2=round(eq_area_km2(geom), 2), _geom=geom, _parent=h.get("parent")))
-        cur = [r for r in rows if r["snapshot"] == snap]
-        print(snap, "admin units:", len(hs), "pieces:", len(cur), "split by control:", n_split, flush=True)
-
-        # ---- population estimate
-        base = ghs_zonal([(r["piece_id"], r["_geom"]) for r in cur])
-        upop = uy[uy.year == year].set_index("unit_id").population.to_dict()
-        ugw = uy[uy.year == year].groupby("gwcode").population.sum().to_dict()
-        if SET == "postwar":
-            # the yearly table describes 1 July: a unit created later in the year (India and Pakistan on 15 August
-            # 1947, the states that left the Soviet Union in 1991) takes its population of the next year
-            nxt = uy[uy.year == year + 1].set_index("unit_id").population.to_dict()
-            upop = {**{u: v for u, v in nxt.items() if u not in upop}, **upop}
-        world_ratio = years.loc[year, "world_population"] / 4.069e9
-        by_unit = defaultdict(float)
-        for r in cur:
-            r["pop_base_1975"] = base.get(r["piece_id"], 0.0)
-            by_unit[r["unit_id"]] += r["pop_base_1975"]
-        st = targets[targets.year == year].set_index("iso_3166_2").population.to_dict()
-        state_code = {n: k for k, n in zip(*_us_states())}
-        us_state_base = defaultdict(float)
-        for r in cur:
-            if r["admin_id"].startswith("AHCB-") and r["_parent"] in state_code:
-                us_state_base[r["_parent"]] += r["pop_base_1975"]
-        island_pop = {v[0]: v[5] for v in ALL_ISLANDS.values()}
-        for r in cur:
-            stc = state_code.get(r["_parent"]) if r["admin_id"].startswith("AHCB-") else None
-            if stc in st and us_state_base[r["_parent"]] > 0:
-                f = st[stc] / us_state_base[r["_parent"]]
-                r["pop_method"] = "GHS-1975 pattern scaled to state census estimate"
-            elif r["unit_id"] in island_pop and by_unit[r["unit_id"]] > 0:
-                f = island_pop[r["unit_id"]] / by_unit[r["unit_id"]]
-                r["pop_method"] = "GHS-1975 pattern scaled to an approximate territory population " + \
-                    ("on the date" if SET == "postwar" else "c. 1940")
-            elif by_unit[r["unit_id"]] > 0 and (r["unit_id"] in upop):
-                f = upop[r["unit_id"]] / by_unit[r["unit_id"]]
-                r["pop_method"] = "GHS-1975 pattern scaled to unit population"
-            elif by_unit[r["unit_id"]] > 0 and r["unit_gwcode"] in ugw:
-                f = ugw[r["unit_gwcode"]] / by_unit[r["unit_id"]]
-                r["pop_method"] = "GHS-1975 pattern scaled to unit population (matched by GW code)"
+                parts = [(("cs", i), polys(inter(g, ug[i]))) for i, _ in shares]
+                parts = [(k, p) for k, p in parts if p is not None]
+        kind_flag = "manchukuo" if h["kind"] == "省 (Manchukuo)" else "kwantung" if hid.startswith("KW") else \
+            "manchu_roc" if hid.startswith("ROC-") and h["name"] in MANCHU_ROC else ""
+        for (ptype, ref_u), gp in parts:
+            gpart = gp if gp is not None else g
+            if ptype == "island":
+                iu = ref_u
+                u = {"fid": iu[0], "gwcode": None, "country_name": iu[1], "status": iu[3]}
+                status, uen, uzh, sov_gw = iu[3], iu[1], iu[2], iu[4]
+                if sov_gw is None:  # an island state that became independent: its own sovereign
+                    sov_gw = iu[0]
             else:
-                f = world_ratio
-                r["pop_method"] = "GHS-1975 pattern scaled by world growth"
-            r["population_est"] = round(r["pop_base_1975"] * f)
-        print(snap, "population", f"{sum(r['population_est'] for r in cur) / 1e9:.3f} bn", flush=True)
+                u = act[ref_u]
+                status = u["status"]
+                uen, uzh = namer(u["country_name"], status, year)
+                sov_gw = u["gwcode"] if status == "independent" else int(u["owner"])
+                fix = UNIT_FIX.get((snap, u["country_name"]))
+                if fix:
+                    status, sov_gw, uen, uzh = fix
+            sov_en, sov_zh = names_on(snap).get(sov_gw) or state_name.get(str(sov_gw)) or \
+                ((uen, uzh) if ptype == "island" and sov_gw == ref_u[0] else (None, None))
 
+            def ctrl_of(r, u=u, uen=uen, uzh=uzh, status=status, sov_gw=sov_gw, sov_en=sov_en, sov_zh=sov_zh,
+                        gpart=gpart):
+                key = (r["ref_id"], u["fid"], hid if SET != "ww2" else (kind_flag and hid))
+                if key not in cache:
+                    c = dict(r, defacto_parent_kind={"manchukuo": "省 (Manchukuo)", "kwantung": "leased territory",
+                                                     "manchu_roc": "ROC Manchuria"}.get(kind_flag),
+                             defacto_parent=h["name"], defacto_parent_zh=h["name_zh"],
+                             hist_names=[h["name"], h.get("parent"), h.get("grandparent")])
+                    p = r["pt"] if gpart.contains(r["pt"]) else inter(r["geom"], gpart).representative_point()
+                    cache[key] = control_for(c, u, uen, uzh, status, sov_gw, sov_en, sov_zh, snap, p, whole, rules,
+                                             ov_layers, state_name)
+                return cache[key]
+            refs_here = [refs[k] for k in rtree.query(gpart, predicate="intersects")]
+            if not refs_here:
+                refs_here = [refs[rtree.nearest(gpart.representative_point())]]
+            cps = control_pieces(gpart, refs_here, ctrl_of)
+            if len(cps) == 1 and cps[0][0] is not None and cps[0][1] is None:
+                ctrl = dict(zip(CTRL_KEYS, cps[0][0]))
+                cps = [(ctrl, None)]
+            else:
+                cps = [(dict(zip(CTRL_KEYS, key)) if key else ctrl_of(refs_here[0]), pg) for key, pg in cps]
+                n_split += len(cps) > 1
+            for k, (ctrl, pg) in enumerate(cps):
+                pid = hid + (f"@{u['fid']}" if gp is not None else "") + (f"~{k}" if len(cps) > 1 else "")
+                geom = pg if pg is not None else gpart
+                if pid != hid:
+                    piece_geom[pid] = geom
+                rows.append(dict(
+                    snapshot=snap, piece_id=pid, admin_id=hid, unit_id=u["fid"], unit_gwcode=u["gwcode"],
+                    unit_name_en=uen, unit_name_zh=uzh, unit_status=status, sovereign_gwcode=sov_gw,
+                    sovereign_name_en=sov_en, sovereign_name_zh=sov_zh, controller_gwcode=ctrl["gw"],
+                    controller_name_en=ctrl["en"], controller_name_zh=ctrl["zh"], controller_detail_en=ctrl["detail"],
+                    controller_detail_zh=ctrl["detail_zh"], control_type=ctrl["type"],
+                    control_source=ctrl["source"], control_confidence=ctrl["conf"],
+                    bloc=bloc(ctrl["gw"], snap, ctrl["detail"]), control_split=int(len(cps) > 1),
+                    partial_control_events=";".join(partial.get((u["country_name"], u["gwcode"]), [])),
+                    area_km2=round(eq_area_km2(geom), 2), _geom=geom, _parent=h.get("parent")))
+    print(snap, "admin units:", len(hs), "pieces:", len(rows), "split by control:", n_split, flush=True)
+    return rows, piece_geom
+
+
+def estimate_population(cur, snap, inp):
+    """population_est and pop_method of the pieces of one date: the GHS-1975 pattern scaled to the state census
+    estimates (US), the territory populations, the political units' populations, or world growth."""
+    uy, targets, years = inp.uy, inp.targets, inp.years
+    year = int(snap[:4])
+    base = ghs_zonal([(r["piece_id"], r["_geom"]) for r in cur])
+    upop = uy[uy.year == year].set_index("unit_id").population.to_dict()
+    ugw = uy[uy.year == year].groupby("gwcode").population.sum().to_dict()
+    if SET == "postwar":
+        # the yearly table describes 1 July: a unit created later in the year (India and Pakistan on 15 August
+        # 1947, the states that left the Soviet Union in 1991) takes its population of the next year
+        nxt = uy[uy.year == year + 1].set_index("unit_id").population.to_dict()
+        upop = {**{u: v for u, v in nxt.items() if u not in upop}, **upop}
+    world_ratio = years.loc[year, "world_population"] / 4.069e9
+    by_unit = defaultdict(float)
+    for r in cur:
+        r["pop_base_1975"] = base.get(r["piece_id"], 0.0)
+        by_unit[r["unit_id"]] += r["pop_base_1975"]
+    st = targets[targets.year == year].set_index("iso_3166_2").population.to_dict()
+    state_code = {n: k for k, n in zip(*_us_states())}
+    us_state_base = defaultdict(float)
+    for r in cur:
+        if r["admin_id"].startswith("AHCB-") and r["_parent"] in state_code:
+            us_state_base[r["_parent"]] += r["pop_base_1975"]
+    island_pop = {v[0]: v[5] for v in ALL_ISLANDS.values()}
+    for r in cur:
+        stc = state_code.get(r["_parent"]) if r["admin_id"].startswith("AHCB-") else None
+        if stc in st and us_state_base[r["_parent"]] > 0:
+            f = st[stc] / us_state_base[r["_parent"]]
+            r["pop_method"] = "GHS-1975 pattern scaled to state census estimate"
+        elif r["unit_id"] in island_pop and by_unit[r["unit_id"]] > 0:
+            f = island_pop[r["unit_id"]] / by_unit[r["unit_id"]]
+            r["pop_method"] = "GHS-1975 pattern scaled to an approximate territory population " + \
+                ("on the date" if SET == "postwar" else "c. 1940")
+        elif by_unit[r["unit_id"]] > 0 and (r["unit_id"] in upop):
+            f = upop[r["unit_id"]] / by_unit[r["unit_id"]]
+            r["pop_method"] = "GHS-1975 pattern scaled to unit population"
+        elif by_unit[r["unit_id"]] > 0 and r["unit_gwcode"] in ugw:
+            f = ugw[r["unit_gwcode"]] / by_unit[r["unit_id"]]
+            r["pop_method"] = "GHS-1975 pattern scaled to unit population (matched by GW code)"
+        else:
+            f = world_ratio
+            r["pop_method"] = "GHS-1975 pattern scaled by world growth"
+        r["population_est"] = round(r["pop_base_1975"] * f)
+    print(snap, "population", f"{sum(r['population_est'] for r in cur) / 1e9:.3f} bn", flush=True)
+
+
+def write_outputs(rows, piece_geom):
     out = pd.DataFrame([{k: v for k, v in r.items() if not k.startswith("_")} for r in rows])
     for snap, d in out.groupby("snapshot"):
         d.to_csv(WW2_WORK / f"snapshot_{snap}.csv", index=False)
@@ -430,6 +444,18 @@ def main(only=None):
         write_outlines(WW2_WORK / f"split_{snap}.geojson", ((k, g) for k, g in piece_geom.items() if k in keep))
     print(out.groupby("snapshot").agg(pieces=("piece_id", "count"), pop=("population_est", "sum")))
     print(out.groupby(["snapshot", "bloc"]).population_est.sum().unstack())
+
+
+def main(only=None):
+    dates = [s[0] for s in SNAPSHOTS if not only or s[0] in only]
+    inp = read_inputs(dates)
+    rows, piece_geom = [], {}
+    for snap in dates:
+        cur, geoms = pieces_on(snap, inp)
+        estimate_population(cur, snap, inp)
+        rows += cur
+        piece_geom.update(geoms)
+    write_outputs(rows, piece_geom)
 
 
 def _us_states():

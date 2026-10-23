@@ -21,6 +21,8 @@ import multiprocessing
 import unicodedata
 from collections import Counter, defaultdict
 from concurrent.futures import ProcessPoolExecutor
+from functools import partial
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -401,15 +403,10 @@ def hydro():
 
 # ---------------------------------------------------------------- main
 
-G = {}  # set in main() before the worker processes fork
-
-
-def _one_snapshot(k):
-    return G["one"](k)
-
-
-def main():
-    OUT.mkdir(parents=True, exist_ok=True)
+def read_snapshots():
+    """The province pieces of every date of the three sets and of 2026 (ids of 1900-34 prefixed E:, of 1946-91 P:):
+    divisions, pieces per date, their outlines, the list of dates, and the present-day units and names."""
+    modern_zh = {}
     hist = pd.read_csv(WW2_WORK / "prov_units.csv", low_memory=False)
     snaps = {s[0]: pd.read_csv(WW2_WORK / f"prov_snapshot_{s[0]}.csv", low_memory=False) for s in SNAPSHOTS}
     hgeom = read_outlines(WW2_WORK / "prov_units.geojson", "unit_id")
@@ -457,7 +454,11 @@ def main():
         modern_ug = {f["properties"]["unit_id"]: shape(f["geometry"]) for f in units26}
         modern_zh = {f["properties"]["a3"]: f["properties"]["name_zh"] for f in units26}
         modern_meta = json.load(open(MODERN / "meta_2026.json"))
+    return hist, snaps, hgeom, pgeom, snapshots, modern_ug, modern_zh, modern_meta
 
+
+def admin_index(hist, snaps, hgeom, pgeom):
+    """admin.bin (the divisions and their attributes, the feature list) and each outline encoded once."""
     used = sorted(set().union(*[set(d.piece_id) for d in snaps.values()]))
     fidx = {p: i for i, p in enumerate(used)}
     padmin = {}
@@ -484,8 +485,11 @@ def main():
         "label": [[round(float(x), 3), round(float(y), 3)] for x, y in zip(arow.label_lon, arow.label_lat)],
         "feature_admin": [aidx[padmin[p]] for p in used],
     }
-    packed(OUT / "admin.bin", json.dumps(static, ensure_ascii=False, separators=(",", ":")).encode())
+    return used, fidx, padmin, aids, aidx, geom_of, admin_rec, feat_rec, static
 
+
+def unit_outlines(snaps, modern_ug):
+    """The political units (CShapes, and the present-day units) of all dates, encoded."""
     # political units (CShapes) for borders and labels
     arcs, gs = topo.load(RAW / "cshapes_2_gw.topojson")
     unit_ids = sorted(set().union(*[set(d.unit_id) for d in snaps.values()]))
@@ -494,114 +498,136 @@ def main():
     unit_ids = [u for u in unit_ids if u in ug]  # territories CShapes does not draw have no outline
     unit_rec = [encode([ug[u]], TOL_UNIT) for u in unit_ids]
     uidx = {u: i for i, u in enumerate(unit_ids)}
+    return ug, unit_ids, unit_rec, uidx
 
-    def one_snapshot(k):
-        """The data file of one snapshot, its summary and the control-view outlines it adds (numbered from 0
-        here; shifted when the snapshots are put together)."""
-        snap, tzh, ten = snapshots[k]
-        ctrl_geoms = []
-        d = snaps[snap].drop_duplicates("piece_id").reset_index(drop=True)
-        modern = "country_key" in d.columns
-        d["country"] = d.country_key if modern else [country_key(r) for r in d.to_dict("records")]
-        luts = {}
-        rows = {}
-        for col in ("unit_name_zh", "unit_name_en", "unit_status", "sovereign_name_zh", "controller_name_zh",
-                    "controller_name_en", "controller_detail_zh", "controller_detail_en", "control_type", "control_source",
-                    "partial_control_events"):
-            luts[col], rows[col] = table(d[col].tolist())
-        units = d.groupby("unit_id").agg(name_zh=("unit_name_zh", "first"), name_en=("unit_name_en", "first"),
-                                         pop=("population_est", "sum")).reset_index()
-        lab = []
-        for u in units.itertuples():
-            if u.unit_id not in ug:
+
+def one_snapshot(ctx, k):
+    """The data file of one snapshot, its summary and the control-view outlines it adds (numbered from 0
+    here; shifted when the snapshots are put together)."""
+    snapshots, snaps, hist, ug, uidx, fidx, aidx, admin_rec, feat_rec, unit_rec, geom_of, modern_zh, modern_meta = (
+        ctx.snapshots, ctx.snaps, ctx.hist, ctx.ug, ctx.uidx, ctx.fidx, ctx.aidx, ctx.admin_rec, ctx.feat_rec, ctx.unit_rec, ctx.geom_of, ctx.modern_zh, ctx.modern_meta)
+    snap, tzh, ten = snapshots[k]
+    ctrl_geoms = []
+    d = snaps[snap].drop_duplicates("piece_id").reset_index(drop=True)
+    modern = "country_key" in d.columns
+    d["country"] = d.country_key if modern else [country_key(r) for r in d.to_dict("records")]
+    luts = {}
+    rows = {}
+    for col in ("unit_name_zh", "unit_name_en", "unit_status", "sovereign_name_zh", "controller_name_zh",
+                "controller_name_en", "controller_detail_zh", "controller_detail_en", "control_type", "control_source",
+                "partial_control_events"):
+        luts[col], rows[col] = table(d[col].tolist())
+    units = d.groupby("unit_id").agg(name_zh=("unit_name_zh", "first"), name_en=("unit_name_en", "first"),
+                                     pop=("population_est", "sum")).reset_index()
+    lab = []
+    for u in units.itertuples():
+        if u.unit_id not in ug:
+            continue
+        g = ug[u.unit_id]
+        big = max(getattr(g, "geoms", [g]), key=lambda q: q.area)
+        anchor = label_anchor(big)
+        if anchor:
+            km2 = big.area * (111.32 ** 2) * math.cos(math.radians(big.centroid.y))
+            lab.append([uidx[u.unit_id], u.name_zh or u.name_en] + anchor + [round(km2)])
+    # nations: the de jure political units, coloured by state
+    nat = d.groupby("unit_id", sort=False).agg(zh=("unit_name_zh", "first"), en=("unit_name_en", "first"),
+                                               status=("unit_status", "first"), sov=("sovereign_name_zh", "first"),
+                                               pop=("population_est", "sum"), km2=("area_km2", "sum"))
+    nat_color = {u: (r["nation_color"] if modern else nation_of(r))
+                 for u, r in d.drop_duplicates("unit_id").set_index("unit_id", drop=False).iterrows()}
+    nat = nat.sort_values("pop", ascending=False)
+    nidx = {u: i for i, u in enumerate(nat.index)}
+    nations = [[int(u), r.zh or r.en, r.en, nat_color[u], r.status, r.sov if isinstance(r.sov, str) else None,
+                int(r["pop"]), round(float(r.km2))]
+               for u, r in nat.iterrows()]
+
+    # countries of the control view: dissolved territory, colour, curved name lines
+    countries, clabels = [], []
+    cindex = {}
+    for key, g in sorted(d.groupby("country"), key=lambda kv: -kv[1].population_est.sum()):
+        first = g.sort_values("area_km2").iloc[-1]
+        if modern:
+            zh, en = first.country_zh, first.country_en
+        elif (snap in EARLY_DATES or snap in POSTWAR_DATES) and key != "MAN":  # WWII names such as "-1" Allied
+            # forces mean other things here
+            home = g[g.unit_gwcode == g.controller_gwcode]  # a state is named after its own territory
+            nm = home.sort_values("area_km2").iloc[-1] if len(home) else first
+            zh, en = nm.controller_name_zh or nm.controller_name_en, nm.controller_name_en
+        else:
+            zh, en = SPECIAL.get(key, (first.controller_name_zh or first.controller_name_en, first.controller_name_en))
+        geom = dissolve([geom_of(p) for p in g.piece_id]) or polys(union([geom_of(p) for p in g.piece_id]))
+        ci = len(countries)
+        cindex[key] = ci
+        comp = g.groupby("unit_name_zh", dropna=False).agg(pop=("population_est", "sum"),
+                                                           km2=("area_km2", "sum")).sort_values("km2", ascending=False)
+        countries.append([key, zh, en, first.country_color if modern else color_of(key), BLOCS.index(Counter(g.bloc).most_common(1)[0][0]),
+                          int(g.population_est.sum()), round(float(g.area_km2.sum())), int(g.admin_id.nunique()),
+                          len(ctrl_geoms), [[n if isinstance(n, str) else "—", int(r["pop"]), round(float(r["km2"]))]
+                                            for n, r in comp.head(12).iterrows()]])
+        ctrl_geoms.append(geom)
+        if key in ("-20", "M:FRONT") or geom is None:
+            continue
+        for part in getattr(geom, "geoms", [geom]):
+            km2 = part.area * (111.32 ** 2) * math.cos(math.radians(part.centroid.y))
+            if km2 < LABEL_MIN_KM2:
                 continue
-            g = ug[u.unit_id]
-            big = max(getattr(g, "geoms", [g]), key=lambda q: q.area)
-            anchor = label_anchor(big)
+            anchor = label_anchor(part)
             if anchor:
-                km2 = big.area * (111.32 ** 2) * math.cos(math.radians(big.centroid.y))
-                lab.append([uidx[u.unit_id], u.name_zh or u.name_en] + anchor + [round(km2)])
-        # nations: the de jure political units, coloured by state
-        nat = d.groupby("unit_id", sort=False).agg(zh=("unit_name_zh", "first"), en=("unit_name_en", "first"),
-                                                   status=("unit_status", "first"), sov=("sovereign_name_zh", "first"),
-                                                   pop=("population_est", "sum"), km2=("area_km2", "sum"))
-        nat_color = {u: (r["nation_color"] if modern else nation_of(r))
-                     for u, r in d.drop_duplicates("unit_id").set_index("unit_id", drop=False).iterrows()}
-        nat = nat.sort_values("pop", ascending=False)
-        nidx = {u: i for i, u in enumerate(nat.index)}
-        nations = [[int(u), r.zh or r.en, r.en, nat_color[u], r.status, r.sov if isinstance(r.sov, str) else None,
-                    int(r["pop"]), round(float(r.km2))]
-                   for u, r in nat.iterrows()]
+                clabels.append([ci] + anchor + [round(km2)])
+    doc = {
+        "snapshot": snap, "title_zh": tzh, "title_en": ten,
+        "feature": [fidx[p] for p in d.piece_id], "unit": [uidx.get(u, -1) for u in d.unit_id],
+        "country": [cindex[k] for k in d.country], "nation": [nidx[u] for u in d.unit_id], "nations": nations,
+        "bloc": [BLOCS.index(b) for b in d.bloc], "conf": [CONF.index(c) if c in CONF else 0 for c in d.control_confidence],
+        "ctrl_gw": [int(x) for x in d.controller_gwcode], "split": [int(x) for x in d.control_split],
+        "area": [round(float(a), 1) for a in d.area_km2],
+        "pop": [int(x) for x in d.population_est], "luts": luts, "rows": rows,
+        "units_active": sorted(set(uidx[u] for u in d.unit_id if u in uidx)),
+        "admin_active": sorted(set(aidx[a] for a in d.admin_id)), "unit_labels": lab,
+        "geo_feature": sorted(set(fidx[p] for p in d.piece_id) & feat_rec.keys()),
+        "countries": countries, "country_labels": clabels,
+        "cities": cities.y2026(modern_zh) if modern else cities.ww2(snap),
+        "bloc_names": modern_meta.get("bloc_names") if modern else META.get(snap, {}).get("bloc_names"),
+        "notes": META.get(snap, {}).get("notes"),
+        "bloc_pop": {b: int(d[d.bloc == b].population_est.sum()) for b in BLOCS},
+        "tier_count": {str(t): int(n) for t, n in hist.set_index("unit_id").loc[sorted(set(d.admin_id))]
+                       .tier.value_counts().sort_index().items()},
+    }
+    summary = {"snapshot": snap, "title_zh": tzh, "title_en": ten, "pieces": len(d),
+               "admin_units": int(d.admin_id.nunique()), "countries": len(countries),
+               "population": int(d.population_est.sum()), "bloc_pop": doc["bloc_pop"],
+               "tier_count": doc["tier_count"]}
+    print(snap, "pieces", len(d), "provinces", d.admin_id.nunique(), "countries", len(countries),
+          "labels", len(clabels), flush=True)
+    # the snapshot's outlines, in the order the page reads them: provinces (admin_active), cut pieces
+    # (geo_feature), units (units_active), then the control areas (countries[i][8] counts from 0)
+    packed(OUT / f"geo-{snap}.bin", b"".join([admin_rec[a] for a in doc["admin_active"]]
+                                             + [feat_rec[f] for f in doc["geo_feature"]]
+                                             + [unit_rec[u] for u in doc["units_active"]])
+           + encode(ctrl_geoms, TOL_CTRL))
+    return doc, summary
 
-        # countries of the control view: dissolved territory, colour, curved name lines
-        countries, clabels = [], []
-        cindex = {}
-        for key, g in sorted(d.groupby("country"), key=lambda kv: -kv[1].population_est.sum()):
-            first = g.sort_values("area_km2").iloc[-1]
-            if modern:
-                zh, en = first.country_zh, first.country_en
-            elif (snap in EARLY_DATES or snap in POSTWAR_DATES) and key != "MAN":  # WWII names such as "-1" Allied
-                # forces mean other things here
-                home = g[g.unit_gwcode == g.controller_gwcode]  # a state is named after its own territory
-                nm = home.sort_values("area_km2").iloc[-1] if len(home) else first
-                zh, en = nm.controller_name_zh or nm.controller_name_en, nm.controller_name_en
-            else:
-                zh, en = SPECIAL.get(key, (first.controller_name_zh or first.controller_name_en, first.controller_name_en))
-            geom = dissolve([geom_of(p) for p in g.piece_id]) or polys(union([geom_of(p) for p in g.piece_id]))
-            ci = len(countries)
-            cindex[key] = ci
-            comp = g.groupby("unit_name_zh", dropna=False).agg(pop=("population_est", "sum"),
-                                                               km2=("area_km2", "sum")).sort_values("km2", ascending=False)
-            countries.append([key, zh, en, first.country_color if modern else color_of(key), BLOCS.index(Counter(g.bloc).most_common(1)[0][0]),
-                              int(g.population_est.sum()), round(float(g.area_km2.sum())), int(g.admin_id.nunique()),
-                              len(ctrl_geoms), [[n if isinstance(n, str) else "—", int(r["pop"]), round(float(r["km2"]))]
-                                                for n, r in comp.head(12).iterrows()]])
-            ctrl_geoms.append(geom)
-            if key in ("-20", "M:FRONT") or geom is None:
-                continue
-            for part in getattr(geom, "geoms", [geom]):
-                km2 = part.area * (111.32 ** 2) * math.cos(math.radians(part.centroid.y))
-                if km2 < LABEL_MIN_KM2:
-                    continue
-                anchor = label_anchor(part)
-                if anchor:
-                    clabels.append([ci] + anchor + [round(km2)])
-        doc = {
-            "snapshot": snap, "title_zh": tzh, "title_en": ten,
-            "feature": [fidx[p] for p in d.piece_id], "unit": [uidx.get(u, -1) for u in d.unit_id],
-            "country": [cindex[k] for k in d.country], "nation": [nidx[u] for u in d.unit_id], "nations": nations,
-            "bloc": [BLOCS.index(b) for b in d.bloc], "conf": [CONF.index(c) if c in CONF else 0 for c in d.control_confidence],
-            "ctrl_gw": [int(x) for x in d.controller_gwcode], "split": [int(x) for x in d.control_split],
-            "area": [round(float(a), 1) for a in d.area_km2],
-            "pop": [int(x) for x in d.population_est], "luts": luts, "rows": rows,
-            "units_active": sorted(set(uidx[u] for u in d.unit_id if u in uidx)),
-            "admin_active": sorted(set(aidx[a] for a in d.admin_id)), "unit_labels": lab,
-            "geo_feature": sorted(set(fidx[p] for p in d.piece_id) & feat_rec.keys()),
-            "countries": countries, "country_labels": clabels,
-            "cities": cities.y2026(modern_zh) if modern else cities.ww2(snap),
-            "bloc_names": modern_meta.get("bloc_names") if modern else META.get(snap, {}).get("bloc_names"),
-            "notes": META.get(snap, {}).get("notes"),
-            "bloc_pop": {b: int(d[d.bloc == b].population_est.sum()) for b in BLOCS},
-            "tier_count": {str(t): int(n) for t, n in hist.set_index("unit_id").loc[sorted(set(d.admin_id))]
-                           .tier.value_counts().sort_index().items()},
-        }
-        summary = {"snapshot": snap, "title_zh": tzh, "title_en": ten, "pieces": len(d),
-                   "admin_units": int(d.admin_id.nunique()), "countries": len(countries),
-                   "population": int(d.population_est.sum()), "bloc_pop": doc["bloc_pop"],
-                   "tier_count": doc["tier_count"]}
-        print(snap, "pieces", len(d), "provinces", d.admin_id.nunique(), "countries", len(countries),
-              "labels", len(clabels), flush=True)
-        # the snapshot's outlines, in the order the page reads them: provinces (admin_active), cut pieces
-        # (geo_feature), units (units_active), then the control areas (countries[i][8] counts from 0)
-        packed(OUT / f"geo-{snap}.bin", b"".join([admin_rec[a] for a in doc["admin_active"]]
-                                                 + [feat_rec[f] for f in doc["geo_feature"]]
-                                                 + [unit_rec[u] for u in doc["units_active"]])
-               + encode(ctrl_geoms, TOL_CTRL))
-        return doc, summary
+
+G = {}  # set in main() before the worker processes fork
+
+
+def _one_snapshot(k):
+    return G["one"](k)
+
+
+def main():
+    OUT.mkdir(parents=True, exist_ok=True)
+    hist, snaps, hgeom, pgeom, snapshots, modern_ug, modern_zh, modern_meta = read_snapshots()
+    used, fidx, padmin, aids, aidx, geom_of, admin_rec, feat_rec, static = admin_index(hist, snaps, hgeom, pgeom)
+    packed(OUT / "admin.bin", json.dumps(static, ensure_ascii=False, separators=(",", ":")).encode())
+    ug, unit_ids, unit_rec, uidx = unit_outlines(snaps, modern_ug)
+    ctx = SimpleNamespace(snapshots=snapshots, snaps=snaps, hist=hist, ug=ug, uidx=uidx, fidx=fidx, aidx=aidx,
+                          admin_rec=admin_rec, feat_rec=feat_rec, unit_rec=unit_rec, geom_of=geom_of,
+                          modern_zh=modern_zh, modern_meta=modern_meta)
 
     # the snapshots are independent: one worker process each, as many as fit in memory (forked, so they
     # share everything loaded above)
-    G["one"] = one_snapshot
+    G["one"] = partial(one_snapshot, ctx)
     # a worker killed for memory stops the run (BrokenProcessPool) instead of leaving it waiting
     with ProcessPoolExecutor(workers(len(snapshots), 2.5), mp_context=multiprocessing.get_context("fork")) as pool:
         results = list(pool.map(_one_snapshot, range(len(snapshots))))
