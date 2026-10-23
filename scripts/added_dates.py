@@ -12,6 +12,8 @@ add_snapshots.py and ww2_html.py, not the build of the sets.
 """
 from dataclasses import dataclass, field
 
+from controllers import STATE
+
 
 @dataclass
 class Snapshot:
@@ -130,7 +132,7 @@ WW1 = Group(
 # 1942 month by month, from the divisions and control of 1942-11-01 (the greatest Axis extent). Every control of
 # that date that does not come from CShapes or a whole-unit event (the curated rules and the East Asia layers) is
 # carried over piece by piece; curated/ww2_1942_region_control.csv then says what was different on each date.
-# Blocs as on the 1939-45 dates (ww2_snapshots.WW2_BLOCS): Ethiopia and Iraq with the Allies, as on 1942-11-01.
+# Blocs as on the 1939-45 dates (controllers.WW2_BLOCS): Ethiopia and Iraq with the Allies, as on 1942-11-01.
 _ALLIED42 = {200, 20, 900, 920, 560, 750, 290, 210, 211, 212, 385, 710, -1, -2, -4, 2, 365, 345, 350,
              40, 41, 42, 90, 91, 92, 93, 94, 95, 530, 645}   # Cuba to Panama declared war in December 1941
 _AXIS42 = {255, 325, 740, 317, -10, -12, 310, 360, 355, 375}
@@ -154,19 +156,9 @@ WW2_1942 = Group(
     control_note="控制沿用 1942-11-01 的分区规则与东亚图层，再按各月的战局改写。" + _NOTE42,
     bloc_names={"allied": "同盟国一方", "axis": "轴心国一方", "neutral": "中立 / 维希", "contested": "前线争夺"},
     bloc_title="实际控制阵营 · 人口",
-    # the short names of the 1939-45 dates (ww2_snapshots.STATE)
-    names={255: ("Germany", "德国"), 325: ("Italy", "意大利"), 740: ("Japan", "日本"), 365: ("Soviet Union", "苏联"),
-           200: ("United Kingdom", "英国"), 2: ("United States", "美国"), 220: ("France", "法国"),
-           710: ("Republic of China", "中华民国"), 310: ("Hungary", "匈牙利"), 360: ("Romania", "罗马尼亚"),
-           355: ("Bulgaria", "保加利亚"), 375: ("Finland", "芬兰"), 800: ("Thailand", "泰国"),
-           317: ("Slovakia", "斯洛伐克"), 210: ("Netherlands", "荷兰"), 211: ("Belgium", "比利时"),
-           235: ("Portugal", "葡萄牙"), 230: ("Spain", "西班牙"), 900: ("Australia", "澳大利亚"),
-           339: ("Albania", "阿尔巴尼亚"), 290: ("Poland", "波兰"), 345: ("Yugoslavia", "南斯拉夫"),
-           350: ("Greece", "希腊"), 560: ("South Africa", "南非"), 20: ("Canada", "加拿大"), 920: ("New Zealand", "新西兰"),
-           -1: ("Allied powers", "同盟国"), -10: ("Axis powers", "轴心国"),
-           -12: ("Independent State of Croatia", "克罗地亚独立国"), -20: ("Front line (contested)", "前线（双方争夺）"),
-           -2: ("Chinese Communist Party", "中国共产党"), -30: ("Tuvan People's Republic", "图瓦人民共和国"),
-           -4: ("Free France", "自由法国"),
+    # the short names of the 1939-45 dates (controllers.STATE; the United Nations do not appear), and Darlan's
+    # French North and West Africa
+    names={**{k: v for k, v in STATE.items() if k != -3},
            -5: ("French North and West Africa (Darlan)", "法属北非与西非（达尔朗）")},
     snapshots=[
         Snapshot(

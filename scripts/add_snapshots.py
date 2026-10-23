@@ -50,6 +50,7 @@ from shapely.errors import GEOSException
 from shapely.geometry import MultiPolygon, Polygon, box, shape
 
 import cities
+import controllers
 from added_dates import GROUPS
 from build_database import Namer
 from common import DB_DIR, ROOT, WORK
@@ -101,9 +102,7 @@ def matches(pattern, value):
 
 
 def bloc(gw, s):
-    if gw == -20:
-        return "contested"
-    return "allied" if gw in s.allied else "axis" if gw in s.axis else "neutral"
+    return controllers.bloc(gw, s.allied, s.axis)
 
 
 def names(units, group, s):
