@@ -3,6 +3,7 @@
 #   pip install -r requirements.txt
 #   ./build_all.sh            (add "hyde" to also download HYDE 3.5 where reachable)
 set -e
+# (to use the released data instead of building it: python3 scripts/data_release.py fetch)
 cd "$(dirname "$0")/scripts"
 python3 fetch_sources.py ghs ne terrain git "$@"
 python3 build_country_series.py

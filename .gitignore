@@ -4,3 +4,10 @@ work/
 __pycache__/
 *.pyc
 *.sqlite-journal
+# Built data: attachments of the GitHub release named in data_release.json (scripts/data_release.py fetch)
+db/*.sqlite
+ww2/maps/data/
+exports/
+maps/*.png
+!maps/1942.png
+dist/

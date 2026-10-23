@@ -21,6 +21,12 @@ git clone https://github.com/dns0129/World_Map_History.git
 cd World_Map_History
 ```
 
+数据库、地图数据、逐年导出和逐年地图（约 810 MB）不在 git 中，而是作为 [GitHub Release](https://github.com/dns0129/World_Map_History/releases) 的附件发布，版本和每个文件的 sha256 记在 `data_release.json`。克隆后先下载：
+
+```sh
+python3 scripts/data_release.py fetch     # 全部（约 460 MB 压缩包）；只要地图：fetch ww2-maps-data.tar.gz
+```
+
 ### 1. 交互地图（1900–1991 十九个断面与 2026 年）
 
 地图页面需要从本地网页服务器打开。直接双击 HTML 文件时，浏览器会拦截数据文件的读取。任选一条命令启动服务器：
@@ -136,7 +142,7 @@ exports/geometry/units.topojson 全部历史政治单元边界
 
 ### 4. 在线访问（可选）
 
-- **GitHub Pages：** 在仓库的 Settings → Pages 中，把 Source 设为 “Deploy from a branch”，分支选 `main`、目录 `/ (root)`，保存。几分钟后地图可在 `https://dns0129.github.io/World_Map_History/ww2/maps/` 打开。
+- **GitHub Pages：** 在仓库的 Settings → Pages 中，把 Source 设为 “GitHub Actions”。之后每次推送到 `main`，`.github/workflows/pages.yml` 会下载 `data_release.json` 所指的地图数据并部署，地图在 `https://dns0129.github.io/World_Map_History/ww2/maps/` 打开。
 - **Claude Artifact：** 本仓库构建时另发布了一份私有链接（https://claude.ai/artifact/3s4bb36QVmiUUhQAaxUnXf）。只有所有者和被分享的人能打开。更新时用 `scripts/publish_artifact.py` 只上传变了的文件（见 [SOP](docs/snapshot-sop.md#发布到-claude-artifact)）。
 
 ## 目录

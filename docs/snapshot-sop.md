@@ -349,7 +349,7 @@ python3 scripts/pipeline.py --sets <集合>             # 生成；中断后重�
 11. **今日政区代码的坑**：`admin1_pieces` 中 `RU-MOS` 是莫斯科市、`RU-MOW` 是莫斯科州（与 ISO 相反）；克里米亚 `UA-43`、塞瓦斯托波尔 `UA-40` 的 `modern_country` 记为 Russia。写掩膜前先查一下代码对应的名称。
 12. **沿用的基准块不一定按今日政区划分**：例如 1942-11-01 的 `rule:35` 中斯塔夫罗波尔、卡拉恰伊-切尔克斯、卡巴尔达-巴尔卡尔是同一大块。用 `base:…@今日政区` 选块时，按块的代表点判断，选不到会报错。
 13. **掩膜不得在境内留下直边**：按战线切块的多边形，除战线本身外不能有任何边界穿过所切的国家（不要用固定经纬度封口，也不要只取线后若干度）；否则省份被直线切开，切出的块又带着 `approximate` 斜线，地图上会出现大块矩形。线的北端用 `north` 沿海面封口。
-14. **改了一组断面后，同时发布所有内容变了的数据文件**：`admin.bin` 中各断面的要素按组的顺序连续编号，新增一组会使其后各组的 `snap-<日期>.json` 编号整体后移；只发布新组的文件，旧组的断面就会指向错误的要素。发布前用 `git status ww2/maps/data` 列出所有变化的文件一并发布。
+14. **改了一组断面后，同时发布所有内容变了的数据文件**：`admin.bin` 中各断面的要素按组的顺序连续编号，新增一组会使其后各组的 `snap-<日期>.json` 编号整体后移；只发布新组的文件，旧组的断面就会指向错误的要素。`publish_artifact.py` 按 sha256 列出所有变化的文件一并发布，GitHub Release 也整体换新版本（`data_release.py manifest`）。
 15. **态势图的控制点**：沿用或转移来的控制点要在图上复核；一张图的多项式在控制点稀少的边缘外推，误差可达 100 像素以上（8 月南图的沃罗涅日）。
 16. **印版更换**：同一系列的态势图会换印版（1944 年 5 月起南图改为 1:100 万新版），SIFT 仍能匹配上大量特征但点位系统偏移。逐月转移控制点后一定要看检查图；换版时从新版中控制点读得好的一期反向转移。
 17. **按城市核对战线**：每描完一年，用一组关键城市（如霍尔姆、旧鲁萨、戈梅利、纳尔瓦、普斯科夫、里加、刻赤）逐月判断落在哪一侧，与史实对照；只看叠图容易漏掉“线恰好穿过城市”的情况。
@@ -393,6 +393,20 @@ python3 scripts/verify_database.py     # 1900–2000 逐年数据库
 4. **图框不留缝**：按图框描出的区域（`curated/atlas_1945.json`）与图框内缘之间没有细长窄条（第 22 条）。
 
 任何一项不通过，脚本以状态 1 退出并逐条列出。
+
+#### 发布数据（GitHub Release）
+
+数据库（`db/`）、地图数据（`ww2/maps/data/`）、`exports/`、`maps/*.png` 不提交到 git（`.gitignore`），只提交清单 `data_release.json`（发布标签和每个文件的 sha256、大小）。新克隆先 `python3 scripts/data_release.py fetch`。重建后发布新版本：
+
+```sh
+python3 scripts/data_release.py manifest data-<日期>      # 清单 := 这次的数据
+git add data_release.json && git commit -m "Data release data-<日期>" && git push
+git switch -c data-staging/<日期>
+git add -f db/*.sqlite ww2/maps/data exports maps && git commit -m "data" && git push -u origin data-staging/<日期>
+git switch - && git branch -D data-staging/<日期>
+```
+
+推送 `data-staging/<日期>` 会触发 `.github/workflows/data-release.yml`：打包、与清单逐文件核对、以前一个提交（不含数据）为标签建立 Release、删除这个分支，数据不会留在历史中。`python3 scripts/data_release.py check` 核对工作区的数据与清单是否一致。
 
 #### 发布到 Claude Artifact
 

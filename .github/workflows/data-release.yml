@@ -1,0 +1,30 @@
+# Publishes the built data as a GitHub release (see scripts/data_release.py). A push to data-staging/<name> carries
+# one commit with the data on top of a commit with data_release.json; this packs the data, checks it against the
+# manifest, makes the release with its tag on the commit before (no data in it) and deletes the staging branch.
+name: data release
+on:
+  push:
+    branches: ["data-staging/**"]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Pack and check against the manifest
+        run: python3 scripts/data_release.py pack dist
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(python3 -c "import json; print(json.load(open('data_release.json'))['tag'])")
+          base=$(git rev-parse HEAD~1)
+          git diff --quiet HEAD~1 HEAD -- data_release.json scripts .github || { echo "the data commit changes more than data"; exit 1; }
+          gh release create "$tag" dist/*.tar.gz --target "$base" --title "Data $tag" \
+            --notes "Databases, map data, exports and yearly maps built from $base. Fetch with: python3 scripts/data_release.py fetch"
+      - name: Delete the staging branch
+        if: always()
+        run: git push origin --delete "${GITHUB_REF_NAME}"

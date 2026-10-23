@@ -1,0 +1,33 @@
+# The interactive map on GitHub Pages: the pages from git, the map data from the release in data_release.json.
+# (Settings -> Pages -> Source: GitHub Actions.)
+name: pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the data release
+        run: python3 scripts/data_release.py fetch ww2-maps-data.tar.gz maps.tar.gz
+      - name: Site
+        run: |
+          mkdir -p site
+          cp -r ww2 maps README.md site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
