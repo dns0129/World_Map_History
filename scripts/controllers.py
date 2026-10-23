@@ -192,3 +192,87 @@ UNIT_FIX = {("1918-11-11", "Serbia"): ("independent", 345, "Serbia", "塞尔维�
             ("1918-11-11", "Montenegro"): ("independent", 341, "Montenegro", "黑山"),
             ("1991-12-26", "Russia (Soviet Union)"): ("independent", 365, "Russia", "俄罗斯"),
             ("1991-12-26", "German Federal Republic"): ("independent", 260, "Germany", "德国")}
+
+
+# The East Asian occupation layers (K. Lawson's tracings, ww2_snapshots.overlays) and the divisions that stand
+# for a client state or a leased territory: the first rule that applies gives the controller, a rule with no
+# controller (None) means none of them does. A rule applies when the date lies in since..until (inclusive, None:
+# open), the division's de facto parent kind is one of `kinds`, its parent one of `parents`, its country one of
+# `iso3` (and none of `not_iso3`), and the place lies in the `layer` (ceded, ccp, meng, occ). Text in the names:
+# {parent}/{parent_zh} the parent division, {roc}/{roc_zh} the Manchukuo province of MANCHU_ROC.
+_MK, _LT, _ROC = "省 (Manchukuo)", "leased territory", "ROC Manchuria"
+_KW_JP = (740, "Kwantung Leased Territory (Japan)", "关东州（日本租借地）", "leased_territory", "overlay:kwantung", "whole")
+_OCC = (740, "Japanese-occupied China (incl. Wang Jingwei regime)", "日占区（含汪精卫政权）", "military_occupation",
+        "overlay:occupied_zone_1942")
+_MENG = (740, "Mengjiang (Japanese client state)", "蒙疆（日本扶植政权）", "client_state", "overlay:mengjiang")
+
+
+def _r(since=None, until=None, ctrl=None, *, dates=None, kinds=None, parents=None, iso3=None, not_iso3=None,
+       layer=None):
+    return dict(since=since, until=until, dates=dates, kinds=kinds, parents=parents, iso3=iso3, not_iso3=not_iso3,
+                layer=layer, ctrl=ctrl)
+
+
+OVERLAY_RULES = [
+    # after the war only two layers still mean something: the Indochinese land Thailand kept until the Washington
+    # agreement of November 1946, and the Kwantung territory (Port Arthur and Dalny), held by the Soviet Union
+    # under the treaty of August 1945
+    _r("1945-09-03", "1946-11-17", iso3=("KHM", "LAO"), layer="ceded",
+       ctrl=(800, "Thailand (territory ceded by French Indochina in 1941, returned in November 1946)",
+             "泰国（1941 年法属印度支那割让地，1946 年 11 月归还）", "annexation", "overlay:indochina_ceded", "whole")),
+    _r("1945-09-03", "1949-09-30", kinds=(_LT,),
+       ctrl=(365, "Soviet Union (Port Arthur naval base and Dalny, treaty of 14 August 1945)",
+             "苏联（旅顺海军基地与大连，1945 年 8 月 14 日条约）", "leased_territory", "overlay:kwantung", "whole")),
+    _r("1945-09-03"),
+    # before the war with China: Manchukuo in the provinces of the Republic (Jehol from March 1933), Kwantung
+    _r("1932-03-01", "1933-03-03", kinds=(_ROC,), parents=("Jehol",)),
+    _r("1932-03-01", "1937-07-06", kinds=(_ROC,),
+       ctrl=(740, "Manchukuo ({roc} Province)", "伪满洲国（{roc_zh}省）", "client_state", "overlay:manchukuo_roc",
+             "whole")),
+    _r(None, "1905-09-04", kinds=(_LT,),
+       ctrl=(365, "Kwantung Leased Territory (Russia, Port Arthur and Dalny)", "关东州（俄国租借地，旅顺、大连）",
+             "leased_territory", "overlay:kwantung", "whole")),
+    _r(None, "1937-07-06", kinds=(_LT,), ctrl=_KW_JP),
+    _r(None, "1937-07-06"),
+    # 1937-1945
+    _r("1945-09-02", "1945-09-02", kinds=(_MK, _LT),
+       ctrl=(365, "Soviet military occupation of Manchuria", "苏军占领东北", "military_occupation", "overlay:manchukuo",
+             "whole")),
+    _r(kinds=(_LT,), ctrl=_KW_JP),
+    _r(kinds=(_MK,), ctrl=(740, "Manchukuo ({parent} Province)", "伪满洲国（{parent_zh}省）", "client_state",
+                           "overlay:manchukuo", "whole")),
+    _r("1941-05-09", None, not_iso3=("CHN",), iso3=("KHM", "LAO"), layer="ceded",
+       ctrl=(800, "Thailand (territory ceded by French Indochina, 1941)", "泰国（1941年法属印度支那割让地）",
+             "annexation", "overlay:indochina_ceded", "whole")),
+    _r(not_iso3=("CHN",)),
+    _r(dates=("1941-12-07", "1942-11-01"), layer="ccp",
+       ctrl=(-2, "CCP base area / guerrilla zone (1941-42)", "中共抗日根据地 / 游击区（1941-42）", "resistance_base",
+             "overlay:ccp_bases_1941_42", "approximate")),
+    _r(dates=("1939-09-01",), layer="meng", ctrl=_MENG + ("approximate",)),
+    _r(None, "1945-09-01", layer="meng", ctrl=_MENG + ("whole",)),
+    _r("1945-09-02", "1945-09-02", layer="occ",
+       ctrl=(740, "Japanese forces pending surrender (occupied zone of 1942)", "待投降日军（1942年占领区范围）",
+             "surrendering_forces", "overlay:occupied_zone_1942", "approximate")),
+    _r(dates=("1939-09-01", "1940-07-01", "1944-06-06"), layer="occ", ctrl=_OCC + ("approximate",)),
+    _r(layer="occ", ctrl=_OCC + ("whole",)),
+]
+
+
+def overlay_control(snap, county, inside):
+    """The controller the East Asian layers give a place (OVERLAY_RULES), or None. county: the reference unit with
+    iso3 and its historical division's defacto_parent_kind, defacto_parent, defacto_parent_zh; inside(layer): whether
+    the place lies in that layer (False when the layer is missing)."""
+    kind, parent = county.get("defacto_parent_kind"), county.get("defacto_parent")
+    for r in OVERLAY_RULES:
+        if (r["since"] and snap < r["since"]) or (r["until"] and snap > r["until"]) or \
+                (r["dates"] and snap not in r["dates"]) or (r["kinds"] and kind not in r["kinds"]) or \
+                (r["parents"] and parent not in r["parents"]) or (r["iso3"] and county["iso3"] not in r["iso3"]) or \
+                (r["not_iso3"] and county["iso3"] in r["not_iso3"]) or (r["layer"] and not inside(r["layer"])):
+            continue
+        if r["ctrl"] is None:
+            return None
+        gw, en, zh, typ, src, conf = r["ctrl"]
+        roc = MANCHU_ROC[parent] if "{roc" in en else ("", "")
+        fill = dict(parent=parent, parent_zh=county.get("defacto_parent_zh") or "", roc=roc[0], roc_zh=roc[1])
+        return gw, en.format(**fill), zh.format(**fill), typ, src, conf
+    return None

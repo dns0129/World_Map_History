@@ -79,61 +79,10 @@ def overlays():
 
 
 def control_overlay(snap, county, pt, occ, meng, ccp, ceded):
-    """East Asia occupation layers; returns (gw, detail_en, detail_zh, type, source, confidence) or None."""
-    year = int(snap[:4])
-    if snap > "1945-09-02":
-        # after the war only two layers still mean something: the Indochinese land Thailand kept until
-        # the Washington agreement of November 1946, and the Kwantung territory (Port Arthur and Dalny),
-        # held by the Soviet Union under the treaty of August 1945
-        if ceded is not None and county["iso3"] in ("KHM", "LAO") and snap <= "1946-11-17" and ceded.contains(pt):
-            return (800, "Thailand (territory ceded by French Indochina in 1941, returned in November 1946)",
-                    "泰国（1941 年法属印度支那割让地，1946 年 11 月归还）", "annexation", "overlay:indochina_ceded", "whole")
-        if county.get("defacto_parent_kind") == "leased territory" and snap < "1949-10-01":
-            return (365, "Soviet Union (Port Arthur naval base and Dalny, treaty of 14 August 1945)",
-                    "苏联（旅顺海军基地与大连，1945 年 8 月 14 日条约）", "leased_territory", "overlay:kwantung", "whole")
-        return None
-    if snap < "1937-07-07":
-        if county.get("defacto_parent_kind") == "ROC Manchuria" and snap >= "1932-03-01":
-            name = county.get("defacto_parent")
-            if name == "Jehol" and snap < "1933-03-04":
-                return None
-            en, zh = MANCHU_ROC[name]
-            return (740, f"Manchukuo ({en} Province)", f"伪满洲国（{zh}省）", "client_state", "overlay:manchukuo_roc", "whole")
-        if county.get("defacto_parent_kind") != "leased territory":
-            return None
-        if snap < "1905-09-05":
-            return (365, "Kwantung Leased Territory (Russia, Port Arthur and Dalny)", "关东州（俄国租借地，旅顺、大连）",
-                    "leased_territory", "overlay:kwantung", "whole")
-        return (740, "Kwantung Leased Territory (Japan)", "关东州（日本租借地）", "leased_territory", "overlay:kwantung",
-                "whole")
-    if county.get("defacto_parent_kind") == "省 (Manchukuo)" or county.get("defacto_parent_kind") == "leased territory":
-        lt = county.get("defacto_parent_kind") == "leased territory"
-        if snap == "1945-09-02":
-            return (365, "Soviet military occupation of Manchuria", "苏军占领东北", "military_occupation",
-                    "overlay:manchukuo", "whole")
-        if lt:
-            return (740, "Kwantung Leased Territory (Japan)", "关东州（日本租借地）", "leased_territory", "overlay:kwantung", "whole")
-        return (740, f"Manchukuo ({county.get('defacto_parent')} Province)", f"伪满洲国（{county.get('defacto_parent_zh') or ''}省）",
-                "client_state", "overlay:manchukuo", "whole")
-    if county["iso3"] not in ("CHN",):
-        if ceded is not None and county["iso3"] in ("KHM", "LAO") and snap >= "1941-05-09" and ceded.contains(pt):
-            return (800, "Thailand (territory ceded by French Indochina, 1941)", "泰国（1941年法属印度支那割让地）",
-                    "annexation", "overlay:indochina_ceded", "whole")
-        return None
-    if snap in ("1941-12-07", "1942-11-01") and ccp.contains(pt):
-        return (-2, "CCP base area / guerrilla zone (1941-42)", "中共抗日根据地 / 游击区（1941-42）", "resistance_base",
-                "overlay:ccp_bases_1941_42", "approximate")
-    if meng is not None and meng.contains(pt) and snap != "1945-09-02":
-        return (740, "Mengjiang (Japanese client state)", "蒙疆（日本扶植政权）", "client_state", "overlay:mengjiang",
-                "approximate" if snap == "1939-09-01" else "whole")
-    if occ is not None and occ.contains(pt):
-        if snap == "1945-09-02":
-            return (740, "Japanese forces pending surrender (occupied zone of 1942)", "待投降日军（1942年占领区范围）",
-                    "surrendering_forces", "overlay:occupied_zone_1942", "approximate")
-        conf = "approximate" if snap in ("1939-09-01", "1940-07-01", "1944-06-06") else "whole"
-        return (740, "Japanese-occupied China (incl. Wang Jingwei regime)", "日占区（含汪精卫政权）", "military_occupation",
-                "overlay:occupied_zone_1942", conf)
-    return None
+    """East Asia occupation layers (controllers.OVERLAY_RULES); returns (gw, detail_en, detail_zh, type, source,
+    confidence) or None."""
+    layers = dict(occ=occ, meng=meng, ccp=ccp, ceded=ceded)
+    return controllers.overlay_control(snap, county, lambda k: layers[k] is not None and layers[k].contains(pt))
 
 
 def geo_shapes(match):
