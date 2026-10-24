@@ -11,6 +11,7 @@ import urllib.request
 from pathlib import Path
 
 from common import RAW
+from sources import commit, load
 
 UA = {"User-Agent": "world-history-data/1.0"}
 
@@ -23,7 +24,7 @@ HYDE_BASE = ("https://geo.public.data.uu.nl/vault-hyde/hyde35_c9_apr2025%5B17492
              "/original/gbc2025_7apr_base/NetCDF/")
 HYDE_FILES = ["urban_population.nc", "rural_population.nc"]
 
-NE_BASE = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/"
+NE_BASE = f"https://raw.githubusercontent.com/nvkelso/natural-earth-vector/{commit('natural-earth')}/geojson/"
 NE_LAYERS = [
     "ne_10m_admin_0_countries",
     "ne_10m_admin_1_states_provinces",
@@ -56,11 +57,11 @@ GHS_EPOCHS = [1975, 1980, 1985, 1990, 1995, 2000]
 
 # The GeoJSON copy of the river layer lacks translated names; the shapefile
 # carries name_zh and wikidataid.
-NE_SHP = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/10m_physical/"
+NE_SHP = f"https://raw.githubusercontent.com/nvkelso/natural-earth-vector/{commit('natural-earth')}/10m_physical/"
 NE_SHP_LAYERS = ["ne_10m_rivers_lake_centerlines", "ne_10m_rivers_europe", "ne_10m_rivers_north_america"]
 
 TERRARIUM = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
-TERRAIN_ZOOM = 5
+TERRAIN_ZOOMS = (5, 6)   # 5: build_terrain.py, 6: the relief sheets of the web maps (ww2_relief.py)
 
 GIT_SOURCES = {
     # CShapes 2.0 with status/owner fields, as bundled in the CRAN package.
@@ -96,14 +97,21 @@ def fetch(url: str, dest: Path, min_size: int = 1) -> Path:
     return dest
 
 
-def git_sparse(url: str, dest: Path, paths=None):
+def git_sparse(url: str, dest: Path, paths=None, name=None):
+    """A checkout of the commit sources.json pins for this repository (name: its key there), sparse when paths
+    are given."""
     if not dest.exists():
         subprocess.run(["git", "clone", "-q", "--depth", "1", "--filter=blob:none",
                         "--no-checkout", url, str(dest)], check=True)
+    ref = "HEAD"
+    if name:
+        ref = commit(name)
+        subprocess.run(["git", "-C", str(dest), "fetch", "-q", "--depth", "1", "--filter=blob:none", "origin", ref],
+                       check=True)
     if paths:
-        subprocess.run(["git", "-C", str(dest), "checkout", "-q", "HEAD", "--", *paths], check=True)
+        subprocess.run(["git", "-C", str(dest), "checkout", "-q", ref, "--", *paths], check=True)
     else:
-        subprocess.run(["git", "-C", str(dest), "checkout", "-q", "HEAD"], check=True)
+        subprocess.run(["git", "-C", str(dest), "checkout", "-q", ref], check=True)
 
 
 def main(what):
@@ -112,7 +120,8 @@ def main(what):
         for name in HYDE_FILES:
             jobs.append((HYDE_BASE + name, RAW / "hyde35" / name, 1_000_000))
     if "ghs" in what:
-        for y in GHS_EPOCHS:
+        for y in GHS_EPOCHS + [2025]:  # 2025: the 2026 tab (modern_2026.py), downloaded here so that raw/ is
+            # complete before sources.py --check
             jobs.append((GHS_URL.format(y=y), RAW / "ghs_pop" / f"GHS_POP_E{y}_30ss.tif", 100_000_000))
     if "ne" in what:
         for layer in NE_LAYERS:
@@ -121,11 +130,10 @@ def main(what):
             for ext in ("shp", "shx", "dbf", "prj", "cpg"):
                 jobs.append((NE_SHP + f"{layer}.{ext}", RAW / "naturalearth" / "shp" / f"{layer}.{ext}", 1))
     if "terrain" in what:
-        n = 2 ** TERRAIN_ZOOM
-        for x in range(n):
-            for y in range(n):
-                jobs.append((TERRARIUM.format(z=TERRAIN_ZOOM, x=x, y=y),
-                             RAW / "terrarium" / str(TERRAIN_ZOOM) / f"{x}_{y}.png", 100))
+        for z in TERRAIN_ZOOMS:
+            for x in range(2 ** z):
+                for y in range(2 ** z):
+                    jobs.append((TERRARIUM.format(z=z, x=x, y=y), RAW / "terrarium" / str(z) / f"{x}_{y}.png", 100))
     with cf.ThreadPoolExecutor(8) as ex:
         futs = {ex.submit(fetch, u, d, m): u for u, d, m in jobs}
         for i, f in enumerate(cf.as_completed(futs), 1):
@@ -133,29 +141,29 @@ def main(what):
             if i % 50 == 0 or i == len(jobs):
                 print(f"{i}/{len(jobs)} downloaded", flush=True)
     if "git" in what:
-        git_sparse(GIT_SOURCES["cran-cshapes"], RAW / "cran-cshapes")
+        git_sparse(GIT_SOURCES["cran-cshapes"], RAW / "cran-cshapes", name="cran-cshapes")
         xz = RAW / "cran-cshapes" / "inst" / "extdata" / "cshapes_2_gw.topojson.xz"
         out = RAW / "cshapes_2_gw.topojson"
         if not out.exists():
             out.write_bytes(lzma.decompress(xz.read_bytes()))
         git_sparse("https://github.com/owid/owid-datasets", RAW / "owid-datasets",
-                   [f"datasets/{d}" for d in OWID_DATASETS])
+                   [f"datasets/{d}" for d in OWID_DATASETS], name="owid-datasets")
         git_sparse("https://github.com/open-numbers/ddf--gapminder--gdp_per_capita_cppp",
                    RAW / "gapminder-gdp", ["README.md", "ddf--entities--geo.csv",
                    "ddf--datapoints--income_per_person_gdppercapita_ppp_inflation_adjusted--by--geo--time.csv",
-                   "ddf--datapoints--gdp_total_ppp_inflation_adjusted--by--geo--time.csv"])
+                   "ddf--datapoints--gdp_total_ppp_inflation_adjusted--by--geo--time.csv"], name="gapminder-gdp")
         git_sparse("https://github.com/open-numbers/ddf--gapminder--population",
                    RAW / "gapminder-pop", ["README.md", "ddf--entities--geo--country.csv",
                    "ddf--datapoints--population--by--country--year.csv",
-                   "ddf--datapoints--population--by--global--year.csv"])
+                   "ddf--datapoints--population--by--global--year.csv"], name="gapminder-pop")
         # COW NMC, Fariss et al. GDP and the COW<->GW year table (R package peacesciencer)
         ps = RAW / "peacesciencer-src"
         git_sparse("https://github.com/cran/peacesciencer", ps,
-                   ["data/cow_nmc.rda", "data/cow_sdp_gdp.rda", "data/cow_gw_years.rda", "DESCRIPTION"])
+                   ["data/cow_nmc.rda", "data/cow_sdp_gdp.rda", "data/cow_gw_years.rda", "DESCRIPTION"], name="peacesciencer")
         (RAW / "peacesciencer").mkdir(exist_ok=True)
         for f in ("cow_nmc.rda", "cow_sdp_gdp.rda", "cow_gw_years.rda"):
             (RAW / "peacesciencer" / f).write_bytes((ps / "data" / f).read_bytes())
-        fetch("https://raw.githubusercontent.com/JoshData/historical-state-population-csv/master/"
+        fetch(f"https://raw.githubusercontent.com/JoshData/historical-state-population-csv/{commit('state-population')}/"
               "historical_state_population_by_year.csv", RAW / "subnational" / "us_state_population_by_year.csv")
     print("done")
 

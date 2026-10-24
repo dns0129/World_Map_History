@@ -1,0 +1,16 @@
+# Python 3.13. Versions of the last full build that passed every check (build_all.sh, October 2026).
+#   pip install -r requirements.txt
+numpy==2.5.3
+pandas==3.0.5
+scipy==1.18.1
+shapely==2.2.0
+pyproj==3.8.0
+rasterio==1.5.2
+pillow==12.3.0
+pyshp==3.1.6            # import shapefile
+pyreadr==0.5.7          # build_yearly.py: the R data of the population series
+osmium==4.3.1           # ww2_ohm.py: the OpenHistoricalMap planet
+matplotlib==3.11.2      # render_maps.py: the preview maps
+requests==2.34.2
+opencv-python-headless==5.0.0.93   # scripts/trace: colour masks, feature matching of the scanned maps
+# optional: xarray (build_base_grids.py reads HYDE 3.5 only when "fetch_sources.py hyde" downloaded it)

@@ -16,6 +16,7 @@ Outputs go to work/ and are assembled into the database by build_database.py.
 """
 import json
 from collections import defaultdict
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -188,7 +189,9 @@ def build_pieces(recs, needed_fids):
 
 # ---------------------------------------------------------------- main
 
-def main():
+def read_inputs():
+    """The series, grids, admin-1 table, CShapes and control events the years are built from, and the admin-1
+    pieces of the units in force on any of the years."""
     codes, cid, pop_s, gpc_s, cs = load_series()
     ne_codes = pd.read_csv(WORK / "ne_admin0_codes.csv")
     ne_to_cid = np.array([cid.get(c, -1) for c in ne_codes.code] + [-1], dtype=np.int32)
@@ -214,7 +217,17 @@ def main():
     print("clipping admin-1 pieces ...")
     pieces, piece_by_fid, a1g = build_pieces(recs, needed)
     print("pieces:", len(pieces))
+    return SimpleNamespace(codes=codes, cid=cid, pop_s=pop_s, gpc_s=gpc_s, cs=cs, ne_codes=ne_codes,
+                           code_grid=code_grid, a1grid=a1grid, a1tab=a1tab, area_row=area_row, targets=targets,
+                           iso2_to_a1=iso2_to_a1, kind=kind, steps=steps, recs=recs, by_fid_rec=by_fid_rec,
+                           dates=dates, needed=needed, events=events, cow_key=cow_key, nmc_pop=nmc_pop,
+                           fariss_gdp=fariss_gdp, pieces=pieces, piece_by_fid=piece_by_fid, a1g=a1g)
 
+
+def write_static(X):
+    """units.csv, pieces.csv and pieces.geojson; the area of each unit."""
+    a1tab, by_fid_rec, needed, pieces = (
+        X.a1tab, X.by_fid_rec, X.needed, X.pieces)
     # ---- static unit table
     units = []
     for fid in sorted(needed):
@@ -243,7 +256,14 @@ def main():
         json.dump({"type": "FeatureCollection", "features": [
             {"type": "Feature", "properties": {"piece_id": pid},
              "geometry": mapping(p["geom"])} for pid, p in pieces.items()]}, f)
+    return unit_area
 
+
+def nearest_piece(X):
+    """piece_for(fid, a1): the piece of unit fid in admin-1 unit a1, else the nearest piece of that unit (for raster
+    cells whose pair has no vector piece; remembered)."""
+    pieces, piece_by_fid, a1g = (
+        X.pieces, X.piece_by_fid, X.a1g)
     # nearest piece for raster cells whose (unit, admin1) pair has no vector piece
     a1_centroid = {i: g.representative_point() for i, g in enumerate(a1g)}
 
@@ -258,205 +278,264 @@ def main():
         best = min(cand.items(), key=lambda kv: pieces[kv[1]]["geom"].distance(pt))
         piece_by_fid[fid][a] = best[1]
         return best[1]
+    return piece_for
 
-    unit_grid_cache = {}
-    last_ratio = {}  # gwcode -> (year, NMC/stage-1 ratio) of the last accepted calibration
+
+def calibrated_grids(y, yi, base, X):
+    """Population grid of year y calibrated to the national and sub-national series, and the GDP grid."""
+    codes, cid, pop_s, gpc_s, code_grid, a1grid, targets, iso2_to_a1 = (
+        X.codes, X.cid, X.pop_s, X.gpc_s, X.code_grid, X.a1grid, X.targets, X.iso2_to_a1)
+    # ---- national calibration
+    flat_code = code_grid.ravel()
+    valid = flat_code >= 0
+    sums = np.bincount(flat_code[valid], weights=base.ravel()[valid], minlength=len(codes))
+    ncell = np.bincount(flat_code[valid], minlength=len(codes))
+    target = pop_s[:, yi]
+    factor = np.ones(len(codes))
+    ok = (~np.isnan(target)) & (sums > 0)
+    factor[ok] = target[ok] / sums[ok]
+    popg = base * np.where(code_grid >= 0, factor[np.maximum(code_grid, 0)], 1.0)
+    empty = (~np.isnan(target)) & (sums <= 0) & (ncell > 0) & (target > 0)
+    for c in np.flatnonzero(empty):
+        m = code_grid == c
+        popg[m] = target[c] / m.sum()
+
+    # ---- sub-national calibration
+    ty = targets[targets.year == y]
+    for code, grp in ty.groupby("code"):
+        c = cid[code]
+        cm = code_grid == c
+        a_in = a1grid[cm]
+        p_in = popg[cm]
+        cur = pd.Series(p_in).groupby(a_in).sum()
+        tmap = {iso2_to_a1[k]: v for k, v in zip(grp.iso_3166_2, grp.population) if k in iso2_to_a1}
+        covered = [a for a in cur.index if a in tmap]
+        uncovered_pop = cur.drop(covered).sum()
+        total = np.nansum(p_in)
+        covered_target = total - uncovered_pop
+        tsum = sum(tmap[a] for a in covered)
+        f = np.ones(int(a1grid.max()) + 2)
+        for a in covered:
+            if cur[a] > 0:
+                f[a] = covered_target * tmap[a] / tsum / cur[a]
+        popg[cm] = p_in * f[a_in]
+
+    # ---- GDP grid
+    gpc = gpc_s[:, yi]
+    gdpg = popg * np.where(code_grid >= 0, np.nan_to_num(gpc[np.maximum(code_grid, 0)]), 0.0)
+    return popg, gdpg
+
+
+def unit_grid(act, X):
+    """The grid of the CShapes units in force (the last one is kept); populated cells outside every unit go to the
+    nearest unit."""
+    populated_any = X.populated_any
+    key = tuple(sorted(r["fid"] for r in act))
+    if key not in X.unit_grid_cache:
+        items = sorted(((r["geom"], r["fid"]) for r in act), key=lambda t: -t[0].area)
+        ug = rasterize(((mapping(g), f) for g, f in items), out_shape=(HYDE_H, HYDE_W),
+                       transform=T5, fill=-1, dtype="int32")
+        present = set(np.unique(ug).tolist())
+        for g, f in items:
+            if f not in present:
+                pt = g.representative_point()
+                ug[min(int((90 - pt.y) / HYDE_RES), HYDE_H - 1), min(int((pt.x + 180) / HYDE_RES), HYDE_W - 1)] = f
+        populated = populated_any
+        if ((ug < 0) & populated).any():
+            _, (ri, ci) = ndimage.distance_transform_edt(ug < 0, return_indices=True)
+            miss = (ug < 0) & populated
+            ug[miss] = ug[ri[miss], ci[miss]]
+        X.unit_grid_cache = {key: ug}
+    ug = X.unit_grid_cache[key]
+    return key, ug
+
+
+def stage2(y, act, ug, popg, gdpg, X):
+    """Stage 2 (years up to NMC_UNTIL): the independent units whose borders differ from every present-day country
+    rescaled to the COW NMC population in contemporary borders."""
+    codes, code_grid, cow_key, nmc_pop = (
+        X.codes, X.code_grid, X.cow_key, X.nmc_pop)
+    flat_code = code_grid.ravel()
+    valid = flat_code >= 0
+    fl = ug.ravel()
+    m = fl >= 0
+    nf = int(fl.max()) + 1
+    # ---- stage 2: contemporary-border population for independent units
+    calib = {}
+    if y <= NMC_UNTIL:
+        upop0 = np.bincount(fl[m], weights=popg.ravel()[m], minlength=nf)
+        pair = fl[m].astype(np.int64) * 1000 + code_grid.ravel()[m].astype(np.int64) + 1
+        up, upi = np.unique(pair, return_inverse=True)
+        pw = np.bincount(upi, weights=popg.ravel()[m])
+        code_tot = np.bincount(flat_code[valid], weights=popg.ravel()[valid], minlength=len(codes))
+        comp = defaultdict(list)
+        for kk, v in zip(up, pw):
+            comp[int(kk // 1000)].append((int(kk % 1000) - 1, v))
+        scale = np.ones(nf)
+        for r in act:
+            fid = r["fid"]
+            if r["status"] != "independent" or upop0[fid] <= 0:
+                continue
+            cc = cow_key.get((y, r["gwcode"]))
+            target_n = nmc_pop.get((cc, y)) if cc is not None else None
+            if target_n is None:
+                continue
+            c_main, v_main = max(comp[fid], key=lambda t: t[1])
+            frac = v_main / upop0[fid]
+            capture = v_main / code_tot[c_main] if c_main >= 0 and code_tot[c_main] > 0 else 0
+            ratio = target_n / upop0[fid]
+            if frac >= MODERN_MATCH and capture >= MODERN_MATCH:
+                calib[fid] = ("modern_series", target_n)
+            elif y in NMC_EXCLUDE.get(r["gwcode"], ()):
+                # COW counts annexed/occupied areas outside this polygon: carry
+                # the last accepted correction ratio instead
+                if r["gwcode"] in X.last_ratio:
+                    scale[fid] = X.last_ratio[r["gwcode"]][1]
+                    calib[fid] = (f"nmc_ratio_carried_from_{X.last_ratio[r['gwcode']][0]}", target_n)
+                else:
+                    calib[fid] = ("modern_series (nmc_wartime_territory_mismatch)", target_n)
+            elif not NMC_RATIO_BOUNDS[0] <= ratio <= NMC_RATIO_BOUNDS[1]:
+                calib[fid] = ("modern_series (nmc_outlier)", target_n)
+            else:
+                scale[fid] = ratio
+                calib[fid] = ("cow_nmc_tpop", target_n)
+                X.last_ratio[r["gwcode"]] = (y, ratio)
+        if (scale != 1).any():
+            sg = np.where(ug >= 0, scale[np.maximum(ug, 0)], 1.0)
+            popg = popg * sg
+            gdpg = gdpg * sg
+    return popg, gdpg, calib
+
+
+def aggregate(key, ug, popg, gdpg, X):
+    """Population and GDP per unit and per (unit, admin-1 piece), the world totals and what no unit holds."""
+    a1grid, piece_by_fid = X.a1grid, X.piece_by_fid
+    fl = ug.ravel()
+    m = fl >= 0
+    nf = int(fl.max()) + 1
+    upop = np.bincount(fl[m], weights=popg.ravel()[m], minlength=nf)
+    ugdp = np.bincount(fl[m], weights=gdpg.ravel()[m], minlength=nf)
+    world_pop = float(np.nansum(popg))
+    world_gdp = float(np.nansum(gdpg))
+    unassigned = world_pop - float(upop.sum())
+
+    # admin-1 pieces: combine unit and admin-1 ids
+    a1f = a1grid.ravel()
+    k = fl[m].astype(np.int64) * 100000 + (a1f[m].astype(np.int64) + 1)
+    uk, inv = np.unique(k, return_inverse=True)
+    kp = np.bincount(inv, weights=popg.ravel()[m])
+    kg = np.bincount(inv, weights=gdpg.ravel()[m])
+    ppop, pgdp = defaultdict(float), defaultdict(float)
+    for kk, pv, gv in zip(uk, kp, kg):
+        fid, a = int(kk // 100000), int(kk % 100000) - 1
+        if pv == 0 and gv == 0:
+            continue
+        pid = X.piece_for(fid, a)
+        if pid is None:
+            continue
+        ppop[(fid, pid)] += pv
+        pgdp[(fid, pid)] += gv
+    for fid in key:  # pieces without population still belong to the year
+        for pid in sorted(set(piece_by_fid[fid].values())):
+            ppop.setdefault((fid, pid), 0.0)
+            pgdp.setdefault((fid, pid), 0.0)
+    return nf, upop, ugdp, world_pop, world_gdp, unassigned, ppop, pgdp
+
+
+def unit_year(y, date, act, calib, nf, upop, ugdp, world_pop, world_gdp, X):
+    """The units of year y with sovereign, de facto controller (whole-unit events), population, GDP and shares, and
+    the totals per sovereign (de jure and de facto)."""
+    recs, events, cow_key, fariss_gdp = X.recs, X.events, X.cow_key, X.fariss_gdp
+    sov = []
+    # ---- control
+    ev_y = events[(events.start_date <= date) & (events.end_date >= date)]
+    whole = {(e.unit_name, e.unit_gwcode): e for e in ev_y.itertuples() if e.scope == "whole"}
+    partial = defaultdict(list)
+    for e in ev_y.itertuples():
+        if e.scope == "partial":
+            partial[(e.unit_name, e.unit_gwcode)].append(e.event_id)
+
+    rows_y = []
+    for r in act:
+        fid = r["fid"]
+        owner_nm = r["country_name"] if r["status"] == "independent" else owner_name(recs, r["owner"], date)
+        owner_gw = str(r["gwcode"]) if r["status"] == "independent" else str(r["owner"])
+        e = whole.get((r["country_name"], r["gwcode"]))
+        if e is not None:
+            ctrl_nm, ctrl_gw, ctype, ceid = e.controller_name, str(e.controller_gwcode), e.control_type, e.event_id
+        else:
+            ctrl_nm, ctrl_gw, ctype, ceid = owner_nm, owner_gw, r["status"], None
+        rows_y.append(dict(year=y, unit_id=fid, name=r["country_name"], gwcode=r["gwcode"],
+                           cshapes_status=r["status"], sovereign_gwcode=owner_gw, sovereign_name=owner_nm,
+                           controller_gwcode=ctrl_gw, controller_name=ctrl_nm, control_type=ctype,
+                           control_event=ceid,
+                           partial_control_events=";".join(partial.get((r["country_name"], r["gwcode"]), [])),
+                           pop_calibration=calib.get(fid, ("modern_series", None))[0],
+                           nmc_tpop=calib.get(fid, (None, None))[1],
+                           gdp_alt_fariss2022_2011usd=(fariss_gdp.get((cow_key.get((y, r["gwcode"])), y))
+                                                       if r["status"] == "independent" else None),
+                           population=float(upop[fid]) if fid < nf else 0.0,
+                           gdp_2011usd=float(ugdp[fid]) if fid < nf else 0.0))
+    uy = pd.DataFrame(rows_y)
+    uy["area_km2"] = uy.unit_id.map(X.unit_area)
+    uy["pop_share_world"] = uy.population / world_pop
+    uy["gdp_share_world"] = uy.gdp_2011usd / world_gdp
+    uy["gdp_per_capita"] = uy.gdp_2011usd / uy.population.replace(0, np.nan)
+    uy["density_per_km2"] = uy.population / uy.area_km2
+    for basis_col, nm_col, out in (("sovereign_gwcode", "sovereign_name", "de_jure"),
+                                   ("controller_gwcode", "controller_name", "de_facto")):
+        tot = uy.groupby(basis_col).population.transform("sum")
+        uy[f"pop_share_{out}_sovereign"] = np.where(tot > 0, uy.population / tot, np.nan)
+        g = uy.groupby([basis_col, nm_col]).agg(population=("population", "sum"), gdp_2011usd=("gdp_2011usd", "sum"),
+                                                area_km2=("area_km2", "sum"), n_units=("unit_id", "count")).reset_index()
+        g = g.rename(columns={basis_col: "sovereign_gwcode", nm_col: "sovereign_name"})
+        g.insert(0, "basis", out)
+        g.insert(0, "year", y)
+        g["pop_share_world"] = g.population / world_pop
+        g["gdp_share_world"] = g.gdp_2011usd / world_gdp
+        sov.append(g)
+    return uy, sov, whole, ev_y
+
+
+def write_outputs(unit_rows, sov_rows, piece_year_rows, year_rows):
+    pd.concat(unit_rows).to_csv(WORK / "unit_year.csv", index=False)
+    pd.concat(sov_rows).to_csv(WORK / "sovereign_year.csv", index=False)
+    py = pd.DataFrame(piece_year_rows, columns=["year", "unit_id", "piece_id", "population", "gdp_2011usd"])
+    uyall = pd.concat(unit_rows)[["year", "unit_id", "population"]].rename(columns={"population": "unit_pop"})
+    py = py.merge(uyall, on=["year", "unit_id"], how="left")
+    py["pop_share_unit"] = np.where(py.unit_pop > 0, py.population / py.unit_pop, np.nan)
+    wp = pd.DataFrame(year_rows).set_index("year").world_population
+    py["pop_share_world"] = py.population / py.year.map(wp)
+    py.drop(columns="unit_pop").to_csv(WORK / "piece_year.csv", index=False)
+    pd.DataFrame(year_rows).to_csv(WORK / "years.csv", index=False)
+
+
+def main():
+    X = read_inputs()
+    X.unit_area = write_static(X)
+    X.piece_for = nearest_piece(X)
+    code_grid, cid, kind, steps, recs, dates = X.code_grid, X.cid, X.kind, X.steps, X.recs, X.dates
+    X.unit_grid_cache = {}
+    X.last_ratio = {}  # gwcode -> (year, NMC/stage-1 ratio) of the last accepted calibration
     populated_any = (code_grid >= 0) & (code_grid != cid.get("ata", -9))
     for s_ in steps:
         populated_any |= grid(("hyde_5m_" if kind == "hyde" else "ghs_5m_") + str(s_)) > 0
     unit_rows, piece_year_rows, sov_rows, year_rows = [], [], [], []
+    X.populated_any = populated_any
     (WORK / "grids").mkdir(exist_ok=True)
-    area_grid_row = area_row[:, None]
 
     for yi, y in enumerate(YEARS):
         date = dates[y]
         base, basis = base_pattern(y, kind, steps)
-
-        # ---- national calibration
-        flat_code = code_grid.ravel()
-        valid = flat_code >= 0
-        sums = np.bincount(flat_code[valid], weights=base.ravel()[valid], minlength=len(codes))
-        ncell = np.bincount(flat_code[valid], minlength=len(codes))
-        target = pop_s[:, yi]
-        factor = np.ones(len(codes))
-        ok = (~np.isnan(target)) & (sums > 0)
-        factor[ok] = target[ok] / sums[ok]
-        popg = base * np.where(code_grid >= 0, factor[np.maximum(code_grid, 0)], 1.0)
-        empty = (~np.isnan(target)) & (sums <= 0) & (ncell > 0) & (target > 0)
-        for c in np.flatnonzero(empty):
-            m = code_grid == c
-            popg[m] = target[c] / m.sum()
-
-        # ---- sub-national calibration
-        ty = targets[targets.year == y]
-        for code, grp in ty.groupby("code"):
-            c = cid[code]
-            cm = code_grid == c
-            a_in = a1grid[cm]
-            p_in = popg[cm]
-            cur = pd.Series(p_in).groupby(a_in).sum()
-            tmap = {iso2_to_a1[k]: v for k, v in zip(grp.iso_3166_2, grp.population) if k in iso2_to_a1}
-            covered = [a for a in cur.index if a in tmap]
-            uncovered_pop = cur.drop(covered).sum()
-            total = np.nansum(p_in)
-            covered_target = total - uncovered_pop
-            tsum = sum(tmap[a] for a in covered)
-            f = np.ones(int(a1grid.max()) + 2)
-            for a in covered:
-                if cur[a] > 0:
-                    f[a] = covered_target * tmap[a] / tsum / cur[a]
-            popg[cm] = p_in * f[a_in]
-
-        # ---- GDP grid
-        gpc = gpc_s[:, yi]
-        gdpg = popg * np.where(code_grid >= 0, np.nan_to_num(gpc[np.maximum(code_grid, 0)]), 0.0)
-
-        # ---- historical units
+        popg, gdpg = calibrated_grids(y, yi, base, X)
         act = active(recs, date)
-        key = tuple(sorted(r["fid"] for r in act))
-        if key not in unit_grid_cache:
-            items = sorted(((r["geom"], r["fid"]) for r in act), key=lambda t: -t[0].area)
-            ug = rasterize(((mapping(g), f) for g, f in items), out_shape=(HYDE_H, HYDE_W),
-                           transform=T5, fill=-1, dtype="int32")
-            present = set(np.unique(ug).tolist())
-            for g, f in items:
-                if f not in present:
-                    pt = g.representative_point()
-                    ug[min(int((90 - pt.y) / HYDE_RES), HYDE_H - 1), min(int((pt.x + 180) / HYDE_RES), HYDE_W - 1)] = f
-            populated = populated_any
-            if ((ug < 0) & populated).any():
-                _, (ri, ci) = ndimage.distance_transform_edt(ug < 0, return_indices=True)
-                miss = (ug < 0) & populated
-                ug[miss] = ug[ri[miss], ci[miss]]
-            unit_grid_cache = {key: ug}
-        ug = unit_grid_cache[key]
-
-        fl = ug.ravel()
-        m = fl >= 0
-        nf = int(fl.max()) + 1
-
-        # ---- stage 2: contemporary-border population for independent units
-        calib = {}
-        if y <= NMC_UNTIL:
-            upop0 = np.bincount(fl[m], weights=popg.ravel()[m], minlength=nf)
-            pair = fl[m].astype(np.int64) * 1000 + code_grid.ravel()[m].astype(np.int64) + 1
-            up, upi = np.unique(pair, return_inverse=True)
-            pw = np.bincount(upi, weights=popg.ravel()[m])
-            code_tot = np.bincount(flat_code[valid], weights=popg.ravel()[valid], minlength=len(codes))
-            comp = defaultdict(list)
-            for kk, v in zip(up, pw):
-                comp[int(kk // 1000)].append((int(kk % 1000) - 1, v))
-            scale = np.ones(nf)
-            for r in act:
-                fid = r["fid"]
-                if r["status"] != "independent" or upop0[fid] <= 0:
-                    continue
-                cc = cow_key.get((y, r["gwcode"]))
-                target_n = nmc_pop.get((cc, y)) if cc is not None else None
-                if target_n is None:
-                    continue
-                c_main, v_main = max(comp[fid], key=lambda t: t[1])
-                frac = v_main / upop0[fid]
-                capture = v_main / code_tot[c_main] if c_main >= 0 and code_tot[c_main] > 0 else 0
-                ratio = target_n / upop0[fid]
-                if frac >= MODERN_MATCH and capture >= MODERN_MATCH:
-                    calib[fid] = ("modern_series", target_n)
-                elif y in NMC_EXCLUDE.get(r["gwcode"], ()):
-                    # COW counts annexed/occupied areas outside this polygon: carry
-                    # the last accepted correction ratio instead
-                    if r["gwcode"] in last_ratio:
-                        scale[fid] = last_ratio[r["gwcode"]][1]
-                        calib[fid] = (f"nmc_ratio_carried_from_{last_ratio[r['gwcode']][0]}", target_n)
-                    else:
-                        calib[fid] = ("modern_series (nmc_wartime_territory_mismatch)", target_n)
-                elif not NMC_RATIO_BOUNDS[0] <= ratio <= NMC_RATIO_BOUNDS[1]:
-                    calib[fid] = ("modern_series (nmc_outlier)", target_n)
-                else:
-                    scale[fid] = ratio
-                    calib[fid] = ("cow_nmc_tpop", target_n)
-                    last_ratio[r["gwcode"]] = (y, ratio)
-            if (scale != 1).any():
-                sg = np.where(ug >= 0, scale[np.maximum(ug, 0)], 1.0)
-                popg = popg * sg
-                gdpg = gdpg * sg
-
-        upop = np.bincount(fl[m], weights=popg.ravel()[m], minlength=nf)
-        ugdp = np.bincount(fl[m], weights=gdpg.ravel()[m], minlength=nf)
-        world_pop = float(np.nansum(popg))
-        world_gdp = float(np.nansum(gdpg))
-        unassigned = world_pop - float(upop.sum())
-
-        # admin-1 pieces: combine unit and admin-1 ids
-        a1f = a1grid.ravel()
-        k = fl[m].astype(np.int64) * 100000 + (a1f[m].astype(np.int64) + 1)
-        uk, inv = np.unique(k, return_inverse=True)
-        kp = np.bincount(inv, weights=popg.ravel()[m])
-        kg = np.bincount(inv, weights=gdpg.ravel()[m])
-        ppop, pgdp = defaultdict(float), defaultdict(float)
-        for kk, pv, gv in zip(uk, kp, kg):
-            fid, a = int(kk // 100000), int(kk % 100000) - 1
-            if pv == 0 and gv == 0:
-                continue
-            pid = piece_for(fid, a)
-            if pid is None:
-                continue
-            ppop[(fid, pid)] += pv
-            pgdp[(fid, pid)] += gv
-        for fid in key:  # pieces without population still belong to the year
-            for pid in set(piece_by_fid[fid].values()):
-                ppop.setdefault((fid, pid), 0.0)
-                pgdp.setdefault((fid, pid), 0.0)
-
-        # ---- control
-        ev_y = events[(events.start_date <= date) & (events.end_date >= date)]
-        whole = {(e.unit_name, e.unit_gwcode): e for e in ev_y.itertuples() if e.scope == "whole"}
-        partial = defaultdict(list)
-        for e in ev_y.itertuples():
-            if e.scope == "partial":
-                partial[(e.unit_name, e.unit_gwcode)].append(e.event_id)
-
-        rows_y = []
-        for r in act:
-            fid = r["fid"]
-            owner_nm = r["country_name"] if r["status"] == "independent" else owner_name(recs, r["owner"], date)
-            owner_gw = str(r["gwcode"]) if r["status"] == "independent" else str(r["owner"])
-            e = whole.get((r["country_name"], r["gwcode"]))
-            if e is not None:
-                ctrl_nm, ctrl_gw, ctype, ceid = e.controller_name, str(e.controller_gwcode), e.control_type, e.event_id
-            else:
-                ctrl_nm, ctrl_gw, ctype, ceid = owner_nm, owner_gw, r["status"], None
-            rows_y.append(dict(year=y, unit_id=fid, name=r["country_name"], gwcode=r["gwcode"],
-                               cshapes_status=r["status"], sovereign_gwcode=owner_gw, sovereign_name=owner_nm,
-                               controller_gwcode=ctrl_gw, controller_name=ctrl_nm, control_type=ctype,
-                               control_event=ceid,
-                               partial_control_events=";".join(partial.get((r["country_name"], r["gwcode"]), [])),
-                               pop_calibration=calib.get(fid, ("modern_series", None))[0],
-                               nmc_tpop=calib.get(fid, (None, None))[1],
-                               gdp_alt_fariss2022_2011usd=(fariss_gdp.get((cow_key.get((y, r["gwcode"])), y))
-                                                           if r["status"] == "independent" else None),
-                               population=float(upop[fid]) if fid < nf else 0.0,
-                               gdp_2011usd=float(ugdp[fid]) if fid < nf else 0.0))
-        uy = pd.DataFrame(rows_y)
-        uy["area_km2"] = uy.unit_id.map(unit_area)
-        uy["pop_share_world"] = uy.population / world_pop
-        uy["gdp_share_world"] = uy.gdp_2011usd / world_gdp
-        uy["gdp_per_capita"] = uy.gdp_2011usd / uy.population.replace(0, np.nan)
-        uy["density_per_km2"] = uy.population / uy.area_km2
-        for basis_col, nm_col, out in (("sovereign_gwcode", "sovereign_name", "de_jure"),
-                                       ("controller_gwcode", "controller_name", "de_facto")):
-            tot = uy.groupby(basis_col).population.transform("sum")
-            uy[f"pop_share_{out}_sovereign"] = np.where(tot > 0, uy.population / tot, np.nan)
-            g = uy.groupby([basis_col, nm_col]).agg(population=("population", "sum"), gdp_2011usd=("gdp_2011usd", "sum"),
-                                                    area_km2=("area_km2", "sum"), n_units=("unit_id", "count")).reset_index()
-            g = g.rename(columns={basis_col: "sovereign_gwcode", nm_col: "sovereign_name"})
-            g.insert(0, "basis", out)
-            g.insert(0, "year", y)
-            g["pop_share_world"] = g.population / world_pop
-            g["gdp_share_world"] = g.gdp_2011usd / world_gdp
-            sov_rows.append(g)
+        key, ug = unit_grid(act, X)
+        popg, gdpg, calib = stage2(y, act, ug, popg, gdpg, X)
+        nf, upop, ugdp, world_pop, world_gdp, unassigned, ppop, pgdp = aggregate(key, ug, popg, gdpg, X)
+        uy, sov, whole, ev_y = unit_year(y, date, act, calib, nf, upop, ugdp, world_pop, world_gdp, X)
+        sov_rows += sov
         unit_rows.append(uy)
 
-        upop_map = dict(zip(uy.unit_id, uy.population))
         for (fid, pid), pv in ppop.items():
             piece_year_rows.append((y, fid, pid, pv, pgdp[(fid, pid)]))
 
@@ -474,16 +553,7 @@ def main():
         print(y, f"world {world_pop / 1e9:.3f} bn, GDP {world_gdp / 1e12:.2f} tn, units {len(act)}, "
               f"unassigned {unassigned:.0f}, pattern {basis}", flush=True)
 
-    pd.concat(unit_rows).to_csv(WORK / "unit_year.csv", index=False)
-    pd.concat(sov_rows).to_csv(WORK / "sovereign_year.csv", index=False)
-    py = pd.DataFrame(piece_year_rows, columns=["year", "unit_id", "piece_id", "population", "gdp_2011usd"])
-    uyall = pd.concat(unit_rows)[["year", "unit_id", "population"]].rename(columns={"population": "unit_pop"})
-    py = py.merge(uyall, on=["year", "unit_id"], how="left")
-    py["pop_share_unit"] = np.where(py.unit_pop > 0, py.population / py.unit_pop, np.nan)
-    wp = pd.DataFrame(year_rows).set_index("year").world_population
-    py["pop_share_world"] = py.population / py.year.map(wp)
-    py.drop(columns="unit_pop").to_csv(WORK / "piece_year.csv", index=False)
-    pd.DataFrame(year_rows).to_csv(WORK / "years.csv", index=False)
+    write_outputs(unit_rows, sov_rows, piece_year_rows, year_rows)
 
 
 if __name__ == "__main__":

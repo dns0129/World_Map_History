@@ -9,7 +9,7 @@
 | **1900–1934 七个断面** | 同样的省级区划、实际控制、阵营与城市：1900 年八国联军攻入北京、1914 年一战爆发、1915 年意大利参战、1916 年罗马尼亚参战、1917 年美国参战、1918 年停战、1934 年长征开始 | [ww2/README.md](ww2/README.md#19001934-年的七个断面) |
 | **1946–1991 六个断面** | 同样的省级区划、实际控制、冷战阵营与城市：1946 年国共内战全面爆发、1947 年印巴分治、1948 年辽沈战役开始、1949 年中华人民共和国成立、1953 年朝鲜停战、1991 年苏联解体 | [ww2/README.md](ww2/README.md#19461991-年的六个断面) |
 | **2026 年当今世界** | 同一张地图的第七个标签页：当今的一级行政区、法理与实际控制、军事同盟、2025–26 年人口、首都与重要工业城市和港口 | [ww2/README.md](ww2/README.md#2026-年地图) |
-| **1942 年东线态势图（OKH “Lage Ost”）** | 德国陆军总司令部作战处 1942 年每月 1 日的东线态势图原件扫描（北、南两张），来自俄罗斯国防部中央档案馆第 500 号全宗、germandocsinrussia.org 数字化项目 | [okh_lage_ost_1942/README.md](okh_lage_ost_1942/README.md) |
+| **1942 年东线态势图（OKH “Lage Ost”）** | 德国陆军总司令部作战处 1942 年每月 1 日的东线态势图原件扫描（北、南两张），来自俄罗斯国防部中央档案馆第 500 号全宗、germandocsinrussia.org 数字化项目。网站条款只允许研究用途，扫描件不放入仓库，用 `python3 scripts/okh_lage_ost.py` 下载拼接到 `okh_lage_ost_1942/` | [scripts/okh_lage_ost.py](scripts/okh_lage_ost.py) |
 
 ![1942 年地图](maps/1942.png)
 
@@ -20,6 +20,12 @@
 ```sh
 git clone https://github.com/dns0129/World_Map_History.git
 cd World_Map_History
+```
+
+数据库、地图数据、逐年导出和逐年地图（约 810 MB）不在 git 中，而是作为 [GitHub Release](https://github.com/dns0129/World_Map_History/releases) 的附件发布，版本和每个文件的 sha256 记在 `data_release.json`。克隆后先下载：
+
+```sh
+python3 scripts/data_release.py fetch     # 全部（约 460 MB 压缩包）；只要地图：fetch ww2-maps-data.tar.gz
 ```
 
 ### 1. 交互地图（1900–1991 十九个断面与 2026 年）
@@ -45,10 +51,15 @@ npx --yes http-server -p 8000        # 已安装 Node.js 时也可以用这个
 | http://localhost:8000/1917-04-06.html | 美国对德国宣战 |
 | http://localhost:8000/1918-11-11.html | 贡比涅停战协定生效，一战结束 |
 | http://localhost:8000/1934-10-16.html | 中央红军开始长征 |
+| http://localhost:8000/1937-07-07.html … 1939-03-27.html | 中日战争六个关键日：卢沟桥事变、上海与太原失守、南京沦陷、徐州失守、武汉与广州失守后、南昌失守（见 [说明](ww2/README.md#19371939-年中日战争关键日)） |
 | http://localhost:8000/1939-09-01.html | 德国入侵波兰 |
 | http://localhost:8000/1940-07-01.html | 法国停战后 |
 | http://localhost:8000/1941-12-07.html | 珍珠港事件当日 |
 | http://localhost:8000/1942-11-01.html | 轴心国最大范围 |
+| http://localhost:8000/1941-06-22.html … 1941-12-01.html | 1941 年 6–12 月断面（苏德战争开始与每月 1 日，见 [说明](ww2/README.md#1941-年-612-月断面)） |
+| http://localhost:8000/1942-01-01.html … 1942-12-01.html | 1942 年逐月断面（每月 1 日，见 [说明](ww2/README.md#1942-年逐月断面)） |
+| http://localhost:8000/1943-01-01.html … 1944-12-01.html | 1943、1944 年逐月断面（见 [说明](ww2/README.md#19431944-年逐月断面)） |
+| http://localhost:8000/1945-01-01.html … 1945-05-01.html | 1945 年 1–5 月逐月断面（见 [说明](ww2/README.md#1945-年-15-月断面)） |
 | http://localhost:8000/1944-06-06.html | 诺曼底登陆日 |
 | http://localhost:8000/1945-09-02.html | 日本签署投降书 |
 | http://localhost:8000/1946-06-26.html | 国民政府军进攻中原解放区，国共内战全面爆发 |
@@ -84,10 +95,15 @@ npx --yes http-server -p 8000        # 已安装 Node.js 时也可以用这个
 
 | 文件 | 内容 |
 |---|---|
-| `db/ww2_divisions_1939_1945.sqlite` | 1939–1945 历史省级区划与实际控制 |
-| `db/divisions_1900_1934.sqlite` | 1900–1934 七个断面的省级区划与实际控制（表结构相同） |
-| `db/divisions_1946_1991.sqlite` | 1946–1991 六个断面的省级区划与实际控制（表结构相同） |
+| `db/ww2_divisions_1939_1945.sqlite` | 1939–1945 六个事件日的历史省级区划与实际控制（27 MB） |
+| `db/ww2_china_1937_1939.sqlite` | 1937–1939 中日战争六个关键日（表结构相同） |
+| `db/ww2_monthly_1941.sqlite` … `ww2_monthly_1945.sqlite` | 1941–1944 年逐月断面与 1945 年 1–5 月断面，每年一个文件（31–40 MB，表结构相同） |
+| `db/divisions_1900_1934.sqlite` | 1900–1934 四个事件日（表结构相同） |
+| `db/divisions_1915_1917.sqlite` | 1915–1917 三个一战事件日（表结构相同） |
+| `db/divisions_1946_1991.sqlite` | 1946–1991 六个断面（表结构相同） |
 | `db/world_history_1900_2000.sqlite` | 1900–2000 逐年世界数据 |
+
+每个文件都是完整的：表、视图（`snapshot_full`）、索引相同，并带有它的断面用到的全部区划、切块、控制方、规则和来源，单独打开即可查询，不需要同时打开其他文件。逐月文件中的区划多为事件日数据库里的同一批历史省份（复制了一份），`meta` 表的 `base_database` 写明它们来自哪个事件日。
 
 几何存为 GeoJSON 文本，不需要 GIS 扩展。可以用命令行、Python 或图形界面打开：
 
@@ -99,8 +115,20 @@ sqlite> SELECT snapshot, bloc, SUM(population_est) FROM snapshot_full GROUP BY s
 
 ```python
 import sqlite3, pandas as pd
-con = sqlite3.connect("db/ww2_divisions_1939_1945.sqlite")
-df = pd.read_sql("SELECT * FROM snapshot_full WHERE snapshot = '1942-11-01'", con)
+con = sqlite3.connect("db/ww2_monthly_1943.sqlite")
+df = pd.read_sql("SELECT * FROM snapshot_full WHERE snapshot = '1943-07-01'", con)
+```
+
+需要跨文件查询时（例如 1939–1945 全部断面的阵营人口），用 `ATTACH` 把几个文件挂在一起，再 `UNION ALL`：
+
+```sql
+ATTACH 'db/ww2_monthly_1943.sqlite' AS m43;
+ATTACH 'db/ww2_monthly_1944.sqlite' AS m44;
+SELECT snapshot, bloc, SUM(population_est) FROM (
+  SELECT snapshot, bloc, population_est FROM main.snapshot_full
+  UNION ALL SELECT snapshot, bloc, population_est FROM m43.snapshot_full
+  UNION ALL SELECT snapshot, bloc, population_est FROM m44.snapshot_full)
+GROUP BY snapshot, bloc ORDER BY snapshot;
 ```
 
 图形界面可用 [DB Browser for SQLite](https://sqlitebrowser.org/)（免费）：打开文件后在 “Browse Data” 中选表或视图。
@@ -115,22 +143,23 @@ exports/geometry/units.topojson 全部历史政治单元边界
 
 ### 4. 在线访问（可选）
 
-- **GitHub Pages：** 在仓库的 Settings → Pages 中，把 Source 设为 “Deploy from a branch”，分支选 `main`、目录 `/ (root)`，保存。几分钟后地图可在 `https://dns0129.github.io/World_Map_History/ww2/maps/` 打开。
-- **Claude Artifact：** 本仓库构建时另发布了一份私有链接（https://claude.ai/artifact/3s4bb36QVmiUUhQAaxUnXf）。只有所有者和被分享的人能打开。
+- **GitHub Pages：** 在仓库的 Settings → Pages 中，把 Source 设为 “GitHub Actions”。之后每次推送到 `main`，`.github/workflows/pages.yml` 会下载 `data_release.json` 所指的地图数据并部署，地图在 https://dns0129.github.io/World_Map_History/ 打开（转到 `ww2/maps/`，可带 `#日期`，如 `…/World_Map_History/#1944-06-06`）。
+- **Claude Artifact：** 本仓库构建时另发布了一份私有链接（https://claude.ai/artifact/3s4bb36QVmiUUhQAaxUnXf）。只有所有者和被分享的人能打开。更新时用 `scripts/publish_artifact.py` 只上传变了的文件（见 [SOP](docs/snapshot-sop.md#发布到-claude-artifact)）。
 
 ## 目录
 
 ```
 README.md                  本文件
 docs/world-1900-2000.md    1900–2000 部分的说明（方法、表结构、核对结果、局限）
+docs/snapshot-sop.md       新增断面的生产 SOP（规则、录入卡片、文件清单、流程）
 ww2/README.md              1900–1991 各断面的说明（区划来源、省级合并、覆盖程度、控制判定、表结构）
 ww2/maps/                  交互地图（index.html、每个断面一页、data/、vendor/）
 ww2/coverage*.csv          各层级、各政治单元的省级区划覆盖程度（*_1900_1934 为早期七个断面，*_1946_1991 为战后六个断面）
-db/                        两个 SQLite 数据库
+db/                        SQLite 数据库（事件日、逐月断面、逐年数据各自成文件）
 exports/                   1900–2000 逐年导出文件
 maps/                      1900–2000 逐年地图
 curated/                   人工整理的控制事件、控制规则、名称对照
-okh_lage_ost_1942/         1942 年每月 1 日的 OKH 东线态势图扫描（scripts/okh_lage_ost.py 下载拼接）
+okh_lage_ost_1942/         1942 年每月 1 日的 OKH 东线态势图扫描（scripts/okh_lage_ost.py 下载拼接，不提交）
 scripts/                   全部构建脚本
 build_all.sh               一键重建
 checks.json                1900–2000 数据库的核对结果
@@ -141,14 +170,16 @@ checks.json                1900–2000 数据库的核对结果
 所有数据都可以从原始来源重新生成。原始下载放在 `raw/`，中间文件放在 `work/`，这两个目录不提交。
 
 ```sh
-pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas pyreadr osmium
+pip install -r requirements.txt
 ./build_all.sh
 ```
+
+**版本锁定：** `requirements.txt` 写明各 Python 库的版本；`sources.json` 写明每个数据源的版本（git 仓库的提交、OpenHistoricalMap 的 planet 文件），下载脚本按它取数据，不取“最新”，所以重建读到的数据与上次构建相同。`build_all.sh` 下载后运行 `python3 scripts/sources.py --check`，按校验值核对 `raw/` 的各个文件夹，不一致就停下。要更新某个数据源：改 `sources.json` 中它的提交或文件，重新下载，再运行 `python3 scripts/sources.py --record`。
 
 首次全流程约 2 小时，需要下载约 4 GB：
 
 - 1900–2000 部分约 30 分钟；
-- 1900–1991 部分需要 OpenHistoricalMap 全球数据约 1.3 GB。三个时期、2026 年图层、网页地图和 1915–1917 年三个断面共 68 个任务，由 `scripts/pipeline.py` 调度，首次构建约 80 分钟（16 GB 内存的机器上）。
+- 1900–1991 部分需要 OpenHistoricalMap 全球数据约 1.3 GB。三个时期、2026 年图层、网页地图和追加的断面（目前为 1915–1917 年三个）共 68 个任务，由 `scripts/pipeline.py` 调度，首次构建约 80 分钟（16 GB 内存的机器上）。
 
 `pipeline.py` 为每个任务记下输入的指纹，再次运行时只重算输入变了的部分：
 
@@ -160,15 +191,19 @@ pip install shapely pyproj rasterio numpy scipy pillow matplotlib pyshp pandas p
 
 各步骤见 `build_all.sh` 和 `scripts/pipeline.py` 开头的说明。
 
-仅重建 1915、1916、1917 三个交互断面时，可以直接使用仓库内已有的两个数据库和地图数据，无需下载原始资料：
+程序的分层、两条构建路径共用的控制规则和单元测试（`python3 -m unittest discover tests`）见 [程序结构](docs/architecture.md)。
+
+按历史地图描出的资料（`curated/` 中的战线、根据地、1945 年图集）怎样从原图复现，见 [描图资料的来源与复现](docs/tracing.md)：自动描出的部分由 `scripts/trace/` 的脚本从原图重新生成（`--check` 与仓库逐字节比较），目视读出的部分以读数为原始资料。
+
+仅重建 1915、1916、1917 三个交互断面（以及 `scripts/added_dates.py` 中以后追加的其他日期）时，可以直接使用仓库内已有的数据库和地图数据，无需下载原始资料：
 
 ```sh
-pip install shapely pyproj numpy pandas pyshp rasterio
-python3 scripts/ww1_maps.py
+pip install -r requirements.txt
+python3 scripts/add_snapshots.py
 python3 scripts/ww2_html.py
 ```
 
-三个断面写入原有的 `db/divisions_1900_1934.sqlite`，复用原地图的界面、数据格式、地形和水系。省级人口沿用既有历史区划的空间分布，缩放到同一逐年数据库的人口估计；前线和部分占领区为明确标注的近似，详见 [一战断面说明](ww2/README.md#19151917-三个一战事件日)。
+新增断面的规则和流程见 [docs/snapshot-sop.md](docs/snapshot-sop.md)。1915–1917 三个断面写入原有的 `db/divisions_1900_1934.sqlite`，复用原地图的界面、数据格式、地形和水系。省级人口沿用既有历史区划的空间分布，缩放到同一逐年数据库的人口估计；前线和部分占领区为明确标注的近似，详见 [一战断面说明](ww2/README.md#19151917-三个一战事件日)。
 
 ## 来源与许可
 

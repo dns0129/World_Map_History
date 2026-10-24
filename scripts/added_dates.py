@@ -1,0 +1,615 @@
+"""Dates added to a set's database and map data without rebuilding the set (add_snapshots.py).
+
+A group adds dates to the database of one set (ww2 1939-45, early 1900-34, postwar 1946-91). Its dates reuse
+the historical divisions of one date already in that database (the base date): the divisions in force on the
+base date that are still in force on the new date, plus those of the database with a start or end date
+between the two. Political units come from CShapes on the new date, population from the yearly database.
+Everything that is particular to a date is written here, so that adding a date means adding a Snapshot (and
+its control rules and cities), not changing the scripts.
+
+This module holds data only: the pipeline fingerprints the scripts that import it, so editing it reruns only
+add_snapshots.py and ww2_html.py, not the build of the sets.
+"""
+from dataclasses import dataclass, field
+
+from controllers import STATE
+
+
+@dataclass
+class Snapshot:
+    date: str                       # YYYY-MM-DD, the exact day
+    title_zh: str
+    title_en: str
+    allied: set                     # controller codes (gwcode, or the group's negative codes) in each bloc;
+    axis: set                       # -20 is always "contested", all others are "neutral"
+    bloc_note: str                  # legend: who is in which bloc, who is not yet (Chinese)
+    city_code: str                  # the date's code in the dates/capital/seat columns of the group's city table
+    bloc_names: dict = None         # legend names of the four blocs; the group's when None
+    bloc_title: str = None          # legend heading; the group's when None
+    control_note: str = None        # legend: the de facto control; the group's when None
+    names: dict = field(default_factory=dict)   # controller names on this date only {gw: (en, zh)}; the
+                                                # political units with that gwcode take the name too
+    checks: dict = field(default_factory=dict)  # what verify_added_snapshots.py checks on this date:
+    #   blocs {gw: bloc}; places [(name, lon, lat, gw)]: the one piece at the point is held by gw;
+    #   cities_in / cities_out [name_zh]: shown / not shown; controller_zh {gw: {names}}: all the names gw has
+
+
+@dataclass
+class Group:
+    key: str                        # prefix of what the group adds: divisions for land without provinces
+                                    # "ADD-CSH-<unit>-<tile>" (in tiles of add_snapshots.TILE_DEG), control_rules rows "key:<row>",
+                                    # sources "key-control-<n>"; must not change once built
+    set: str                        # ww2 / early / postwar
+    base: str                       # the date whose divisions are reused
+    rules: str                      # curated/<rules>: the group's control rules (see add_snapshots.py)
+    cities: str                     # curated/<cities>: city table of the set
+    db: str                         # db/<db>: the database the group's dates are written to (with a copy of the
+                                    # divisions they use; groups may share one); the set's own database keeps
+                                    # only the set's dates
+    pop_method: str                 # pop_methods row of the database
+    control_note: str               # legend default for its dates
+    bloc_names: dict
+    bloc_title: str
+    snapshots: list
+    density_from: tuple = ()        # dates whose province densities weigh the new pieces where the base date
+                                    # has none (the base date's own come first)
+    inherit: tuple = ()             # control sources of the base date carried over to every date, piece by
+                                    # piece (enclaves curated for the base date; rule:<row> numbers of the set's
+                                    # rules table)
+    keep_whole: tuple = ()          # control sources of the base date kept for the whole division
+    names: dict = field(default_factory=dict)   # controllers without a state of their own {gw: (en, zh)}
+    coast_deg: float = 0            # masks of present-day regions reach this far out to sea (degrees), for
+                                    # historical coasts drawn further out than the present-day ones
+    min_piece_km2: float = 0        # pieces smaller than this are merged into a neighbour (add_snapshots.absorb)
+    client_states: bool = False     # control view: client states (Manchukuo, Mengjiang, ...) and Vichy France as
+                                    # countries of their own, as on the 1939-45 dates (ww2_webmap.country_key)
+    meta_key: str = None            # meta rows <meta_key>_method, <meta_key>_control; key when None
+    label: str = None               # sources: "<label> control reference"; key when None
+    period: str = ""                # sources: "<period> event-day control facts"
+
+
+WW1 = Group(
+    key="ww1", set="early", base="1914-08-04", rules="ww1_region_control.csv", cities="cities_1900_1934.csv",
+    db="divisions_1915_1917.sqlite",
+    density_from=("1918-11-11",), inherit=("rule:8", "rule:9", "rule:69", "overlay:kwantung"),
+    keep_whole=("overlay:kwantung",), meta_key="wwi", label="WWI", period="1915-1917",
+    pop_method=("1914 historical province population density (original GHS-POP-derived estimates), "
+                "or the existing 1918 estimate where no 1914 province exists; "
+                "area-adjusted for new pieces and scaled to the same political unit's annual "
+                "population in world_history_1900_2000.sqlite; rounded with conserved unit totals"),
+    control_note=("控制区沿用原地图的省级近似方法。西线、加利西亚、非洲战场等没有精确战线资料的省份标为交战区；"
+                  "部分占领范围借用同一数据库的现代地区轮廓作近似裁切，并加斜线，不代表精确战线。"
+                  "人口为该年估计，并非事件日普查。历史区划缺失处保留整个政治单元。"),
+    bloc_names={"allied": "协约国及其盟国（已参战）", "axis": "同盟国（已参战）", "neutral": "中立国 / 尚未参战",
+                "contested": "交战区"},
+    bloc_title="参战国 · 人口",
+    names={-1: ("Allied forces", "协约国联军"), -20: ("Contested front", "交战区（双方争夺）"),
+           -70: ("Kingdom of Hejaz", "汉志王国"), -73: ("Outer Mongolia (Bogd Khanate)", "外蒙古（博克多汗国）"),
+           -76: ("Greek Provisional Government of National Defence", "希腊国民防卫临时政府")},
+    snapshots=[
+        Snapshot(
+            "1915-05-23", "意大利对奥匈帝国宣战，加入协约国", "Italy declares war on Austria-Hungary",
+            allied={200, 220, 365, 340, 345, 341, 211, 20, 900, 920, 560, 740, 325, -1},
+            axis={255, 300, 640}, city_code="15",
+            bloc_note="意大利当日对奥匈宣战（战争状态次日生效），尚未对德国宣战；日本、黑山和奥斯曼已经参战，保加利亚、罗马尼亚、"
+                      "葡萄牙、美国、中国、希腊仍中立。东线在戈尔利采攻势期间，不能套用 1915 年秋的占领范围。",
+            checks=dict(blocs={325: "allied", 255: "axis", 300: "axis", 710: "neutral", 2: "neutral", 355: "neutral",
+                               235: "neutral"},
+                        places=[("Paris", 2.35, 48.86, 220), ("Berlin", 13.4, 52.52, 255), ("Beijing", 116.4, 39.9, 710),
+                                ("Riga", 24.11, 56.95, 365), ("Basra", 47.78, 30.51, 200),
+                                ("Istanbul", 28.97, 41.04, 640), ("Warsaw", 21.01, 52.23, 365)],
+                        cities_in=["彼得格勒"], cities_out=["圣彼得堡"])),
+        Snapshot(
+            "1916-08-27", "罗马尼亚对奥匈帝国宣战，加入协约国", "Romania declares war on Austria-Hungary",
+            allied={200, 220, 365, 340, 345, 341, 211, 20, 900, 920, 560, 740, 325, -1, 235, 360, -70},
+            axis={255, 300, 640, 355}, city_code="16",
+            bloc_note="罗马尼亚当日对奥匈宣战；意大利当日另对德国宣战。葡萄牙已于 3 月参战，保加利亚属同盟国。美国、中国、希腊仍未"
+                      "正式参战。罗马尼亚尚未遭到同盟国的冬季占领。",
+            checks=dict(blocs={325: "allied", 255: "axis", 300: "axis", 710: "neutral", 2: "neutral", 355: "axis",
+                               235: "allied"},
+                        places=[("Paris", 2.35, 48.86, 220), ("Berlin", 13.4, 52.52, 255), ("Beijing", 116.4, 39.9, 710),
+                                ("Riga", 24.11, 56.95, 365), ("Basra", 47.78, 30.51, 200),
+                                ("Istanbul", 28.97, 41.04, 640), ("Warsaw", 21.01, 52.23, 255)],
+                        cities_in=["彼得格勒"], cities_out=["圣彼得堡"])),
+        Snapshot(
+            "1917-04-06", "美国对德国宣战，加入第一次世界大战", "The United States declares war on Germany",
+            allied={200, 220, 365, 340, 345, 341, 211, 20, 900, 920, 560, 740, 325, -1, 235, 360, 2, -70, -76},
+            axis={255, 300, 640, 355}, city_code="17",
+            names={365: ("Russia (Provisional Government)", "俄国（临时政府）")},
+            bloc_note="美国当日对德国宣战（对奥匈宣战在 12 月）；俄国临时政府继续参加协约国战争。中国、巴西、暹罗尚未对德宣战，"
+                      "希腊尚未统一参战；萨洛尼卡临时政府及协约国驻军另作近似处理。俄国此时尚未发生十月革命，也未签订布列斯特和约。",
+            checks=dict(blocs={325: "allied", 255: "axis", 300: "axis", 710: "neutral", 2: "allied", 355: "axis",
+                               235: "allied"},
+                        places=[("Paris", 2.35, 48.86, 220), ("Berlin", 13.4, 52.52, 255), ("Beijing", 116.4, 39.9, 710),
+                                ("Riga", 24.11, 56.95, 365), ("Basra", 47.78, 30.51, 200),
+                                ("Istanbul", 28.97, 41.04, 640), ("Warsaw", 21.01, 52.23, 255),
+                                ("Baghdad", 44.37, 33.32, 200)],
+                        cities_in=["彼得格勒", "雅西"], cities_out=["圣彼得堡"],
+                        controller_zh={365: {"俄国（临时政府）"}})),
+    ],
+)
+
+# 1942 month by month, from the divisions and control of 1942-11-01 (the greatest Axis extent). Every control of
+# that date that does not come from CShapes or a whole-unit event (the curated rules and the East Asia layers) is
+# carried over piece by piece; curated/ww2_1942_region_control.csv then says what was different on each date.
+# Blocs as on the 1939-45 dates (controllers.WW2_BLOCS): Ethiopia and Iraq with the Allies, as on 1942-11-01.
+_ALLIED42 = {200, 20, 900, 920, 560, 750, 290, 210, 211, 212, 385, 710, -1, -2, -4, 2, 365, 345, 350,
+             40, 41, 42, 90, 91, 92, 93, 94, 95, 530, 645}   # Cuba to Panama declared war in December 1941
+_AXIS42 = {255, 325, 740, 317, -10, -12, 310, 360, 355, 375}
+_NOTE42 = ("前线与占领区按整省、整区近似（斜线）；中国战场的日占区按日军《中國軍全般図》（1941 年 8 月下旬）描出，"
+           "浙赣战役、滇西、第三次长沙会战按作战经过图与史书逐月补入（斜线）；华北的中共根据地与游击区按北支那方面军 1942 年 9 月《治安概况》图的未治安地区描出，陕甘宁边区按同期敌情要图（斜线），华中沿用 1941–42 年范围。")
+_CHECKS42 = dict(places=[("Berlin", 13.4, 52.52, 255), ("Moscow", 37.62, 55.75, 365), ("Chongqing", 106.55, 29.56, 710)])
+WW2_1942 = Group(
+    key="m42", set="ww2", base="1942-11-01", rules="ww2_1942_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_monthly_1942.sqlite",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1942 monthly", period="1942",
+    inherit=("overlay:ccp_bases_1941_42", "overlay:indochina_ceded", "overlay:kwantung", "overlay:manchukuo",
+             "overlay:mengjiang", "overlay:occupied_zone_1942", "rule:2", "rule:5", "rule:8", "rule:9", "rule:10",
+             "rule:11", "rule:12", "rule:14", "rule:15", "rule:21", "rule:22", "rule:23", "rule:29", "rule:30",
+             "rule:32", "rule:33", "rule:34", "rule:35", "rule:36", "rule:43", "rule:44", "rule:45", "rule:46",
+             "rule:48", "rule:50", "rule:52", "rule:54", "rule:55", "rule:59", "rule:60", "rule:61", "rule:63",
+             "rule:67", "rule:68", "rule:70", "rule:71", "rule:72", "rule:75", "rule:76", "rule:78", "rule:79",
+             "rule:97", "rule:98", "rule:99", "rule:100", "rule:101", "rule:102"),
+    pop_method=("Province population pattern of 1942-11-01 (GHS-POP 1975 shares of the 1939-45 database), "
+                "area-adjusted for new pieces and scaled to each political unit's 1942 population in "
+                "world_history_1900_2000.sqlite; rounded with conserved unit totals"),
+    control_note="控制沿用 1942-11-01 的分区规则与东亚图层，再按各月的战局改写。" + _NOTE42,
+    bloc_names={"allied": "同盟国一方", "axis": "轴心国一方", "neutral": "中立 / 维希", "contested": "前线争夺"},
+    bloc_title="实际控制阵营 · 人口",
+    # the short names of the 1939-45 dates (controllers.STATE; the United Nations do not appear), and Darlan's
+    # French North and West Africa
+    names={**{k: v for k, v in STATE.items() if k != -3},
+           -5: ("French North and West Africa (Darlan)", "法属北非与西非（达尔朗）")},
+    snapshots=[
+        Snapshot(
+            "1942-01-01", "《联合国家宣言》签署；日军进攻马来亚与菲律宾",
+            "Declaration by United Nations; Japan advances in Malaya and the Philippines",
+            allied=_ALLIED42, axis=_AXIS42, city_code="4201",
+            bloc_note="1 月 1 日 26 国在华盛顿签署《联合国家宣言》。同盟国一方含英联邦、苏联、美国、中华民国、自由法国、各流亡政府，"
+                      "以及 1941 年 12 月对轴心国宣战的古巴、海地、多米尼加和中美洲各国。泰国 1941 年 12 月 21 日与日本结盟，"
+                      "1 月 25 日才对英美宣战，此时计入中立。",
+            control_note="苏军冬季反攻：莫斯科州西部、图拉州南部、加里宁、卡卢加仍在争夺；刻赤半岛已被苏军收复，塞瓦斯托波尔被围。"
+                         "英军十字军行动后收复昔兰尼加。日军已占吕宋大部、马来亚北部、槟城、沙捞越、香港、关岛。" + _NOTE42,
+            checks=dict(blocs={800: "neutral", 70: "neutral"}, places=_CHECKS42["places"] + [("Benghazi", 20.07, 32.12, 200)])),
+        Snapshot(
+            "1942-02-01", "日军逼近新加坡，隆美尔重夺班加西", "Japan nears Singapore; Rommel retakes Benghazi",
+            allied=_ALLIED42, axis=_AXIS42 | {800}, city_code="4202",
+            bloc_note="泰国 1 月 25 日对英美宣战，计入轴心国一方。墨西哥（5 月）、巴西（8 月）尚未参战。",
+            control_note="英军 1 月 31 日撤入新加坡岛，马来半岛全境为日军占领；日军攻占缅甸丹那沙林、婆罗洲东岸与北苏拉威西、"
+                         "拉包尔。苏军巴尔文科沃突出部（哈尔科夫以南）与杰米扬斯克一带激战；北非轴心国军重占班加西。" + _NOTE42,
+            checks=dict(blocs={800: "axis"})),
+        Snapshot(
+            "1942-03-01", "新加坡陷落后，日军登陆爪哇", "After the fall of Singapore: Japanese landings on Java",
+            allied=_ALLIED42, axis=_AXIS42 | {800}, city_code="4203",
+            bloc_note="泰国计入轴心国一方。墨西哥、巴西尚未参战。",
+            control_note="新加坡 2 月 15 日陷落；日军已占婆罗洲、苏拉威西、摩鹿加、巴厘、帝汶与苏门答腊南部，3 月 1 日登陆爪哇（交战）；"
+                         "缅甸日军渡过锡当河，仰光、勃固为交战区。北非两军对峙于加查拉防线。" + _NOTE42),
+        Snapshot(
+            "1942-04-01", "日军占领荷属东印度与下缅甸", "Japan holds the Dutch East Indies and Lower Burma",
+            allied=_ALLIED42, axis=_AXIS42 | {800}, city_code="4204",
+            bloc_note="泰国计入轴心国一方。墨西哥、巴西尚未参战。",
+            control_note="荷属东印度 3 月 8 日投降；仰光 3 月 8 日、同古 3 月 30 日失守；日军 3 月 23 日占领安达曼群岛，3 月占莱城、"
+                         "萨拉马瓦。菲律宾巴丹半岛仍在抵抗。" + _NOTE42),
+        Snapshot(
+            "1942-05-01", "巴丹失守，日军攻占曼德勒", "After Bataan: Japan takes Mandalay",
+            allied=_ALLIED42, axis=_AXIS42 | {800}, city_code="4205",
+            bloc_note="泰国计入轴心国一方。墨西哥 5 月 22 日才参战。",
+            control_note="巴丹 4 月 9 日投降，科雷希多尔仍在坚守；日军登陆宿务、班乃与棉兰老；缅甸腊戍、曼德勒失守，英中军向钦敦江撤退。"
+                         "刻赤半岛与巴尔文科沃突出部仍为苏军控制。" + _NOTE42),
+        Snapshot(
+            "1942-06-01", "第二次哈尔科夫战役之后，加查拉激战", "After the Second Battle of Kharkov; the Battle of Gazala",
+            allied=_ALLIED42 | {70}, axis=_AXIS42 | {800}, city_code="4206",
+            bloc_note="墨西哥 5 月 22 日对德意日宣战，计入同盟国一方；泰国计入轴心国一方。巴西尚未参战。",
+            control_note="德军 5 月收复刻赤半岛、歼灭巴尔文科沃突出部，塞瓦斯托波尔被围；加查拉战役进行中（托布鲁克一带为交战区）；"
+                         "菲律宾、缅甸全境失守；英军 5 月占领马达加斯加北端迭戈苏亚雷斯；泰国军队进入景栋。" + _NOTE42),
+        Snapshot(
+            "1942-07-01", "德军发动“蓝色行动”，非洲军团抵阿拉曼", "Case Blue begins; the Afrika Korps at El Alamein",
+            allied=_ALLIED42 | {70}, axis=_AXIS42 | {800}, city_code="4207",
+            bloc_note="墨西哥计入同盟国一方，泰国计入轴心国一方。巴西尚未参战。",
+            control_note="德军 6 月 28 日向沃罗涅日、顿河发动夏季攻势，塞瓦斯托波尔最后的战斗；托布鲁克 6 月 21 日失守，轴心国军进入埃及"
+                         "马特鲁省，止于阿拉曼。日军 5 月占领图拉吉。" + _NOTE42),
+        Snapshot(
+            "1942-08-01", "德军突入顿河大弯曲部与库班", "The Germans in the Don bend and the Kuban",
+            allied=_ALLIED42 | {70}, axis=_AXIS42 | {800}, city_code="4208",
+            bloc_note="墨西哥计入同盟国一方，泰国计入轴心国一方。巴西 8 月 22 日才参战。",
+            control_note="罗斯托夫 7 月 24 日失守，A 集团军群进入库班与斯塔夫罗波尔，B 集团军群在顿河大弯曲部逼近斯大林格勒；"
+                         "日军在新几内亚布纳登陆（7 月 21 日），在瓜达尔卡纳尔岛修建机场。" + _NOTE42),
+        Snapshot(
+            "1942-09-01", "斯大林格勒与瓜达尔卡纳尔岛的争夺", "The battles of Stalingrad and Guadalcanal",
+            allied=_ALLIED42 | {70, 140}, axis=_AXIS42 | {800}, city_code="4209",
+            bloc_note="巴西 8 月 22 日对德意宣战，计入同盟国一方；墨西哥计入同盟国一方，泰国计入轴心国一方。",
+            control_note="德军 8 月 23 日抵伏尔加河，斯大林格勒为交战区；克拉斯诺达尔、迈科普失守，前线到捷列克河；美军 8 月 7 日登陆瓜达尔卡纳尔岛；"
+                         "日军 8 月 26 日占领瑙鲁。" + _NOTE42),
+        Snapshot(
+            "1942-10-01", "斯大林格勒巷战，英军推进马达加斯加", "Street fighting in Stalingrad; the British advance in Madagascar",
+            allied=_ALLIED42 | {70, 140}, axis=_AXIS42 | {800}, city_code="4210",
+            bloc_note="墨西哥、巴西计入同盟国一方，泰国计入轴心国一方。",
+            control_note="斯大林格勒巷战；高加索前线在捷列克河与图阿普谢以北；英军 9 月占领马达加斯加的马任加、塔马塔夫、塔那那利佛，"
+                         "向南推进。阿拉曼两军对峙。" + _NOTE42),
+        Snapshot(
+            "1942-12-01", "“火炬”与“天王星”行动之后", "After Operation Torch and Operation Uranus",
+            allied=_ALLIED42 | {70, 140, -5}, axis=_AXIS42 | {800}, city_code="4212",
+            bloc_note="法属北非与西非在达尔朗与盟国的协议（11 月 22 日）后倒向同盟国，单列；留尼汪 11 月 28 日加入自由法国。"
+                      "墨西哥、巴西计入同盟国一方，泰国计入轴心国一方。",
+            control_note="德意 11 月 11 日占领维希法国本土（意军占罗讷河以东与科西嘉）；盟军登陆摩洛哥、阿尔及利亚后向突尼斯推进，"
+                         "轴心国军据守突尼斯东北部；英军收复昔兰尼加；苏军 11 月 23 日合围斯大林格勒的德军第六集团军（城区仍为交战区）。"
+                         + _NOTE42,
+            checks=dict(blocs={-5: "allied"}, places=_CHECKS42["places"] + [("Algiers", 3.06, 36.75, -5),
+                                                                              ("Tunis", 10.18, 36.8, -10)])),
+    ],
+)
+
+# 1941 from the invasion of the Soviet Union to December, from the divisions and control of 1941-12-07 (Pearl
+# Harbor). The Eastern Front follows the OKH situation maps (curated/frontlines_1941, scripts/lagekarten.py);
+# curated/ww2_1941_region_control.csv also undoes what came after each date elsewhere (Syria, Iran, Indochina).
+_ALLIED_41 = {200, 20, 900, 920, 560, 750, 290, 210, 211, 212, 385, 710, -1, -2, -4, 365, 345, 350}  # no US yet
+_AXIS_41 = {255, 325, 740, 317, -10, -12, 310, 360, 355, 375}
+_NOTE41 = "东线按德国陆军总司令部的每日态势图“Lage Ost”描出的德军前沿（线后 2.5° 以内为德方，其余沿用 1941-12-07 的分区控制）；其他战场按整省、整区近似（斜线）。"
+_CHECKS41 = dict(places=[("Berlin", 13.4, 52.52, 255), ("Moscow", 37.62, 55.75, 365), ("Chongqing", 106.55, 29.56, 710)])
+_BLOC41 = ("同盟国一方为英联邦、苏联、中华民国、自由法国与各流亡政府（南斯拉夫、希腊 4 月起）；美国尚未参战（12 月 8 日对日宣战），"
+           "按中立计。轴心国一方含罗马尼亚、匈牙利、斯洛伐克、克罗地亚、保加利亚与芬兰。")
+WW2_1941 = Group(
+    key="m41", set="ww2", base="1941-12-07", rules="ww2_1941_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_monthly_1941.sqlite",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1941 monthly", period="1941",
+    inherit=("overlay:ccp_bases_1941_42", "overlay:indochina_ceded", "overlay:kwantung", "overlay:manchukuo",
+             "overlay:mengjiang", "overlay:occupied_zone_1942", "rule:2", "rule:5", "rule:8", "rule:9", "rule:10",
+             "rule:11", "rule:12", "rule:14", "rule:15", "rule:16", "rule:17", "rule:18", "rule:19", "rule:20",
+             "rule:21", "rule:22", "rule:23", "rule:24", "rule:25", "rule:26", "rule:27", "rule:29", "rule:30",
+             "rule:43", "rule:44", "rule:45", "rule:46", "rule:48", "rule:50", "rule:52", "rule:54", "rule:55",
+             "rule:59", "rule:60", "rule:62", "rule:79", "rule:97", "rule:98", "rule:99", "rule:100", "rule:101",
+             "rule:102"),
+    pop_method=("Province population pattern of 1941-12-07 (GHS-POP 1975 shares of the 1939-45 database), "
+                "area-adjusted for new pieces and scaled to each political unit's 1941 population in "
+                "world_history_1900_2000.sqlite; rounded with conserved unit totals"),
+    control_note="控制沿用 1941-12-07 的分区规则与东亚图层，东线按各月态势图改写。" + _NOTE41,
+    bloc_names=WW2_1942.bloc_names, bloc_title=WW2_1942.bloc_title,
+    names={k: v for k, v in WW2_1942.names.items() if k != -5},
+    snapshots=[
+        Snapshot(
+            "1941-06-22", "德国入侵苏联（“巴巴罗萨”行动）", "Germany invades the Soviet Union (Operation Barbarossa)",
+            allied=_ALLIED_41, axis=_AXIS_41 - {375}, city_code="4106",
+            bloc_note="苏联当日遭到进攻，与英国并肩作战（7 月 12 日签订英苏协定）。芬兰 6 月 25 日、匈牙利 6 月 27 日才对苏开战，"
+                      "芬兰此日按中立计；匈牙利已是《三国同盟条约》成员，计入轴心国。" + _BLOC41,
+            control_note="战线取 6 月 22 日晚的态势图：德军第一天在立陶宛推进到杜比萨河与涅曼河，围住布列斯特要塞；罗马尼亚、"
+                         "匈牙利边境尚未开打。叙利亚—黎巴嫩战役进行中（交战）；伊朗中立；法属印度支那仍由维希政府管辖。" + _NOTE41,
+            checks=dict(blocs={375: "neutral", 2: "neutral", 365: "allied"}, places=_CHECKS41["places"])),
+        Snapshot(
+            "1941-07-01", "明斯克合围，德军抵达西德维纳河", "The Minsk pocket; the Germans on the Dvina",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4107",
+            bloc_note="芬兰（6 月 25 日）、匈牙利（6 月 27 日）已对苏开战。" + _BLOC41,
+            control_note="6 月 30 日的态势图：比亚韦斯托克—明斯克包围圈（6 月 28 日合拢）、德军在道加瓦皮尔斯与叶卡布皮尔斯渡过西德维纳河，"
+                         "进抵里加、博布鲁伊斯克、罗夫诺与利沃夫。叙利亚—黎巴嫩战役仍在进行。" + _NOTE41),
+        Snapshot(
+            "1941-08-01", "斯摩棱斯克战役与乌曼合围", "The Battle of Smolensk and the Uman encirclement",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4108",
+            bloc_note=_BLOC41,
+            control_note="7 月 31 日的态势图：斯摩棱斯克包围圈与叶利尼亚突出部，大卢基已被苏军收复；北方在卢加河一线与爱沙尼亚中部；"
+                         "南方逼近基辅筑垒地域，乌曼一带合围在即，罗马尼亚军收复比萨拉比亚。叙利亚、黎巴嫩 7 月 14 日由自由法国接管；"
+                         "日军 7 月下旬进驻印度支那南部。" + _NOTE41),
+        Snapshot(
+            "1941-09-01", "德军逼近列宁格勒，敖德萨被围", "The Germans before Leningrad; Odessa besieged",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4109",
+            bloc_note=_BLOC41,
+            control_note="8 月 31 日的态势图：德军占领诺夫哥罗德、姆加，逼近列宁格勒；托罗佩茨、大卢基失守；古德里安装甲集群南下；"
+                         "第聂伯河沿岸从基辅到扎波罗热，德军在第聂伯罗彼得罗夫斯克建立桥头堡；敖德萨被罗马尼亚军包围，塔林 8 月 28 日撤出。"
+                         "英苏 8 月 25 日进入伊朗（29 日停火）；芬兰 8 月 29 日收复维堡。" + _NOTE41),
+        Snapshot(
+            "1941-10-01", "列宁格勒被围，“台风”行动开始", "Leningrad besieged; Operation Typhoon begins",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4110",
+            bloc_note=_BLOC41,
+            control_note="9 月 30 日的态势图：施吕瑟尔堡 9 月 8 日失守，列宁格勒被围；基辅包围战 9 月 26 日结束，德军占领波尔塔瓦，"
+                         "进抵彼列科普；古德里安当日向奥廖尔发起“台风”行动。敖德萨与穆胡、萨列马等岛仍由苏军坚守。" + _NOTE41),
+        Snapshot(
+            "1941-11-01", "德军逼近莫斯科，克里木失守", "The Germans before Moscow; the Crimea overrun",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4111",
+            bloc_note=_BLOC41 + "苏联政府机关 10 月中旬疏散到古比雪夫。",
+            control_note="10 月 31 日的态势图：维亚济马—布良斯克合围之后，前线到加里宁、沃洛科拉姆斯克、莫扎伊斯克防线与图拉城下；"
+                         "哈尔科夫（10 月 24 日）、塔甘罗格失守；德军突破伊顺阵地进入克里木（克里木南部、刻赤与塞瓦斯托波尔仍在苏军手中）；"
+                         "敖德萨 10 月 16 日撤出。" + _NOTE41),
+        Snapshot(
+            "1941-12-01", "莫斯科城下，苏军收复罗斯托夫", "At the gates of Moscow; Rostov retaken",
+            allied=_ALLIED_41, axis=_AXIS_41, city_code="4112",
+            bloc_note=_BLOC41 + "苏联政府机关在古比雪夫。",
+            control_note="11 月 30 日的态势图：德军在莫斯科—伏尔加运河的亚赫罗马桥头堡、克拉斯纳亚波利亚纳与纳拉河一线，图拉被三面包围；"
+                         "季赫温 11 月 8 日失守；苏军 11 月 29 日收复罗斯托夫，德军退到米乌斯河。北非“十字军”行动进行中（托布鲁克一带交战）。"
+                         + _NOTE41,
+            checks=dict(places=_CHECKS41["places"] + [("Kiev", 30.52, 50.45, 255), ("Leningrad", 30.32, 59.94, 365)])),
+    ],
+)
+
+# 1943 month by month, from the divisions and control of 1942-11-01 like the 1942 dates, and 1944 month by month
+# from those of 1944-06-06. The Eastern Front follows the OKH situation maps (curated/frontlines_1943 and _1944);
+# the other theatres are approximated by whole regions in curated/ww2_1943_region_control.csv and _1944_.
+_NOTE43 = ("东线按德国陆军总司令部态势图“Lage Ost”描出的德军前沿；其他战场（北非、意大利、太平洋等）按整省、整区近似（斜线）；"
+           "中国战场沿用 1942 年日占区；华北中共根据地按北支那方面军 1942 年 9 月《治安概况》图的未治安地区（斜线）。")
+_NOTE44 = ("东线按德国陆军总司令部态势图“Lage Ost”描出的德军前沿（1944 年 11 月 13 日以后无图）；"
+           "7 月起法国、低地国家按美军第 12 集团军群每日态势图（美国国会图书馆）描出的战线；意大利、巴尔干、"
+           "缅甸、中国（一号作战）与太平洋按整省、整区近似（斜线）；华北中共根据地沿用北支那方面军 1942 年 9 月"
+           "《治安概况》图的未治安地区，陕甘宁边区按同期敌情要图（斜线）。")
+_ALLIED43 = _ALLIED42 | {70, 140}
+_AXIS43 = _AXIS42 | {800}
+_BLOC43 = "同盟国一方含英联邦、苏联、美国、中华民国、自由法国（法兰西民族解放委员会）、各流亡政府与拉丁美洲参战国；轴心国一方含德、意、日、泰与东欧仆从国。"
+_N43 = dict(WW2_1942.names)
+_N43.update({-4: ("Free France (French Committee of National Liberation)", "自由法国（法兰西民族解放委员会）"),
+             -5: ("French North and West Africa (Giraud)", "法属北非与西非（吉罗）"),
+             -1: ("Allied powers / Kingdom of Italy", "同盟国（意大利王国）")})
+def _m43(day, zh, en, code, control, allied=_ALLIED43, axis=_AXIS43, bloc=_BLOC43, checks=None):
+    return Snapshot(day, zh, en, allied=allied, axis=axis, bloc_note=bloc, city_code=code,
+                    control_note=control + _NOTE43, checks=checks or {})
+WW2_1943 = Group(
+    key="m43", set="ww2", base="1942-11-01", rules="ww2_1943_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_monthly_1943.sqlite",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1943 monthly", period="1943",
+    inherit=WW2_1942.inherit,
+    pop_method=WW2_1942.pop_method.replace("1942 population", "1943 population"),
+    control_note="控制沿用 1942-11-01 的分区规则与东亚图层，再按各月战局改写。" + _NOTE43,
+    bloc_names=WW2_1942.bloc_names, bloc_title=WW2_1942.bloc_title, names=_N43,
+    snapshots=[
+        _m43("1943-01-01", "斯大林格勒包围圈，“小土星”行动之后", "The Stalingrad pocket after Operation Little Saturn", "4301",
+             "第 6 集团军被围于斯大林格勒，顿河中游意大利第 8 集团军溃败，A 集团军群开始撤出高加索；大卢基德军被围。"
+             "突尼斯桥头堡交战，布纳—戈纳之战进入尾声。", allied=_ALLIED43 | {-5}),
+        _m43("1943-02-01", "斯大林格勒战役结束", "The end of the Battle of Stalingrad", "4302",
+             "1 月 31 日第 6 集团军投降（北部包围圈 2 月 2 日）；列宁格勒陆上通道打开（1 月 18 日）；苏军逼近库尔斯克、"
+             "哈尔科夫与罗斯托夫，第 17 集团军退入库班。的黎波里 1 月 23 日失守，瓜达尔卡纳尔岛日军撤离。", allied=_ALLIED43 | {-5}),
+        _m43("1943-03-01", "曼施坦因的反击", "Manstein's counterstroke", "4303",
+             "苏军 2 月 16 日攻占哈尔科夫，德军反击收复顿巴斯西部；德军撤出杰米扬斯克，“水牛”行动撤出勒热夫突出部；米乌斯河防线、"
+             "库班桥头堡。突尼斯凯塞林山口之战之后。", allied=_ALLIED43 | {-5}),
+        _m43("1943-04-01", "库尔斯克突出部形成", "The Kursk bulge", "4304",
+             "德军 3 月 15 日重夺哈尔科夫、18 日别尔哥罗德，前线稳定在库尔斯克突出部与奥廖尔突出部；勒热夫突出部已放弃。"
+             "突尼斯马雷特防线与阿卡里特河之战。", allied=_ALLIED43 | {-5}),
+        _m43("1943-05-01", "突尼斯战役的最后阶段", "The last weeks in Tunisia", "4305",
+             "盟军逼近突尼斯与比塞大（5 月 7 日攻占，13 日轴心国投降）；东线春季对峙，库班桥头堡。", allied=_ALLIED43 | {-5}),
+        _m43("1943-06-01", "北非轴心国投降之后", "After the Axis surrender in Africa", "4306",
+             "突尼斯 5 月 13 日轴心国投降；6 月 3 日法兰西民族解放委员会在阿尔及尔成立；东线库尔斯克战前对峙，"
+             "苏军 5 月攻占克雷姆斯卡亚。", allied=_ALLIED43 | {145}),
+        _m43("1943-07-01", "“堡垒”行动前夕", "On the eve of Operation Citadel", "4307",
+             "库尔斯克会战（7 月 5 日）前夕的东线；盟军即将登陆西西里（7 月 10 日），新乔治亚战役开始（6 月 30 日）。",
+             allied=_ALLIED43 | {145}),
+        _m43("1943-08-01", "库尔斯克之后，盟军登陆西西里", "After Kursk; the Allies in Sicily", "4308",
+             "“堡垒”行动失败，苏军“库图佐夫”行动攻向奥廖尔（8 月 5 日收复）；西西里西部已被盟军占领，墨索里尼 7 月 25 日倒台。",
+             allied=_ALLIED43 | {145}),
+        _m43("1943-09-01", "哈尔科夫解放，意大利停战前夕", "Kharkov liberated; Italy on the eve of the armistice", "4309",
+             "苏军攻占哈尔科夫（8 月 23 日）、塔甘罗格（8 月 30 日）与叶利尼亚，向第聂伯河推进；西西里全岛被盟军占领（8 月 17 日）。",
+             allied=_ALLIED43 | {145}),
+        _m43("1943-10-01", "德军退守第聂伯河，盟军登陆意大利", "Back to the Dnieper; the Allies in Italy", "4310",
+             "德军退到“豹—沃坦”防线（第聂伯河），苏军在柳捷日、布克林建立桥头堡，收复斯摩棱斯克；意大利 9 月 8 日停战，德军占领北部"
+             "（意大利社会共和国），盟军占领南部与撒丁岛，那不勒斯 10 月 1 日解放；科西嘉 10 月 4 日解放。",
+             allied=_ALLIED43 | {145, 630}, axis=_AXIS43 - {325}),
+        _m43("1943-11-01", "克里木被切断", "The Crimea cut off", "4311",
+             "苏军突破梅利托波尔，11 月 1 日抵达彼列科普，克里木第 17 集团军被切断；涅韦尔、第聂伯罗彼得罗夫斯克失守；"
+             "意大利南部前线在加里利亚诺河与桑格罗河；美军登陆布干维尔岛（11 月 1 日）。",
+             allied=_ALLIED43 | {145, 630, 325}, axis=_AXIS43 - {325}),
+        _m43("1943-12-01", "基辅解放之后", "After the liberation of Kiev", "4312",
+             "苏军 11 月 6 日解放基辅，德军反击重夺日托米尔；戈梅利 11 月 26 日解放；刻赤附近苏军桥头堡；塔拉瓦战役（11 月 20 日）。",
+             allied=_ALLIED43 | {145, 630, 325, 100}, axis=_AXIS43 - {325}),
+    ],
+)
+
+_ALLIED44M = _ALLIED42 | {70, 140, 145, 630, 100, 325, 450, 220}
+_AXIS44M = _AXIS42 - {325} | {800}
+_BLOC44 = "同盟国一方含英联邦、苏联、美国、中华民国、法国（民族解放委员会 / 临时政府）、意大利王国（共同交战国）与各流亡政府；"
+_N44 = dict(_N43)
+_N44.update({220: ("France", "法国"), 339: ("Albania", "阿尔巴尼亚"), 345: ("Yugoslavia (Partisans)", "南斯拉夫（游击队）"),
+             350: ("Greece", "希腊"), 211: ("Belgium", "比利时"), 210: ("Netherlands", "荷兰"), 212: ("Luxembourg", "卢森堡")})
+def _m44(day, zh, en, code, control, allied=_ALLIED44M, axis=_AXIS44M, bloc=None, checks=None):
+    return Snapshot(day, zh, en, allied=allied, axis=axis, bloc_note=_BLOC44 + (bloc or "轴心国一方含德、日、泰与匈牙利、罗马尼亚、保加利亚、芬兰、斯洛伐克、克罗地亚。"),
+                    city_code=code, control_note=control + _NOTE44, checks=checks or {})
+WW2_1944 = Group(
+    key="m44", set="ww2", base="1944-06-06", rules="ww2_1944_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_monthly_1944.sqlite",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1944 monthly", period="1944",
+    inherit=("overlay:ccp_bases_1941_42", "overlay:indochina_ceded", "overlay:kwantung", "overlay:manchukuo",
+             "overlay:mengjiang", "overlay:occupied_zone_1942", "rule:2", "rule:5", "rule:12", "rule:13", "rule:14",
+             "rule:17", "rule:22", "rule:29", "rule:30", "rule:37", "rule:38", "rule:39", "rule:40", "rule:41",
+             "rule:42", "rule:43", "rule:44", "rule:45", "rule:46", "rule:50", "rule:53", "rule:54", "rule:55",
+             "rule:56", "rule:57", "rule:58", "rule:59", "rule:60", "rule:63", "rule:67", "rule:68", "rule:70",
+             "rule:73", "rule:74", "rule:77", "rule:78", "rule:79", "rule:92", "rule:97", "rule:98", "rule:102",
+             "rule:104"),
+    pop_method=("Province population pattern of 1944-06-06 (GHS-POP 1975 shares of the 1939-45 database), "
+                "area-adjusted for new pieces and scaled to each political unit's 1944 population in "
+                "world_history_1900_2000.sqlite; rounded with conserved unit totals"),
+    control_note="控制沿用 1944-06-06 的分区规则与东亚图层，再按各月战局改写。" + _NOTE44,
+    bloc_names=WW2_1942.bloc_names, bloc_title=WW2_1942.bloc_title, names=_N44,
+    snapshots=[
+        _m44("1944-01-01", "第聂伯河右岸战役", "The battles west of the Dnieper", "4401",
+             "苏军收复日托米尔、科罗斯坚，逼近别尔季切夫；列宁格勒—诺夫哥罗德战役前夕；意大利古斯塔夫防线；克里木被围。"),
+        _m44("1944-02-01", "列宁格勒解围与科尔孙包围圈", "Leningrad relieved; the Korsun pocket", "4402",
+             "列宁格勒 1 月 27 日完全解围，诺夫哥罗德 1 月 20 日解放；科尔孙—舍甫琴科夫斯基包围圈（1 月 28 日合拢）；安齐奥登陆（1 月 22 日）。"),
+        _m44("1944-03-01", "“豹”防线与乌克兰西部", "The Panther line and western Ukraine", "4403",
+             "北方德军退守纳尔瓦—普斯科夫的“豹”防线；罗夫诺、卢茨克失守，尼科波尔桥头堡与克里沃罗格放弃；马绍尔群岛登陆。"),
+        _m44("1944-04-01", "苏军进入罗马尼亚", "The Red Army enters Romania", "4404",
+             "苏军渡过德涅斯特河与普鲁特河进入罗马尼亚东北，德军第 1 装甲集团军在卡缅涅茨—波多利斯基被围后突围，塔尔诺波尔被围；"
+             "德军 3 月 19 日占领匈牙利；日军进攻英帕尔（3 月 8 日）。",
+             bloc="匈牙利 3 月 19 日被德军占领，仍属轴心国一方。"),
+        _m44("1944-05-01", "敖德萨与克里木", "Odessa and the Crimea", "4405",
+             "敖德萨 4 月 10 日解放，克里木德军退守塞瓦斯托波尔（5 月 9 日攻占）；英帕尔与科希马之战；一号作战开始（4 月）。"),
+        _m44("1944-06-01", "“巴格拉季昂”与诺曼底前夕", "On the eve of Bagration and Normandy", "4406",
+             "东线“白俄罗斯阳台”对峙；意大利盟军突破古斯塔夫防线与安齐奥（罗马 6 月 4 日解放）；中国战场一号作战进攻长沙。"),
+        _m44("1944-07-01", "“巴格拉季昂”行动", "Operation Bagration", "4407",
+             "苏军 6 月 22 日发起“巴格拉季昂”行动，维捷布斯克、博布鲁伊斯克失守，中央集团军群崩溃；诺曼底滩头（瑟堡 6 月 26 日）；"
+             "维堡 6 月 20 日失守；塞班岛战役。",
+             checks=dict(places=[("Cherbourg", -1.62, 49.64, 220), ("Bayeux", -0.70, 49.28, 220), ("Caen", -0.37, 49.18, 255), ("Saint-Lô", -1.09, 49.12, 255)])),
+        _m44("1944-08-01", "华沙城下", "Before Warsaw", "4408",
+             "苏军解放明斯克、维尔纽斯、利沃夫、卢布林，推进到维斯瓦河与里加湾（图库姆斯）；华沙起义（8 月 1 日）前夕；"
+             "盟军在诺曼底突破（阿夫朗什 7 月 31 日）；佛罗伦萨战斗；密支那围攻。",
+             checks=dict(places=[("Caen", -0.37, 49.18, 220), ("Saint-Lô", -1.09, 49.12, 220), ("Coutances", -1.44, 49.05, 220), ("Falaise", -0.20, 48.90, 255)])),
+        _m44("1944-09-01", "罗马尼亚倒戈，巴黎解放", "Romania changes sides; Paris liberated", "4409",
+             "罗马尼亚 8 月 23 日倒戈，苏军占领布加勒斯特（8 月 31 日）；巴黎 8 月 25 日解放，“龙骑兵”行动后法国南部解放；"
+             "斯洛伐克民族起义；保加利亚 9 月 9 日政变前夕。",
+             allied=_ALLIED44M | {360}, axis=_AXIS44M - {360},
+             bloc="罗马尼亚 8 月 23 日倒戈，计入同盟国一方；保加利亚 9 月 8 日才对德宣战。",
+             checks=dict(places=[("Paris", 2.35, 48.86, 220), ("Rouen", 1.09, 49.44, 220), ("Bolbec", 0.47, 49.57, 255), ("Lille", 3.06, 50.63, 255), ("Brest", -4.49, 48.39, 255), ("Toulouse", 1.44, 43.60, 220), ("Lyon", 4.84, 45.76, 255), ("Nancy", 6.18, 48.69, 255)])),
+        _m44("1944-10-01", "波罗的海与巴尔干", "The Baltic and the Balkans", "4410",
+             "塔林 9 月 22 日解放，芬兰 9 月 19 日停战；保加利亚倒戈后苏军进入南斯拉夫；德军撤出希腊；比利时、卢森堡解放，"
+             "“市场花园”行动失败；华沙起义被镇压（10 月 2 日）。",
+             allied=_ALLIED44M | {360, 355}, axis=_AXIS44M - {360, 355, 375},
+             bloc="罗马尼亚、保加利亚计入同盟国一方；芬兰停战后按中立计。",
+             checks=dict(places=[("Brussels", 4.35, 50.85, 211), ("Antwerp", 4.40, 51.22, 211), ("Luxembourg", 6.13, 49.61, 212), ("Eindhoven", 5.48, 51.44, 210), ("Nancy", 6.18, 48.69, 220), ("Metz", 6.18, 49.12, 255), ("Strasbourg", 7.75, 48.58, 255), ("Dunkirk", 2.38, 51.03, 255), ("Lorient", -3.37, 47.75, 255)])),
+        _m44("1944-11-01", "贝尔格莱德与德布勒森", "Belgrade and Debrecen", "4411",
+             "里加 10 月 13 日解放，库尔兰被围，苏军首次攻入东普鲁士（贡宾嫩—戈尔达普）；贝尔格莱德 10 月 20 日解放，"
+             "德布勒森坦克战后苏军抵蒂萨河；希腊解放；莱特岛登陆（10 月 20 日）。",
+             allied=_ALLIED44M | {360, 355}, axis=_AXIS44M - {360, 355, 375},
+             bloc="罗马尼亚、保加利亚计入同盟国一方；芬兰停战后按中立计。",
+             checks=dict(places=[("Antwerp", 4.40, 51.22, 211), ("Breda", 4.78, 51.59, 210), ("Middelburg", 3.61, 51.50, 255), ("Aachen", 6.08, 50.78, 2), ("Metz", 6.18, 49.12, 255), ("Strasbourg", 7.75, 48.58, 255)])),
+        _m44("1944-12-01", "布达佩斯城下", "Before Budapest", "4412",
+             "苏军逼近布达佩斯（11 月 13 日态势图为本系列最后一张）；斯特拉斯堡、梅斯解放，科尔马包围圈；阿尔巴尼亚解放；"
+             "一号作战攻占桂林、柳州。",
+             allied=_ALLIED44M | {360, 355}, axis=_AXIS44M - {360, 355, 375},
+             bloc="罗马尼亚、保加利亚计入同盟国一方；芬兰停战后按中立计。",
+             checks=dict(places=[("Middelburg", 3.61, 51.50, 210), ("Aachen", 6.08, 50.78, 2), ("Metz", 6.18, 49.12, 220), ("Strasbourg", 7.75, 48.58, 220), ("Colmar", 7.36, 48.08, 255), ("Belfort", 6.86, 47.64, 220), ("Dunkirk", 2.38, 51.03, 255)])),
+        ],
+)
+
+# The Sino-Japanese War from the Marco Polo Bridge to the fall of Nanchang: six key dates before the 1939-45 dates,
+# from the divisions of 1939-09-01. The occupied area of China is the one traced from the Japanese general situation
+# map of late August 1941 cut back to the ground reached by each date (curated/china_front_1937.json, after the
+# operations maps of Senshi Sosho vols. 18 and 89 and the North China Area Army's progress maps); the Spanish Civil War
+# by whole provinces. Blocs: the two sides of the war in China; Germany and Italy (Anti-Comintern Pact) not at war.
+_ALLIED37 = {710, -2}
+_AXIS37 = {740}
+_NOTE37 = ("中国战场的日占区按日军《中國軍全般図》（1941 年 8 月下旬）描出的占领区，再按《战史丛书》第 18、89 卷作战经过图与"
+           "北支那方面军作战经过要图（JACAR）所示各日期已到达的地点裁切（斜线，近似）；伪满洲国、蒙疆、关东州沿用 1939 年图层。"
+           "中共的陕甘宁边区按北支那方面军 1942 年 9 月敌情要图，晋察冀边区按其 1939 年 11 月《共产军概况》图"
+           "（1938 年 1 月创设时的势力圈与 1939 年 11 月的范围，斜线）。西班牙内战按整省近似（斜线）。")
+_BLOC37 = ("阵营按中日战争划分：中国（含中共军队）一方与日本（含伪满、蒙疆等扶植政权）一方；德、意虽与日本签有《反共产国际协定》，"
+           "欧洲尚未开战，按未参战计。")
+_CHECKS37 = [("Chongqing", 106.55, 29.56, 710), ("Tokyo", 139.69, 35.69, 740), ("Changchun", 125.32, 43.88, 740)]
+WW2_1937 = Group(
+    key="c37", set="ww2", base="1939-09-01", rules="ww2_1937_39_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_china_1937_1939.sqlite",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1937-39 key dates", period="1937-1939",
+    inherit=("overlay:kwantung", "overlay:manchukuo", "overlay:mengjiang", "rule:62", "rule:79"),
+    pop_method=("Province population pattern of 1939-09-01 (GHS-POP 1975 shares of the 1939-45 database), "
+                "area-adjusted for new pieces and scaled to each political unit's population of the year in "
+                "world_history_1900_2000.sqlite; rounded with conserved unit totals"),
+    control_note="政治单元取各日期的 CShapes，控制沿用 1939-09-01 的东亚图层，再按各日期的战局改写。" + _NOTE37,
+    bloc_names={"allied": "中国一方", "axis": "日本一方", "neutral": "未参战", "contested": "前线争夺"},
+    bloc_title="中日战争阵营 · 人口",
+    names={**{k: v for k, v in WW2_1942.names.items() if k not in (-5, -4, -12, -1, -10)},
+           -42: ("Spanish Republic", "西班牙共和国（共和派）"), 230: ("Spain (Nationalists)", "西班牙（国民军）")},
+    snapshots=[
+        Snapshot(
+            "1937-07-07", "卢沟桥事变", "The Marco Polo Bridge Incident",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3707",
+            bloc_note="7 月 7 日夜日军在卢沟桥挑起事变，全面抗战由此开始；7 月 17 日蒋介石发表庐山谈话。" + _BLOC37,
+            control_note="战前态势：日本占有东北（伪满洲国、关东州）与热河；冀东 22 县为日本扶植的冀东防共自治政府；"
+                         "察哈尔北部为德王的蒙古军政府，绥远经 1936 年绥远抗战仍由中国控制；平津有日本驻屯军。"
+                         "西班牙内战：毕尔巴鄂 6 月 19 日失守。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Beiping", 116.4, 39.9, 710), ("Shanghai", 121.47, 31.23, 710),
+                                            ("Tongzhou", 116.66, 39.91, 740), ("Hohhot", 111.65, 40.82, 710),
+                                            ("Vienna", 16.37, 48.21, 305), ("Prague", 14.42, 50.08, 315),
+                                            ("Valencia", -0.38, 39.47, -42), ("Seville", -5.98, 37.39, 230)])),
+        Snapshot(
+            "1937-11-12", "淞沪会战结束，太原失守", "Shanghai falls; Taiyuan lost",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3711",
+            bloc_note="意大利 11 月 6 日加入《反共产国际协定》。" + _BLOC37,
+            control_note="上海 11 月 12 日失守（日军 11 月 5 日在杭州湾金山卫登陆）；华北日军 8 日攻占太原，平汉线推进到漳河，"
+                         "津浦线推进到济南以北的黄河北岸；10 月占领归绥、包头。西班牙北方战线已失（希洪 10 月 21 日）。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Beiping", 116.4, 39.9, 740), ("Taiyuan", 112.55, 37.87, 740),
+                                            ("Jinan", 117.0, 36.65, 710), ("Nanjing", 118.78, 32.06, 710),
+                                            ("Shanghai", 121.47, 31.23, 740), ("Hohhot", 111.65, 40.82, 740)])),
+        Snapshot(
+            "1937-12-13", "南京沦陷", "The fall of Nanjing",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3712",
+            bloc_note="国民政府 11 月 20 日宣布移驻重庆，军政机关集中于武汉。" + _BLOC37,
+            control_note="日军 12 月 13 日攻占南京，随即展开大屠杀；长江三角洲（苏州、无锡、常州、镇江、湖州、广德、芜湖）已失，"
+                         "杭州（12 月 24 日）与济南（12 月 27 日）尚在中国军手中。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Nanjing", 118.78, 32.06, 740), ("Wuxi", 120.3, 31.57, 740),
+                                            ("Hangzhou", 120.15, 30.27, 710), ("Jinan", 117.0, 36.65, 710),
+                                            ("Wuhan", 114.3, 30.6, 710)])),
+        Snapshot(
+            "1938-05-19", "徐州失守", "The fall of Xuzhou",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3805",
+            bloc_note="德国 3 月 13 日吞并奥地利；5 月德国承认伪满洲国并召回在华军事顾问。" + _BLOC37,
+            control_note="台儿庄大捷（4 月）后，日军南北夹击，5 月 19 日攻占徐州，中国军突围西撤；山西大部、山东、豫北已失，"
+                         "合肥 5 月 14 日、厦门 5 月 13 日失守。6 月花园口决堤前。西班牙：国民军 4 月 15 日在维纳罗斯抵达地中海，"
+                         "将共和国一分为二。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Xuzhou", 117.18, 34.26, 740), ("Jinan", 117.0, 36.65, 740),
+                                            ("Kaifeng", 114.31, 34.8, 710), ("Wuhan", 114.3, 30.6, 710),
+                                            ("Vienna", 16.37, 48.21, 255), ("Barcelona", 2.17, 41.39, -42)])),
+        Snapshot(
+            "1938-11-02", "武汉、广州失守后", "After the fall of Wuhan and Canton",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3811",
+            bloc_note="慕尼黑协定（9 月 30 日）后德国并入苏台德地区，11 月 2 日第一次维也纳仲裁把斯洛伐克南部割给匈牙利。" + _BLOC37,
+            control_note="广州 10 月 21 日、武汉三镇 10 月 25—27 日失守；日军沿长江两岸占领安庆、九江、德安、永修、咸宁，"
+                         "大别山北麓经固始、潢川到信阳，经商城、麻城到黄陂；岳阳（11 月 11 日）尚未失守。开封 6 月 6 日失守，"
+                         "黄泛区阻断平汉线以东。西班牙：埃布罗河战役进入尾声。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Wuhan", 114.3, 30.6, 740), ("Canton", 113.26, 23.13, 740),
+                                            ("Kaifeng", 114.31, 34.8, 740), ("Changsha", 112.97, 28.2, 710),
+                                            ("Nanchang", 115.89, 28.68, 710), ("Yueyang", 113.13, 29.37, 710),
+                                            ("Liberec", 15.05, 50.77, 255)])),
+        Snapshot(
+            "1939-03-27", "南昌失守", "The fall of Nanchang",
+            allied=_ALLIED37, axis=_AXIS37, city_code="3903",
+            bloc_note="德国 3 月 15 日占领捷克，斯洛伐克在德国保护下独立，匈牙利占领喀尔巴阡乌克兰；3 月 23 日立陶宛把梅梅尔割给德国。"
+                      + _BLOC37,
+            control_note="日军 3 月 27 日攻占南昌；岳阳（1938 年 11 月 11 日）、海南岛（1939 年 2 月 10 日起）、海州（3 月 1 日）"
+                         "已被占领；汕头（6 月）、随枣（5 月）尚在中国军手中。西班牙：加泰罗尼亚已失，3 月 28 日马德里投降。" + _NOTE37,
+            checks=dict(places=_CHECKS37 + [("Nanchang", 115.89, 28.68, 740), ("Yueyang", 113.13, 29.37, 740),
+                                            ("Haikou", 110.35, 20.02, 740), ("Changsha", 112.97, 28.2, 710),
+                                            ("Prague", 14.42, 50.08, 255), ("Bratislava", 17.11, 48.15, 317),
+                                            ("Madrid", -3.70, 40.42, -42), ("Barcelona", 2.17, 41.39, 230)])),
+    ],
+)
+
+# 1945 from January to May: the divisions of 1944-06-06 (the provinces unchanged), the fronts of the war against Germany
+# from the War Department's atlas of the world battle fronts (curated/frontlines_1945, scripts/atlas_fronts.py), checked
+# for 1 April against the OKH map Lage Ost of the end of March 1945; the war against Japan by whole provinces.
+_NOTE45 = ("欧洲战线按美国陆军部《世界各战线半月态势图集》（1945）各期的“对德战争”图描出（盟军控制区按颜色提取，分苏军一侧与西方盟军一侧，"
+           "后者按英加、美、法军大致分区）；4 月 1 日对照德俄数字化项目的德军“Lage Ost”图（1945 年 3 月底）修正上西里西亚、屈斯特林与科尔贝格，"
+           "并补入图集未画的布达佩斯、波森、格洛高、布雷斯劳要塞包围圈（斜线，近似）；大西洋沿岸德军据点、克里特岛西部仍归德军。"
+           "太平洋、缅甸、中国按整省近似（斜线）；华北中共根据地沿用北支那方面军 1942 年 9 月《治安概况》图的未治安地区。")
+_ALLIED45 = {-4, -2, -1, 2, 20, 40, 41, 42, 70, 90, 91, 92, 93, 94, 95, 100, 140, 145, 200, 210, 211, 212, 220, 290, 325, 345,
+             350, 355, 360, 365, 385, 450, 530, 560, 630, 645, 710, 750, 900, 920}
+_AXIS45 = {-12, -10, 255, 310, 317, 740, 800}
+_FEB45 = {130, 150, 135, 155, 101, 165, 640, 651, 652, 660, 670}   # declared war in February 1945 (Ecuador … Saudi Arabia, 1 March)
+_BLOC45 = ("同盟国一方含英联邦、苏联、美国、中华民国、法国临时政府、意大利王国（共同交战国）、罗马尼亚、保加利亚与各流亡政府；"
+           "轴心国一方含德、日、泰、匈牙利（萨拉希政权）、斯洛伐克、克罗地亚。")
+def _m45(day, zh, en, code, control, allied=_ALLIED45, axis=_AXIS45, bloc="", checks=None):
+    return Snapshot(day, zh, en, allied=allied, axis=axis, bloc_note=_BLOC45 + bloc, city_code=code,
+                    control_note=control + _NOTE45, checks=checks or {})
+_C45 = [("Berlin", 13.4, 52.52, 255), ("Moscow", 37.62, 55.75, 365), ("Paris", 2.35, 48.86, 220), ("Liepaja", 21.0, 56.5, 255)]
+WW2_1945 = Group(
+    key="m45", set="ww2", base="1944-06-06", rules="ww2_1945_region_control.csv", cities="ww2_cities.csv",
+    db="ww2_monthly_1945.sqlite",
+    client_states=True, min_piece_km2=30, coast_deg=0.1, label="1945 monthly", period="1945",
+    inherit=WW2_1944.inherit,
+    pop_method=("Province population pattern of 1944-06-06 (GHS-POP 1975 shares of the 1939-45 database), "
+                "area-adjusted for new pieces and scaled to each political unit's 1945 population in "
+                "world_history_1900_2000.sqlite; rounded with conserved unit totals"),
+    control_note="区划与 1944-06-06 相同（省界不变），控制沿用其分区规则与东亚图层，再按各月战线改写。" + _NOTE45,
+    bloc_names=WW2_1942.bloc_names, bloc_title=WW2_1942.bloc_title, names=_N44,
+    snapshots=[
+        _m45("1945-01-01", "阿登反击与布达佩斯被围", "The Ardennes and the siege of Budapest", "4501",
+             "德军阿登攻势（12 月 16 日起）的突出部仍在，巴斯托涅解围；“北风”行动在阿尔萨斯；苏军 12 月 26 日合围布达佩斯；"
+             "维斯瓦河、纳雷夫河前线尚未发动冬季攻势；莱特岛、民都洛岛已被美军攻占。",
+             checks=dict(places=_C45 + [("Budapest", 19.04, 47.5, 255), ("Warsaw", 21.01, 52.23, 255), ("Bastogne", 5.72, 50.0, 211)])),
+        _m45("1945-02-01", "维斯瓦河—奥得河攻势", "The Vistula–Oder offensive", "4502",
+             "苏军 1 月 12 日起的维斯瓦河—奥得河攻势：华沙 1 月 17 日、克拉科夫 1 月 19 日解放，1 月 31 日抵奥得河屈斯特林；东普鲁士被切断；"
+             "波森要塞、布达的德军仍被围；阿登突出部已被收复；美军在吕宋岛林加延湾登陆（1 月 9 日）。",
+             checks=dict(places=_C45 + [("Warsaw", 21.01, 52.23, 365), ("Krakow", 19.94, 50.06, 365)])),
+        _m45("1945-03-01", "波美拉尼亚与莱茵兰", "Pomerania and the Rhineland", "4503",
+             "苏军清剿东波美拉尼亚与西里西亚，布雷斯劳、格洛高被围；布达佩斯 2 月 13 日陷落；西线盟军推进到鲁尔河、莱茵河左岸；"
+             "马尼拉战役结束在即，硫磺岛战役进行中。",
+             allied=_ALLIED45 | _FEB45,
+             bloc="土耳其（2 月 23 日）、埃及、叙利亚、黎巴嫩、沙特阿拉伯与厄瓜多尔、巴拉圭、秘鲁、智利、委内瑞拉、乌拉圭 2 月对德或对日宣战。",
+             checks=dict(places=_C45 + [("Budapest", 19.04, 47.5, 365), ("Breslau", 17.04, 51.11, 255)])),
+        _m45("1945-04-01", "鲁尔合围与维也纳攻势", "The Ruhr pocket and the Vienna offensive", "4504",
+             "盟军 3 月 7 日在雷马根、3 月 23 日在韦塞尔渡过莱茵河，4 月 1 日合围鲁尔；苏军夺取但泽（3 月 30 日）、屈斯特林（3 月 30 日）、"
+             "上西里西亚，进入奥地利；冲绳登陆（4 月 1 日）；曼德勒 3 月 20 日收复。",
+             allied=_ALLIED45 | _FEB45 | {375, 160},
+             bloc="芬兰 3 月 3 日对德宣战、阿根廷 3 月 27 日对德日宣战，计入同盟国一方。",
+             checks=dict(places=_C45 + [("Danzig", 18.65, 54.35, 365), ("Breslau", 17.04, 51.11, 255), ("Cologne", 6.96, 50.94, 2)])),
+        _m45("1945-05-01", "柏林战役与易北河会师", "The Battle of Berlin; the link-up on the Elbe", "4505",
+             "苏军合围并攻入柏林（希特勒 4 月 30 日自杀），维也纳 4 月 13 日解放；美苏两军 4 月 25 日在托尔高会师；盟军占领德国西部与南部、"
+             "意大利北部（意大利境内德军 5 月 2 日投降）；德军仍据守荷兰西部、丹麦、挪威、库尔兰、波希米亚与奥地利西部；仰光 5 月 3 日收复。",
+             allied=_ALLIED45 | _FEB45 | {375, 160},
+             bloc="芬兰、阿根廷计入同盟国一方。",
+             checks=dict(places=_C45[1:] + [("Vienna", 16.37, 48.21, 365), ("Munich", 11.58, 48.14, 2), ("Hamburg", 10.0, 53.55, 255)])),
+    ],
+)
+
+GROUPS = [WW1, WW2_1937, WW2_1941, WW2_1942, WW2_1943, WW2_1944, WW2_1945]
+
+SNAPSHOTS_ADDED = sorted((s.date, s.title_zh, s.title_en) for g in GROUPS for s in g.snapshots)

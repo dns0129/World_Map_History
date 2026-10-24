@@ -1,0 +1,2490 @@
+{
+ "assets": {
+  "db.tar.gz": {
+   "db/divisions_1900_1934.sqlite": {
+    "sha256": "000b713fb4d34e921461857c415c0bd7e03cff04bb2007c2740fd98de1b4ea22",
+    "size": 34271232
+   },
+   "db/divisions_1915_1917.sqlite": {
+    "sha256": "dcf64e043d9074deab5b1302d4e15447226d983b58fcc759891c25fed543ad37",
+    "size": 27525120
+   },
+   "db/divisions_1946_1991.sqlite": {
+    "sha256": "d446bd5ac27cd952d07073640a11119905dfbbe568b171c22e75c43ab5be4bf0",
+    "size": 39743488
+   },
+   "db/world_history_1900_2000.sqlite": {
+    "sha256": "9b6a0d102a3d0f9f74dc9db4fcba66cd92f2ec9d8c6a7606adbb0275115d97c9",
+    "size": 88555520
+   },
+   "db/ww2_china_1937_1939.sqlite": {
+    "sha256": "f5d9e5970a31308bee737e820fe4408ed26cfcb1ea35bb084c39bc3f55a13129",
+    "size": 30760960
+   },
+   "db/ww2_divisions_1939_1945.sqlite": {
+    "sha256": "f9882716455e003a9218adb9b902726a9e4a1be71e23dcf9e5c4514c4372f49f",
+    "size": 27525120
+   },
+   "db/ww2_monthly_1941.sqlite": {
+    "sha256": "a191242c719e7a20fc71ec87eccdc201e2493f45756eeeba996d5d621f9dd92e",
+    "size": 32411648
+   },
+   "db/ww2_monthly_1942.sqlite": {
+    "sha256": "ef27eaac213cdf69a38b2957d8870792b4971c650b76eae9d1c7f211233c9243",
+    "size": 35815424
+   },
+   "db/ww2_monthly_1943.sqlite": {
+    "sha256": "87228fad34bb39c4c94d74e74cd8f780d5e256864205e2155d20eb41b728e53d",
+    "size": 35229696
+   },
+   "db/ww2_monthly_1944.sqlite": {
+    "sha256": "2faafe0c03cf73e8e528e38717255eb807fecadc2dc72d799ae9582a08aae28a",
+    "size": 40108032
+   },
+   "db/ww2_monthly_1945.sqlite": {
+    "sha256": "d0e9ebf3f9631544973a9dd687278932550b7930aa6b540d85275766d834b11f",
+    "size": 34959360
+   }
+  },
+  "exports.tar.gz": {
+   "exports/geometry/admin1_pieces.geojson": {
+    "sha256": "995fdb1b841b6bfdff9f6e86a43a4799603b6c0b739f88f197ebd6c2797b9456",
+    "size": 8510254
+   },
+   "exports/geometry/units.topojson": {
+    "sha256": "2c2d3edc3ae2d21a6ed5377ba4344490e9b16fcfa04a7099f5e8fa2932a899e9",
+    "size": 1819112
+   },
+   "exports/grids/population_1900.tif": {
+    "sha256": "061c6ace918fbe0fa6f7bbbb4c6a493c23a79f3d6f6808971b3f7619aef265ff",
+    "size": 162284
+   },
+   "exports/grids/population_1901.tif": {
+    "sha256": "3866501653038c15edf92b84b6a8bb2a31e89e795b557c7504ce5f79e002a27e",
+    "size": 162562
+   },
+   "exports/grids/population_1902.tif": {
+    "sha256": "8501bbff377dd205b53768420a8a98830995fc6648ef484b0c1b7fa1ef0ca3cb",
+    "size": 162582
+   },
+   "exports/grids/population_1903.tif": {
+    "sha256": "0bc32a51801cdbdca81d158352da668c2bf77eb112c59e7e50982d9ab9fa01e5",
+    "size": 162888
+   },
+   "exports/grids/population_1904.tif": {
+    "sha256": "fd79f786a6389aa503a6b4a860e9e26168774c1a5c26fe6b9f04e1336dc65c3b",
+    "size": 162978
+   },
+   "exports/grids/population_1905.tif": {
+    "sha256": "8f2c5c58626c2c382ce29a677e9da0580a15cb0f6c2b83da31621afdd77f7cb1",
+    "size": 163084
+   },
+   "exports/grids/population_1906.tif": {
+    "sha256": "1c2c09de67bd7e29d445bd11d7ce437060262623ce79952fda8937955e6a2ca8",
+    "size": 163314
+   },
+   "exports/grids/population_1907.tif": {
+    "sha256": "42120c57122643b808862d81543462d96ce7bf220e474119d2c0ff1b5e63f0a8",
+    "size": 163536
+   },
+   "exports/grids/population_1908.tif": {
+    "sha256": "73495b46ca23202a0ae0c12ffbe584f72fbf53b2f29c2caf505d27033e21847e",
+    "size": 163716
+   },
+   "exports/grids/population_1909.tif": {
+    "sha256": "6d33abb1720302cbd0d975c9d50b5f6ea7967f6918608618f29313e4d624e658",
+    "size": 163844
+   },
+   "exports/grids/population_1910.tif": {
+    "sha256": "4c66d843190b581ecd756c08a1b8823db6f03d2e1a13cd4261f97db5fe728a67",
+    "size": 163942
+   },
+   "exports/grids/population_1911.tif": {
+    "sha256": "d930a5685f56f5870a349c1f2e6970c523d5da826d469ff39d90aa725f9cbb7e",
+    "size": 164106
+   },
+   "exports/grids/population_1912.tif": {
+    "sha256": "f80ee16c0ad60e12575734ebdebb0faae4bcfa13ed10745c826ab4b072ae9757",
+    "size": 164240
+   },
+   "exports/grids/population_1913.tif": {
+    "sha256": "5a5db35aafc442ae87baaf32ddd619f14f90de28349e36621f21666c429986a6",
+    "size": 164554
+   },
+   "exports/grids/population_1914.tif": {
+    "sha256": "71695c3e9a8308834a3839e76eaaaa73e5848680ab63b16e4c0da881c99994a8",
+    "size": 164700
+   },
+   "exports/grids/population_1915.tif": {
+    "sha256": "f3554db6a1d517b291c3d837f7383fce9a5d7792257fea64f0e299d247fa0500",
+    "size": 164870
+   },
+   "exports/grids/population_1916.tif": {
+    "sha256": "99b365a4362b41d7caadc5dc74a64ca6ab38ffb89ee7fa1af256757833c78a83",
+    "size": 165000
+   },
+   "exports/grids/population_1917.tif": {
+    "sha256": "1923dc3078e14b6c408c29f5aaefc50df8874aefe7b2c58ded0677c263318f02",
+    "size": 165102
+   },
+   "exports/grids/population_1918.tif": {
+    "sha256": "f2c5713f7df7b60fc7555823169c1ccfd718bf01ecc36c4063f299ef2dbc0b0a",
+    "size": 164630
+   },
+   "exports/grids/population_1919.tif": {
+    "sha256": "0823d9bcd3209678b96a31a53e691e9b935aba3b6e76211f2d6e8b504b3de634",
+    "size": 165060
+   },
+   "exports/grids/population_1920.tif": {
+    "sha256": "48fae21a2e00f251882014589d13943a7c244bd30368dc906c0721187cde303d",
+    "size": 165040
+   },
+   "exports/grids/population_1921.tif": {
+    "sha256": "a55dbb06bc5fd648bc7a8fbe7bd9e8c98dd70cb4171ae1dffc5f32acf81025a7",
+    "size": 165186
+   },
+   "exports/grids/population_1922.tif": {
+    "sha256": "5c8c28dea6aee5d07d1eb4df2d463ab24254ea36d66fcf057f3c7986db70f5f0",
+    "size": 165276
+   },
+   "exports/grids/population_1923.tif": {
+    "sha256": "615d23847a420aec9b3b6404eb4f5dc61a213232285952311263b80494235cb5",
+    "size": 165432
+   },
+   "exports/grids/population_1924.tif": {
+    "sha256": "0af45798ca48dadbd7ce48a4c9c8a376435f346c5058cec6e415b57b9b0aeef0",
+    "size": 165572
+   },
+   "exports/grids/population_1925.tif": {
+    "sha256": "ac5a4f935f2dcb3900dda936f0e75ec94bccb76cb930f1651b33613c029f763e",
+    "size": 165778
+   },
+   "exports/grids/population_1926.tif": {
+    "sha256": "fd236983495760ebd06141ab20c6ba7070a33088f7debf3b6be06cc34b36da15",
+    "size": 165916
+   },
+   "exports/grids/population_1927.tif": {
+    "sha256": "a1f6814fdcc5db81d7f7499b68aecb399aa01cffb1b2ed3f0eea1aa2ec562857",
+    "size": 166066
+   },
+   "exports/grids/population_1928.tif": {
+    "sha256": "d808d2a150d12b5c1aa00dc93ac07c680a4b9908585a7613c7634825c1083d11",
+    "size": 166140
+   },
+   "exports/grids/population_1929.tif": {
+    "sha256": "799a892a35dd5dc256fb094cb276cbcdc999e052bdffc7436b5fd80a380592c9",
+    "size": 166350
+   },
+   "exports/grids/population_1930.tif": {
+    "sha256": "062eefd189008c527b9f04c637e8a73d071dccb68887dd24ba0cdfa96e257938",
+    "size": 166340
+   },
+   "exports/grids/population_1931.tif": {
+    "sha256": "d5b14339434618d142d1427b2301ff7a3c6adefddfd6d7b981881c03c60aed59",
+    "size": 166486
+   },
+   "exports/grids/population_1932.tif": {
+    "sha256": "ce32bfb5891d850f57f889a01ba0ec3b4023e6bb14507bdb86270908843bd256",
+    "size": 166750
+   },
+   "exports/grids/population_1933.tif": {
+    "sha256": "6363b4e65385f0f314d2e76d57abe939d3cbb9bf48a77278f9e91dd19db2c09d",
+    "size": 166872
+   },
+   "exports/grids/population_1934.tif": {
+    "sha256": "a94369665b616fc7a535988426a00764ef242e743210854aae9d575835dc254e",
+    "size": 166822
+   },
+   "exports/grids/population_1935.tif": {
+    "sha256": "22a11b9762807f635395609e7eddefd79824ba06c6bae74f81da02a97514c329",
+    "size": 167044
+   },
+   "exports/grids/population_1936.tif": {
+    "sha256": "42575893d5e49076f31d7dcdfee9368234ee656b5e43657a7ee7cbe4cb3f8476",
+    "size": 167208
+   },
+   "exports/grids/population_1937.tif": {
+    "sha256": "fd3f27057e05f281b3faf0bc4f7c49cf0157940dd6f0b1ead1d29c92839353d5",
+    "size": 167388
+   },
+   "exports/grids/population_1938.tif": {
+    "sha256": "275246a8877396a0d5426c29ebbb2348584738ce249a488d9faeb8423eaebfac",
+    "size": 167686
+   },
+   "exports/grids/population_1939.tif": {
+    "sha256": "aebf27ba07aaffefe874062ca1269b11ac4528c7d8def57b20e7f7dda9da0a1f",
+    "size": 167746
+   },
+   "exports/grids/population_1940.tif": {
+    "sha256": "352d9699510eedb0a0323504dd1998f3e488d4ce861da47a0e8874c5d499c3d1",
+    "size": 167712
+   },
+   "exports/grids/population_1941.tif": {
+    "sha256": "f6f153bd5b306a893551dd6e65d321e6b42a70bb941547ea8fcea9d249effebb",
+    "size": 167900
+   },
+   "exports/grids/population_1942.tif": {
+    "sha256": "11d1bd2bacd35a35ced0eb8d4854f91460b3885c344155e3859784386d3bab5c",
+    "size": 167880
+   },
+   "exports/grids/population_1943.tif": {
+    "sha256": "c177c4dc1725c99c45c2e5146cd9fec085f17fae3bdc7dc7e42289b8ea9ad8a3",
+    "size": 168070
+   },
+   "exports/grids/population_1944.tif": {
+    "sha256": "009c2b8db021e605af02722c477529c3a5e8a06aeacfea6bec79f72210d2829a",
+    "size": 168126
+   },
+   "exports/grids/population_1945.tif": {
+    "sha256": "de3e5a5539beff5a7a26e0ecd7e1189ac1a34ef6e7a5a955bf4b272969c806cc",
+    "size": 168276
+   },
+   "exports/grids/population_1946.tif": {
+    "sha256": "0a5cb9b61cdaea5add8fedf2dd3082c055219b615b0d3e9d103d990142a0320e",
+    "size": 168118
+   },
+   "exports/grids/population_1947.tif": {
+    "sha256": "8f4a9dbca19b7917035830854cae6e22a14713fd0734ce5a68794dcf09b82662",
+    "size": 168330
+   },
+   "exports/grids/population_1948.tif": {
+    "sha256": "0cfd2d9e4b5b4ab06ab24f3bec07bfafe8fa222a5792319c487cf6bf1963d18f",
+    "size": 168590
+   },
+   "exports/grids/population_1949.tif": {
+    "sha256": "4816b583784d42f91fd5211e9db805832d82e9783292789ae47bc74a1423b354",
+    "size": 168606
+   },
+   "exports/grids/population_1950.tif": {
+    "sha256": "e09d6b36438cc49192fe111d6b44e1ca7b55aaa6a6714f3bb0682b5d7e4adbef",
+    "size": 168682
+   },
+   "exports/grids/population_1951.tif": {
+    "sha256": "12b924a667278ec6f48a41bfbc2a69d02900d24941664cc4ff7a3eeec0f09d82",
+    "size": 168904
+   },
+   "exports/grids/population_1952.tif": {
+    "sha256": "e17ee21ca12624fa2231ebe729d03bd9138b0a1643098c875a32624eb2135c2f",
+    "size": 169192
+   },
+   "exports/grids/population_1953.tif": {
+    "sha256": "927c6901fba2d75a35ab400b24657a385ba553ec00f914b5d8bc0e1dcbe5a522",
+    "size": 169420
+   },
+   "exports/grids/population_1954.tif": {
+    "sha256": "20f21f586c0cde0567887cb85de938b476dccca8d0faf364b5c72387023b9ca6",
+    "size": 169644
+   },
+   "exports/grids/population_1955.tif": {
+    "sha256": "5a25799e4473dab5554062c95da2f86d5e2ea53af708f03911e16aa970b47b6f",
+    "size": 169928
+   },
+   "exports/grids/population_1956.tif": {
+    "sha256": "db7991d174c904d77213b4dc45c75a76a0559e4c739bbfba7ed0d3c7fc1ee405",
+    "size": 170018
+   },
+   "exports/grids/population_1957.tif": {
+    "sha256": "d976f3fc06b810f404481a244660576a6b6e41ff7dbbf04d9515f1883f8bc592",
+    "size": 170278
+   },
+   "exports/grids/population_1958.tif": {
+    "sha256": "aa39d22074d1fc823fff918beda16734f710ff87f2281832abbaeba138b45590",
+    "size": 170488
+   },
+   "exports/grids/population_1959.tif": {
+    "sha256": "0dfc74211efef1fc909cd8ac2d3dbc655cf1f8a7374f680316e40177d88355e7",
+    "size": 170682
+   },
+   "exports/grids/population_1960.tif": {
+    "sha256": "abe07ce956ac8270ece54c7bdd0f65bf34dd4cc16c91189a6c8dbb0592bb268c",
+    "size": 170884
+   },
+   "exports/grids/population_1961.tif": {
+    "sha256": "b32dee5f8b7e0a0aa860123eda5203a49dd89736a67264dd6f88dd57d5aef12d",
+    "size": 171086
+   },
+   "exports/grids/population_1962.tif": {
+    "sha256": "fb9c8ebd216ca1964ac287e38262b8d2f4704f7957c9582cbd3c3ad1bcc855a7",
+    "size": 171378
+   },
+   "exports/grids/population_1963.tif": {
+    "sha256": "73d7bcf4a755562db200e14c0988e7f378b198dbd22fdedafe5968cf07831339",
+    "size": 171656
+   },
+   "exports/grids/population_1964.tif": {
+    "sha256": "bf8b295cbd33b94e1f67722382c58422816f12ccd64f4358b6331655e94f0a2b",
+    "size": 171786
+   },
+   "exports/grids/population_1965.tif": {
+    "sha256": "5d798134204d27ff317320d897bb5e6e44bf0a4e9ffe7706de4d57c6896f7cb9",
+    "size": 172070
+   },
+   "exports/grids/population_1966.tif": {
+    "sha256": "34e62e7ee6f71ad5cc018f03bac70e2c6e1e3354e89970b640a03815ed4ed0d6",
+    "size": 172118
+   },
+   "exports/grids/population_1967.tif": {
+    "sha256": "5c619fce7a001e291265ce14f897df4132f35609f561c28017cde4b6a85aa4ce",
+    "size": 172416
+   },
+   "exports/grids/population_1968.tif": {
+    "sha256": "e97e55a63a5916c53e88c3133c4dd495f2033874e2b4a30dcfacc58c7782566c",
+    "size": 172526
+   },
+   "exports/grids/population_1969.tif": {
+    "sha256": "a078f8574aa2c780a406ec825a8a63e6fc39a1bb735dcfc401a9f10e566a308a",
+    "size": 172736
+   },
+   "exports/grids/population_1970.tif": {
+    "sha256": "462c26ba0280d0f71679c72954f2f51cac1ed082e086bf7f1d2d18ba87f7c963",
+    "size": 172918
+   },
+   "exports/grids/population_1971.tif": {
+    "sha256": "ed505f1e86a04317b9a6244ff5a46e100824e591259bcf6d7d53d326a23cf462",
+    "size": 173178
+   },
+   "exports/grids/population_1972.tif": {
+    "sha256": "f209ea5acaf6f3a6deabe77759ad47fb6de4394f45e83499854ed00cd1a40989",
+    "size": 173344
+   },
+   "exports/grids/population_1973.tif": {
+    "sha256": "21ce1a975a940cb19a9820c6facbf7bafea420a6b4001ce00e885e4f9f610ad4",
+    "size": 173542
+   },
+   "exports/grids/population_1974.tif": {
+    "sha256": "df0fa10551728edc42c0ef6222d5bed0d2be41d80477ee096e0a03f4c7622454",
+    "size": 173700
+   },
+   "exports/grids/population_1975.tif": {
+    "sha256": "1e0da6e6bfa9ff864e1741a8f08473c56d1df1f1005d77d0ec19b9bb2989bec8",
+    "size": 173876
+   },
+   "exports/grids/population_1976.tif": {
+    "sha256": "415518ad5e71ba5d99d5e5c61009cd2d9ab12d0e26c2de3ba40f64bf57652085",
+    "size": 174074
+   },
+   "exports/grids/population_1977.tif": {
+    "sha256": "cdc0de4711baa8ffc9a48de9184acd98c26d67e7c4b54b4b55a5a8c26d4aff02",
+    "size": 174220
+   },
+   "exports/grids/population_1978.tif": {
+    "sha256": "6c8424a695fcc1988add40245b2569450eafdd2fc06e0202ce73e25644c22620",
+    "size": 174474
+   },
+   "exports/grids/population_1979.tif": {
+    "sha256": "a67d96cb876756a5c94b3971d0e3e0661a5343dd200ed2cfd03bac134299da17",
+    "size": 174550
+   },
+   "exports/grids/population_1980.tif": {
+    "sha256": "88740789756972e814548138bd534a14adff3048489e8a1b7a9f19d871d8ca29",
+    "size": 174830
+   },
+   "exports/grids/population_1981.tif": {
+    "sha256": "e74d69d1a60ae214592c2fbefcbfae44bf2031cd4d649c2ca9c754a021d0e89b",
+    "size": 174936
+   },
+   "exports/grids/population_1982.tif": {
+    "sha256": "7e894f2b4f7481d8e3ddd85681a5c149bbea4bbde1deb2a676621cbe7e965458",
+    "size": 175266
+   },
+   "exports/grids/population_1983.tif": {
+    "sha256": "7b56d1d5a159ad60b1dbb0ed6b1c14a8b588d57908cd61ff4c8137ed72717038",
+    "size": 175336
+   },
+   "exports/grids/population_1984.tif": {
+    "sha256": "0d8649754b389e4f27a548260add94bda20c3191da802db09682f1fc62944c7b",
+    "size": 175638
+   },
+   "exports/grids/population_1985.tif": {
+    "sha256": "c2d870a871d672d126df8768ff647d6debca4f799901ae2eb973a3bfe01ac165",
+    "size": 175662
+   },
+   "exports/grids/population_1986.tif": {
+    "sha256": "9841aef359943b5427c2436e98f136d10164a2e0d55f9324fb7509ed2401b241",
+    "size": 175904
+   },
+   "exports/grids/population_1987.tif": {
+    "sha256": "f4b4dc1bee23dc8610462fda0a0154f28e59487e8b349a37d805e77718e8b2f4",
+    "size": 176162
+   },
+   "exports/grids/population_1988.tif": {
+    "sha256": "c7a6cf5d58c6dee1e2424b63912c838c53fca2ee725b27a662510915fd343a1e",
+    "size": 176228
+   },
+   "exports/grids/population_1989.tif": {
+    "sha256": "8dbe1063715b62286ab842f91da7cd04630c448a57f7e8ed651aafdde3b63b17",
+    "size": 176404
+   },
+   "exports/grids/population_1990.tif": {
+    "sha256": "723ffc4b7d3af295cca9e0b6e945dd839f5d3e3d78794dd1f79da690cc7bd61a",
+    "size": 176600
+   },
+   "exports/grids/population_1991.tif": {
+    "sha256": "f7c34b71017919d96dcc531d14ff77e3986490e426ee865368a3c6f3b4b43aec",
+    "size": 176736
+   },
+   "exports/grids/population_1992.tif": {
+    "sha256": "6924b41fc2e5f6b8ca95416d5c92f5266c967c4a19129aebba71a4be47d1ed44",
+    "size": 176846
+   },
+   "exports/grids/population_1993.tif": {
+    "sha256": "70301ad5b3554429ac12e5bb7cbaf4284dba05e0a4e6871f18d22468284a8591",
+    "size": 176978
+   },
+   "exports/grids/population_1994.tif": {
+    "sha256": "c8a0c7789cd7bda3cd1529a9bef13084cdc0ff4ac274b1363059ce7b667bd11f",
+    "size": 177054
+   },
+   "exports/grids/population_1995.tif": {
+    "sha256": "105c40d652479cc23c532e8224b819eb4223b62359a6bb00925e0989791d6417",
+    "size": 177244
+   },
+   "exports/grids/population_1996.tif": {
+    "sha256": "c34031bad83fad5e701d054f75cc744c0a70e54947cfc829bdc982069e02ad64",
+    "size": 177274
+   },
+   "exports/grids/population_1997.tif": {
+    "sha256": "5571e95d3d48a3acb5319f7d131b5359e2b315f900fc0da4547bd8320894e131",
+    "size": 177404
+   },
+   "exports/grids/population_1998.tif": {
+    "sha256": "c89afea8dc857b3be20e06d354e21d15d5978f34e1d0aa87bc44a4a0ced05597",
+    "size": 177528
+   },
+   "exports/grids/population_1999.tif": {
+    "sha256": "18ed5b3ff12f7a5caecaed18d5d83b23d83edc5357c93e48e5209297335f91be",
+    "size": 177464
+   },
+   "exports/grids/population_2000.tif": {
+    "sha256": "42ebac9fae6c3d4f2db92f933616008087b0adebf4b7153971a0cb1b0c53a80c",
+    "size": 177536
+   },
+   "exports/index.json": {
+    "sha256": "7ee884d81bcb372144305e9238d91d7d7e7c792ff5539aa6e691da012c0be031",
+    "size": 2039
+   },
+   "exports/physical/elevation_5m.tif": {
+    "sha256": "1ef1faf022661e27bd768c5d935dd71d1ecf533255089d7288249c763dce8ede",
+    "size": 11196692
+   },
+   "exports/physical/elevation_bands.geojson": {
+    "sha256": "8e1d78a239a625a99cbee79ee2be03cae52f391245f55f4db1a7b0f4c47d918d",
+    "size": 5958924
+   },
+   "exports/physical/glaciers.geojson": {
+    "sha256": "8a6038d39aadd34b7344797fc9233d0705a1bc333694ac50b8e238278545136e",
+    "size": 1351597
+   },
+   "exports/physical/hillshade_5m.png": {
+    "sha256": "4356bd9402da3e442b38d9ba822cd2572ca5456fd2b3883335e86900dbad40a9",
+    "size": 1381344
+   },
+   "exports/physical/lakes.geojson": {
+    "sha256": "79810a79444a793683f811fe03a4c45061741ae859f7f16aa562b82753097a35",
+    "size": 1816756
+   },
+   "exports/physical/land.geojson": {
+    "sha256": "3c1c8041d8410bdb0220d937f0ee7d831e7b1460826bf27cb202826d31003455",
+    "size": 4474081
+   },
+   "exports/physical/marine.geojson": {
+    "sha256": "6273d6e11e90cc008e0dc7714fe1592a9da96782f278eb544678bb492ddc097d",
+    "size": 646185
+   },
+   "exports/physical/peaks.geojson": {
+    "sha256": "4be7f04b5b7a77a77fd1e8abf61d6b97c2bd70124948af57caaed8febe2c6a09",
+    "size": 220590
+   },
+   "exports/physical/region_points.geojson": {
+    "sha256": "b2a7e416c2f4ae59919c1536219a83c40acbee1ea0a37492af0c018998d09ef1",
+    "size": 70959
+   },
+   "exports/physical/regions.geojson": {
+    "sha256": "638841efb345b2c11c6e3a7e879c000e528a3077686bae3fa2ee7949f0e64d04",
+    "size": 1740781
+   },
+   "exports/physical/rivers.geojson": {
+    "sha256": "cb384c78e039e5ad0e170ba5779b779e2b406ed3cf1ed57626b8a4825a784667",
+    "size": 2396943
+   },
+   "exports/years/1900.json": {
+    "sha256": "f586b64fa2d0db367eff1b90d6d122e3dff8357d5b93c87bb6d9d1ac31b3d927",
+    "size": 348980
+   },
+   "exports/years/1901.json": {
+    "sha256": "c33cd8b0d85c1eeeb10de3ddc4cc8ee938bcff18c9fd6f404099a01d9d1b5509",
+    "size": 346275
+   },
+   "exports/years/1902.json": {
+    "sha256": "cfef6bf802a18fb18eff140d88b85f23906b8fdc5439d2b7d7dc2e72f1b72b88",
+    "size": 346509
+   },
+   "exports/years/1903.json": {
+    "sha256": "7ec0dfd0b0e75f3fefff4930217af8a2760398d6bf7e90dacabae331288b0325",
+    "size": 347219
+   },
+   "exports/years/1904.json": {
+    "sha256": "753baff178f78a160b01f365394551e84e7a22ea0711a0be0ea449508f4de78f",
+    "size": 345092
+   },
+   "exports/years/1905.json": {
+    "sha256": "10a1ed88a108eaf2acceafc5d3b195355ff007b703d5395dc85cfa6b6698e099",
+    "size": 349461
+   },
+   "exports/years/1906.json": {
+    "sha256": "5536ffd85b13f4a5e9f018b11725ee6bb6a9c965ee5dcdf4c378ea1799d85507",
+    "size": 351466
+   },
+   "exports/years/1907.json": {
+    "sha256": "5a82758a98132377fed943038672ad0f7946a61ebae58ac074ede946efe48bc7",
+    "size": 351422
+   },
+   "exports/years/1908.json": {
+    "sha256": "7f9afc169678f38eb6da10c3d2d92b62a5d4eb91b70411db0a1f4d5dbbc6982e",
+    "size": 351671
+   },
+   "exports/years/1909.json": {
+    "sha256": "d2487e2fed346c3270fb7249251579f45338b4a524ca1c847ae4a945627e207d",
+    "size": 349916
+   },
+   "exports/years/1910.json": {
+    "sha256": "b75368c2f3f801ea2a11dc9ba84b7945afb6bbad2c14edec57a8179a8ec45ea9",
+    "size": 346714
+   },
+   "exports/years/1911.json": {
+    "sha256": "b56ce33e595113c1a07d9118cf25218952eacfb6523b34f2cad6409ec64fa16e",
+    "size": 346470
+   },
+   "exports/years/1912.json": {
+    "sha256": "3928274ab56f7c39058fd1a1c4d1147d4607b7e7b9f43c7d7d9bd431eba28c97",
+    "size": 346062
+   },
+   "exports/years/1913.json": {
+    "sha256": "e5716d41dc9e370f2e02d6598efad77453e171436133efe7ec5b73ea6e202e7e",
+    "size": 344379
+   },
+   "exports/years/1914.json": {
+    "sha256": "61535f8c25bf1561dc9f23f097b79e8bcb40d03c671cb190ffb86892e1526375",
+    "size": 348624
+   },
+   "exports/years/1915.json": {
+    "sha256": "eb9fc1c4f25f03f97494a1fdc97da82a98ae96763caea6ac119461f712b3f399",
+    "size": 349913
+   },
+   "exports/years/1916.json": {
+    "sha256": "0ea7987201713d5e32e2cb846ed6593949692e6836e7c37a37204d9743dafea2",
+    "size": 348995
+   },
+   "exports/years/1917.json": {
+    "sha256": "bf7cfadc749d7029376cbcac1ea5b18a83c5e1b2cdd5766003d130e3fcfcb580",
+    "size": 350926
+   },
+   "exports/years/1918.json": {
+    "sha256": "b25a072dc676fc269d9a70604de6bc0dfe247d415c5e83646e1cd8970e280c04",
+    "size": 353541
+   },
+   "exports/years/1919.json": {
+    "sha256": "9a975c1ca2f5a46576bde4f6811b6b07ae95d22eee1ab0579c76c810acbe68d6",
+    "size": 362710
+   },
+   "exports/years/1920.json": {
+    "sha256": "f780ecaa558de9b62b705c36cfb06cf96d80d04333517801b632a7004feca180",
+    "size": 364985
+   },
+   "exports/years/1921.json": {
+    "sha256": "022ba3625d1dbde42f8ee200fd69deb13a2d5842a4d7776c86560b7864be27b5",
+    "size": 365513
+   },
+   "exports/years/1922.json": {
+    "sha256": "a697bebb030317716a72ba64a0d3c3005c20b324d71bd185501a5e868370c208",
+    "size": 367263
+   },
+   "exports/years/1923.json": {
+    "sha256": "e10c8f23566c1fa80d5fded8f1460d8337ba9d2a888548102ee543d624864dc4",
+    "size": 368559
+   },
+   "exports/years/1924.json": {
+    "sha256": "11a0b59942c6e90d02f34da72e4301ae84b9bd856cd80b2d780bd69f7c90a142",
+    "size": 368569
+   },
+   "exports/years/1925.json": {
+    "sha256": "62f6ee3c80a7feae0e7d334195196f932426f31de1b75ad0d8173195a5d48d43",
+    "size": 368737
+   },
+   "exports/years/1926.json": {
+    "sha256": "e7ef3b43af13c51ae0fa330f97401ad4d74cb79e97aab3449f3b34ed4a546af0",
+    "size": 368447
+   },
+   "exports/years/1927.json": {
+    "sha256": "cb7a3cbd9e7d89682c7a1805b1b840420cb2e641b8538b78bf38652ca49f5db8",
+    "size": 368408
+   },
+   "exports/years/1928.json": {
+    "sha256": "7a7032cdc6e60e0d7ac679633251c9ef37cb02e5096a02caa438b72098fa1416",
+    "size": 368550
+   },
+   "exports/years/1929.json": {
+    "sha256": "ef09aae8ad435e7e4ae7d4b3fa880304230da84bf2b97dd3c81fe43c538b70e6",
+    "size": 368635
+   },
+   "exports/years/1930.json": {
+    "sha256": "6cfb21641c864ee3478edd8f8f26397519cdbc2112881845c1a1fed95200717b",
+    "size": 368037
+   },
+   "exports/years/1931.json": {
+    "sha256": "b6d5d83e0f18158cf53831fb26de4da022bed4562954b025842a1db74dba1f5a",
+    "size": 368778
+   },
+   "exports/years/1932.json": {
+    "sha256": "1402db86d9c7eb450f423c4bbed355fb723c06c8f20c673542a06cc9c4403cf5",
+    "size": 369177
+   },
+   "exports/years/1933.json": {
+    "sha256": "5b7357a4aa1e370e6b75aa2aa16b01f9cba68bae7379662a618dc840e8e03a35",
+    "size": 371181
+   },
+   "exports/years/1934.json": {
+    "sha256": "4a6fb480fad69b5de03f6169b9f1425a62346861f8914c4b4322fb3d375963a7",
+    "size": 371258
+   },
+   "exports/years/1935.json": {
+    "sha256": "1311468a5fd6debdad07062e06c5212749cc91827f4bbfc7b53f654538b4ce56",
+    "size": 371636
+   },
+   "exports/years/1936.json": {
+    "sha256": "4074dc3674c20164ad14875d54240b86c4d6907ac8a57f7260b9a3e657493045",
+    "size": 371875
+   },
+   "exports/years/1937.json": {
+    "sha256": "07f952b0b73af89d64a9c62ff8c99f49104e0e2e868920b889f28d5c9ec80818",
+    "size": 374719
+   },
+   "exports/years/1938.json": {
+    "sha256": "03a6e879be2e884c48ba2ebfc478c5e2693ea6200afeccb7114a667ea35cd896",
+    "size": 375196
+   },
+   "exports/years/1939.json": {
+    "sha256": "748f49ba8652496fad93b7c865bc872e3cffafc025f1a927c1fe4294ca0b0d2e",
+    "size": 374970
+   },
+   "exports/years/1940.json": {
+    "sha256": "6a1e6dca4b6920f89a55a6afad22d5da9607b674075f1001a24d5183fcfa2238",
+    "size": 372555
+   },
+   "exports/years/1941.json": {
+    "sha256": "32f04c3e0e57424620d0d036377c973de4eb9319476d8431d47181322362e549",
+    "size": 373391
+   },
+   "exports/years/1942.json": {
+    "sha256": "1d2bfce33fe495d77c76191ca5e5330151198c6b3f9d1f8609efdac2a7add816",
+    "size": 377335
+   },
+   "exports/years/1943.json": {
+    "sha256": "88c8f41f2117861520d86fabf897591ea13dca8cc7021c39e63628b02da2d0aa",
+    "size": 377689
+   },
+   "exports/years/1944.json": {
+    "sha256": "1fe53081484c6095eb99a7a16371eedb5025331bbd967ba0756d1c09b4310452",
+    "size": 378404
+   },
+   "exports/years/1945.json": {
+    "sha256": "3796c3c0e3818f7cb35a76484e1969258de5f5f9579c5a4de6d5adf86646d08c",
+    "size": 375179
+   },
+   "exports/years/1946.json": {
+    "sha256": "218f67c1412838f0af4916d744c37101f1b5657cf0207685aac5260a5ef04eb4",
+    "size": 368996
+   },
+   "exports/years/1947.json": {
+    "sha256": "01bc7d5caf48218920e5e969b5407daf9e6ad1f7a684f614cd150f069212a8e6",
+    "size": 370381
+   },
+   "exports/years/1948.json": {
+    "sha256": "a97bb80aa464c6d8f1339693202505025233ca15406bb4e19ce7c9a548c96095",
+    "size": 376413
+   },
+   "exports/years/1949.json": {
+    "sha256": "7baf0ee7031497646841e9b84b6ddebf80c6717e427f474a92f79a64baac4321",
+    "size": 374605
+   },
+   "exports/years/1950.json": {
+    "sha256": "97fd53d3c62ac995a124aa8e64af71c58d243d4fb982fa8620c7a9ebf7103f8d",
+    "size": 377916
+   },
+   "exports/years/1951.json": {
+    "sha256": "591f322661ac18034a2b0f1c18e51c46ffa32d37d9d3c91679cee4368c5cf800",
+    "size": 376515
+   },
+   "exports/years/1952.json": {
+    "sha256": "4667ba84e1decf178b37d06683006743af32b750c31611bf3417508d182829d6",
+    "size": 376725
+   },
+   "exports/years/1953.json": {
+    "sha256": "cea4fc825e3c4c6c694725619d6e48de363b3c797ecbdc22d289970bcc627219",
+    "size": 376084
+   },
+   "exports/years/1954.json": {
+    "sha256": "5bcec0f1666a2d472727483ed87ff4cd76f40d62d18cdee40cdaeb57baddab8c",
+    "size": 377078
+   },
+   "exports/years/1955.json": {
+    "sha256": "a599d97648d9c302134ee327d8c1fa854d7c5c8de87eb58ad567f011cb64b384",
+    "size": 377205
+   },
+   "exports/years/1956.json": {
+    "sha256": "7114272e66d49c3b4ff1385a182dda8645acd053cb87577554903bba1f82768c",
+    "size": 377036
+   },
+   "exports/years/1957.json": {
+    "sha256": "7b60c9d6269413b6a993d4fe9369781bef4d968ca10751907ed1baf7a3f2f176",
+    "size": 377592
+   },
+   "exports/years/1958.json": {
+    "sha256": "6dfeac50a946cae3d5330f44ec24a9b6eb460e78e544250f17829fe34d7788a8",
+    "size": 377583
+   },
+   "exports/years/1959.json": {
+    "sha256": "17dc1030bcda059846270cd0f801c96f88c12286f23a031626c638532c58023a",
+    "size": 376655
+   },
+   "exports/years/1960.json": {
+    "sha256": "054641481b06f71dcf48c4f601634542ad3a017b96a4226dd9a27627a3c2af1d",
+    "size": 378407
+   },
+   "exports/years/1961.json": {
+    "sha256": "ebfbd1648545c7f27184fead670722f0191f0adf80f10013ea1fba0e034883ca",
+    "size": 385454
+   },
+   "exports/years/1962.json": {
+    "sha256": "921e4bd3e418d44f8f69885f86875cf06e975cfe502fdf9eb93f84b4b1764f24",
+    "size": 385737
+   },
+   "exports/years/1963.json": {
+    "sha256": "8297a7023930dc667d03605925740a15cd7f2d648d7c5e05f7b5390c70d88e05",
+    "size": 386456
+   },
+   "exports/years/1964.json": {
+    "sha256": "45d7888995e8b468725365a8efa732ff2899c1f0c9b82ab3b73c48463f6a21ab",
+    "size": 386840
+   },
+   "exports/years/1965.json": {
+    "sha256": "2ca53d414dae7a2965abcb77c4107567d8ce4e0f7b255fddf66bc65a9c134e05",
+    "size": 388478
+   },
+   "exports/years/1966.json": {
+    "sha256": "0e2cc31c39fe0e2e3b14a9826751e17bb98780ec441d330e4959600fdb1f2db8",
+    "size": 390533
+   },
+   "exports/years/1967.json": {
+    "sha256": "813ad7a4f7e1510270feb49a8385190ec1f4cf50347bc3b0fed5fd4f1e480ad3",
+    "size": 390409
+   },
+   "exports/years/1968.json": {
+    "sha256": "9fd3418ebafdbb07b54f9df45cd04bb3f8881598aa40d3c367e457b54e2813d3",
+    "size": 391500
+   },
+   "exports/years/1969.json": {
+    "sha256": "c06ea8e0c634c9f3e02646e456745ae03f83a2b8799daaa931bab593c7129377",
+    "size": 392482
+   },
+   "exports/years/1970.json": {
+    "sha256": "2b281db3b9357ef107fa136c03053251657811cb81fff02da9fdb01d31bb1ded",
+    "size": 391596
+   },
+   "exports/years/1971.json": {
+    "sha256": "bb5172da1aa9a17d1612cdfd8b340ebee1f25e993e1d083c2edc7f053ff34038",
+    "size": 392011
+   },
+   "exports/years/1972.json": {
+    "sha256": "c2a92f3945582f8d3e2a51e07691bdf27fa70139a31288bd36e44117f604d1e2",
+    "size": 394719
+   },
+   "exports/years/1973.json": {
+    "sha256": "f1457ad77ad6ea316aba468e6c504876a31b349320b528c70c27722e7a1e30c3",
+    "size": 394820
+   },
+   "exports/years/1974.json": {
+    "sha256": "8503aef1589bd2864c773252a6cfbbbc2b5388179acd06562943fc492be0fd0d",
+    "size": 395281
+   },
+   "exports/years/1975.json": {
+    "sha256": "1825bd3ad872a8f80ea0c15779c3b42721ebba29b68933436db7f70b75bc5706",
+    "size": 395028
+   },
+   "exports/years/1976.json": {
+    "sha256": "1d977307482f460bd61a479bbf84ec96bf8e2e522e3bf1a37f77a1dedc7c9823",
+    "size": 396712
+   },
+   "exports/years/1977.json": {
+    "sha256": "963f7c5932448eb8f4db32332fe5b79365cd3b147c3b922ec500070520aaaae7",
+    "size": 396289
+   },
+   "exports/years/1978.json": {
+    "sha256": "8f70187eb6295e4e3d0e3395000e3d132fa3d6d1c2bb41d4e1af7ac147e40121",
+    "size": 396798
+   },
+   "exports/years/1979.json": {
+    "sha256": "f3d86ffb192f53aac1a0dc4dc2a052999408adbf9db33bc9e27d5678e8c3621c",
+    "size": 397473
+   },
+   "exports/years/1980.json": {
+    "sha256": "f2483c542bfe5db5498587496fc6a28ee87cef103f0d8602f4f1bf85be470495",
+    "size": 397890
+   },
+   "exports/years/1981.json": {
+    "sha256": "d1679843b90ba08c49577070325dcf7343daf2387573e4bd65a2f108d10666b7",
+    "size": 397974
+   },
+   "exports/years/1982.json": {
+    "sha256": "ac8e38a3e3f6f438043118d23153dfd2412f5154324cf59b409297babdeb4066",
+    "size": 398447
+   },
+   "exports/years/1983.json": {
+    "sha256": "63642f46cc842bb4343b96c38bf7a128912bb020e5b052a41936069ebf0a8194",
+    "size": 398540
+   },
+   "exports/years/1984.json": {
+    "sha256": "3cb89e55f7e827a6b1f4ae6839eb06c42083f290ab627b7b92d710af8a409881",
+    "size": 398914
+   },
+   "exports/years/1985.json": {
+    "sha256": "ae2f15946b1ca7f41cd1d18bdce4ccbe12b82333503cad0d093bc97581c0a834",
+    "size": 398968
+   },
+   "exports/years/1986.json": {
+    "sha256": "36da869581a4b7f45de1e8a11d36c0945146dec860bd985e5d8d4883c5c8f433",
+    "size": 399194
+   },
+   "exports/years/1987.json": {
+    "sha256": "707daef28e8a3e336dfde59eea23cb13db66e5e2c7dcb7b2f0af49b25602862c",
+    "size": 399241
+   },
+   "exports/years/1988.json": {
+    "sha256": "d3076d19717c0926c889ec0866ba0c674faed330831c94f8f0a7af677f93fa18",
+    "size": 399476
+   },
+   "exports/years/1989.json": {
+    "sha256": "02d41c74ebce838ecf619d0e7381f66ef2f8fb5d0b5ebc1addcc1f440c82ecd8",
+    "size": 399238
+   },
+   "exports/years/1990.json": {
+    "sha256": "8d2c80abf65ad9d1bc3940e3c7cc0e01d0104c87cf91597c843508ac77d4bfd7",
+    "size": 397782
+   },
+   "exports/years/1991.json": {
+    "sha256": "8e4ec7976d84c30d3384a5edd4145143cbd5d1e497cdb8a798d7cc55ad9769b5",
+    "size": 396438
+   },
+   "exports/years/1992.json": {
+    "sha256": "3e8f093c0f6a10cd3d74ed208d2166317057b2d9e4d07a2a7753f7c5a898c656",
+    "size": 421395
+   },
+   "exports/years/1993.json": {
+    "sha256": "9238c1d8555d3bf2f9c35ddb16b3014d8c1d697ce30ee3add70f26c63db8c8b1",
+    "size": 423975
+   },
+   "exports/years/1994.json": {
+    "sha256": "d30cf98b861e6e2a1e171a298cac9796cd7c18c47b7758de2ffe028d560a98d0",
+    "size": 424319
+   },
+   "exports/years/1995.json": {
+    "sha256": "9aff2699288be8ae5797ecd912e2f26fef648ef779005c47c4f708a6a2503637",
+    "size": 424510
+   },
+   "exports/years/1996.json": {
+    "sha256": "94c23beaa980a8fd89ab5f2eaac20495a9b8faec3a7b9d529e70d7e79abae1af",
+    "size": 423976
+   },
+   "exports/years/1997.json": {
+    "sha256": "df5722a699c6f2b0a44b42d2061fff6c9d7e798a2c8d2c16c38d0321d1a21fb0",
+    "size": 425028
+   },
+   "exports/years/1998.json": {
+    "sha256": "36d20295f309cab3c870dde289ae9b3f201e84c3ba2fc13a5c719a13217eeaaf",
+    "size": 425161
+   },
+   "exports/years/1999.json": {
+    "sha256": "6d79a9f33c8c58c275fa80cf3aea1a8a96510ddd53b27aeed1cbe2940a1c2195",
+    "size": 425561
+   },
+   "exports/years/2000.json": {
+    "sha256": "598bdb2c0b568a5a62e945229487b50930dabf0913a83919d6d4a3c7369f08e7",
+    "size": 425233
+   }
+  },
+  "maps.tar.gz": {
+   "maps/1900.png": {
+    "sha256": "37b03b658f143730d9eeff08b33062c9d6017bb19b657f654831f02db5a3ae9b",
+    "size": 554011
+   },
+   "maps/1901.png": {
+    "sha256": "c881de2899985f7e2f50358557d8f02a73c6bf0a8648aaca1f7da18cf8afe961",
+    "size": 549654
+   },
+   "maps/1902.png": {
+    "sha256": "04e6820a983b60a71b4ac9b098067cb60524a46a798ae052869d69b26850ac53",
+    "size": 552492
+   },
+   "maps/1903.png": {
+    "sha256": "3e623bd2f0e9c18044b1745fef4359dbfc3e724408b4dce1d941d5a6e004fa78",
+    "size": 551578
+   },
+   "maps/1904.png": {
+    "sha256": "de2650e6ac11f7d21e7eb9b009f210114c3eae14be84562fe9ff977b692c1b0a",
+    "size": 550019
+   },
+   "maps/1905.png": {
+    "sha256": "442d668bb767317158bd37a746a1254caaa1d25a10eb9fa252d3ab02e131aac8",
+    "size": 551445
+   },
+   "maps/1906.png": {
+    "sha256": "84b3c345a3c9c773a471666f2caf0467042e86076f975db34c7fe990cee02993",
+    "size": 551949
+   },
+   "maps/1907.png": {
+    "sha256": "c9dcdb4eac644ff8269e06c4a50c334ac58899031fbf668f2092f5e946695ba4",
+    "size": 551974
+   },
+   "maps/1908.png": {
+    "sha256": "fb81c8ce971f902dcf365d1da630e08a42f9790f6cabd04362975dad72e4f2d7",
+    "size": 552542
+   },
+   "maps/1909.png": {
+    "sha256": "c2efe9c25e0476cc320fda2b807c95f1cb83be85cb759d5e6f0f812d3ffa525b",
+    "size": 551232
+   },
+   "maps/1910.png": {
+    "sha256": "03d3d5f97b75ace744645fb114ca41af82f6bd86eccaaba254c79a9055f1ac23",
+    "size": 549916
+   },
+   "maps/1911.png": {
+    "sha256": "e4d17ae218d6f93d7dd7706305a8705d7ad68255f23cfbaca341f717ba49533b",
+    "size": 547661
+   },
+   "maps/1912.png": {
+    "sha256": "60257d2a63e15a2fc2f7fa6b6d1b2599e1c26e0b5fbd8c9e297e6803b882c3a1",
+    "size": 550618
+   },
+   "maps/1913.png": {
+    "sha256": "9ab19bb2f5a9b4d9681f1940c2a5691387d70bd3e29bb2df68753d68565e3e22",
+    "size": 550906
+   },
+   "maps/1914.png": {
+    "sha256": "f708c826b482394f86ba25edd54813c6ade828468b2c6a9e8dc3d146062629fb",
+    "size": 551497
+   },
+   "maps/1915.png": {
+    "sha256": "382bdbb448280f5f07995403fbfd7925a0c9db1d43d2a2ff9cc089e537ab1c66",
+    "size": 553312
+   },
+   "maps/1916.png": {
+    "sha256": "9aa834d3e6cc807603f64bdfd0ba73c1f4c815e71811440dca770850a4c7174b",
+    "size": 553520
+   },
+   "maps/1917.png": {
+    "sha256": "77ba2669a8b881762e100af81940e5c43dfdaa37cea1dbca6f7455ab4911e533",
+    "size": 556332
+   },
+   "maps/1918.png": {
+    "sha256": "6533b9cf76545835c5a2b1cfacf6525accfd9f2f73c4ed8734d1380efb430791",
+    "size": 558875
+   },
+   "maps/1919.png": {
+    "sha256": "21431b8e4bc493c42b5c10585ce034e4f21a6c22ae152ae7237a905161ef5dee",
+    "size": 554388
+   },
+   "maps/1920.png": {
+    "sha256": "c26970482e0263ca7a5f0537a843098633a5634852d75cc2a1910a19d05f0f9b",
+    "size": 555392
+   },
+   "maps/1921.png": {
+    "sha256": "da47a0c1cab342c23300d83a99c40c3a11e35143fe9441c4ac9ecf8112ab8bbc",
+    "size": 555337
+   },
+   "maps/1922.png": {
+    "sha256": "6c8c0332f64c8063c08ff404965ab0bcb6276127b93cb2f56ba83a81b22371c3",
+    "size": 552568
+   },
+   "maps/1923.png": {
+    "sha256": "8d786321ba95f10c907add0c437d880711b708c053b73c6def6a4240fa8f9743",
+    "size": 553314
+   },
+   "maps/1924.png": {
+    "sha256": "7b33b755a72031f5ca5e00613733f39338c92e4135f183776d0e80ac9cc4f141",
+    "size": 552304
+   },
+   "maps/1925.png": {
+    "sha256": "eae7668c6dac31cdc8b12ab87021144df30afb71f974bf9f2ab416582d23413a",
+    "size": 553859
+   },
+   "maps/1926.png": {
+    "sha256": "824198e6dc8ae90146a014bd4c8dd7bdf43245364b47eeacce2cf08b4fd49e2c",
+    "size": 553674
+   },
+   "maps/1927.png": {
+    "sha256": "9ef98d288755b56c7c96fcf7c70fba837e40b5459bd6c12bcdc1496ee45de6af",
+    "size": 552855
+   },
+   "maps/1928.png": {
+    "sha256": "3c6d579cee79e8cec12c164b897d7793f270eb1261255bfc374e8c04d6499dfb",
+    "size": 553476
+   },
+   "maps/1929.png": {
+    "sha256": "f05cd6730d010909d180e76a9dfea23b4233e898cae17bbccdf96e1f7cdc4f45",
+    "size": 553885
+   },
+   "maps/1930.png": {
+    "sha256": "e8ac59f74db012500c6f2fd2ec1bfe1307c1262630a600e3c72f22d849d0f37c",
+    "size": 550492
+   },
+   "maps/1931.png": {
+    "sha256": "eda85cdbd07cfd4b4ed000fd096cd5fd80f1ba5deb5b0a7feef1aa05f56542c4",
+    "size": 551153
+   },
+   "maps/1932.png": {
+    "sha256": "e8f94f96c988dc8dfb5fab2e972b7de5dd864da3be341507d9764c6d35109595",
+    "size": 551070
+   },
+   "maps/1933.png": {
+    "sha256": "3caad9dff4d4bc428fe54836be50459653608e29d6339d4cfe897ccd04a77be7",
+    "size": 551222
+   },
+   "maps/1934.png": {
+    "sha256": "0d71111fbb05a3633f60b1b78f673a9a5321085d85111e25d198974a96c7a734",
+    "size": 552453
+   },
+   "maps/1935.png": {
+    "sha256": "dc7c88f75c8e24b17d8a8f5053369c40cd6b0f0236ee595218fef8e23d756b62",
+    "size": 550581
+   },
+   "maps/1936.png": {
+    "sha256": "1c785a3eb3428320931fffc717f6be4a2980c765c26c64ee22c47c5577d6909c",
+    "size": 550526
+   },
+   "maps/1937.png": {
+    "sha256": "2d7f9a5e24eb5afff90105f91b930457fec1a227510c7ea2281f648adec41814",
+    "size": 551057
+   },
+   "maps/1938.png": {
+    "sha256": "e6874f2f20122338078cf31a3eb7e5ffe75c7b7fd3493d835ae5cd169bc497f8",
+    "size": 552553
+   },
+   "maps/1939.png": {
+    "sha256": "9a60b002902c98bd508c67d27ccc19f1687c099dcfe3d090b117843c53f775ce",
+    "size": 551775
+   },
+   "maps/1940.png": {
+    "sha256": "c5422ba2257abf3f3f02237b0f8add0c0d0c9af7a3ab6bb2157cd4a502193f41",
+    "size": 551665
+   },
+   "maps/1941.png": {
+    "sha256": "f7477269fed2c47ea39ebd4479adb9e51a90ec3ad4089d66d44657e8dac26624",
+    "size": 552396
+   },
+   "maps/1943.png": {
+    "sha256": "f1c66803087e69336543f42e1ed834f06f235a20dc1746919ef6d38ddc27d187",
+    "size": 553764
+   },
+   "maps/1944.png": {
+    "sha256": "4f9dad77d2a7062c5fc9b8553e17c5f1707992a4820f95e3fddeeb718badad99",
+    "size": 556673
+   },
+   "maps/1945.png": {
+    "sha256": "931e58b2fafafb203dd52ab62cb148351d3e2d820b3e5bfeb4e5a4f50b243bfd",
+    "size": 550949
+   },
+   "maps/1946.png": {
+    "sha256": "68553021f390850fb440cdd0019b65fa2e39b586fb99d18ee838fa45edb6b0ad",
+    "size": 555215
+   },
+   "maps/1947.png": {
+    "sha256": "2fe765ff7a81e3537a9f9c9ca8ecfe0751532db16a3f6a106bd0368de470c7f7",
+    "size": 557031
+   },
+   "maps/1948.png": {
+    "sha256": "030de1e0b07dd4c7ce62b8c1f6dd5683b1ed3cc3e814817df7137eed97ca6c19",
+    "size": 552391
+   },
+   "maps/1949.png": {
+    "sha256": "854901fb57f814d58d467208d2668209c60d5f0118c30b6d14f7bf05b7380bcc",
+    "size": 549633
+   },
+   "maps/1950.png": {
+    "sha256": "3b460cccacda30b91f21ce28c014108e7d7f1f7456936d748fd693c68e4929ac",
+    "size": 551049
+   },
+   "maps/1951.png": {
+    "sha256": "fb49049f4670ab2bc3485d2ca104b465f8874b768f39b8c8c5dd9e1f806ecf89",
+    "size": 551614
+   },
+   "maps/1952.png": {
+    "sha256": "276b7e889e446f99b42f73bc430fb65454b112c7b71cd09fd307068757b9a325",
+    "size": 546560
+   },
+   "maps/1953.png": {
+    "sha256": "5a43164439e9dfe06ddea3b503f5f9a659d8577510b9cf80fbb4eb83518a78f4",
+    "size": 546608
+   },
+   "maps/1954.png": {
+    "sha256": "203983270f323449c811279369d96556ee6f71a11c9eb09a5c305b0b6ffd0ac2",
+    "size": 547399
+   },
+   "maps/1955.png": {
+    "sha256": "482a270d851f02dc5b2eaefbc348aa2a8b446b772a147e4a8ff9aab4466c2f35",
+    "size": 544612
+   },
+   "maps/1956.png": {
+    "sha256": "411f87532fa697db7f7017ef8eea5666eb288362f40627fa99f66ae96c59a7d4",
+    "size": 548665
+   },
+   "maps/1957.png": {
+    "sha256": "d17c43969ecde53d7059c1a9c4f0bfdc1252d7029c180b522fcb76ae190d76e3",
+    "size": 549884
+   },
+   "maps/1958.png": {
+    "sha256": "080671671eba7e85a13fa37946616b3734d8ea693c26a73cb723fe45f37bde62",
+    "size": 548663
+   },
+   "maps/1959.png": {
+    "sha256": "f4149de92dc213290069e41fc59e29da653337073316306c2061a49ef94a38b2",
+    "size": 549677
+   },
+   "maps/1960.png": {
+    "sha256": "494a2258f0e81515e39703d2f7a2755d43393a97f5415567dd226f5e258b78b0",
+    "size": 549142
+   },
+   "maps/1961.png": {
+    "sha256": "5e74de63689767158cfdde6dd6500f18fc60c23d4cec805ff36ef7a3d983f22a",
+    "size": 547747
+   },
+   "maps/1962.png": {
+    "sha256": "2339567729eddd22e14c6748dc1cd38de6ffea4e6fecf3cc7b79f0541050d2df",
+    "size": 549220
+   },
+   "maps/1963.png": {
+    "sha256": "88db188fe74a5386fe10ffa8b316ae9b021641c5191c11f51db516c468e92b3c",
+    "size": 550449
+   },
+   "maps/1964.png": {
+    "sha256": "aea549ec4b448d78114330a87f00411fb21448c9908d7a4f4abd9463f01d84f5",
+    "size": 549170
+   },
+   "maps/1965.png": {
+    "sha256": "5de5b6f6711144684555389dee287bf7b983f265f3bac4aef9fd5caf3d4de026",
+    "size": 551313
+   },
+   "maps/1966.png": {
+    "sha256": "36d0097b81ab81d82756039c0de438e998588fd7726e0cf5849073a32cb1e41c",
+    "size": 551354
+   },
+   "maps/1967.png": {
+    "sha256": "55eaeaa5cd3fd6930d17eb5ff8640ebd90f1007d9bcd4cade8bf1303a47437bb",
+    "size": 550687
+   },
+   "maps/1968.png": {
+    "sha256": "99e11d023257343f9972a9691bb8f594736ec1269a17f8da21b5acc32568a3c9",
+    "size": 552928
+   },
+   "maps/1969.png": {
+    "sha256": "44a405df9c5d7f76e02f1fe350a507203f8cf469f9d77df02a0d7ef5a60d647f",
+    "size": 551385
+   },
+   "maps/1970.png": {
+    "sha256": "3b2338f222004c9a8315a61b9f560ae6ac0b5289d95c998305e29ed8b43ad627",
+    "size": 552652
+   },
+   "maps/1971.png": {
+    "sha256": "6cb4e202dcbb55b035df2fb9ce54f39f86c054cfd82b3f5339f53935d4bcb832",
+    "size": 551844
+   },
+   "maps/1972.png": {
+    "sha256": "47f7929820af4c10d6baeeaa7fae89abb3e0b2341613b1b317eed96d29548d67",
+    "size": 549960
+   },
+   "maps/1973.png": {
+    "sha256": "6f2d2fbb5d9769814a4e5f33c4fcb8cb12fae45bfd4069b7782a465664d8e744",
+    "size": 548915
+   },
+   "maps/1974.png": {
+    "sha256": "cee61dd4117a7c85eaced8a4119fc7f7ac972c7eb80e46cd4f70d337ac07b700",
+    "size": 548724
+   },
+   "maps/1975.png": {
+    "sha256": "520a1a575aaf06763a1ea8a9fe665d33b7a7eb8654cf427b8fd0e24a26d8fcdf",
+    "size": 551029
+   },
+   "maps/1976.png": {
+    "sha256": "970e0ac9ff4594ecccd25caac870c873be773a6b4317b33dd813d6b7f16e4f78",
+    "size": 549390
+   },
+   "maps/1977.png": {
+    "sha256": "0c08bdcf258ed35fce995b7d21c17146d51bea5ce8b97545147a6944a099c4cc",
+    "size": 548656
+   },
+   "maps/1978.png": {
+    "sha256": "b0b20f0cd711935156f0854b8a8d02f2f93cf52e4216d23166756278895bd8e9",
+    "size": 549945
+   },
+   "maps/1979.png": {
+    "sha256": "effbe139b44776c1478f4517ee65f267fa8fb331be49fe2d0d70dacf3371df66",
+    "size": 550634
+   },
+   "maps/1980.png": {
+    "sha256": "1adab86237667ef297fa0535ef95533558cacd7f736c0a49668a86820426ad6d",
+    "size": 550007
+   },
+   "maps/1981.png": {
+    "sha256": "c9b76dc862fb1299f2b04e6cea2742d8356979cb0f5e73075a7021be6c5fa977",
+    "size": 550549
+   },
+   "maps/1982.png": {
+    "sha256": "1ffb7098a014fbac2f512b9e8f0c31c6a732b3309e4404378e0100e8d3ac3668",
+    "size": 550808
+   },
+   "maps/1983.png": {
+    "sha256": "287ea7106a84556d69fc89018133587c3f045edf5d28066f532359433fa88a16",
+    "size": 550637
+   },
+   "maps/1984.png": {
+    "sha256": "78031d7a96ecbe8df063b0fd08af0ab40a5770d2dd8dde9d4538ca2b8a1341f9",
+    "size": 550249
+   },
+   "maps/1985.png": {
+    "sha256": "71412e5121b9e051b23b57728fd8c7d626978e65d12594bf993596f0ab1b8fa9",
+    "size": 550735
+   },
+   "maps/1986.png": {
+    "sha256": "d7d48f4a6d37b12a3fcfc1e8b218fb60bf3828bb2ceb4a59db16dcf0bd45864f",
+    "size": 550600
+   },
+   "maps/1987.png": {
+    "sha256": "b4e13572584eedeb4aa735bcbe0bc74a66c605f7d7b74a550e10d05f8760c71f",
+    "size": 550569
+   },
+   "maps/1988.png": {
+    "sha256": "3939bf83ba7e706fdafe7ad26f0885848295e8a55a75f6b3dba76e043aa31198",
+    "size": 551030
+   },
+   "maps/1989.png": {
+    "sha256": "731b1c1b4e427db18a602f0f3975a35bc92bd39743b754908f94e666bbb70e6c",
+    "size": 550575
+   },
+   "maps/1990.png": {
+    "sha256": "577769f973c9061e327ad670f473ac39ebf79968d5a1fc7a77e91222b78983b0",
+    "size": 549219
+   },
+   "maps/1991.png": {
+    "sha256": "d51f131f185ae600e330b9882c83dc35299c65c31f5593e4779c11dd2615de8b",
+    "size": 549874
+   },
+   "maps/1992.png": {
+    "sha256": "e647241ff3d2eb78b2044a4a7186c7f0263557e56bcc8446a24e770639bf6453",
+    "size": 556390
+   },
+   "maps/1993.png": {
+    "sha256": "3d81961ad1a9e864247fb14ff5318e6af01c4ec0c76720d4270d5191bc4471b8",
+    "size": 555051
+   },
+   "maps/1994.png": {
+    "sha256": "1f41e837a1acf67de3bd5e5d97e1b61f4ee709d4fb62fa8294761bf2a2b61943",
+    "size": 555622
+   },
+   "maps/1995.png": {
+    "sha256": "51e598105c39a48dab1de725ca9bcbe461996fdceb241602ce2d93da6db6c35e",
+    "size": 556522
+   },
+   "maps/1996.png": {
+    "sha256": "f9df4609237b1050a5ca2cc0801381f528f149e3afac6bfefe302917ed78b0e0",
+    "size": 556269
+   },
+   "maps/1997.png": {
+    "sha256": "5c07980dea8023cf3a2eb4ac94e96964b56dab866ae728f6a48e51629eb3d4e0",
+    "size": 554869
+   },
+   "maps/1998.png": {
+    "sha256": "4d6a5b167832a6a71c1245f036b2785201df3e237c6c6205b4016146288a460c",
+    "size": 556235
+   },
+   "maps/1999.png": {
+    "sha256": "c9e5a1927f80aa685345ef0179a93f805125ff6f6904d1bba29a2a126760b4e9",
+    "size": 555570
+   },
+   "maps/2000.png": {
+    "sha256": "0d52faaed5cf15b29a88d7b7113941ba6c8bc5a2bad48295d0e6fec8d8d658e9",
+    "size": 556509
+   }
+  },
+  "ww2-maps-data.tar.gz": {
+   "ww2/maps/data/added-build.json": {
+    "sha256": "f987c374f81c0d7c67990e0c07f5ae70a9cd71da693b85d7ba0cebb4e3e5eeba",
+    "size": 268
+   },
+   "ww2/maps/data/admin.bin": {
+    "sha256": "a33005ef0644b79e54e5dba064438b25861c9f517731c019dcb5b86d08258256",
+    "size": 401913
+   },
+   "ww2/maps/data/geo-1900-08-14.bin": {
+    "sha256": "91031822ae0dd669c2cff45a3ca7fdc28c32093740fa83f8bd6efea07146eeaf",
+    "size": 1661488
+   },
+   "ww2/maps/data/geo-1914-08-04.bin": {
+    "sha256": "df66522e262d96a382fabf641266f428709b853a0a79c9ece5a7ca92bf44cd0c",
+    "size": 1636746
+   },
+   "ww2/maps/data/geo-1915-05-23.bin": {
+    "sha256": "7476fc71f19763005bb3758aaf831363b3d320eda44383ddebe8f5dccfe25fe1",
+    "size": 1424921
+   },
+   "ww2/maps/data/geo-1916-08-27.bin": {
+    "sha256": "92757166f7179e964c2459100c3805a8a6a49acccb86131e6907d13e5458331e",
+    "size": 1462046
+   },
+   "ww2/maps/data/geo-1917-04-06.bin": {
+    "sha256": "d628a3989d9790000baf0bc3c4ee8f50e49e721521d03b6808522235c0e8ec15",
+    "size": 1503089
+   },
+   "ww2/maps/data/geo-1918-11-11.bin": {
+    "sha256": "6fa2183baedcf43779cd885ace3251a73a2d2939521748b663c54e5c4c7913a1",
+    "size": 1813516
+   },
+   "ww2/maps/data/geo-1934-10-16.bin": {
+    "sha256": "fdc655aa4d2972973cf217935bf59a0e979c8de4fa51eaa5e12a3ad0de2441c4",
+    "size": 1690560
+   },
+   "ww2/maps/data/geo-1937-07-07.bin": {
+    "sha256": "e8f36bf51a0dc7d55b278304dc2f04933201362647d84fc7618b6dff48057d84",
+    "size": 1360438
+   },
+   "ww2/maps/data/geo-1937-11-12.bin": {
+    "sha256": "41893c1b28a92adc852afb0a1f55a9462d3bf379560382e427d8a2f50029b5f9",
+    "size": 1397376
+   },
+   "ww2/maps/data/geo-1937-12-13.bin": {
+    "sha256": "d01086df52eaa3d6fbb66813a672ba294029d744b6e67be57dcf32f52978d446",
+    "size": 1398343
+   },
+   "ww2/maps/data/geo-1938-05-19.bin": {
+    "sha256": "30524a3d650dea8b8da166ad3a8ed6bbe81a409a625bee208534e3375ef03312",
+    "size": 1438127
+   },
+   "ww2/maps/data/geo-1938-11-02.bin": {
+    "sha256": "764daaadc24f266c0010eefba0cbcd3f2b6f0456d66d217ee17ded997fbccd13",
+    "size": 1461061
+   },
+   "ww2/maps/data/geo-1939-03-27.bin": {
+    "sha256": "d4eca3bd0576967dbf656e2db7e1629d28627b8bc2b37cf034f8defbd20ad0d3",
+    "size": 1474863
+   },
+   "ww2/maps/data/geo-1939-09-01.bin": {
+    "sha256": "ff401ad51d03cc7afe6bca273c2c7fdea8d6df537c537d7b260b1aa6ed71a318",
+    "size": 1740028
+   },
+   "ww2/maps/data/geo-1940-07-01.bin": {
+    "sha256": "d7ba97aa1cc99fec57a02a3fd9fb4740f600ae41e2043ac52e95c873873916bb",
+    "size": 1747039
+   },
+   "ww2/maps/data/geo-1941-06-22.bin": {
+    "sha256": "860327e7744689acefb0f9211c74b6b6019a17300dce6b538e32287d7ed42121",
+    "size": 1576663
+   },
+   "ww2/maps/data/geo-1941-07-01.bin": {
+    "sha256": "586cd08f18d1a253226fe7e6bed95b5c9b42665cb72df27376cfb508e24df192",
+    "size": 1572470
+   },
+   "ww2/maps/data/geo-1941-08-01.bin": {
+    "sha256": "112651bdaafd40bea98bb4730d63d5fd8fb538495f7e736ddc0891043ad39444",
+    "size": 1576349
+   },
+   "ww2/maps/data/geo-1941-09-01.bin": {
+    "sha256": "4b0b5260590bfa621c6116d2ee39c03892cf76248925dcd671b05d58456ec4a7",
+    "size": 1583339
+   },
+   "ww2/maps/data/geo-1941-10-01.bin": {
+    "sha256": "3701b9e7f8930cc8cbe7f04b007d5d71ccd0190d306aa1a401cc3193f52746e5",
+    "size": 1582086
+   },
+   "ww2/maps/data/geo-1941-11-01.bin": {
+    "sha256": "7004e3c32258b7c2aba7a6c30ded9b549a60aa37a306886f975498244921018e",
+    "size": 1581468
+   },
+   "ww2/maps/data/geo-1941-12-01.bin": {
+    "sha256": "2857d8207678bfb70bfeba2a0e110447972650fd9729949b8f1272355b3da3d2",
+    "size": 1586719
+   },
+   "ww2/maps/data/geo-1941-12-07.bin": {
+    "sha256": "6c76cb392e8151cb6698f1b4ae13db25328cbea90cfb31f1d48b38958dcfafcd",
+    "size": 1819144
+   },
+   "ww2/maps/data/geo-1942-01-01.bin": {
+    "sha256": "711be05ccf75389ea38766b1dfef81f392f543af104c950021489708c7b44925",
+    "size": 1631551
+   },
+   "ww2/maps/data/geo-1942-02-01.bin": {
+    "sha256": "a3cb89af1d831697586ed1dc2d080c67764e3c5f391604fac3b907d1f68af80a",
+    "size": 1632640
+   },
+   "ww2/maps/data/geo-1942-03-01.bin": {
+    "sha256": "ed407a7e2e386f71a7a888b5a5b2188be402a3f9fc4fd90342af77c23fcc6c55",
+    "size": 1631606
+   },
+   "ww2/maps/data/geo-1942-04-01.bin": {
+    "sha256": "e3be8ceafab806494af86d158908f4a7dc0967ffd69b12a4cf52d84bf1727fdd",
+    "size": 1631038
+   },
+   "ww2/maps/data/geo-1942-05-01.bin": {
+    "sha256": "8e4fe6903112f4a80caf65567efd8d07b43d0a88ad4ba9efe6c62a8d0763564b",
+    "size": 1626667
+   },
+   "ww2/maps/data/geo-1942-06-01.bin": {
+    "sha256": "cf6ab66713cffb4069f13d70c1b35a66fa32063b54963b141f836b6b1196b6cc",
+    "size": 1610738
+   },
+   "ww2/maps/data/geo-1942-07-01.bin": {
+    "sha256": "3baf13bd0910375f68d7c2d0e4a9290a54e0921d4652f9ef3c52ac2ceca6d60a",
+    "size": 1608794
+   },
+   "ww2/maps/data/geo-1942-08-01.bin": {
+    "sha256": "81208a4f5d1cd43ae520cdf2f2c7f548e6f9c1893a6b8cf4340c9672978bf940",
+    "size": 1607128
+   },
+   "ww2/maps/data/geo-1942-09-01.bin": {
+    "sha256": "00d4b49884994cc9345bfe7f906cf1eaee744b22579d4442b9f1f87e762c9065",
+    "size": 1608111
+   },
+   "ww2/maps/data/geo-1942-10-01.bin": {
+    "sha256": "1e0ba1ed61b3149c765a55736a6d566549ee336f1cfa52465429264b13eebf62",
+    "size": 1610290
+   },
+   "ww2/maps/data/geo-1942-11-01.bin": {
+    "sha256": "2658bc2221fd64e251ef4dbbd8bad026f6243af85bc5e9a6596ed7c79e9cc003",
+    "size": 1831800
+   },
+   "ww2/maps/data/geo-1942-12-01.bin": {
+    "sha256": "d05af48bdfc0811f34bcc4889e2003ce686da4927371d2622ff1b10e4b772f01",
+    "size": 1608220
+   },
+   "ww2/maps/data/geo-1943-01-01.bin": {
+    "sha256": "7e686edee07a8332023b342a7a28d01825ca1d5ddf4e897e41b0f30bf97281f0",
+    "size": 1613735
+   },
+   "ww2/maps/data/geo-1943-02-01.bin": {
+    "sha256": "cb776937707be9321331d94530528383c23461e562cb50ad45df1abc054e114e",
+    "size": 1618184
+   },
+   "ww2/maps/data/geo-1943-03-01.bin": {
+    "sha256": "e94e32906256d4d8686dccea28d1f678265a204d9d1a596cf0504d9167949ce0",
+    "size": 1629280
+   },
+   "ww2/maps/data/geo-1943-04-01.bin": {
+    "sha256": "f58236351481f4f2c02468bf65aa7741019389f3cc2009331eb558e52bca36fc",
+    "size": 1629935
+   },
+   "ww2/maps/data/geo-1943-05-01.bin": {
+    "sha256": "cea5e418814653e189e2307922e788d8cef156ca973fa670097f2fa5c95f58e6",
+    "size": 1628125
+   },
+   "ww2/maps/data/geo-1943-06-01.bin": {
+    "sha256": "8f8db24e16aa9f8b6e77f36a0b03573deba223167904bd3ca6e2b49185296866",
+    "size": 1626444
+   },
+   "ww2/maps/data/geo-1943-07-01.bin": {
+    "sha256": "a66b142331d1eaa16424604d89338c8dd6ecb2be9126c63ee37cc85510ed8ae4",
+    "size": 1627148
+   },
+   "ww2/maps/data/geo-1943-08-01.bin": {
+    "sha256": "1f00fb5d3dc5f23ec0e1a074080e1d129327513ce0ab250c8c08ed8f51c8c0f6",
+    "size": 1633621
+   },
+   "ww2/maps/data/geo-1943-09-01.bin": {
+    "sha256": "a43440db7186a537457caffe2c37a58b56cf09c19cfd2ad229b0b3b9c3bd05f2",
+    "size": 1632367
+   },
+   "ww2/maps/data/geo-1943-10-01.bin": {
+    "sha256": "6bc0b4d704df1b8cfeecf92d2c8280905c8fbd0a072aba75631752e11341e0aa",
+    "size": 1645839
+   },
+   "ww2/maps/data/geo-1943-11-01.bin": {
+    "sha256": "699302b787514b195a63e26522b622587cd24fece179cac4e11329ad34ee48eb",
+    "size": 1651789
+   },
+   "ww2/maps/data/geo-1943-12-01.bin": {
+    "sha256": "baa24ea21de1920b96ac008df0dc746b3355fdaefe4598a8a8cc98ddf0c65e0b",
+    "size": 1652455
+   },
+   "ww2/maps/data/geo-1944-01-01.bin": {
+    "sha256": "ebf9dc4640d77b7ac75380871b639d9f4129a4fb0cff1809682eb8f2fd3df7ec",
+    "size": 1587732
+   },
+   "ww2/maps/data/geo-1944-02-01.bin": {
+    "sha256": "3081aa5e09f8afa0fc96f5db97b117b2939c568833867f2eb0ecacd2ad3573d1",
+    "size": 1588002
+   },
+   "ww2/maps/data/geo-1944-03-01.bin": {
+    "sha256": "85b2ca402e56531209d4d00becf9a8896617b12087f6ccda49c58d5594c87c18",
+    "size": 1587605
+   },
+   "ww2/maps/data/geo-1944-04-01.bin": {
+    "sha256": "2da724c595812fd9e4343c6cfc2859d7485a8cab3d648c5423462b992814c9cf",
+    "size": 1583361
+   },
+   "ww2/maps/data/geo-1944-05-01.bin": {
+    "sha256": "20aa8a3df5bd9d2d2730ad4df7cbca336ffecd46d9f3da94f010595424c7bbfe",
+    "size": 1575356
+   },
+   "ww2/maps/data/geo-1944-06-01.bin": {
+    "sha256": "4d1fbf8089b4758c865029a90d31b3dfb2f8d95aba09717a3b41449acdd2c095",
+    "size": 1573746
+   },
+   "ww2/maps/data/geo-1944-06-06.bin": {
+    "sha256": "0874fe392538ba065b7d5e0cbde3fbfdb636555e2e3af5f7b472bd45a8cd61e0",
+    "size": 1794165
+   },
+   "ww2/maps/data/geo-1944-07-01.bin": {
+    "sha256": "10fe7a26b090c67f1b4e677d94d84058ad6dacd478b8f650aa2a164f699e1d02",
+    "size": 1586589
+   },
+   "ww2/maps/data/geo-1944-08-01.bin": {
+    "sha256": "94db33ac9cde837733c2ab0c46c949ae68541d9e0e969e23799e86c5d9aa8d65",
+    "size": 1600246
+   },
+   "ww2/maps/data/geo-1944-09-01.bin": {
+    "sha256": "fe4c55369951aa894de87d0524414886ad7ea2a5c785cef0462e913b27065894",
+    "size": 1625322
+   },
+   "ww2/maps/data/geo-1944-10-01.bin": {
+    "sha256": "821c6c59effed7f8f926866ea5d1e005c69e0491633abb1149951790cdd8848b",
+    "size": 1624732
+   },
+   "ww2/maps/data/geo-1944-11-01.bin": {
+    "sha256": "d99d51f2af034dec6f8555ccc0d61c4ed4796994dc05d474fc278f9bf83506cf",
+    "size": 1634383
+   },
+   "ww2/maps/data/geo-1944-12-01.bin": {
+    "sha256": "5f894fe2ef6acb3ea806db468ad57851119b00b05aa2c95c17645c0eb702a3f4",
+    "size": 1634587
+   },
+   "ww2/maps/data/geo-1945-01-01.bin": {
+    "sha256": "705e1457dfb0891a9918a0cbd9d42e6055cfde3a68e20105e26262ceeaa6a8dc",
+    "size": 1672961
+   },
+   "ww2/maps/data/geo-1945-02-01.bin": {
+    "sha256": "922b16004cc59514573efb46426057dc148cac876cad6616f7f861910c5e15e4",
+    "size": 1675537
+   },
+   "ww2/maps/data/geo-1945-03-01.bin": {
+    "sha256": "bd7644471d5ee4bd631c201d5c7c9b66907f96e4c9b3eef8e2db6a6c971640ac",
+    "size": 1678465
+   },
+   "ww2/maps/data/geo-1945-04-01.bin": {
+    "sha256": "96477ee2cfa82356bc5a4d9d0cd089e60625fbbe00b0db110c72c4afeb33083f",
+    "size": 1688864
+   },
+   "ww2/maps/data/geo-1945-05-01.bin": {
+    "sha256": "8179c8577b3dff08fc03da4a0a90a873f780c885588f4c5417a1efb3a2c9392c",
+    "size": 1700727
+   },
+   "ww2/maps/data/geo-1945-09-02.bin": {
+    "sha256": "3f222dbe97d0b452334ab5a3d41208a0f20d3fff654d27fecdd20abfc0811077",
+    "size": 1754645
+   },
+   "ww2/maps/data/geo-1946-06-26.bin": {
+    "sha256": "b117959caf11b8ed457e10d4b124d5c65b386633aa18f747d93d15e5ad0c0583",
+    "size": 1764799
+   },
+   "ww2/maps/data/geo-1947-08-15.bin": {
+    "sha256": "25092f77260a76263c4ae7685c96e63c8b96c0e770795f8f1065cc7b1e7081d5",
+    "size": 1792896
+   },
+   "ww2/maps/data/geo-1948-09-12.bin": {
+    "sha256": "4fde71f8ea22a5011e56d157905c841b793fc1abbcaff73417545cd89f38f161",
+    "size": 1793849
+   },
+   "ww2/maps/data/geo-1949-10-01.bin": {
+    "sha256": "5e2594dc5d669a56ced584e28d52e5e31637446e84e66ab195fe048da2888673",
+    "size": 1772067
+   },
+   "ww2/maps/data/geo-1953-07-27.bin": {
+    "sha256": "6c8ae48a2ee16f408f7a1b6bfa1bd753b953edf557ab9fd09cc57c5f228fb54c",
+    "size": 1729313
+   },
+   "ww2/maps/data/geo-1991-12-26.bin": {
+    "sha256": "188a9d21d0abe4db5b8db49176e95bdfd566f4a73d9284fe992e180bbacd7275",
+    "size": 1890976
+   },
+   "ww2/maps/data/geo-2026.bin": {
+    "sha256": "46e415f5b7573aa4194559e01bd4e82aec9d6a4d6d1689856528497f89754b38",
+    "size": 1553067
+   },
+   "ww2/maps/data/glyphs/sans/0-255.pbf": {
+    "sha256": "2b5324d3fcaa58f93c71d4e6ee70eba532f15585401d764daf99efc427a62693",
+    "size": 75579
+   },
+   "ww2/maps/data/glyphs/sans/1024-1279.pbf": {
+    "sha256": "f7777f998395744d9164e46ef1ae8b451bc79938c146daa9ff891590062766cf",
+    "size": 124641
+   },
+   "ww2/maps/data/glyphs/sans/256-511.pbf": {
+    "sha256": "052e7e11d0420e7a6772478413f5d2bb910d150f76830bdf17dfabcabe87aaf1",
+    "size": 126638
+   },
+   "ww2/maps/data/glyphs/sans/512-767.pbf": {
+    "sha256": "521d978d95db4d0d0339c8412e74af218218ae8a5967a15dbab8b3aa59b32e5c",
+    "size": 95147
+   },
+   "ww2/maps/data/glyphs/sans/768-1023.pbf": {
+    "sha256": "fc704a0ce14b2d2fbbc67faa588f9653a933930b852c62f643199a89e7bad134",
+    "size": 74171
+   },
+   "ww2/maps/data/glyphs/sans/7680-7935.pbf": {
+    "sha256": "ef53e5a0534cef3b320ceb0708422be1b67b97f04860a2c76e86cebad727c142",
+    "size": 130010
+   },
+   "ww2/maps/data/glyphs/sans/8192-8447.pbf": {
+    "sha256": "a62e17817c512a5991bdc2167f952d90633570d1bdf7e76d80a456cfff7fd67a",
+    "size": 29024
+   },
+   "ww2/maps/data/hydro-detail.bin": {
+    "sha256": "9a667f333474dee9fc25ec52d64d9badeaa2a4149cfe4e4d7f2977313ef16beb",
+    "size": 611681
+   },
+   "ww2/maps/data/hydro.bin": {
+    "sha256": "d1d644968c41412a0224d419af5613f16358dbb5547e7901a5f75aeb37edfe50",
+    "size": 1105827
+   },
+   "ww2/maps/data/index.json": {
+    "sha256": "cf5cf5d5fccedb052842508ed381d7a44c5fdf617df878b353ee1c98d23ac3d0",
+    "size": 24264
+   },
+   "ww2/maps/data/relief/d0_0_0.webp": {
+    "sha256": "0b659cb3549e4ba479d4cafac537cc3965ad20cc9d5fd0117c544250c32bcc70",
+    "size": 31980
+   },
+   "ww2/maps/data/relief/d1_0_0.webp": {
+    "sha256": "70db49d6174cafe5307aa6ade138f7a54ede30bc1a198a6ce1d3bfd99adcb5e8",
+    "size": 110646
+   },
+   "ww2/maps/data/relief/d2_0_0.webp": {
+    "sha256": "5b4b8c941b08e935f5f5359daa8a7a8a2643ba5579008dcce538ccff309fd153",
+    "size": 378006
+   },
+   "ww2/maps/data/relief/d3_0_0.webp": {
+    "sha256": "99a10961bd30c28044addde5021748b5166b9e4f5e6e54f4d5a28a4d3074b12d",
+    "size": 1284294
+   },
+   "ww2/maps/data/relief/d4_0_0.webp": {
+    "sha256": "b125fcfe6ebe248f60c1944d59ec3b6d73bd688d00aa6172332c3e41565e4a8d",
+    "size": 1220376
+   },
+   "ww2/maps/data/relief/d4_0_1.webp": {
+    "sha256": "1a7efca835a954136e2101d51e637a843a90db16c19126d729cc1b0ed2301847",
+    "size": 458816
+   },
+   "ww2/maps/data/relief/d4_1_0.webp": {
+    "sha256": "85774feff18d969190442c9a2da311cc293155b4d4b3ad02580b3e2bc1b8fb54",
+    "size": 1644672
+   },
+   "ww2/maps/data/relief/d4_1_1.webp": {
+    "sha256": "867b06e191b0a27aa25dab43b3c495eb9dac7f3952dd92e390f9d4f72cfce359",
+    "size": 942704
+   },
+   "ww2/maps/data/relief/d5_0_0.webp": {
+    "sha256": "abf29860885901f233b453d819d07d5ee39f258f54214ecbf2149981eac612a2",
+    "size": 491496
+   },
+   "ww2/maps/data/relief/d5_0_1.webp": {
+    "sha256": "f04e16e18f7e8157c62f738f4d50057de6ab2294d17d95e5d8b40a585385e529",
+    "size": 1380468
+   },
+   "ww2/maps/data/relief/d5_0_2.webp": {
+    "sha256": "ae22d4fb0e318dfd77d42673a36abdb74723eeb414c80aa5cc2e9d6f7fd7f287",
+    "size": 5494
+   },
+   "ww2/maps/data/relief/d5_0_3.webp": {
+    "sha256": "e5e3f20513b815c22f845808d6d81415ced96ff2c76a081dca0a6c40200c4f53",
+    "size": 255160
+   },
+   "ww2/maps/data/relief/d5_1_0.webp": {
+    "sha256": "82b1ef426409372ea0b440dd92086461486a24199908bf102a67702a665f8b74",
+    "size": 1191700
+   },
+   "ww2/maps/data/relief/d5_1_1.webp": {
+    "sha256": "3887e62d433a82588ccd31a221c8b8b39a5e2a8388dad08eb70d05140d56a082",
+    "size": 967340
+   },
+   "ww2/maps/data/relief/d5_1_2.webp": {
+    "sha256": "c1e25af01938cc2227756cf60d4e8a365f34850491637fa3dd96fc098a26cdf0",
+    "size": 691908
+   },
+   "ww2/maps/data/relief/d5_1_3.webp": {
+    "sha256": "f197a4db0ad6f35c0d608964546ff896b66d266f1762a26bb4546720f5fd984e",
+    "size": 429570
+   },
+   "ww2/maps/data/relief/d5_2_0.webp": {
+    "sha256": "caae9924573662d1fcb83443a2f6580fcb9527174d5b0ea25f4d6866080deea6",
+    "size": 418984
+   },
+   "ww2/maps/data/relief/d5_2_1.webp": {
+    "sha256": "b9d804559a49721e09ddbf0806ccf93138900b6b0f83038c48efb7d30949c6b3",
+    "size": 2587822
+   },
+   "ww2/maps/data/relief/d5_2_2.webp": {
+    "sha256": "8ce1346cc0b0db957539032d9ff232ba7e2f5daec10b1757b1109d347b1441f9",
+    "size": 426696
+   },
+   "ww2/maps/data/relief/d5_2_3.webp": {
+    "sha256": "8525ae9f54c38621f4374fbd54bb201d92668d6fc099cee367fa9d281e371385",
+    "size": 1056504
+   },
+   "ww2/maps/data/relief/d5_3_0.webp": {
+    "sha256": "40b291df4cab3c31df1bdbc8f341b626d425a72897fe56cbd4c1f6b488a99ad8",
+    "size": 729776
+   },
+   "ww2/maps/data/relief/d5_3_1.webp": {
+    "sha256": "18ed1d1b2b409005ef3ceee7baf96b945035969c6d801f83416929e5130f3f02",
+    "size": 2062254
+   },
+   "ww2/maps/data/relief/d5_3_2.webp": {
+    "sha256": "1d68145b076234cb762a9c87d4d60dfcc19c4f8d2a8faca1b7b61621d6a4783e",
+    "size": 451750
+   },
+   "ww2/maps/data/relief/d5_3_3.webp": {
+    "sha256": "7de58d07d132ccef663c5360f32d16343327e8dec7319182a52fae07de8f1437",
+    "size": 817458
+   },
+   "ww2/maps/data/relief/d6_0_1.webp": {
+    "sha256": "a488a173bf34e75612ecf0ff69f1cecde47a9fa285c3a93c49fe56fbe027d748",
+    "size": 481602
+   },
+   "ww2/maps/data/relief/d6_0_2.webp": {
+    "sha256": "892f1a0f607ac178731ef494728e9bb49838f59d254d6cdbec96658dcad61d10",
+    "size": 956544
+   },
+   "ww2/maps/data/relief/d6_0_3.webp": {
+    "sha256": "349cb7df3de3341b97b231a9a3e5972b8ae4587839333ad27bef54743f94c95d",
+    "size": 6816
+   },
+   "ww2/maps/data/relief/d6_0_4.webp": {
+    "sha256": "3d3d4aa2b98533477046cc64b6ca888dc5544b323d7fcf8dc2e1d1fcca5ff23c",
+    "size": 8012
+   },
+   "ww2/maps/data/relief/d6_0_5.webp": {
+    "sha256": "22f3dbad83978a3ed3efc5241f51c15a887e4a2ca6d6adb595cdd7626085e26b",
+    "size": 1940
+   },
+   "ww2/maps/data/relief/d6_0_6.webp": {
+    "sha256": "2f3a923347fd0a8e7f544c082d199117bc99a7a4cf8b4b31a75907e3780c54de",
+    "size": 93044
+   },
+   "ww2/maps/data/relief/d6_0_7.webp": {
+    "sha256": "19a5bb8470afd580f968fe65246fd962dc4860a9b3dad86d80731bfe2cc16848",
+    "size": 62140
+   },
+   "ww2/maps/data/relief/d6_1_0.webp": {
+    "sha256": "a35d0d5b6a4c550dded3a4d510b2337dee9993f59c44be22931fb0f94cf15b5f",
+    "size": 91112
+   },
+   "ww2/maps/data/relief/d6_1_1.webp": {
+    "sha256": "220d5154906a5080868c7348e8e3f511bad3066914323692a961112b9dff02f4",
+    "size": 816410
+   },
+   "ww2/maps/data/relief/d6_1_2.webp": {
+    "sha256": "1545ac25b8c67fb171f111201ae90e1ceb952901d715fb6156b2c41bf3920ea6",
+    "size": 2478646
+   },
+   "ww2/maps/data/relief/d6_1_3.webp": {
+    "sha256": "1de0d2e2cfd77151a47f87b282b7f7494e867c09b0650eb6311d64e1c562c6a5",
+    "size": 1058904
+   },
+   "ww2/maps/data/relief/d6_1_4.webp": {
+    "sha256": "8f26d3e06ffd85f426aa818569f840ade4dd3e81c44a067ea50f5041df6bfc76",
+    "size": 3588
+   },
+   "ww2/maps/data/relief/d6_1_5.webp": {
+    "sha256": "65c69bd2e56f2fe14aa4fffbb9aed6f7d65eb9a71ff8332870664c99820813a7",
+    "size": 1500
+   },
+   "ww2/maps/data/relief/d6_1_6.webp": {
+    "sha256": "dc9ac70fd666ce10ab907c1967960506f9ccd2869dbc655b40cc9022c5d334fa",
+    "size": 189452
+   },
+   "ww2/maps/data/relief/d6_1_7.webp": {
+    "sha256": "4fdf0dd00cd4f922f5b6e5d41c3836e62e8b4f0627f1d47809b9c22fce2ce7e3",
+    "size": 291142
+   },
+   "ww2/maps/data/relief/d6_2_0.webp": {
+    "sha256": "6894ed690c933bbb9619c04126a52849a2785fdd1ab2002ca407f94f58933094",
+    "size": 893178
+   },
+   "ww2/maps/data/relief/d6_2_1.webp": {
+    "sha256": "12df9035c0e730164882a84ed090ce4b43a5517d66db2d8b0871533f31b530fe",
+    "size": 1159470
+   },
+   "ww2/maps/data/relief/d6_2_2.webp": {
+    "sha256": "39fb1a978a580850909f9cdf352b82e62a73e163513866187fde143388f7187e",
+    "size": 1260650
+   },
+   "ww2/maps/data/relief/d6_2_3.webp": {
+    "sha256": "9185e4b0270b4948745a87799e6c36382e78952ab9284a3332ff41163315d6b2",
+    "size": 786324
+   },
+   "ww2/maps/data/relief/d6_2_4.webp": {
+    "sha256": "c164c4661c6ea66899f838f491120d5d4603309ff841fb009caa07114058a569",
+    "size": 1691494
+   },
+   "ww2/maps/data/relief/d6_2_5.webp": {
+    "sha256": "3049036d53daa732e3dcde518e8db81f4d36f946ff6467e45515c48f58470806",
+    "size": 361156
+   },
+   "ww2/maps/data/relief/d6_2_6.webp": {
+    "sha256": "639b1e897e1d72376b108f4f1faeacdd4f8d19f46285039de4769358f7917fa0",
+    "size": 307618
+   },
+   "ww2/maps/data/relief/d6_2_7.webp": {
+    "sha256": "6d02d17cd87a14558a73692958b641f58558a58ca19c9a75e3d308d468b1adc9",
+    "size": 214438
+   },
+   "ww2/maps/data/relief/d6_3_0.webp": {
+    "sha256": "98021f3e77944d9894bdd85bd9cb2b661b839b16195d2cd10a2cacbbbb85bddd",
+    "size": 479780
+   },
+   "ww2/maps/data/relief/d6_3_1.webp": {
+    "sha256": "9e45d7b182f57628a3f7983699a515449c7c130877a901ddf68e125c40f2edbd",
+    "size": 650946
+   },
+   "ww2/maps/data/relief/d6_3_2.webp": {
+    "sha256": "8130262cf230faf7cc83831a4bd40b64332cfd0fdf90cf532c60689126ac9d36",
+    "size": 392384
+   },
+   "ww2/maps/data/relief/d6_3_3.webp": {
+    "sha256": "a2b269f1fcb71dad72e9a805cef0924ebfeafdd98c2c19acaf225b8b54ce0b27",
+    "size": 647542
+   },
+   "ww2/maps/data/relief/d6_3_4.webp": {
+    "sha256": "3296bc163da3ee46269bf6870a738aa27effa21cf48f21f3573ce29b43940e2f",
+    "size": 264308
+   },
+   "ww2/maps/data/relief/d6_3_5.webp": {
+    "sha256": "bfdca4eb08869bb7fe685b437792c335a4cc7d4de0f62d5c1b3befa87a6d117b",
+    "size": 5318
+   },
+   "ww2/maps/data/relief/d6_3_6.webp": {
+    "sha256": "970655d46545ae9218e884b073b3becad429067dda95be94de9ef7209874671a",
+    "size": 226638
+   },
+   "ww2/maps/data/relief/d6_3_7.webp": {
+    "sha256": "66770ffbedd1e2e2cf5be5b4bdd389a500c41c3722629c9722a4d4d0ec11e651",
+    "size": 357194
+   },
+   "ww2/maps/data/relief/d6_4_0.webp": {
+    "sha256": "b708ec09f6a65924209002c8a1b0f541294756e01b987b67835b731d1b88d056",
+    "size": 78192
+   },
+   "ww2/maps/data/relief/d6_4_1.webp": {
+    "sha256": "6c95d0175849c6c7188b88a7645ea2d9c2277c41c82733ad1f20437861a1fffb",
+    "size": 471034
+   },
+   "ww2/maps/data/relief/d6_4_2.webp": {
+    "sha256": "d088c0b855b048818becd3942f11f63799fc84330750e8dda135223a4081020f",
+    "size": 1968614
+   },
+   "ww2/maps/data/relief/d6_4_3.webp": {
+    "sha256": "26dcc49db112b215db2b12c06a05d0d16154ab29a9161640b187cd376aa94e2e",
+    "size": 2355708
+   },
+   "ww2/maps/data/relief/d6_4_4.webp": {
+    "sha256": "e9a982f2edfe6e0d19f99309134454b00e19ccb40b5cbaf74c6e09494a583f05",
+    "size": 1306870
+   },
+   "ww2/maps/data/relief/d6_4_5.webp": {
+    "sha256": "ff3156a9b11af425063e859d7570bc7e9b031a4308bed5572e90d640a8911873",
+    "size": 1970
+   },
+   "ww2/maps/data/relief/d6_4_6.webp": {
+    "sha256": "d4418b58490b0a99e17349f2fd24d1918654d2b3232dc5fd8ef647fec1d4b176",
+    "size": 767398
+   },
+   "ww2/maps/data/relief/d6_4_7.webp": {
+    "sha256": "7a23ab9ce4af8bdce3107fcf240c431a55f42a8e3ad12388979f58f34d488cab",
+    "size": 510168
+   },
+   "ww2/maps/data/relief/d6_5_0.webp": {
+    "sha256": "bb054d0614ca21c6f201f3cd0db032a7a96a17eec6bbd6f80355455792e7e732",
+    "size": 63356
+   },
+   "ww2/maps/data/relief/d6_5_1.webp": {
+    "sha256": "202e1a7408b6db712d80b5fbc2595fb0d2c1a7caea030965986425ea46865b38",
+    "size": 563710
+   },
+   "ww2/maps/data/relief/d6_5_2.webp": {
+    "sha256": "981cd0b01757a44988bde84e8bcca75b15b5e824289757e61899f768d45b5774",
+    "size": 2024546
+   },
+   "ww2/maps/data/relief/d6_5_3.webp": {
+    "sha256": "86977fe2ed2c18c4f02ca518f8b1ad2360d308acd0f142b68b5016604ca80b77",
+    "size": 1905198
+   },
+   "ww2/maps/data/relief/d6_5_4.webp": {
+    "sha256": "87b32527511bc5893b81100aaf7a48b44caa025998f00b82ae9f804ff2ce6ece",
+    "size": 98022
+   },
+   "ww2/maps/data/relief/d6_5_5.webp": {
+    "sha256": "f23d2e05adb55c06f3cfdda77693f89cfa3fe9a7f4557de05d36775cc40fee89",
+    "size": 11952
+   },
+   "ww2/maps/data/relief/d6_5_6.webp": {
+    "sha256": "738897e2d0d4610535e0e500eb6347e9e6cf055e3d15e8f7b39965ff901ab285",
+    "size": 895340
+   },
+   "ww2/maps/data/relief/d6_5_7.webp": {
+    "sha256": "22abdaaa3ef6824af1aeb120d91f8fe439fef16304bb315a7b8f67175148102f",
+    "size": 703168
+   },
+   "ww2/maps/data/relief/d6_6_0.webp": {
+    "sha256": "0f9a12bb9550fb2ed9a985d9af3210367d8c5a0be9688e8465ddf36debb5fa99",
+    "size": 49692
+   },
+   "ww2/maps/data/relief/d6_6_1.webp": {
+    "sha256": "7f77907911226737240761cf30f29dca19895f7178fd55a624167112b5df1d22",
+    "size": 1369442
+   },
+   "ww2/maps/data/relief/d6_6_2.webp": {
+    "sha256": "35caf6ad2363b1cd3a32a69bb95645278637f25487cbcfcc11d1e2b027db3268",
+    "size": 3312144
+   },
+   "ww2/maps/data/relief/d6_6_3.webp": {
+    "sha256": "b1af92afd69efb0fd6e382d4e13484486e527421d8250f08a6814ae63289adf0",
+    "size": 1966368
+   },
+   "ww2/maps/data/relief/d6_6_4.webp": {
+    "sha256": "945d2f56429ae61480a95cdcd603fb70b753ef5fd484cc10c9be46dbcccfe073",
+    "size": 652570
+   },
+   "ww2/maps/data/relief/d6_6_5.webp": {
+    "sha256": "0a232040af619f4bb2377c314978fded41201b7da7564f5a47b9c5c4fb463843",
+    "size": 14960
+   },
+   "ww2/maps/data/relief/d6_6_6.webp": {
+    "sha256": "e9ebeaab36ee4bf51d1f11aa13cce902de43f8c071e3e9ffd7c78b802199dbd6",
+    "size": 519352
+   },
+   "ww2/maps/data/relief/d6_6_7.webp": {
+    "sha256": "90c4dbd9db9d5735388048f7aaf9a1c02a7c36f819970a1de4b859502c09708f",
+    "size": 589420
+   },
+   "ww2/maps/data/relief/d6_7_1.webp": {
+    "sha256": "23f540a575c6c25b25800ac69a3dde3a202d979f6b51faac7474a75565c5605b",
+    "size": 685464
+   },
+   "ww2/maps/data/relief/d6_7_2.webp": {
+    "sha256": "df2d0d3c4ec2cb9f267b9eda04d6500b2202bbbf2696bed76d11656870694030",
+    "size": 1560126
+   },
+   "ww2/maps/data/relief/d6_7_3.webp": {
+    "sha256": "8eebb1ae36098714bf450707bbdadbe9477c55e609bb51eda8ab780cd8218060",
+    "size": 63484
+   },
+   "ww2/maps/data/relief/d6_7_4.webp": {
+    "sha256": "8787949aa7dc6ef2594f624afa1497cda3469b9d791b1d6c2a3e38c0ec05163a",
+    "size": 683604
+   },
+   "ww2/maps/data/relief/d6_7_5.webp": {
+    "sha256": "e262f0d5d4c0ff6a06b1d641fff3db7eee0fdc663c73382843b49b8797b1ba53",
+    "size": 85782
+   },
+   "ww2/maps/data/relief/d6_7_6.webp": {
+    "sha256": "8a658cc11f04693138e8c0165c4860bc449ab6d185c70b519ad5c6d5c5e9f754",
+    "size": 432606
+   },
+   "ww2/maps/data/relief/d6_7_7.webp": {
+    "sha256": "8177e7cb3662c0beb46fa707e1547d79012a4c87964604baa1b72d3dd66f63ac",
+    "size": 664956
+   },
+   "ww2/maps/data/relief/r0_0_0.webp": {
+    "sha256": "31235ed5d7693472f1c6ce1ff3afc25313cff710c7fee582a441fdb74d9585ae",
+    "size": 26562
+   },
+   "ww2/maps/data/relief/r1_0_0.webp": {
+    "sha256": "b8ab8a32c99f8d0e89fd3dba8fb9cc9cebbb4854bff6319c3d77f75423176179",
+    "size": 72244
+   },
+   "ww2/maps/data/relief/r2_0_0.webp": {
+    "sha256": "d02279f03c184fe85564a0ea52b39b9b4f540a2bbf4035d52f4fa639c099de9e",
+    "size": 200490
+   },
+   "ww2/maps/data/relief/r3_0_0.webp": {
+    "sha256": "2848a67f561af3e347278ab7376636459fecb8940eb8b9835f582dec9c015954",
+    "size": 554710
+   },
+   "ww2/maps/data/relief/r4_0_0.webp": {
+    "sha256": "17b68c1301336489d7612deb21b75bd4bb606a0e6950860bdc34d66ca8d397eb",
+    "size": 525826
+   },
+   "ww2/maps/data/relief/r4_0_1.webp": {
+    "sha256": "59f732cdf23b6adf9008d973c752e89be0972ac64f5024a52ce15f8abc9becfc",
+    "size": 213690
+   },
+   "ww2/maps/data/relief/r4_1_0.webp": {
+    "sha256": "0b66960da9336a0a63cec9226618570164d5bc374b4b02aa20cdb12019b55631",
+    "size": 531006
+   },
+   "ww2/maps/data/relief/r4_1_1.webp": {
+    "sha256": "9ab8c4d18eaf06fa40769e7f7af036b1e489f86ff57fd405e92d673d6dcefbad",
+    "size": 240458
+   },
+   "ww2/maps/data/relief/r5_0_0.webp": {
+    "sha256": "11053470272254baa3deaf61dd29666e2e164c5e35a04b0282873581159a20ac",
+    "size": 159568
+   },
+   "ww2/maps/data/relief/r5_0_1.webp": {
+    "sha256": "c6971ac528e4614bec449be956fae95111692961af2fdcfc05807dbacc8e5dfe",
+    "size": 260900
+   },
+   "ww2/maps/data/relief/r5_0_2.webp": {
+    "sha256": "6a6cf7681c597ca8b498a0688effebf68b86d739b7eee5e8153a1cb0861155d4",
+    "size": 17080
+   },
+   "ww2/maps/data/relief/r5_0_3.webp": {
+    "sha256": "998ed6cba280518212d2e2c77525e059e336c7d1b130a5fda9e142761f36bcc0",
+    "size": 87140
+   },
+   "ww2/maps/data/relief/r5_1_0.webp": {
+    "sha256": "8902dd183b8d7b9232c58ad138c9057018ae43dd42f12da523fc85f82815ccc8",
+    "size": 337608
+   },
+   "ww2/maps/data/relief/r5_1_1.webp": {
+    "sha256": "18157cb56be8c11e8d4415824e66ad21accc980fc5af70e1627e7f5fb4e646de",
+    "size": 224120
+   },
+   "ww2/maps/data/relief/r5_1_2.webp": {
+    "sha256": "f0d335fe80da1c132fe6c3c1d8b3df3700557510dcd5f5a8612708349b42d008",
+    "size": 129758
+   },
+   "ww2/maps/data/relief/r5_1_3.webp": {
+    "sha256": "206a509a05758f1af6fa67150dd8bac7911b8ab0019919f26e49ddeec6933497",
+    "size": 130208
+   },
+   "ww2/maps/data/relief/r5_2_0.webp": {
+    "sha256": "db5c6b9abf7df0d582c3e8e2589551d0d65987c737a6e08b78e1983c3e485258",
+    "size": 141662
+   },
+   "ww2/maps/data/relief/r5_2_1.webp": {
+    "sha256": "08d0782b8d908c03a29216a0ee8f8abe4b0171670c98a2373f3d12d0126bcfd0",
+    "size": 387002
+   },
+   "ww2/maps/data/relief/r5_2_2.webp": {
+    "sha256": "6f9c25f7754dd91849caf56f37f854999820506a34b9bcc6f1399ae321c78791",
+    "size": 65184
+   },
+   "ww2/maps/data/relief/r5_2_3.webp": {
+    "sha256": "33816fd191e3c192320e370eddec9f0a8a6e79e284f6ad92af17f7c8ba3de795",
+    "size": 125132
+   },
+   "ww2/maps/data/relief/r5_3_0.webp": {
+    "sha256": "69c4a96ccd718b4a6a704900cc79924b3c14f1dc7150be5f891c37c2fd29b0b1",
+    "size": 140716
+   },
+   "ww2/maps/data/relief/r5_3_1.webp": {
+    "sha256": "839c214878a4a9414ab451bec7d9ecb26bd945a55f98817a42dd78e132f45e55",
+    "size": 404900
+   },
+   "ww2/maps/data/relief/r5_3_2.webp": {
+    "sha256": "8f71bfa1175d3fbdd702d33770ccda21e5db0efa05120ad5a6ac5289aef084c5",
+    "size": 122892
+   },
+   "ww2/maps/data/relief/r5_3_3.webp": {
+    "sha256": "e71cf9e740ce63c2b8e7eb5e5bdfa4250e3fbdfcc8c69972d4b84cc9bb785c18",
+    "size": 130948
+   },
+   "ww2/maps/data/relief/s0_0_0.webp": {
+    "sha256": "db17b90bf4807c5417782d1a2f3c12b147b13a524762a6e6982800fad98d3c97",
+    "size": 37080
+   },
+   "ww2/maps/data/relief/s1_0_0.webp": {
+    "sha256": "eba7e0fd2c1bc391ef788b3a788b99525ce85fdc22f7b11e03135f796e6f56b5",
+    "size": 123416
+   },
+   "ww2/maps/data/relief/s2_0_0.webp": {
+    "sha256": "b77b243e333d3a2b42c971b9224f32a206ec7420195895d6b7ad62281ae5a1ca",
+    "size": 436322
+   },
+   "ww2/maps/data/relief/s3_0_0.webp": {
+    "sha256": "932b1c1d9d52402cdf4a702d47c9802952700ad5cf790f5e43c0ee63ecc50c40",
+    "size": 1535232
+   },
+   "ww2/maps/data/relief/s4_0_0.webp": {
+    "sha256": "f09e21fc59a9a6820f7fc8e119b1c52e53d47bbb4d751457e626e96c0917fb6e",
+    "size": 1496468
+   },
+   "ww2/maps/data/relief/s4_0_1.webp": {
+    "sha256": "187d22cee88c86ed3b1591ad9af4225c1623333f4ec5d2372df03115ab6aa59f",
+    "size": 553284
+   },
+   "ww2/maps/data/relief/s4_1_0.webp": {
+    "sha256": "038c0ef1da4c53e10d4e7447e03a91abe03d45f6add43e791db1adb7d8dbea1a",
+    "size": 1917076
+   },
+   "ww2/maps/data/relief/s4_1_1.webp": {
+    "sha256": "f0d0f861faed8f74d2676125f2af127d33c0f8f14e4e5c65577e477409e0f17c",
+    "size": 1158716
+   },
+   "ww2/maps/data/relief/s5_0_0.webp": {
+    "sha256": "0069275e0f88f0ddb7cf09f8ef40113cecb8bf2b7442a6379c0b2ff26e83b20a",
+    "size": 610054
+   },
+   "ww2/maps/data/relief/s5_0_1.webp": {
+    "sha256": "9298ff6162982731cadb7e658b5cf19fb4dd3c4cee59617df834428561a8885e",
+    "size": 1569428
+   },
+   "ww2/maps/data/relief/s5_0_2.webp": {
+    "sha256": "d486fa2ffaec97eacf5d1fcb3c38acad8123ce4f3ba497fa8713e53c12dbb838",
+    "size": 14948
+   },
+   "ww2/maps/data/relief/s5_0_3.webp": {
+    "sha256": "9df438617f201096f88aa201a81a31e468c5de46bb236fc00043feaa2b3a38d1",
+    "size": 305430
+   },
+   "ww2/maps/data/relief/s5_1_0.webp": {
+    "sha256": "f696a28f255b8a04a01a77267078ae9d754d56c3c6f61a67066519d23ff3d008",
+    "size": 1351264
+   },
+   "ww2/maps/data/relief/s5_1_1.webp": {
+    "sha256": "52358c8384c526f942e661cd711448a960f069a99c3548073eb21b80f111a641",
+    "size": 1094978
+   },
+   "ww2/maps/data/relief/s5_1_2.webp": {
+    "sha256": "5c3bf15100d96bdbf5251f32fced357c80abf26e2f52844015b4a88d47fcf590",
+    "size": 722700
+   },
+   "ww2/maps/data/relief/s5_1_3.webp": {
+    "sha256": "74fae2d3d58d4b8d3a69569930012fd26108114b8cfe3350bf733ef5fba4edf0",
+    "size": 538510
+   },
+   "ww2/maps/data/relief/s5_2_0.webp": {
+    "sha256": "3095706b1e30d4273259ab8655764fbf7306dc528f57bfb671a4fe99c99610cf",
+    "size": 514090
+   },
+   "ww2/maps/data/relief/s5_2_1.webp": {
+    "sha256": "92f54c2e68ff472748ba37849478d7c05d174aec42248c411039e4eb53772dea",
+    "size": 2901234
+   },
+   "ww2/maps/data/relief/s5_2_2.webp": {
+    "sha256": "2dcc73d4bac95ff83e6ae42bc3456b75c4e31ded572f2c4823cfd9fe731e26a3",
+    "size": 435220
+   },
+   "ww2/maps/data/relief/s5_2_3.webp": {
+    "sha256": "8973eba8e2733913c131afb69c2028f172ac02243279b3f88e3e54234aa77b53",
+    "size": 1305920
+   },
+   "ww2/maps/data/relief/s5_3_0.webp": {
+    "sha256": "56dcc4568968a867858caf89051f8461566af7a4f23f4389f89043e91f35cbd1",
+    "size": 859406
+   },
+   "ww2/maps/data/relief/s5_3_1.webp": {
+    "sha256": "23ddf82f07be3faad63945302053de7154d833d3ed9a89cabaa1fbf7bfa6f3b6",
+    "size": 2316946
+   },
+   "ww2/maps/data/relief/s5_3_2.webp": {
+    "sha256": "c862664bb3e8cd5e207c658e86b45e0506a9fcce1295e2a41744921025a22506",
+    "size": 478732
+   },
+   "ww2/maps/data/relief/s5_3_3.webp": {
+    "sha256": "1bca80a73eddfa677dc4ba03e1deb33c370c041e61c0f9e966d9056f2068c717",
+    "size": 979262
+   },
+   "ww2/maps/data/snap-1900-08-14.json": {
+    "sha256": "214b440df8af714f555bde601d4b0390235d2360d5874bf1f2594c0aefd7d6aa",
+    "size": 156248
+   },
+   "ww2/maps/data/snap-1914-08-04.json": {
+    "sha256": "0b7d2cec24cba5be8fc05235364c6cc8256566352b8b3a8e7e26c4dc910770ca",
+    "size": 160304
+   },
+   "ww2/maps/data/snap-1915-05-23.json": {
+    "sha256": "0394f5a32565cde6d023b42549c2715d2c3c6188adcc097956837f3d47ff4be6",
+    "size": 254761
+   },
+   "ww2/maps/data/snap-1916-08-27.json": {
+    "sha256": "3a0320b4845e249ff7673ef9e539fe61aacb7a4c8f5b77b1b96503e8fd5cf61c",
+    "size": 255843
+   },
+   "ww2/maps/data/snap-1917-04-06.json": {
+    "sha256": "b8d0c996d2cee1214f07a571d988fc72d87674ffa7a43e32d0440d1903ed1402",
+    "size": 261660
+   },
+   "ww2/maps/data/snap-1918-11-11.json": {
+    "sha256": "ca0af07dd4c904a7d1f9eea8790aab64b250eb09964b9ce8ac8c4cf55f93a3e8",
+    "size": 194020
+   },
+   "ww2/maps/data/snap-1934-10-16.json": {
+    "sha256": "9201686360646dbe8c4b1f6333460c3103114f32b1322289a3f14149c5662b33",
+    "size": 172168
+   },
+   "ww2/maps/data/snap-1937-07-07.json": {
+    "sha256": "3490baec7335076774fdddefd35d1dae0d25cc951a6404b1ff202b95477a43e5",
+    "size": 240098
+   },
+   "ww2/maps/data/snap-1937-11-12.json": {
+    "sha256": "f4cf8edb7477994b77cf993165c51e6c19c8c405bf628ac01b7a36913a0a4b65",
+    "size": 241258
+   },
+   "ww2/maps/data/snap-1937-12-13.json": {
+    "sha256": "59c93540da1ac069c0dd2dccbe8dc03d6d2fc3bde9c9c5d3615f792a079b1eeb",
+    "size": 241779
+   },
+   "ww2/maps/data/snap-1938-05-19.json": {
+    "sha256": "e5717bf1573a76b36b5b94bba93999a2791260d2cf0b21dddbbfc6b6b7fbe10b",
+    "size": 244259
+   },
+   "ww2/maps/data/snap-1938-11-02.json": {
+    "sha256": "d15a131c51ebd14bf2186be8517f05ecbb6dc04b50b2a4b973696129dde28cc4",
+    "size": 244300
+   },
+   "ww2/maps/data/snap-1939-03-27.json": {
+    "sha256": "13f24166a7ab591dabf7ce66bf51da92808fd18cc290f8c807d1d3a7d49a922a",
+    "size": 246347
+   },
+   "ww2/maps/data/snap-1939-09-01.json": {
+    "sha256": "4c50f651870574a8358eed3f782bcc0f447bcd05efd5d1bb797db6a836f7e3f7",
+    "size": 176036
+   },
+   "ww2/maps/data/snap-1940-07-01.json": {
+    "sha256": "40e7ac200d773d8b7468ecab5073f1a502937c9b11f2ab78affe33bb63af4b4b",
+    "size": 174821
+   },
+   "ww2/maps/data/snap-1941-06-22.json": {
+    "sha256": "03d5d001e02a5d64bd7a1916de2f2c0cdff1c01eb681e8d8a5bbf1504d0b03a7",
+    "size": 254898
+   },
+   "ww2/maps/data/snap-1941-07-01.json": {
+    "sha256": "c8db75ec175e397a8af27c4606768ae4706f5658414cbbc0859712dfc616958d",
+    "size": 255010
+   },
+   "ww2/maps/data/snap-1941-08-01.json": {
+    "sha256": "b46ebdddd6c4d81972810e7be4a94ac296dc2b663d5d2ba63d0bb57da70f79a6",
+    "size": 254820
+   },
+   "ww2/maps/data/snap-1941-09-01.json": {
+    "sha256": "6635975353c2e2ba3ce1b582e372db6e3e4f4714794137d23702710d22b51447",
+    "size": 255026
+   },
+   "ww2/maps/data/snap-1941-10-01.json": {
+    "sha256": "7e9394d4e3014622eca4871c2f0f921b4f722caf381767f3a91fdafdbac9156c",
+    "size": 255050
+   },
+   "ww2/maps/data/snap-1941-11-01.json": {
+    "sha256": "1bd3f1a98d525d16fc4ff0910baab02ac8ef6c27e8b30ce45a7a47327b3db969",
+    "size": 255257
+   },
+   "ww2/maps/data/snap-1941-12-01.json": {
+    "sha256": "3df2b1a574502d7054fa67399494dba76845185ab074451b16faaf7aab90d1b3",
+    "size": 255597
+   },
+   "ww2/maps/data/snap-1941-12-07.json": {
+    "sha256": "6fb97a5c410bc3c0f4f68d13e02dfc3786e039e163ed9837d15788c8571bf4e8",
+    "size": 180886
+   },
+   "ww2/maps/data/snap-1942-01-01.json": {
+    "sha256": "e9ea933dd8b55ae77e1bcaec2f3a0e099dc1728731cc194d8686011943b873c2",
+    "size": 263905
+   },
+   "ww2/maps/data/snap-1942-02-01.json": {
+    "sha256": "0cab97fe82cdee8f0455d9e867c62b1abbb53fa7189f598069a403a81d7f5cfc",
+    "size": 265890
+   },
+   "ww2/maps/data/snap-1942-03-01.json": {
+    "sha256": "5811c999618f87ac6f6cf850ea37113d8312bbe5e713b7ba7efbf6f6d85f921b",
+    "size": 266039
+   },
+   "ww2/maps/data/snap-1942-04-01.json": {
+    "sha256": "ddc742129e50cbd742432d262ef27eb4b916e63627463c21ab48a6bb7dc7d5f0",
+    "size": 265352
+   },
+   "ww2/maps/data/snap-1942-05-01.json": {
+    "sha256": "07df33bee1c0b23e649a3b8df7a4acfb116e4f7af3d3fd31dbb9ac242c359e97",
+    "size": 264743
+   },
+   "ww2/maps/data/snap-1942-06-01.json": {
+    "sha256": "b7c590acdcd6ce699fa0c600f9d118e8fe55896963b35c2c3950186e37849bf6",
+    "size": 263977
+   },
+   "ww2/maps/data/snap-1942-07-01.json": {
+    "sha256": "9b8bb0abad17bbeaafc4a6aba245f5b62f767dda7eecb122bd2da47e79dbb521",
+    "size": 263680
+   },
+   "ww2/maps/data/snap-1942-08-01.json": {
+    "sha256": "c0bf34b4f2d60170c1f1d8559c406ed8262b4a5bea2a45e20ee886a867c39712",
+    "size": 263844
+   },
+   "ww2/maps/data/snap-1942-09-01.json": {
+    "sha256": "6e2e78a7dc9b5c01d7cf27e04d060d6e59636d5acfed5529f3985970f2e44dfd",
+    "size": 263924
+   },
+   "ww2/maps/data/snap-1942-10-01.json": {
+    "sha256": "9f85da7da03b20b28f65a0675e1159adf3ef23b4e30e92dd381f9aa7392024a8",
+    "size": 264476
+   },
+   "ww2/maps/data/snap-1942-11-01.json": {
+    "sha256": "aff736e91449934c1e0c1ca759d32c4197431c9105dc61681ea4ffddf62aa620",
+    "size": 182472
+   },
+   "ww2/maps/data/snap-1942-12-01.json": {
+    "sha256": "eeb06b915138e75e62ded317004bb34e88d207c31fec9e9c4d083e137693027d",
+    "size": 267000
+   },
+   "ww2/maps/data/snap-1943-01-01.json": {
+    "sha256": "2b2761c08b28bd011a7e264344b19ba47010e51b304a64d69f1b6fc3f05abd24",
+    "size": 264297
+   },
+   "ww2/maps/data/snap-1943-02-01.json": {
+    "sha256": "62b19325e2fb1b91fa989bcc5dbd2254e10c0d9843c6ea6da3fcc7bfb70544f2",
+    "size": 264698
+   },
+   "ww2/maps/data/snap-1943-03-01.json": {
+    "sha256": "d086424d44f8b2125aa97901c9f64568722dc4ceee03b29fcea0e7b00a8b76da",
+    "size": 264900
+   },
+   "ww2/maps/data/snap-1943-04-01.json": {
+    "sha256": "804b762ca55d91e92c3aab38055948de649a43dd9defd34dd9f9c4a26840f126",
+    "size": 264821
+   },
+   "ww2/maps/data/snap-1943-05-01.json": {
+    "sha256": "e2fa3b38bd895f14cebe47d98e9c7feab3bca8dc062c52e15af298dd443464f0",
+    "size": 264260
+   },
+   "ww2/maps/data/snap-1943-06-01.json": {
+    "sha256": "cfaa40237b88266fe9f55ce6d5c9228cf3912e8c7c17afb84dac6bded590f65a",
+    "size": 263538
+   },
+   "ww2/maps/data/snap-1943-07-01.json": {
+    "sha256": "977e4d37516fd19465aa2315cb9c34cfad68b5261b87547c9b56b7a3254cacf6",
+    "size": 263667
+   },
+   "ww2/maps/data/snap-1943-08-01.json": {
+    "sha256": "ade770f3e60c9b5ef542d1566dbc4a09aa3cd541d79a87f5113cfdf098c8a42e",
+    "size": 264262
+   },
+   "ww2/maps/data/snap-1943-09-01.json": {
+    "sha256": "efa77b963676923cdb49062568340d4a7b7da7527314accb3c212b523e34b740",
+    "size": 263809
+   },
+   "ww2/maps/data/snap-1943-10-01.json": {
+    "sha256": "2bbf7082a21a9f88074241ca2ced70bfa1a668acebc6b63833d079648a463075",
+    "size": 266138
+   },
+   "ww2/maps/data/snap-1943-11-01.json": {
+    "sha256": "1af502455d02aafdb4455f8224c968eb6295254b90ba563561f0e34569b4f58f",
+    "size": 268697
+   },
+   "ww2/maps/data/snap-1943-12-01.json": {
+    "sha256": "b07b657b0be5f3901549f60f61cb8dce72a1a1ee5286f6632528b834239f8725",
+    "size": 268809
+   },
+   "ww2/maps/data/snap-1944-01-01.json": {
+    "sha256": "1ba6fb0e7f6b5a54e9f1a346f0473d7eebfa14c0b9cd7617c4f4db08365f541e",
+    "size": 262617
+   },
+   "ww2/maps/data/snap-1944-02-01.json": {
+    "sha256": "ee1a13175a78c7d31b298f60314babe52cd128ef85772c0bb1dd58ebfc82ae47",
+    "size": 262655
+   },
+   "ww2/maps/data/snap-1944-03-01.json": {
+    "sha256": "5f9f25896c2856ddb3d713735d8acb713761eaa7c540dacacf80892697a79e03",
+    "size": 262692
+   },
+   "ww2/maps/data/snap-1944-04-01.json": {
+    "sha256": "c951be93d35181383ab6f297115710265da7844cfe67885c7a75021f44475059",
+    "size": 263450
+   },
+   "ww2/maps/data/snap-1944-05-01.json": {
+    "sha256": "55110978d1f0f61fff98f6e11f8513ccd1f8fc8ea9b105df9f177e6fdeff9a8a",
+    "size": 263069
+   },
+   "ww2/maps/data/snap-1944-06-01.json": {
+    "sha256": "cb37051965fd57975334c4b1c84910f5f0881e9d0d839870edb01e8d403fd8b1",
+    "size": 263096
+   },
+   "ww2/maps/data/snap-1944-06-06.json": {
+    "sha256": "99a7d01c19617d2e36a9fdb9b8a1e6505a6b4a373c7bf9f490157bd7575ba588",
+    "size": 181000
+   },
+   "ww2/maps/data/snap-1944-07-01.json": {
+    "sha256": "1554693cca01cc9a2fce7432f1dcd7ef895a3ac1239fc509f2b8877ba571c61d",
+    "size": 265441
+   },
+   "ww2/maps/data/snap-1944-08-01.json": {
+    "sha256": "e7fb77da15bc98275405c81db11f9a431a4ee362a60cfd6ad78246564035969f",
+    "size": 265549
+   },
+   "ww2/maps/data/snap-1944-09-01.json": {
+    "sha256": "ed97809c4b75ece3a6be836b53203f28d15470402f06e9b26344e04f9cac3728",
+    "size": 267818
+   },
+   "ww2/maps/data/snap-1944-10-01.json": {
+    "sha256": "dd88e9ce4f007be6a8f5c16b0c403c404b0da3d550db33dcab16f0556c3e9b09",
+    "size": 267872
+   },
+   "ww2/maps/data/snap-1944-11-01.json": {
+    "sha256": "7ce8056e8dcd867d1c037698965c1b338832339d785559ebcc4f2a601a3f8e80",
+    "size": 268534
+   },
+   "ww2/maps/data/snap-1944-12-01.json": {
+    "sha256": "3ef902694b45b4911114afbac9276d9af6451a040c7f7dd857f1d994a4950c71",
+    "size": 268303
+   },
+   "ww2/maps/data/snap-1945-01-01.json": {
+    "sha256": "d9ad923b37a43ef77ff1eb31590d1dc5873eab994da879d730449fc4f1197753",
+    "size": 271447
+   },
+   "ww2/maps/data/snap-1945-02-01.json": {
+    "sha256": "acfbed905c033feb6b79b8747d49bd506906010245f564712606a107277a9413",
+    "size": 273315
+   },
+   "ww2/maps/data/snap-1945-03-01.json": {
+    "sha256": "4c75db843b2d4feaf2a187ebc4c573101dd64692bc983c78b090ccd4fc30481b",
+    "size": 274313
+   },
+   "ww2/maps/data/snap-1945-04-01.json": {
+    "sha256": "2da5777030f0dac1a0d1d7c15d222c00c7d6b7a07c66f925c2f611d66cca7bdf",
+    "size": 278549
+   },
+   "ww2/maps/data/snap-1945-05-01.json": {
+    "sha256": "c104b08b2c42cb38a39324e593069c092d86c7e73efbc10aa90e101288939d9f",
+    "size": 280290
+   },
+   "ww2/maps/data/snap-1945-09-02.json": {
+    "sha256": "a60a5f58cecbec28d7ed769655ff2a80067c1f6628b6725056c5699458c956d3",
+    "size": 179193
+   },
+   "ww2/maps/data/snap-1946-06-26.json": {
+    "sha256": "0145d89adb343b0e771e6ce8db24fdc6566b7702fb8fbd71ac9bcf7fcc02d201",
+    "size": 184043
+   },
+   "ww2/maps/data/snap-1947-08-15.json": {
+    "sha256": "b4304230740a39c077957ff67994aea589dbacfea4bce3727c7031f676b60f55",
+    "size": 188568
+   },
+   "ww2/maps/data/snap-1948-09-12.json": {
+    "sha256": "0d1df17396e2348fa65be7e4c052ea83f15af177bc17f2b4de0528fedd3e0177",
+    "size": 188742
+   },
+   "ww2/maps/data/snap-1949-10-01.json": {
+    "sha256": "021054a867c82d24c3bb772194cbf554ac71d2b6efe795d2c3355ec0d87639bd",
+    "size": 185117
+   },
+   "ww2/maps/data/snap-1953-07-27.json": {
+    "sha256": "88a91d5ea14713bb26de1f871b06f3b663366e7e9af8175b3ac804acd2d0d6bf",
+    "size": 183640
+   },
+   "ww2/maps/data/snap-1991-12-26.json": {
+    "sha256": "47bff400b693358ca18f0f6aacdc6914cdf376b273b8ad6071ffbd4692c45b5b",
+    "size": 238668
+   },
+   "ww2/maps/data/snap-2026.json": {
+    "sha256": "c9195b3559591e67339cb8019db28eb2667b64ea49008ff0f85e94bcdcad9704",
+    "size": 361165
+   }
+  }
+ },
+ "repo": "dns0129/World_Map_History",
+ "tag": "data-2026-10-23"
+}

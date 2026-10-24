@@ -4,7 +4,8 @@ Keeps every boundary=administrative relation (admin_level 3-8) whose start_date/
 overlap 1900-01-01 .. 1991-12-31 (the earliest to the latest snapshot), assembled into
 (multi)polygons.
 
-  python3 ww2_ohm.py            download the newest planet (about 1.3 GB) and extract
+  python3 ww2_ohm.py            download the planet pinned in sources.json (about 1.3 GB) and extract
+  python3 ww2_ohm.py --latest   the newest planet instead (to update the pin: then edit sources.json)
   python3 ww2_ohm.py <planet>   extract from a planet file already on disk
 
 Output: raw/ohm/areas_1900_91.jsonl, one JSON object per line: id, tags, wkb (hex).
@@ -19,6 +20,7 @@ import urllib.request
 import osmium
 
 from common import RAW
+from sources import load
 
 BUCKET = "https://s3.amazonaws.com/planet.openhistoricalmap.org"  # listed here
 DOWNLOAD = "https://planet.openhistoricalmap.org"  # and fetched here: the bucket itself refuses downloads
@@ -93,10 +95,10 @@ def extract(planet):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1 and sys.argv[1] != "--latest":
         planet = sys.argv[1]
-    else:
-        key = latest_planet()
+    else:  # the planet sources.json pins (`--latest`: the newest in the bucket, to update the pin deliberately)
+        key = latest_planet() if "--latest" in sys.argv else "planet/" + load()["ohm_planet"]["file"]
         planet = OUT / key.split("/")[-1]
         if not planet.exists():
             print("downloading", key, flush=True)
