@@ -1,0 +1,38 @@
+# Moves a release tag to another commit, by hand (Actions -> move tag -> Run workflow). Made for the history
+# rewrite of October 2026: the tag of the data release still pointed at the commit of the old history, which kept
+# the old history (with the databases and map data) reachable. The tag is moved only if it is still at `from` and
+# `to` is a commit of main; the release keeps its attachments (it follows the tag name).
+name: move tag
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: tag to move
+        default: data-2026-10-23
+      from:
+        description: the commit the tag must point at now
+        default: fc30cff33c45b135447a8feb60b87765948118c6
+      to:
+        description: the commit to point it at (on main)
+        default: 6a6ea37fa3b0bd97daa0c9f1074309928bec24e7
+permissions:
+  contents: write
+jobs:
+  move:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check and move
+        env:
+          TAG: ${{ inputs.tag }}
+          FROM: ${{ inputs.from }}
+          TO: ${{ inputs.to }}
+        run: |
+          now=$(git ls-remote origin "refs/tags/$TAG" | cut -f1)
+          echo "tag $TAG is at $now"
+          [ "$now" = "$FROM" ] || { echo "the tag is not at $FROM: nothing moved"; exit 1; }
+          git merge-base --is-ancestor "$TO" origin/main || { echo "$TO is not a commit of main: nothing moved"; exit 1; }
+          git push --force origin "$TO:refs/tags/$TAG"
+          echo "moved $TAG: $FROM -> $TO"
