@@ -11,3 +11,5 @@ exports/
 maps/*.png
 !maps/1942.png
 dist/
+# OKH situation map scans (scripts/okh_lage_ost.py): the site's terms allow research use only, not redistribution
+okh_lage_ost_1942/

@@ -8,7 +8,7 @@ SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
 LAYERS = [
     ("data", {"common", "added_dates", "controllers", "ww2_territories"}),
     ("library", {"topo", "georef", "mapdata", "ww2_common", "ww2_geo", "cities", "sources"}),
-    ("sources", {"fetch_sources", "ww2_fetch", "ww2_ohm", "lagekarten", "frontlines_west", "frontlines_china",
+    ("sources", {"fetch_sources", "ww2_fetch", "ww2_ohm", "okh_lage_ost", "lagekarten", "frontlines_west", "frontlines_china",
                  "ccp_areas", "atlas_fronts", "trace/atlas_1945", "trace/ccp_050_332", "trace/china_055_294",
                  "trace/nids"}),
     ("build", {"build_country_series", "build_base_grids", "build_subnational", "build_terrain", "build_yearly",

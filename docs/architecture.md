@@ -6,7 +6,7 @@
 |---|---|---|
 | 数据 | `common`、`added_dates`、`controllers`、`ww2_territories` | 路径、常量和按日期写出的事实：追加断面的配置（`added_dates`），各断面的控制者名称、阵营、东亚占领图层规则（`controllers`），岛屿属地。只含数据和极简的规则函数，不导入 numpy、shapely 等 |
 | 库 | `topo`、`georef`、`mapdata`、`ww2_common`、`ww2_geo`、`cities`、`sources` | 共用的读写与几何：TopoJSON、地图配准、网页数据格式、几何工具、城市表、来源清单 |
-| 来源 | `fetch_sources`、`ww2_fetch`、`ww2_ohm`、`scripts/trace/*`、`lagekarten`、`frontlines_*`、`ccp_areas`、`atlas_fronts` | 下载原始资料（按 `sources.json` 锁定的版本），以及把描图读数换算成 `curated/` 中的战线与区域 |
+| 来源 | `fetch_sources`、`ww2_fetch`、`ww2_ohm`、`okh_lage_ost`、`scripts/trace/*`、`lagekarten`、`frontlines_*`、`ccp_areas`、`atlas_fronts` | 下载原始资料（按 `sources.json` 锁定的版本），以及把描图读数换算成 `curated/` 中的战线与区域 |
 | 构建 | `build_*`、`ww2_reference`、`ww2_histunits`、`ww2_snapshots`、`ww2_provinces`、`ww2_database`、`ww2_relief`、`modern_2026`、`add_snapshots` | 1900–2000 逐年数据库（`build_*`）；三个时期的事件日（路径 B）；追加断面（路径 A） |
 | 导出 | `export_years`、`render_maps`、`ww2_webmap`、`ww2_html`、`publish_artifact`、`data_release` | 逐年导出与地图、交互地图的数据与页面、发布到 Artifact 和 GitHub Release |
 | 检查 | `verify_*`、`ww2_coverage` | 数据库、追加断面、几何的检查，覆盖率 |
