@@ -143,7 +143,7 @@ exports/geometry/units.topojson 全部历史政治单元边界
 
 ### 4. 在线访问（可选）
 
-- **GitHub Pages：** 在仓库的 Settings → Pages 中，把 Source 设为 “GitHub Actions”。之后每次推送到 `main`，`.github/workflows/pages.yml` 会下载 `data_release.json` 所指的地图数据并部署，地图在 `https://dns0129.github.io/World_Map_History/ww2/maps/` 打开。
+- **GitHub Pages：** 在仓库的 Settings → Pages 中，把 Source 设为 “GitHub Actions”。之后每次推送到 `main`，`.github/workflows/pages.yml` 会下载 `data_release.json` 所指的地图数据并部署，地图在 https://dns0129.github.io/World_Map_History/ 打开（转到 `ww2/maps/`，可带 `#日期`，如 `…/World_Map_History/#1944-06-06`）。
 - **Claude Artifact：** 本仓库构建时另发布了一份私有链接（https://claude.ai/artifact/3s4bb36QVmiUUhQAaxUnXf）。只有所有者和被分享的人能打开。更新时用 `scripts/publish_artifact.py` 只上传变了的文件（见 [SOP](docs/snapshot-sop.md#发布到-claude-artifact)）。
 
 ## 目录
