@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>文明时代 · 历史断面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap">
+<link rel="stylesheet" href="../ww2/maps/vendor/maplibre-gl.css">
+<style>
+/* A turn-based grand strategy game on the map dates of the historical map: the map fills the window, the
+   country's figures run along the top, the province or country chosen sits in a sheet on the left. */
+:root {
+  --paper: #eceeea; --sheet: #f8f9f6; --ink: #1b2220; --ink-2: #4f5955; --muted: #7d8681; --rule: #cdd3ce;
+  --sea: #cfe0ea; --accent: #b4532a; --accent-ink: #fff; --good: #2e8b57; --bad: #c0392b; --ally: #2a6fc4; --warn: #c58a16;
+  --focus: #2a78d6; --shadow: 0 1px 2px rgb(20 30 28 / 0.08), 0 6px 18px rgb(20 30 28 / 0.12);
+  --f-display: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --f-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #151b1d; --sheet: #1d2427; --ink: #eef1ee; --ink-2: #c1c8c4; --muted: #8b958f; --rule: #34403f;
+    --sea: #1d2a33; --accent: #d9693a; --good: #4cb07a; --bad: #e0584a; --ally: #5b9be6; --warn: #e0a83a; --focus: #6aa9f0;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #151b1d; --sheet: #1d2427; --ink: #eef1ee; --ink-2: #c1c8c4; --muted: #8b958f; --rule: #34403f;
+  --sea: #1d2a33; --accent: #d9693a; --good: #4cb07a; --bad: #e0584a; --ally: #5b9be6; --warn: #e0a83a; --focus: #6aa9f0;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35); color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.5 var(--f-body); overflow: hidden; }
+.app { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+header.hud {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 8px 14px;
+  background: var(--sheet); border-bottom: 1px solid var(--rule); z-index: 3; min-width: 0;
+}
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.brand h1 { margin: 0; font: 700 17px/1.2 var(--f-display); white-space: nowrap; }
+.brand a { color: var(--muted); font-size: 12px; white-space: nowrap; }
+#me { display: flex; align-items: center; gap: 8px; font: 600 15px/1.2 var(--f-display); cursor: pointer; border: 0; background: none; color: inherit; padding: 2px 4px; border-radius: 6px; }
+#me:hover { background: var(--paper); }
+.flag { width: 18px; height: 13px; border-radius: 2px; border: 1px solid rgb(0 0 0 / 0.25); flex: none; display: inline-block; }
+.stats { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--ink-2); min-width: 0; }
+.stats b { font: 500 13.5px var(--f-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+.stats .d { font: 500 12px var(--f-mono); }
+.up { color: var(--good); } .down { color: var(--bad); }
+.tools { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+button { font: inherit; }
+.btn {
+  border: 1px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 7px; padding: 5px 11px;
+  cursor: pointer; font: 500 13px var(--f-body); white-space: nowrap;
+}
+.btn:hover:not(:disabled) { background: var(--paper); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover:not(:disabled) { filter: brightness(1.07); background: var(--accent); }
+.btn.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--rule)); }
+.btn.big { padding: 7px 18px; font-size: 14px; font-weight: 700; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.stage { position: relative; min-height: 0; }
+#map { position: absolute; inset: 0; background: var(--sea); }
+.sheet {
+  position: absolute; z-index: 2; background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px;
+  box-shadow: var(--shadow); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;
+  max-height: calc(100% - 24px); overflow: auto; box-sizing: border-box;
+}
+.side { left: 12px; top: 12px; width: 340px; }
+.logbox { right: 12px; bottom: 34px; width: 330px; max-height: 38%; gap: 4px; padding: 10px 12px; }
+.sheet h2 { margin: 0; font: 700 17px/1.3 var(--f-display); }
+.sheet h3 { margin: 0; font: 500 11px/1.2 var(--f-body); color: var(--muted); letter-spacing: 0.08em; }
+.lede { margin: 0; color: var(--ink-2); font-size: 13px; }
+.foot { color: var(--muted); font-size: 12px; margin: 0; }
+.stack { display: flex; flex-direction: column; gap: 6px; }
+.row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+dl.kv { display: grid; grid-template-columns: 5.5em 1fr; gap: 3px 10px; margin: 0; font-size: 13px; }
+dl.kv dt { color: var(--muted); } dl.kv dd { margin: 0; font-variant-numeric: tabular-nums; }
+.chip { display: inline-block; padding: 0 7px; border-radius: 999px; font-size: 11.5px; border: 1px solid var(--rule); color: var(--ink-2); line-height: 1.6; }
+.chip.war { border-color: var(--bad); color: var(--bad); } .chip.ally { border-color: var(--ally); color: var(--ally); }
+.chip.self { border-color: var(--good); color: var(--good); } .chip.truce { border-color: var(--warn); color: var(--warn); }
+.title { display: flex; align-items: center; gap: 8px; }
+.title .flag { width: 22px; height: 16px; }
+.link { border: 0; background: none; color: var(--focus); cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 2px; font: inherit; }
+.seg { display: inline-grid; grid-auto-flow: column; border: 1px solid var(--rule); border-radius: 7px; overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--ink-2); padding: 5px 10px; font: 500 12px var(--f-body); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+.mapmode { position: absolute; z-index: 2; left: 50%; transform: translateX(-50%); top: 10px; background: var(--sheet); box-shadow: var(--shadow); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.slider { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+.slider output { font: 500 13px var(--f-mono); min-width: 4.5em; text-align: right; }
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.list button { width: 100%; text-align: left; border: 0; background: transparent; color: var(--ink); padding: 5px 6px; border-radius: 6px;
+  cursor: pointer; font: 13px var(--f-body); display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.list button:hover, .list button.cur { background: var(--paper); }
+.list .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list .num { font: 12px var(--f-mono); color: var(--muted); }
+.search { width: 100%; box-sizing: border-box; padding: 7px 10px; border: 1px solid var(--rule); border-radius: 7px; background: var(--paper); color: var(--ink); font: 13px var(--f-body); }
+select.search { appearance: auto; }
+.scen { max-height: 230px; overflow: auto; border: 1px solid var(--rule); border-radius: 8px; padding: 4px; }
+.scen button { grid-template-columns: 6.6em minmax(0, 1fr); }
+.scen .d { font: 500 12px var(--f-mono); color: var(--ink-2); }
+.picklist { max-height: 300px; overflow: auto; }
+.log { list-style: none; margin: 0; padding: 0; font-size: 12.5px; display: flex; flex-direction: column; gap: 3px; overflow: auto; }
+.log li { color: var(--ink-2); } .log li.mine { color: var(--ink); font-weight: 500; }
+.log .t { font: 11px var(--f-mono); color: var(--muted); margin-right: 6px; }
+.logbox header { display: flex; justify-content: space-between; align-items: center; }
+.logbox.collapsed .log { display: none; }
+.tip { position: absolute; z-index: 4; pointer-events: none; background: var(--sheet); border: 1px solid var(--rule); border-radius: 7px;
+  box-shadow: var(--shadow); padding: 6px 9px; font-size: 12.5px; max-width: 260px; }
+.tip b { font-weight: 600; }
+.toast { position: absolute; z-index: 5; left: 50%; top: 56px; transform: translateX(-50%); background: var(--ink); color: var(--sheet);
+  border-radius: 8px; padding: 8px 14px; font-size: 13px; box-shadow: var(--shadow); max-width: min(90vw, 520px); text-align: center; }
+.modal { position: absolute; inset: 0; z-index: 6; background: rgb(10 15 14 / 0.35); display: grid; place-items: center; padding: 16px; }
+.modal .card { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; box-shadow: var(--shadow); width: min(720px, 100%);
+  max-height: min(80vh, 760px); overflow: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
+.modal .card header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+table.t { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.t th { text-align: left; font: 500 11.5px var(--f-body); color: var(--muted); border-bottom: 1px solid var(--rule); padding: 4px 6px; }
+table.t td { padding: 4px 6px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 55%, transparent); font-variant-numeric: tabular-nums; }
+table.t td.n { font-family: var(--f-mono); font-size: 12px; text-align: right; white-space: nowrap; } table.t th.n { text-align: right; white-space: nowrap; }
+table.t td:first-child { white-space: nowrap; } table.t .title { white-space: nowrap; }
+table.t tr.mine td { background: color-mix(in srgb, var(--good) 12%, transparent); }
+.loading { position: absolute; inset: 0; z-index: 7; display: grid; place-items: center; background: color-mix(in srgb, var(--paper) 80%, transparent);
+  font: 500 15px var(--f-body); color: var(--ink-2); }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+.bar { height: 7px; border-radius: 4px; background: var(--rule); overflow: hidden; } .bar span { display: block; height: 100%; background: var(--accent); }
+.close { border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; padding: 0 4px; }
+@media (max-width: 760px) {
+  .brand a, .brand small { display: none; }
+  .side { left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-height: 46%; }
+  .logbox { display: none; }
+  .tools { margin-left: 0; }
+  .mapmode { top: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hud">
+    <div class="brand"><h1>文明时代 · 历史断面</h1><a href="../index.html">首页</a><a id="mapLink" href="../ww2/maps/">查看历史地图</a></div>
+    <button id="me" type="button" hidden><span class="flag" id="meFlag"></span><span id="meName"></span></button>
+    <div class="stats" id="stats" hidden>
+      <span id="sDate"></span>
+      <span title="金币：省份税收减去军队维持费">金币 <b id="sGold"></b> <span class="d" id="sGoldD"></span></span>
+      <span title="人力：每回合由本国核心省份的人口补充，招募一个师消耗一个">人力 <b id="sMan"></b> <span class="d" id="sManD"></span></span>
+      <span title="陆军师数">军队 <b id="sArmy"></b> 师</span>
+      <span title="省份数 · 控制人口">领土 <b id="sProv"></b></span>
+      <span title="军队质量 = 人均 GDP 决定的基础值 ×（1 + 0.1 × 科技等级）">战力 <b id="sQ"></b></span>
+    </div>
+    <div class="tools" id="tools" hidden>
+      <button class="btn" type="button" id="bDiplo">外交</button>
+      <button class="btn" type="button" id="bRank">排行</button>
+      <button class="btn" type="button" id="bHelp">帮助</button>
+      <button class="btn" type="button" id="bMenu">菜单</button>
+      <button class="btn primary big" type="button" id="bEnd" title="快捷键：回车">结束回合</button>
+    </div>
+  </header>
+  <div class="stage">
+    <div id="map" role="region" aria-label="地图"></div>
+    <div class="seg mapmode" id="mapmode" role="group" aria-label="地图模式" hidden>
+      <button type="button" data-mode="political" aria-pressed="true">政治</button>
+      <button type="button" data-mode="diplo" aria-pressed="false">外交</button>
+      <button type="button" data-mode="army" aria-pressed="false">兵力</button>
+    </div>
+    <aside class="sheet side" id="side" aria-live="polite"></aside>
+    <aside class="sheet logbox" id="logbox" hidden>
+      <header><h3>大事记</h3><button class="close" id="logToggle" type="button" aria-label="收起">–</button></header>
+      <ul class="log" id="log"></ul>
+    </aside>
+    <div class="tip" id="tip" hidden></div>
+    <div class="toast" id="toast" hidden></div>
+    <div class="modal" id="modal" hidden><div class="card" id="card"></div></div>
+    <div class="loading" id="loading">正在载入…</div>
+  </div>
+</div>
+<script src="../ww2/maps/vendor/maplibre-gl.js"></script>
+<script type="module" src="main.js"></script>
+</body>
+</html>
