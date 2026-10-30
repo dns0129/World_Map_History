@@ -1,4 +1,4 @@
-# The interactive map on GitHub Pages: the pages from git, the map data from the release in data_release.json.
+# The interactive map and the game on GitHub Pages: the pages from git, the map data from the release in data_release.json.
 # (Settings -> Pages -> Source: GitHub Actions.)
 name: pages
 on:
@@ -23,17 +23,11 @@ jobs:
       - name: Fetch the data release
         run: python3 scripts/data_release.py fetch ww2-maps-data.tar.gz maps.tar.gz
       - name: Site
-        # https://<owner>.github.io/World_Map_History/ forwards to the map (ww2/maps/), keeping a #date
+        # the site root is index.html: the historical map (ww2/maps/) and the game (game/); old links with a #date
+        # go on to the map
         run: |
           mkdir -p site
-          cp -r ww2 maps README.md site/
-          cat > site/index.html <<'HTML'
-          <!doctype html>
-          <html lang="zh-CN"><head><meta charset="utf-8"><title>World Map History</title>
-          <meta http-equiv="refresh" content="0; url=ww2/maps/">
-          <script>location.replace("ww2/maps/" + location.hash)</script></head>
-          <body><a href="ww2/maps/">World Map History · 世界历史地图</a></body></html>
-          HTML
+          cp -r ww2 maps game index.html README.md site/
           touch site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

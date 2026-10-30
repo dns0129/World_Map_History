@@ -14,7 +14,7 @@ LAYERS = [
     ("build", {"build_country_series", "build_base_grids", "build_subnational", "build_terrain", "build_yearly",
                "build_database", "ww2_reference", "ww2_histunits", "ww2_snapshots", "ww2_provinces", "ww2_database",
                "ww2_relief", "modern_2026", "add_snapshots"}),
-    ("export", {"export_years", "render_maps", "ww2_webmap", "ww2_html", "publish_artifact", "data_release"}),
+    ("export", {"export_years", "render_maps", "ww2_webmap", "ww2_html", "publish_artifact", "data_release", "game_economy"}),
     ("verify", {"verify_database", "verify_added_snapshots", "verify_geometry", "ww2_coverage"}),
     ("run", {"pipeline"}),
 ]
